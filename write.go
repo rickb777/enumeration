@@ -24,7 +24,7 @@ func (i %s) String() string {
 `
 const asMethod = `
 func As%s(s string) (%s, error) {
-	i0 := %s[0]
+	i0 := 0
 	for j := 1; j < len(%s); j++ {
 		i1 := %s[j]
 		p := %s[i0:i1]
@@ -35,6 +35,7 @@ func As%s(s string) (%s, error) {
 	}
 	return %s, errors.New(s + ": unrecognised %s")
 }
+
 `
 
 func write(w io.Writer, mainType, pkg string, values []string) error {
@@ -79,11 +80,17 @@ func write(w io.Writer, mainType, pkg string, values []string) error {
 		return err
 	}
 
-	_, err = fmt.Fprintf(w, asMethod, mainType, mainType, index, index, index, name, mainType, values[0], mainType)
+	_, err = fmt.Fprintf(w, asMethod, mainType, mainType, 	index, index, name, mainType, values[0], mainType)
 	if err != nil {
 		return err
 	}
 
+	if c, ok := w.(io.Closer); ok {
+		err = c.Close()
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
