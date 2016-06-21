@@ -49,7 +49,7 @@ Options are:
 
  * `-plural <name>`
    - the plural equivalent for the name of the primary Go type. This is optional and the default is
-     to use the type name and append letter 's'.
+       to use the type name and append letter 's'.
 
  * `-i <name>` or `-input <name>`
    - the name of the input Go file containing the `type` and `const` declarations.
@@ -59,7 +59,7 @@ Options are:
 
  * `-package <name>`
    - the name of the Go package. If omitted, the directory of the output will be used (which becomes mandatory
-     therefore).
+       therefore).
 
  * `-f`
    - force output generation; if this is not set the output file is only produced when it is older than the
@@ -84,12 +84,12 @@ the `Day` type above. You will get:
 
  * `func (d Day) Ordinal() int`
    - Converts Day values into their ordinal numbers, i.e. the indexes indicating the order in which you declared
-     the constants, starting from zero. These may happen to be the same as the values you chose, but need not be.
+       the constants, starting from zero. These may happen to be the same as the values you chose, but need not be.
 
  * `func AsDay(s string) (Day, error)`
    - Converts a string representation to a Day value, if it can. The name of this function depends on the name
-     of your type.
+       of your type.
 
  * `var AllDays = []string{ ... }`
    - Provides all the Day values in a single slice. This is useful if you need to iterate, for example. The
-     name depends on the name of your type, although it can be overridden using `-plural`.
+       name depends on the name of your type, although it can be overridden using `-plural`.
