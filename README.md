@@ -13,7 +13,15 @@ code and you can't generate the code without compiling.
 interfaces, as shown below. It runs on any source code that's "clean enough", even if the
 source code is still incomplete. Provided your `type` is ok and yoyur `const` is complete, you'll be fine.
 
-## First, write some Go
+## First, Install
+
+```
+go get bitbucket.org/rickb777/enumeration
+```
+You should see that the `enumeration` binary is now in the bin folder on your GOPATH. Make sure this is
+on your PATH so it can be run.
+
+## Now, write some Go
 
 For example,
 
