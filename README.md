@@ -70,6 +70,12 @@ Options are:
 
 The option parser will also infer the template and output file names, so it is also permitted to use
 
+```
+enumeration -type Base
+```
+
+when this matches your needs.
+
 ## Generated Go
 
 The generated code complements your `type` and `const` definitions as follows. Let's assume that you wrote
