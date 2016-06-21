@@ -98,4 +98,4 @@ the `Day` type above. You will get:
 
 ## Other Use Options
 
-This tool is compatible with `go generate` [more](https://blog.golang.org/generate).
+This tool is compatible with `go generate` - [more](https://blog.golang.org/generate).
