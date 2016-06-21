@@ -21,6 +21,8 @@ const sweetEnumStrings = "MarsSnickersKitkat"
 
 var sweetEnumIndex = [...]uint16{0, 4, 12, 18}
 
+var AllSweets = [...]string{"Mars", "Snickers", "Kitkat"}
+
 // String returns the string representation of a Sweet
 func (i Sweet) String() string {
 	if i < 0 || i >= Sweet(len(sweetEnumIndex)-1) {
@@ -41,7 +43,7 @@ func (i Sweet) Ordinal() int {
 
 // AsSweet parses a string to find the corresponding Sweet
 func AsSweet(s string) (Sweet, error) {
-	i0 := 0
+	var i0 uint16 = 0
 	for j := 1; j < len(sweetEnumIndex); j++ {
 		i1 := sweetEnumIndex[j]
 		p := sweetEnumStrings[i0:i1]
@@ -104,7 +106,7 @@ func strEq(t *testing.T, want, got string) {
 		same := true
 		i := 0
 		for ; i < ll; i++ {
-			if want[i] != got[i] {
+			if want[i] != got[i] && want[i] != ' ' {
 				if same {
 					same = false
 					fmt.Printf("<<[")

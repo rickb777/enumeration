@@ -71,7 +71,7 @@ func generate(mainType, plural string) {
 	}
 	debug("pkg=%s\n", pkg)
 
-	convert(out, in, mainType, plural, pkg)
+	convert(out, in, *input1, mainType, plural, pkg)
 	info("Generated %s.\n", *output1)
 }
 
@@ -89,6 +89,8 @@ func main() {
 	if pPlural != nil && *pPlural != "" {
 		plural = *pPlural
 	}
+	debug("type=%s\n", mainType)
+	debug("plural=%s\n", plural)
 
 	if input1 == nil || *input1 == "" { //&& (input2 == nil || *input2 == "") {
 		input1 = sPtr(strings.ToLower(mainType) + ".go")

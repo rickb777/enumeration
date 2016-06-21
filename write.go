@@ -66,6 +66,27 @@ func writeIndexes(w io.Writer, index string, values []string) error {
 
 //-------------------------------------------------------------------------------------------------
 
+func writeAllItemsSlice(w io.Writer, plural string, values []string) error {
+	_, err := fmt.Fprintf(w, "var All%s = [...]string{", plural)
+	if err != nil {
+		return err
+	}
+
+	comma := ""
+	for _, s := range values {
+		_, err = fmt.Fprintf(w, "%s\"%s\"", comma, s)
+		if err != nil {
+			return err
+		}
+		comma = ", "
+	}
+
+	_, err = fmt.Fprintf(w, "}\n\n")
+	return err
+}
+
+//-------------------------------------------------------------------------------------------------
+
 const stringMethod = `// String returns the string representation of a %s
 func (i %s) String() string {
 	if i < 0 || i >= %s(len(%s)-1) {
@@ -114,7 +135,7 @@ func writeFuncOrdinal(w io.Writer, mainType string, values []string) error {
 
 const asMethod = `// As%s parses a string to find the corresponding %s
 func As%s(s string) (%s, error) {
-	i0 := 0
+	var i0 uint16 = 0
 	for j := 1; j < len(%s); j++ {
 		i1 := %s[j]
 		p := %s[i0:i1]
@@ -152,6 +173,11 @@ func write(w io.Writer, mainType, plural, pkg string, values []string) error {
 	}
 
 	err = writeIndexes(w, index, values)
+	if err != nil {
+		return err
+	}
+
+	err = writeAllItemsSlice(w, plural, values)
 	if err != nil {
 		return err
 	}

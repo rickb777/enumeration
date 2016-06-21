@@ -53,7 +53,7 @@ func scanValues(s *bufio.Scanner, mainType string) (result []string) {
 	return
 }
 
-func convert(w io.Writer, in io.Reader, mainType, plural, pkg string) error {
+func convert(w io.Writer, in io.Reader, input, mainType, plural, pkg string) error {
 	foundMainType := false
 	s := bufio.NewScanner(in)
 
@@ -74,6 +74,6 @@ func convert(w io.Writer, in io.Reader, mainType, plural, pkg string) error {
 		}
 	}
 
-	debug("Failed to find anything\n")
+	fail("Failed to find", mainType, "in", input)
 	return nil
 }
