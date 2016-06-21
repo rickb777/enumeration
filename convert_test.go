@@ -34,9 +34,12 @@ func (i Sweet) String() string {
 // Ordinal returns the ordinal number of a Sweet
 func (i Sweet) Ordinal() int {
 	switch i {
-	case Mars: return 0
-	case Snickers: return 1
-	case Kitkat: return 2
+	case Mars:
+		return 0
+	case Snickers:
+		return 1
+	case Kitkat:
+		return 2
 	}
 	panic(fmt.Errorf("%d: unknown Sweet", i))
 }
@@ -48,13 +51,12 @@ func AsSweet(s string) (Sweet, error) {
 		i1 := sweetEnumIndex[j]
 		p := sweetEnumStrings[i0:i1]
 		if s == p {
-			return Sweet(j-1), nil
+			return Sweet(j - 1), nil
 		}
 		i0 = i1
 	}
 	return Mars, errors.New(s + ": unrecognised Sweet")
 }
-
 `
 
 func TestWrite(t *testing.T) {
