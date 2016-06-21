@@ -8,4 +8,3 @@ const (
 	T
 	G
 )
-

@@ -14,6 +14,7 @@ var output1 = flag.String("o", "", "Name of the output file (optional short form
 
 //var output2 = flag.String("output", "", "Name of the output file (optional long form).")
 var pMainType = flag.String("type", "", "Name of the enumeration type (required).")
+var pPlural = flag.String("plural", "", "Plural name of the enumeration type (optional).")
 
 //var force = flag.Bool("f", false, "Force output generation, even if up to date.")
 var pPkg = flag.String("package", "", "Name of the output package (optional). Defaults to the output directory).")
@@ -41,7 +42,7 @@ func choosePackage(outputFile string) string {
 	return pkg
 }
 
-func generate(mainType string) {
+func generate(mainType, plural string) {
 	debug("ReadFile %s\n", *input1)
 	var err error
 
@@ -70,7 +71,7 @@ func generate(mainType string) {
 	}
 	debug("pkg=%s\n", pkg)
 
-	convert(out, in, mainType, pkg)
+	convert(out, in, mainType, plural, pkg)
 	info("Generated %s.\n", *output1)
 }
 
@@ -83,16 +84,21 @@ func main() {
 	if pMainType == nil || *pMainType == "" {
 		fail("Must specify -type.")
 	}
+	mainType := *pMainType
+	plural := mainType + "s"
+	if pPlural != nil && *pPlural != "" {
+		plural = *pPlural
+	}
 
 	if input1 == nil || *input1 == "" { //&& (input2 == nil || *input2 == "") {
-		input1 = sPtr(strings.ToLower(*pMainType) + ".go")
+		input1 = sPtr(strings.ToLower(mainType) + ".go")
 	}
 	//if input2 != nil {
 	//	input1 = input2
 	//}
 
 	if output1 == nil || *output1 == "" { //&& (output2 == nil || *output2 == "") {
-		output1 = sPtr(strings.ToLower(*pMainType) + "_enum.go")
+		output1 = sPtr(strings.ToLower(mainType) + "_enum.go")
 	}
 	//if output2 != nil {
 	//	output1 = output2
@@ -101,5 +107,5 @@ func main() {
 	debug("input=%s\n", *input1)
 	debug("output=%s\n", *output1)
 
-	generate(*pMainType)
+	generate(mainType, plural)
 }

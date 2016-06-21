@@ -29,6 +29,16 @@ func (i Sweet) String() string {
 	return sweetEnumStrings[sweetEnumIndex[i]:sweetEnumIndex[i+1]]
 }
 
+// Ordinal returns the ordinal number of a Sweet
+func (i Sweet) Ordinal() int {
+	switch i {
+	case Mars: return 0
+	case Snickers: return 1
+	case Kitkat: return 2
+	}
+	panic(fmt.Errorf("%d: unknown Sweet", i))
+}
+
 // AsSweet parses a string to find the corresponding Sweet
 func AsSweet(s string) (Sweet, error) {
 	i0 := 0
@@ -48,7 +58,7 @@ func AsSweet(s string) (Sweet, error) {
 func TestWrite(t *testing.T) {
 	Terst(t)
 	buf := &bytes.Buffer{}
-	write(buf, "Sweet", "confectionary", []string{"Mars", "Snickers", "Kitkat"})
+	write(buf, "Sweet", "Sweets", "confectionary", []string{"Mars", "Snickers", "Kitkat"})
 	got := buf.String()
 	strEq(t, got, e1)
 }

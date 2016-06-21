@@ -15,7 +15,7 @@ import (
 	"fmt"
 )
 
-const %s = "`
+`
 
 const stringMethod = `// String returns the string representation of a %s
 func (i %s) String() string {
@@ -26,11 +26,12 @@ func (i %s) String() string {
 }
 
 `
-const ordinalMethod = `func (i %s) Ordinal() int {
-	if i < 0 || i >= %s(len(%s)-1) {
-		return fmt.Sprintf("%s(%%d)", i)
-	}
-	return %s[%s[i]:%s[i+1]]
+const ordinalMethod1 = `// Ordinal returns the ordinal number of a %s
+func (i %s) Ordinal() int {
+	switch i {
+`
+const ordinalMethod2 = `	}
+	panic(fmt.Errorf("%%d: unknown %s", i))
 }
 
 `
@@ -50,13 +51,8 @@ func As%s(s string) (%s, error) {
 
 `
 
-func write(w io.Writer, mainType, pkg string, values []string) error {
-
-	lc := strings.ToLower(mainType)
-	name := fmt.Sprintf("%sEnumStrings", lc)
-	index := fmt.Sprintf("%sEnumIndex", lc)
-
-	_, err := fmt.Fprintf(w, head, pkg, name)
+func writeConst(w io.Writer, name string, values []string) error {
+	_, err := fmt.Fprintf(w, "const %s = \"", name)
 	if err != nil {
 		return err
 	}
@@ -68,7 +64,12 @@ func write(w io.Writer, mainType, pkg string, values []string) error {
 		}
 	}
 
-	_, err = fmt.Fprintf(w, "\"\n\nvar %s = [...]uint16{0", index)
+	_, err = fmt.Fprintf(w, "\"\n\n")
+	return err
+}
+
+func writeIndexes(w io.Writer, index string, values []string) error {
+	_, err := fmt.Fprintf(w, "var %s = [...]uint16{0", index)
 	if err != nil {
 		return err
 	}
@@ -83,11 +84,53 @@ func write(w io.Writer, mainType, pkg string, values []string) error {
 	}
 
 	_, err = fmt.Fprintf(w, "}\n\n")
+	return err
+}
+
+func writeFuncOrdinal(w io.Writer, mainType string, values []string) error {
+	_, err := fmt.Fprintf(w, ordinalMethod1, mainType, mainType)
+	if err != nil {
+		return err
+	}
+
+	for i, s := range values {
+		_, err = fmt.Fprintf(w, "\tcase %s: return %d\n", s, i)
+		if err != nil {
+			return err
+		}
+	}
+
+	_, err = fmt.Fprintf(w, ordinalMethod2, mainType)
+	return err
+}
+
+func write(w io.Writer, mainType, plural, pkg string, values []string) error {
+
+	lc := strings.ToLower(mainType)
+	name := fmt.Sprintf("%sEnumStrings", lc)
+	index := fmt.Sprintf("%sEnumIndex", lc)
+
+	_, err := fmt.Fprintf(w, head, pkg)
+	if err != nil {
+		return err
+	}
+
+	err = writeConst(w, name, values)
+	if err != nil {
+		return err
+	}
+
+	err = writeIndexes(w, index, values)
 	if err != nil {
 		return err
 	}
 
 	_, err = fmt.Fprintf(w, stringMethod, mainType, mainType, mainType, index, mainType, name, index, index)
+	if err != nil {
+		return err
+	}
+
+	err = writeFuncOrdinal(w, mainType, values)
 	if err != nil {
 		return err
 	}
