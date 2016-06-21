@@ -45,32 +45,32 @@ enumeration -i example/sample1.go -type Base -package example
 Options are:
 
  * `-type <name>`
-   - the name of the primary Go type for which code generation is being used.
+    - the name of the primary Go type for which code generation is being used.
 
  * `-plural <name>`
-   - the plural equivalent for the name of the primary Go type. This is optional and the default is
-       to use the type name and append letter 's'.
+    - the plural equivalent for the name of the primary Go type. This is optional and the default is
+        to use the type name and append letter 's'.
 
  * `-i <name>` or `-input <name>`
-   - the name of the input Go file containing the `type` and `const` declarations.
+    - the name of the input Go file containing the `type` and `const` declarations.
 
  * `-o <name>` or `-output <name>`
-   - the name of the output Go file to be written. If omitted, `<type>_enum.go` is used.
+    - the name of the output Go file to be written. If omitted, `<type>_enum.go` is used.
 
  * `-package <name>`
-   - the name of the Go package. If omitted, the directory of the output will be used (which becomes mandatory
-       therefore).
+    - the name of the Go package. If omitted, the directory of the output will be used (which becomes mandatory
+        therefore).
 
  * `-f`
-   - force output generation; if this is not set the output file is only produced when it is older than the
-     dependencies
+    - force output generation; if this is not set the output file is only produced when it is older than the
+      dependencies
 
  * `-v`
-   - verbose info messages
+    - verbose info messages
 
  * key=value ...
-   - (optional) supply a (list of) key/value pairs that re passed in to the template. `true` and `false` are
-     converted to booleans, allowing conditional blocks within your templates.
+    - (optional) supply a (list of) key/value pairs that re passed in to the template. `true` and `false` are
+      converted to booleans, allowing conditional blocks within your templates.
 
 The option parser will also infer the template and output file names, so it is also permitted to use
 
@@ -80,16 +80,16 @@ The generated code complements your `type` and `const` definitions as follows. L
 the `Day` type above. You will get:
 
  * `func (d Day) String() string`
-   - Converts Day values to strings and satisfies the well-known `Stringer` interface.
+    - Converts Day values to strings and satisfies the well-known `Stringer` interface.
 
  * `func (d Day) Ordinal() int`
-   - Converts Day values into their ordinal numbers, i.e. the indexes indicating the order in which you declared
-       the constants, starting from zero. These may happen to be the same as the values you chose, but need not be.
+    - Converts Day values into their ordinal numbers, i.e. the indexes indicating the order in which you declared
+        the constants, starting from zero. These may happen to be the same as the values you chose, but need not be.
 
  * `func AsDay(s string) (Day, error)`
-   - Converts a string representation to a Day value, if it can. The name of this function depends on the name
-       of your type.
+    - Converts a string representation to a Day value, if it can. The name of this function depends on the name
+        of your type.
 
  * `var AllDays = []string{ ... }`
-   - Provides all the Day values in a single slice. This is useful if you need to iterate, for example. The
-       name depends on the name of your type, although it can be overridden using `-plural`.
+    - Provides all the Day values in a single slice. This is useful if you need to iterate, for example. The
+        name depends on the name of your type, although it can be overridden using `-plural`.
