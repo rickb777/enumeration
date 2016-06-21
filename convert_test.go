@@ -21,7 +21,7 @@ const sweetEnumStrings = "MarsSnickersKitkat"
 
 var sweetEnumIndex = [...]uint16{0, 4, 12, 18}
 
-var AllSweets = [...]string{"Mars", "Snickers", "Kitkat"}
+var AllSweets = []string{"Mars", "Snickers", "Kitkat"}
 
 // String returns the string representation of a Sweet
 func (i Sweet) String() string {

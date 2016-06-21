@@ -11,7 +11,7 @@ const dayEnumStrings = "SundayMondayTuesdayWednesdayThursdayFridayPartydaynumber
 
 var dayEnumIndex = [...]uint16{0, 6, 12, 19, 28, 36, 42, 50, 62}
 
-var AllDays = [...]string{"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Partyday", "numberOfDays"}
+var AllDays = []string{"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Partyday", "numberOfDays"}
 
 // String returns the string representation of a Day
 func (i Day) String() string {

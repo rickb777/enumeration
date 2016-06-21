@@ -67,7 +67,7 @@ func writeIndexes(w io.Writer, index string, values []string) error {
 //-------------------------------------------------------------------------------------------------
 
 func writeAllItemsSlice(w io.Writer, plural string, values []string) error {
-	_, err := fmt.Fprintf(w, "var All%s = [...]string{", plural)
+	_, err := fmt.Fprintf(w, "var All%s = []string{", plural)
 	if err != nil {
 		return err
 	}
@@ -121,7 +121,7 @@ func writeFuncOrdinal(w io.Writer, mainType string, values []string) error {
 	}
 
 	for i, s := range values {
-		_, err = fmt.Fprintf(w, "\tcase %s: return %d\n", s, i)
+		_, err = fmt.Fprintf(w, "\tcase %s:\n\t\treturn %d\n", s, i)
 		if err != nil {
 			return err
 		}
@@ -140,13 +140,12 @@ func As%s(s string) (%s, error) {
 		i1 := %s[j]
 		p := %s[i0:i1]
 		if s == p {
-			return %s(j-1), nil
+			return %s(j - 1), nil
 		}
 		i0 = i1
 	}
 	return %s, errors.New(s + ": unrecognised %s")
 }
-
 `
 
 func writeFuncAsEnum(w io.Writer, mainType, name, index string, values []string) error {

@@ -11,7 +11,7 @@ const baseEnumStrings = "ACTG"
 
 var baseEnumIndex = [...]uint16{0, 1, 2, 3, 4}
 
-var AllBases = [...]string{"A", "C", "T", "G"}
+var AllBases = []string{"A", "C", "T", "G"}
 
 // String returns the string representation of a Base
 func (i Base) String() string {
