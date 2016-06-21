@@ -68,10 +68,6 @@ Options are:
  * `-v`
     - verbose info messages
 
- * key=value ...
-    - (optional) supply a (list of) key/value pairs that re passed in to the template. `true` and `false` are
-      converted to booleans, allowing conditional blocks within your templates.
-
 The option parser will also infer the template and output file names, so it is also permitted to use
 
 ## Generated Go
