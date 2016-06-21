@@ -6,6 +6,8 @@ import (
 	"strings"
 )
 
+//-------------------------------------------------------------------------------------------------
+
 const head = `// generated code - do not edit
 
 package %s
@@ -17,39 +19,12 @@ import (
 
 `
 
-const stringMethod = `// String returns the string representation of a %s
-func (i %s) String() string {
-	if i < 0 || i >= %s(len(%s)-1) {
-		return fmt.Sprintf("%s(%%d)", i)
-	}
-	return %s[%s[i]:%s[i+1]]
+func writeHead(w io.Writer, pkg string) error {
+	_, err := fmt.Fprintf(w, head, pkg)
+	return err
 }
 
-`
-const ordinalMethod1 = `// Ordinal returns the ordinal number of a %s
-func (i %s) Ordinal() int {
-	switch i {
-`
-const ordinalMethod2 = `	}
-	panic(fmt.Errorf("%%d: unknown %s", i))
-}
-
-`
-const asMethod = `// As%s parses a string to find the corresponding %s
-func As%s(s string) (%s, error) {
-	i0 := 0
-	for j := 1; j < len(%s); j++ {
-		i1 := %s[j]
-		p := %s[i0:i1]
-		if s == p {
-			return %s(j-1), nil
-		}
-		i0 = i1
-	}
-	return %s, errors.New(s + ": unrecognised %s")
-}
-
-`
+//-------------------------------------------------------------------------------------------------
 
 func writeConst(w io.Writer, name string, values []string) error {
 	_, err := fmt.Fprintf(w, "const %s = \"", name)
@@ -67,6 +42,8 @@ func writeConst(w io.Writer, name string, values []string) error {
 	_, err = fmt.Fprintf(w, "\"\n\n")
 	return err
 }
+
+//-------------------------------------------------------------------------------------------------
 
 func writeIndexes(w io.Writer, index string, values []string) error {
 	_, err := fmt.Fprintf(w, "var %s = [...]uint16{0", index)
@@ -87,6 +64,35 @@ func writeIndexes(w io.Writer, index string, values []string) error {
 	return err
 }
 
+//-------------------------------------------------------------------------------------------------
+
+const stringMethod = `// String returns the string representation of a %s
+func (i %s) String() string {
+	if i < 0 || i >= %s(len(%s)-1) {
+		return fmt.Sprintf("%s(%%d)", i)
+	}
+	return %s[%s[i]:%s[i+1]]
+}
+
+`
+
+func writeFuncString(w io.Writer, mainType, name, index string) error {
+	_, err := fmt.Fprintf(w, stringMethod, mainType, mainType, mainType, index, mainType, name, index, index)
+	return err
+}
+
+//-------------------------------------------------------------------------------------------------
+
+const ordinalMethod1 = `// Ordinal returns the ordinal number of a %s
+func (i %s) Ordinal() int {
+	switch i {
+`
+const ordinalMethod2 = `	}
+	panic(fmt.Errorf("%%d: unknown %s", i))
+}
+
+`
+
 func writeFuncOrdinal(w io.Writer, mainType string, values []string) error {
 	_, err := fmt.Fprintf(w, ordinalMethod1, mainType, mainType)
 	if err != nil {
@@ -104,13 +110,38 @@ func writeFuncOrdinal(w io.Writer, mainType string, values []string) error {
 	return err
 }
 
+//-------------------------------------------------------------------------------------------------
+
+const asMethod = `// As%s parses a string to find the corresponding %s
+func As%s(s string) (%s, error) {
+	i0 := 0
+	for j := 1; j < len(%s); j++ {
+		i1 := %s[j]
+		p := %s[i0:i1]
+		if s == p {
+			return %s(j-1), nil
+		}
+		i0 = i1
+	}
+	return %s, errors.New(s + ": unrecognised %s")
+}
+
+`
+
+func writeFuncAsEnum(w io.Writer, mainType, name, index string, values []string) error {
+	_, err := fmt.Fprintf(w, asMethod, mainType, mainType, mainType, mainType, index, index, name, mainType, values[0], mainType)
+	return err
+}
+
+//-------------------------------------------------------------------------------------------------
+
 func write(w io.Writer, mainType, plural, pkg string, values []string) error {
 
 	lc := strings.ToLower(mainType)
 	name := fmt.Sprintf("%sEnumStrings", lc)
 	index := fmt.Sprintf("%sEnumIndex", lc)
 
-	_, err := fmt.Fprintf(w, head, pkg)
+	err := writeHead(w, pkg)
 	if err != nil {
 		return err
 	}
@@ -125,7 +156,7 @@ func write(w io.Writer, mainType, plural, pkg string, values []string) error {
 		return err
 	}
 
-	_, err = fmt.Fprintf(w, stringMethod, mainType, mainType, mainType, index, mainType, name, index, index)
+	err = writeFuncString(w, mainType, name, index)
 	if err != nil {
 		return err
 	}
@@ -135,7 +166,7 @@ func write(w io.Writer, mainType, plural, pkg string, values []string) error {
 		return err
 	}
 
-	_, err = fmt.Fprintf(w, asMethod, mainType, mainType, mainType, mainType, index, index, name, mainType, values[0], mainType)
+	err = writeFuncAsEnum(w, mainType, name, index, values)
 	if err != nil {
 		return err
 	}
