@@ -1,8 +1,8 @@
 package main
 
 import (
-	"io"
 	"fmt"
+	"io"
 	"strings"
 )
 
@@ -10,19 +10,31 @@ const head = `// generated code - do not edit
 
 package %s
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+)
 
 const %s = "`
 
-const stringMethod = `
+const stringMethod = `// String returns the string representation of a %s
 func (i %s) String() string {
 	if i < 0 || i >= %s(len(%s)-1) {
 		return fmt.Sprintf("%s(%%d)", i)
 	}
 	return %s[%s[i]:%s[i+1]]
 }
+
 `
-const asMethod = `
+const ordinalMethod = `func (i %s) Ordinal() int {
+	if i < 0 || i >= %s(len(%s)-1) {
+		return fmt.Sprintf("%s(%%d)", i)
+	}
+	return %s[%s[i]:%s[i+1]]
+}
+
+`
+const asMethod = `// As%s parses a string to find the corresponding %s
 func As%s(s string) (%s, error) {
 	i0 := 0
 	for j := 1; j < len(%s); j++ {
@@ -70,17 +82,17 @@ func write(w io.Writer, mainType, pkg string, values []string) error {
 		}
 	}
 
-	_, err = fmt.Fprintf(w, "}\n")
+	_, err = fmt.Fprintf(w, "}\n\n")
 	if err != nil {
 		return err
 	}
 
-	_, err = fmt.Fprintf(w, stringMethod, mainType, mainType, index, mainType, name, index, index)
+	_, err = fmt.Fprintf(w, stringMethod, mainType, mainType, mainType, index, mainType, name, index, index)
 	if err != nil {
 		return err
 	}
 
-	_, err = fmt.Fprintf(w, asMethod, mainType, mainType, 	index, index, name, mainType, values[0], mainType)
+	_, err = fmt.Fprintf(w, asMethod, mainType, mainType, mainType, mainType, index, index, name, mainType, values[0], mainType)
 	if err != nil {
 		return err
 	}
@@ -93,4 +105,3 @@ func write(w io.Writer, mainType, pkg string, values []string) error {
 	}
 	return nil
 }
-

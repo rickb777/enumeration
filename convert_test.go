@@ -1,22 +1,27 @@
 package main
 
 import (
+	"bufio"
+	"bytes"
+	"fmt"
 	. "github.com/rickb777/terst"
 	"testing"
-	"bytes"
-	"bufio"
 )
 
 const e1 = `// generated code - do not edit
 
 package confectionary
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+)
 
 const sweetEnumStrings = "MarsSnickersKitkat"
 
 var sweetEnumIndex = [...]uint16{0, 4, 12, 18}
 
+// String returns the string representation of a Sweet
 func (i Sweet) String() string {
 	if i < 0 || i >= Sweet(len(sweetEnumIndex)-1) {
 		return fmt.Sprintf("Sweet(%d)", i)
@@ -24,6 +29,7 @@ func (i Sweet) String() string {
 	return sweetEnumStrings[sweetEnumIndex[i]:sweetEnumIndex[i+1]]
 }
 
+// AsSweet parses a string to find the corresponding Sweet
 func AsSweet(s string) (Sweet, error) {
 	i0 := 0
 	for j := 1; j < len(sweetEnumIndex); j++ {
@@ -44,7 +50,7 @@ func TestWrite(t *testing.T) {
 	buf := &bytes.Buffer{}
 	write(buf, "Sweet", "confectionary", []string{"Mars", "Snickers", "Kitkat"})
 	got := buf.String()
-	Is(got, e1)
+	strEq(t, got, e1)
 }
 
 const enum1 = `
@@ -77,4 +83,41 @@ func TestScanValuesIrrelevant(t *testing.T) {
 	Is(values, nil)
 }
 
-
+func strEq(t *testing.T, want, got string) {
+	if want != got {
+		wl := len(want)
+		gl := len(got)
+		ll := wl
+		if ll > gl {
+			ll = gl
+		}
+		same := true
+		i := 0
+		for ; i < ll; i++ {
+			if want[i] != got[i] {
+				if same {
+					same = false
+					fmt.Printf("<<[")
+				}
+			} else {
+				if !same {
+					same = true
+					fmt.Printf("]>>")
+				}
+			}
+			fmt.Printf("%c", want[i])
+		}
+		for ; i < wl; i++ {
+			fmt.Printf("<<[")
+			fmt.Printf("%c", want[i])
+			fmt.Printf("]>>")
+		}
+		for ; i < gl; i++ {
+			fmt.Printf("<<#")
+			fmt.Printf("%c", got[i])
+			fmt.Printf("#>>")
+		}
+		fmt.Println("")
+		t.Fail()
+	}
+}

@@ -1,17 +1,20 @@
 package main
 
 import (
-	"io"
 	"flag"
+	"io"
 	"os"
 	"strings"
 )
 
 var input1 = flag.String("i", "", "Name of the input file (optional short form). May be '-' for stdin.")
+
 //var input2 = flag.String("input", "", "Name of the input file (optional long form).")
 var output1 = flag.String("o", "", "Name of the output file (optional short form). May be '-' for stdout.")
+
 //var output2 = flag.String("output", "", "Name of the output file (optional long form).")
 var pMainType = flag.String("type", "", "Name of the enumeration type (required).")
+
 //var force = flag.Bool("f", false, "Force output generation, even if up to date.")
 var pPkg = flag.String("package", "", "Name of the output package (optional). Defaults to the output directory).")
 var verbose = flag.Bool("v", false, "Verbose progress messages.")
@@ -81,14 +84,14 @@ func main() {
 		fail("Must specify -type.")
 	}
 
-	if (input1 == nil || *input1 == "") { //&& (input2 == nil || *input2 == "") {
+	if input1 == nil || *input1 == "" { //&& (input2 == nil || *input2 == "") {
 		input1 = sPtr(strings.ToLower(*pMainType) + ".go")
 	}
 	//if input2 != nil {
 	//	input1 = input2
 	//}
 
-	if (output1 == nil || *output1 == "") { //&& (output2 == nil || *output2 == "") {
+	if output1 == nil || *output1 == "" { //&& (output2 == nil || *output2 == "") {
 		output1 = sPtr(strings.ToLower(*pMainType) + "_enum.go")
 	}
 	//if output2 != nil {

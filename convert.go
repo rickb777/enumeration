@@ -1,8 +1,8 @@
 package main
 
 import (
-	"io"
 	"bufio"
+	"io"
 	"strings"
 )
 
@@ -77,5 +77,3 @@ func convert(w io.Writer, in io.Reader, mainType, pkg string) error {
 	debug("Failed to find anything\n")
 	return nil
 }
-
-

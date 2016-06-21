@@ -1,8 +1,8 @@
 package main
 
 import (
-	"os"
 	"fmt"
+	"os"
 	"strings"
 )
 
@@ -31,7 +31,7 @@ func divideC(s string, c byte) (string, string) {
 	if p < 0 {
 		return s, ""
 	}
-	return s[:p], s[p + 1:]
+	return s[:p], s[p+1:]
 }
 
 func divideS(s, sep string) (string, string) {
@@ -40,22 +40,21 @@ func divideS(s, sep string) (string, string) {
 		return s, ""
 	}
 	x := len(sep)
-	return s[:p], s[p + x:]
+	return s[:p], s[p+x:]
 }
 
-func removeBeforeC(s string, c byte) (string) {
+func removeBeforeC(s string, c byte) string {
 	p := strings.LastIndexByte(s, c)
 	if p < 0 {
 		return s
 	}
-	return s[p + 1:]
+	return s[p+1:]
 }
 
-func removeAfterS(s, sep string) (string) {
+func removeAfterS(s, sep string) string {
 	p := strings.LastIndex(s, sep)
 	if p < 0 {
 		return s
 	}
 	return s[:p]
 }
-
