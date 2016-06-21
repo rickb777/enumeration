@@ -40,10 +40,10 @@ func scanValues(s *bufio.Scanner, mainType string) (result []string) {
 
 		if len(words) == 1 && words[0] == ")" {
 			return
-		} else if found && len(words) >= 1 {
+		} else if found && len(words) >= 1 && len(words[0]) > 0 {
 			debug("added %s\n", words[0])
 			result = append(result, words[0])
-		} else if len(words) >= 3 && words[1] == mainType {
+		} else if len(words) >= 3 && len(words[0]) > 0 && words[1] == mainType {
 			found = true
 			debug("started with %s\n", words[0])
 			result = append(result, words[0])

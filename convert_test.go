@@ -68,11 +68,15 @@ func TestWrite(t *testing.T) {
 }
 
 const enum1 = `
+// inline comments are allowed
 const (
 	Mars Sweet = iota
-	Snickers
+	Snickers // I need this
+
+	// yum yum
 	Kitkat
 )
+// as are blank lines
 `
 
 const enum2 = `
