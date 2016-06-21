@@ -11,7 +11,7 @@ code and you can't generate the code without compiling.
 
 **That's where this tool steps in**. It has a basic Go source code parser that finds idiomatic
 interfaces, as shown below. It runs on any source code that's "clean enough", even if the
-source code is still incomplete. Provided your `type` is ok and yoyur `const` is complete, you'll be fine.
+source code is still incomplete. Provided your `type` is ok and your `const` is complete, you'll be fine.
 
 ## First, Install
 
