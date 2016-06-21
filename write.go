@@ -66,15 +66,15 @@ func writeIndexes(w io.Writer, index string, values []string) error {
 
 //-------------------------------------------------------------------------------------------------
 
-func writeAllItemsSlice(w io.Writer, plural string, values []string) error {
-	_, err := fmt.Fprintf(w, "var All%s = []string{", plural)
+func writeAllItemsSlice(w io.Writer, mainType, plural string, values []string) error {
+	_, err := fmt.Fprintf(w, "var All%s = []%s{", plural, mainType)
 	if err != nil {
 		return err
 	}
 
 	comma := ""
 	for _, s := range values {
-		_, err = fmt.Fprintf(w, "%s\"%s\"", comma, s)
+		_, err = fmt.Fprintf(w, "%s%s", comma, s)
 		if err != nil {
 			return err
 		}
@@ -176,7 +176,7 @@ func write(w io.Writer, mainType, plural, pkg string, values []string) error {
 		return err
 	}
 
-	err = writeAllItemsSlice(w, plural, values)
+	err = writeAllItemsSlice(w, mainType, plural, values)
 	if err != nil {
 		return err
 	}
