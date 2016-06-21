@@ -95,3 +95,7 @@ the `Day` type above. You will get:
  * `var AllDays = []string{ ... }`
     - Provides all the Day values in a single slice. This is useful if you need to iterate, for example. The
         name depends on the name of your type, although it can be overridden using `-plural`.
+
+## Other Use Options
+
+This tool is compatible with `go generate` [more](https://blog.golang.org/generate).
