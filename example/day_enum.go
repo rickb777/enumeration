@@ -65,3 +65,13 @@ func AsDay(s string) (Day, error) {
 	err := i.Parse(s)
 	return *i, err
 }
+
+// MarshalText converts values to a form suitable for transmission via JSON, XML etc.
+func (i Day) MarshalText() (text []byte, err error) {
+	return []byte(i.String()), nil
+}
+
+// UnmarshalText converts transmitted values to ordinary values.
+func (i *Day) UnmarshalText(text []byte) error {
+	return i.Parse(string(text))
+}

@@ -65,6 +65,16 @@ func AsSweet(s string) (Sweet, error) {
 	err := i.Parse(s)
 	return *i, err
 }
+
+// MarshalText converts values to a form suitable for transmission via JSON, XML etc.
+func (i Sweet) MarshalText() (text []byte, err error) {
+	return []byte(i.String()), nil
+}
+
+// UnmarshalText converts transmitted values to ordinary values.
+func (i *Sweet) UnmarshalText(text []byte) error {
+	return i.Parse(string(text))
+}
 `
 
 func TestWrite(t *testing.T) {

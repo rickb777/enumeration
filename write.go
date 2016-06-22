@@ -26,8 +26,8 @@ func writeHead(w io.Writer, pkg string) error {
 
 //-------------------------------------------------------------------------------------------------
 
-func writeConst(w io.Writer, name string, values []string) error {
-	_, err := fmt.Fprintf(w, "const %s = \"", name)
+func writeConst(w io.Writer, names string, values []string) error {
+	_, err := fmt.Fprintf(w, "const %s = \"", names)
 	if err != nil {
 		return err
 	}
@@ -81,37 +81,37 @@ func writeAllItemsSlice(w io.Writer, mainType, plural string, values []string) e
 		comma = ", "
 	}
 
-	_, err = fmt.Fprintf(w, "}\n\n")
+	_, err = fmt.Fprintf(w, "}\n")
 	return err
 }
 
 //-------------------------------------------------------------------------------------------------
 
-const stringMethod = `// String returns the string representation of a %s
+const stringMethod = `
+// String returns the string representation of a %s
 func (i %s) String() string {
 	if i < 0 || i >= %s(len(%s)-1) {
 		return fmt.Sprintf("%s(%%d)", i)
 	}
 	return %s[%s[i]:%s[i+1]]
 }
-
 `
 
-func writeFuncString(w io.Writer, mainType, name, index string) error {
-	_, err := fmt.Fprintf(w, stringMethod, mainType, mainType, mainType, index, mainType, name, index, index)
+func writeFuncString(w io.Writer, mainType, names, indexes string) error {
+	_, err := fmt.Fprintf(w, stringMethod, mainType, mainType, mainType, indexes, mainType, names, indexes, indexes)
 	return err
 }
 
 //-------------------------------------------------------------------------------------------------
 
-const ordinalMethod1 = `// Ordinal returns the ordinal number of a %s
+const ordinalMethod1 = `
+// Ordinal returns the ordinal number of a %s
 func (i %s) Ordinal() int {
 	switch i {
 `
 const ordinalMethod2 = `	}
 	panic(fmt.Errorf("%%d: unknown %s", i))
 }
-
 `
 
 func writeFuncOrdinal(w io.Writer, mainType string, values []string) error {
@@ -133,7 +133,8 @@ func writeFuncOrdinal(w io.Writer, mainType string, values []string) error {
 
 //-------------------------------------------------------------------------------------------------
 
-const asMethod = `// Parse parses a string to find the corresponding %s
+const asMethod = `
+// Parse parses a string to find the corresponding %s
 func (v *%s) Parse(s string) error {
 	var i0 uint16 = 0
 	for j := 1; j < len(%s); j++ {
@@ -156,25 +157,27 @@ func As%s(s string) (%s, error) {
 }
 `
 
-func writeFuncAsEnum(w io.Writer, mainType, name, index string, values []string) error {
-	_, err := fmt.Fprintf(w, asMethod, mainType, mainType, index, index, name, mainType, mainType, mainType, mainType, mainType, mainType, mainType)
+func writeFuncAsEnum(w io.Writer, mainType, names, indexes string, values []string) error {
+	_, err := fmt.Fprintf(w, asMethod, mainType, mainType, indexes, indexes, names, mainType, mainType, mainType, mainType, mainType, mainType, mainType)
 	return err
 }
 
 //-------------------------------------------------------------------------------------------------
 
-const marshalText = `// MarshalText converts values to a form suitable for transmission via JSON, XML etc.
+const marshalText = `
+// MarshalText converts values to a form suitable for transmission via JSON, XML etc.
 func (i %s) MarshalText() (text []byte, err error) {
-	return []byte(i.String(), nil
+	return []byte(i.String()), nil
 }
 
-func (i *%s) UnmarshalText() (text []byte, err error) {
-	return []byte(i.String(), nil
+// UnmarshalText converts transmitted values to ordinary values.
+func (i *%s) UnmarshalText(text []byte) error {
+	return i.Parse(string(text))
 }
 `
 
-func writeMarshalText(w io.Writer, mainType, name, index string, values []string) error {
-	_, err := fmt.Fprintf(w, marshalText, mainType)
+func writeMarshalText(w io.Writer, mainType string) error {
+	_, err := fmt.Fprintf(w, marshalText, mainType, mainType)
 	return err
 }
 
@@ -183,20 +186,20 @@ func writeMarshalText(w io.Writer, mainType, name, index string, values []string
 func write(w io.Writer, mainType, baseType, plural, pkg string, values []string) error {
 
 	lc := strings.ToLower(mainType)
-	name := fmt.Sprintf("%sEnumStrings", lc)
-	index := fmt.Sprintf("%sEnumIndex", lc)
+	names := fmt.Sprintf("%sEnumStrings", lc)
+	indexes := fmt.Sprintf("%sEnumIndex", lc)
 
 	err := writeHead(w, pkg)
 	if err != nil {
 		return err
 	}
 
-	err = writeConst(w, name, values)
+	err = writeConst(w, names, values)
 	if err != nil {
 		return err
 	}
 
-	err = writeIndexes(w, index, values)
+	err = writeIndexes(w, indexes, values)
 	if err != nil {
 		return err
 	}
@@ -206,7 +209,7 @@ func write(w io.Writer, mainType, baseType, plural, pkg string, values []string)
 		return err
 	}
 
-	err = writeFuncString(w, mainType, name, index)
+	err = writeFuncString(w, mainType, names, indexes)
 	if err != nil {
 		return err
 	}
@@ -216,7 +219,12 @@ func write(w io.Writer, mainType, baseType, plural, pkg string, values []string)
 		return err
 	}
 
-	err = writeFuncAsEnum(w, mainType, name, index, values)
+	err = writeFuncAsEnum(w, mainType, names, indexes, values)
+	if err != nil {
+		return err
+	}
+
+	err = writeMarshalText(w, mainType)
 	if err != nil {
 		return err
 	}
