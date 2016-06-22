@@ -55,6 +55,7 @@ func scanValues(s *bufio.Scanner, mainType string) (result []string) {
 
 func convert(w io.Writer, in io.Reader, input, mainType, plural, pkg string) error {
 	foundMainType := false
+	baseType := "int"
 	s := bufio.NewScanner(in)
 
 	for s.Scan() {
@@ -65,11 +66,12 @@ func convert(w io.Writer, in io.Reader, input, mainType, plural, pkg string) err
 		if len(words) == 3 && words[0] == "type" && words[1] == mainType {
 			debug("Found type %s\n", mainType)
 			foundMainType = true
+			baseType = words[2]
 
 		} else if foundMainType && len(words) == 2 && words[0] == "const" && words[1] == "(" {
 			values := scanValues(s, mainType)
 			if values != nil {
-				return write(w, mainType, plural, pkg, values)
+				return write(w, mainType, baseType, plural, pkg, values)
 			}
 		}
 	}

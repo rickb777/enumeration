@@ -11,7 +11,7 @@ const dayEnumStrings = "SundayMondayTuesdayWednesdayThursdayFridayPartydaynumber
 
 var dayEnumIndex = [...]uint16{0, 6, 12, 19, 28, 36, 42, 50, 62}
 
-var AllDays = []string{"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Partyday", "numberOfDays"}
+var AllDays = []Day{Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Partyday, numberOfDays}
 
 // String returns the string representation of a Day
 func (i Day) String() string {
@@ -44,16 +44,24 @@ func (i Day) Ordinal() int {
 	panic(fmt.Errorf("%d: unknown Day", i))
 }
 
-// AsDay parses a string to find the corresponding Day
-func AsDay(s string) (Day, error) {
+// Parse parses a string to find the corresponding Day
+func (v *Day) Parse(s string) error {
 	var i0 uint16 = 0
 	for j := 1; j < len(dayEnumIndex); j++ {
 		i1 := dayEnumIndex[j]
 		p := dayEnumStrings[i0:i1]
 		if s == p {
-			return Day(j - 1), nil
+			*v = Day(j - 1)
+			return nil
 		}
 		i0 = i1
 	}
-	return Sunday, errors.New(s + ": unrecognised Day")
+	return errors.New(s + ": unrecognised Day")
+}
+
+// AsDay parses a string to find the corresponding Day
+func AsDay(s string) (Day, error) {
+	var i = new(Day)
+	err := i.Parse(s)
+	return *i, err
 }

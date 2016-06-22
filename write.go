@@ -133,29 +133,54 @@ func writeFuncOrdinal(w io.Writer, mainType string, values []string) error {
 
 //-------------------------------------------------------------------------------------------------
 
-const asMethod = `// As%s parses a string to find the corresponding %s
-func As%s(s string) (%s, error) {
+const asMethod = `// Parse parses a string to find the corresponding %s
+func (v *%s) Parse(s string) error {
 	var i0 uint16 = 0
 	for j := 1; j < len(%s); j++ {
 		i1 := %s[j]
 		p := %s[i0:i1]
 		if s == p {
-			return %s(j - 1), nil
+			*v = %s(j - 1)
+			return nil
 		}
 		i0 = i1
 	}
-	return %s, errors.New(s + ": unrecognised %s")
+	return errors.New(s + ": unrecognised %s")
+}
+
+// As%s parses a string to find the corresponding %s
+func As%s(s string) (%s, error) {
+	var i = new(%s)
+	err := i.Parse(s)
+	return *i, err
 }
 `
 
 func writeFuncAsEnum(w io.Writer, mainType, name, index string, values []string) error {
-	_, err := fmt.Fprintf(w, asMethod, mainType, mainType, mainType, mainType, index, index, name, mainType, values[0], mainType)
+	_, err := fmt.Fprintf(w, asMethod, mainType, mainType, index, index, name, mainType, mainType, mainType, mainType, mainType, mainType, mainType)
 	return err
 }
 
 //-------------------------------------------------------------------------------------------------
 
-func write(w io.Writer, mainType, plural, pkg string, values []string) error {
+const marshalText = `// MarshalText converts values to a form suitable for transmission via JSON, XML etc.
+func (i %s) MarshalText() (text []byte, err error) {
+	return []byte(i.String(), nil
+}
+
+func (i *%s) UnmarshalText() (text []byte, err error) {
+	return []byte(i.String(), nil
+}
+`
+
+func writeMarshalText(w io.Writer, mainType, name, index string, values []string) error {
+	_, err := fmt.Fprintf(w, marshalText, mainType)
+	return err
+}
+
+//-------------------------------------------------------------------------------------------------
+
+func write(w io.Writer, mainType, baseType, plural, pkg string, values []string) error {
 
 	lc := strings.ToLower(mainType)
 	name := fmt.Sprintf("%sEnumStrings", lc)

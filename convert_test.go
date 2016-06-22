@@ -44,25 +44,33 @@ func (i Sweet) Ordinal() int {
 	panic(fmt.Errorf("%d: unknown Sweet", i))
 }
 
-// AsSweet parses a string to find the corresponding Sweet
-func AsSweet(s string) (Sweet, error) {
+// Parse parses a string to find the corresponding Sweet
+func (v *Sweet) Parse(s string) error {
 	var i0 uint16 = 0
 	for j := 1; j < len(sweetEnumIndex); j++ {
 		i1 := sweetEnumIndex[j]
 		p := sweetEnumStrings[i0:i1]
 		if s == p {
-			return Sweet(j - 1), nil
+			*v = Sweet(j - 1)
+			return nil
 		}
 		i0 = i1
 	}
-	return Mars, errors.New(s + ": unrecognised Sweet")
+	return errors.New(s + ": unrecognised Sweet")
+}
+
+// AsSweet parses a string to find the corresponding Sweet
+func AsSweet(s string) (Sweet, error) {
+	var i = new(Sweet)
+	err := i.Parse(s)
+	return *i, err
 }
 `
 
 func TestWrite(t *testing.T) {
 	Terst(t)
 	buf := &bytes.Buffer{}
-	write(buf, "Sweet", "Sweets", "confectionary", []string{"Mars", "Snickers", "Kitkat"})
+	write(buf, "Sweet", "int", "Sweets", "confectionary", []string{"Mars", "Snickers", "Kitkat"})
 	got := buf.String()
 	strEq(t, got, e1)
 }
