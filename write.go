@@ -26,14 +26,14 @@ func writeHead(w io.Writer, pkg string) error {
 
 //-------------------------------------------------------------------------------------------------
 
-func writeConst(w io.Writer, names string, values []string) error {
+func writeConst(w io.Writer, names string, values []string, xf func(string) string) error {
 	_, err := fmt.Fprintf(w, "const %s = \"", names)
 	if err != nil {
 		return err
 	}
 
 	for _, s := range values {
-		_, err = fmt.Fprintf(w, s)
+		_, err = fmt.Fprintf(w, xf(s))
 		if err != nil {
 			return err
 		}
@@ -183,7 +183,7 @@ func writeMarshalText(w io.Writer, mainType string) error {
 
 //-------------------------------------------------------------------------------------------------
 
-func write(w io.Writer, mainType, baseType, plural, pkg string, values []string) error {
+func write(w io.Writer, mainType, baseType, plural, pkg string, values []string, xf func(string) string) error {
 
 	lc := strings.ToLower(mainType)
 	names := fmt.Sprintf("%sEnumStrings", lc)
@@ -194,7 +194,7 @@ func write(w io.Writer, mainType, baseType, plural, pkg string, values []string)
 		return err
 	}
 
-	err = writeConst(w, names, values)
+	err = writeConst(w, names, values, xf)
 	if err != nil {
 		return err
 	}

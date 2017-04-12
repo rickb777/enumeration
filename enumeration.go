@@ -7,17 +7,17 @@ import (
 	"strings"
 )
 
-var input1 = flag.String("i", "", "Name of the input file (optional short form). May be '-' for stdin.")
+var input1 = flag.String("i", "", "Name of the input file. May be '-' for stdin. Default is enumeration type in lower case.")
+var output1 = flag.String("o", "", "Name of the output file. May be '-' for stdout. Default is enumeration type in lower case plus '_enum'.")
 
-//var input2 = flag.String("input", "", "Name of the input file (optional long form).")
-var output1 = flag.String("o", "", "Name of the output file (optional short form). May be '-' for stdout.")
-
-//var output2 = flag.String("output", "", "Name of the output file (optional long form).")
 var pMainType = flag.String("type", "", "Name of the enumeration type (required).")
 var pPlural = flag.String("plural", "", "Plural name of the enumeration type (optional).")
 
 //var force = flag.Bool("f", false, "Force output generation, even if up to date.")
 var pPkg = flag.String("package", "", "Name of the output package (optional). Defaults to the output directory).")
+var force = flag.Bool("f", false, "Force writing the output file even if up to date (not used when piping stdin or stdout).")
+var lowercase = flag.Bool("lc", false, "Convert strings to lowercase.")
+var uppercase = flag.Bool("uc", false, "Convert strings to uppercase.")
 var verbose = flag.Bool("v", false, "Verbose progress messages.")
 var dbg = flag.Bool("z", false, "Debug messages.")
 
@@ -40,6 +40,20 @@ func choosePackage(outputFile string) string {
 	}
 
 	return pkg
+}
+
+func notUpToDate() bool {
+	if *input1 != "-" && *output1 != "-" {
+		xi, err := os.Stat(*input1)
+		if err == nil {
+			xo, err := os.Stat(*output1)
+			if err == nil && xo.ModTime().After(xi.ModTime()) {
+				info("Skipped %s.\n", *output1)
+				return false
+			}
+		}
+	}
+	return true
 }
 
 func generate(mainType, plural string) {
@@ -71,7 +85,14 @@ func generate(mainType, plural string) {
 	}
 	debug("pkg=%s\n", pkg)
 
-	convert(out, in, *input1, mainType, plural, pkg)
+	transform := noop
+	if *lowercase {
+		transform = strings.ToLower
+	} else if *uppercase {
+		transform = strings.ToUpper
+	}
+
+	convert(out, in, *input1, mainType, plural, pkg, transform)
 	info("Generated %s.\n", *output1)
 }
 
@@ -79,35 +100,40 @@ func sPtr(s string) *string {
 	return &s
 }
 
+func noop(s string) string {
+	return s
+}
+
 func main() {
 	flag.Parse()
 	if pMainType == nil || *pMainType == "" {
 		fail("Must specify -type.")
 	}
+
 	mainType := *pMainType
 	plural := mainType + "s"
 	if pPlural != nil && *pPlural != "" {
 		plural = *pPlural
 	}
-	debug("type=%s\n", mainType)
-	debug("plural=%s\n", plural)
 
-	if input1 == nil || *input1 == "" { //&& (input2 == nil || *input2 == "") {
+	if input1 == nil || *input1 == "" {
 		input1 = sPtr(strings.ToLower(mainType) + ".go")
 	}
-	//if input2 != nil {
-	//	input1 = input2
-	//}
 
-	if output1 == nil || *output1 == "" { //&& (output2 == nil || *output2 == "") {
+	if output1 == nil || *output1 == "" {
 		output1 = sPtr(strings.ToLower(mainType) + "_enum.go")
 	}
-	//if output2 != nil {
-	//	output1 = output2
-	//}
 
+	if *output1 == "-" {
+		stdout = os.Stderr // avoiding interleaving with the output of generated code
+	}
+
+	debug("type=%s\n", mainType)
+	debug("plural=%s\n", plural)
 	debug("input=%s\n", *input1)
 	debug("output=%s\n", *output1)
 
-	generate(mainType, plural)
+	if *force || notUpToDate() {
+		generate(mainType, plural)
+	}
 }

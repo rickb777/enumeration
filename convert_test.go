@@ -6,6 +6,7 @@ import (
 	"fmt"
 	. "github.com/rickb777/terst"
 	"testing"
+	"strings"
 )
 
 const e1 = `// generated code - do not edit
@@ -17,7 +18,8 @@ import (
 	"fmt"
 )
 
-const sweetEnumStrings = "MarsSnickersKitkat"
+`
+const e2 = `
 
 var sweetEnumIndex = [...]uint16{0, 4, 12, 18}
 
@@ -77,12 +79,20 @@ func (i *Sweet) UnmarshalText(text []byte) error {
 }
 `
 
-func TestWrite(t *testing.T) {
+func TestWriteUpper(t *testing.T) {
 	Terst(t)
 	buf := &bytes.Buffer{}
-	write(buf, "Sweet", "int", "Sweets", "confectionary", []string{"Mars", "Snickers", "Kitkat"})
+	write(buf, "Sweet", "int", "Sweets", "confectionary", []string{"Mars", "Snickers", "Kitkat"}, noop)
 	got := buf.String()
-	strEq(t, got, e1)
+	strEq(t, got, e1 + `const sweetEnumStrings = "MarsSnickersKitkat"` + e2)
+}
+
+func TestWriteLower(t *testing.T) {
+	Terst(t)
+	buf := &bytes.Buffer{}
+	write(buf, "Sweet", "int", "Sweets", "confectionary", []string{"Mars", "Snickers", "Kitkat"}, strings.ToLower)
+	got := buf.String()
+	strEq(t, got, e1 + `const sweetEnumStrings = "marssnickerskitkat"` + e2)
 }
 
 const enum1 = `

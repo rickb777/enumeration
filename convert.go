@@ -11,7 +11,7 @@ func removeComments(line string) string {
 }
 
 func doRemoveBlanks(words []string) []string {
-	copy := make([]string, 0)
+	copy := make([]string, 0, len(words))
 	for _, w := range words {
 		if w != " " {
 			copy = append(copy, w)
@@ -53,7 +53,7 @@ func scanValues(s *bufio.Scanner, mainType string) (result []string) {
 	return
 }
 
-func convert(w io.Writer, in io.Reader, input, mainType, plural, pkg string) error {
+func convert(w io.Writer, in io.Reader, input, mainType, plural, pkg string, xf func(string) string) error {
 	foundMainType := false
 	baseType := "int"
 	s := bufio.NewScanner(in)
@@ -71,7 +71,7 @@ func convert(w io.Writer, in io.Reader, input, mainType, plural, pkg string) err
 		} else if foundMainType && len(words) == 2 && words[0] == "const" && words[1] == "(" {
 			values := scanValues(s, mainType)
 			if values != nil {
-				return write(w, mainType, baseType, plural, pkg, values)
+				return write(w, mainType, baseType, plural, pkg, values, xf)
 			}
 		}
 	}

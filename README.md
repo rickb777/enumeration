@@ -69,9 +69,15 @@ Options are:
     - the name of the Go package. If omitted, the directory of the output will be used (which becomes mandatory
         therefore).
 
+ * `-lc`
+    - convert to lower case the string representations of the enumeration values.
+
+ * `-uc`
+    - convert to upper case the string representations of the enumeration values.
+
  * `-f`
-    - force output generation; if this is not set the output file is only produced when it is older than the
-      dependencies
+    - force output generation; if this is not set the output file is only produced when it is is absent or
+      when it is older than the input file.
 
  * `-v`
     - verbose info messages

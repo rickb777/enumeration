@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-var stdout = os.Stderr // avoiding interleaving with the output of generated code
+var stdout = os.Stdout
 
 func fail(args ...interface{}) {
 	fmt.Fprint(os.Stderr, "Error: ")
