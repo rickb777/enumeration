@@ -16,7 +16,7 @@ var AllMonths = []Month{January, February, March, April, May, June, July, August
 // String returns the string representation of a Month
 func (i Month) String() string {
 	o := i.Ordinal()
-	if o < 0 || o >= len(monthEnumIndex)-1 {
+	if o < 0 || o >= len(AllMonths) {
 		return fmt.Sprintf("Month(%v)", i)
 	}
 	return monthEnumStrings[monthEnumIndex[o]:monthEnumIndex[o+1]]
@@ -60,7 +60,7 @@ func (v *Month) Parse(s string) error {
 		i1 := monthEnumIndex[j]
 		p := monthEnumStrings[i0:i1]
 		if s == p {
-			*v = Month(j - 1)
+			*v = AllMonths[j-1]
 			return nil
 		}
 		i0 = i1

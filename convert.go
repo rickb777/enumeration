@@ -11,14 +11,22 @@ func removeComments(line string) string {
 	return removeAfterS(line, "//")
 }
 
-func removeBlanks(words []string) []string {
+func removeMatches(words []string, unwanted string) []string {
 	cp := make([]string, 0, len(words))
 	for _, w := range words {
-		if w != "" {
+		if w != unwanted {
 			cp = append(cp, w)
 		}
 	}
 	return cp
+}
+
+func removeBlanks(words []string) []string {
+	return removeMatches(words, "")
+}
+
+func removePlaceholders(words []string) []string {
+	return removeMatches(words, "_")
 }
 
 func removeCommentsAndSplitWords(line string) []string {
@@ -43,13 +51,15 @@ func scanValues(s *bufio.Scanner, mainType string) (result []string) {
 		if eq >= 2 && len(words) >= 3 && words[eq-1] == mainType {
 			found = true
 			for i := 0; i < eq-1; i++ {
-				names := removeBlanks(strings.Split(words[i], ","))
+				names := removePlaceholders(removeBlanks(strings.Split(words[i], ",")))
 				debug("started with %s\n", names)
 				result = append(result, names...)
 			}
 		} else if found && eq < 0 && len(words) >= 1 {
-			debug("added %s\n", words[0])
-			result = append(result, words[0])
+			if words[0] != "_" {
+				debug("added %s\n", words[0])
+				result = append(result, words[0])
+			}
 		}
 	}
 

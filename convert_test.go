@@ -28,7 +28,7 @@ var AllSweets = []Sweet{Mars, Bounty, Snickers, Kitkat}
 // String returns the string representation of a Sweet
 func (i Sweet) String() string {
 	o := i.Ordinal()
-	if o < 0 || o >= len(sweetEnumIndex)-1 {
+	if o < 0 || o >= len(AllSweets) {
 		return fmt.Sprintf("Sweet(%v)", i)
 	}
 	return sweetEnumStrings[sweetEnumIndex[o]:sweetEnumIndex[o+1]]
@@ -56,7 +56,7 @@ func (v *Sweet) Parse(s string) error {
 		i1 := sweetEnumIndex[j]
 		p := sweetEnumStrings[i0:i1]
 		if s == p {
-			*v = Sweet(j - 1)
+			*v = AllSweets[j-1]
 			return nil
 		}
 		i0 = i1

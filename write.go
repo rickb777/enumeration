@@ -91,15 +91,15 @@ const stringMethod = `
 // String returns the string representation of a %s
 func (i %s) String() string {
 	o := i.Ordinal()
-	if o < 0 || o >= len(%s)-1 {
+	if o < 0 || o >= len(All%s) {
 		return fmt.Sprintf("%s(%%v)", i)
 	}
 	return %s[%s[o]:%s[o+1]]
 }
 `
 
-func writeFuncString(w io.Writer, mainType, names, indexes string) error {
-	_, err := fmt.Fprintf(w, stringMethod, mainType, mainType, indexes, mainType, names, indexes, indexes)
+func writeFuncString(w io.Writer, mainType, plural, names, indexes string) error {
+	_, err := fmt.Fprintf(w, stringMethod, mainType, mainType, plural, mainType, names, indexes, indexes)
 	return err
 }
 
@@ -142,7 +142,7 @@ func (v *%s) Parse(s string) error {
 		i1 := %s[j]
 		p := %s[i0:i1]
 		if s == p {
-			*v = %s(j - 1)
+			*v = All%s[j-1]
 			return nil
 		}
 		i0 = i1
@@ -158,8 +158,8 @@ func As%s(s string) (%s, error) {
 }
 `
 
-func writeFuncAsEnum(w io.Writer, mainType, names, indexes string, values []string) error {
-	_, err := fmt.Fprintf(w, asMethod, mainType, mainType, indexes, indexes, names, mainType, mainType, mainType, mainType, mainType, mainType, mainType)
+func writeFuncParse(w io.Writer, mainType, plural, names, indexes string) error {
+	_, err := fmt.Fprintf(w, asMethod, mainType, mainType, indexes, indexes, names, plural, mainType, mainType, mainType, mainType, mainType, mainType)
 	return err
 }
 
@@ -210,7 +210,7 @@ func write(w io.Writer, mainType, baseType, plural, pkg string, values []string,
 		return err
 	}
 
-	err = writeFuncString(w, mainType, names, indexes)
+	err = writeFuncString(w, mainType, plural, names, indexes)
 	if err != nil {
 		return err
 	}
@@ -220,7 +220,7 @@ func write(w io.Writer, mainType, baseType, plural, pkg string, values []string,
 		return err
 	}
 
-	err = writeFuncAsEnum(w, mainType, names, indexes, values)
+	err = writeFuncParse(w, mainType, plural, names, indexes)
 	if err != nil {
 		return err
 	}

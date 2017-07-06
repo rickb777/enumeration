@@ -16,7 +16,7 @@ var AllBases = []Base{A, C, G, T}
 // String returns the string representation of a Base
 func (i Base) String() string {
 	o := i.Ordinal()
-	if o < 0 || o >= len(baseEnumIndex)-1 {
+	if o < 0 || o >= len(AllBases) {
 		return fmt.Sprintf("Base(%v)", i)
 	}
 	return baseEnumStrings[baseEnumIndex[o]:baseEnumIndex[o+1]]
@@ -44,7 +44,7 @@ func (v *Base) Parse(s string) error {
 		i1 := baseEnumIndex[j]
 		p := baseEnumStrings[i0:i1]
 		if s == p {
-			*v = Base(j - 1)
+			*v = AllBases[j-1]
 			return nil
 		}
 		i0 = i1

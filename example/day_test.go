@@ -9,14 +9,15 @@ func TestString(t *testing.T) {
 	Terst(t)
 	Is(Sunday.String(), "Sunday")
 	Is(Monday.String(), "Monday")
-	Is(numberOfDays.String(), "numberOfDays")
 }
 
 func TestOrdinal(t *testing.T) {
 	Terst(t)
+	Is(int(Sunday), 1)
 	Is(Sunday.Ordinal(), 0)
+	Is(int(Monday), 2)
 	Is(Monday.Ordinal(), 1)
-	Is(numberOfDays.Ordinal(), 7)
+	Is(numberOfDays, 7)
 }
 
 func TestAllDays(t *testing.T) {
@@ -34,7 +35,17 @@ func TestAsDay(t *testing.T) {
 	Is(err, "!=", nil)
 }
 
-func TestBinary(t *testing.T) {
+func TestMarshalText(t *testing.T) {
 	Terst(t)
-	//err := Monday.MarshalBinary()
+	tt, err := Monday.MarshalText()
+	Is(err, nil)
+	Is(tt, []byte("Monday"))
+}
+
+func TestUnmarshalText(t *testing.T) {
+	Terst(t)
+	var d = new(Day)
+	err := d.UnmarshalText([]byte("Monday"))
+	Is(err, nil)
+	Is(*d, Monday)
 }
