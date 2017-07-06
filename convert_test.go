@@ -5,8 +5,8 @@ import (
 	"bytes"
 	"fmt"
 	. "github.com/rickb777/terst"
-	"testing"
 	"strings"
+	"testing"
 )
 
 const e1 = `// generated code - do not edit
@@ -21,16 +21,17 @@ import (
 `
 const e2 = `
 
-var sweetEnumIndex = [...]uint16{0, 4, 12, 18}
+var sweetEnumIndex = [...]uint16{0, 4, 10, 18, 24}
 
-var AllSweets = []Sweet{Mars, Snickers, Kitkat}
+var AllSweets = []Sweet{Mars, Bounty, Snickers, Kitkat}
 
 // String returns the string representation of a Sweet
 func (i Sweet) String() string {
-	if i < 0 || i >= Sweet(len(sweetEnumIndex)-1) {
-		return fmt.Sprintf("Sweet(%d)", i)
+	o := i.Ordinal()
+	if o < 0 || o >= len(sweetEnumIndex)-1 {
+		return fmt.Sprintf("Sweet(%v)", i)
 	}
-	return sweetEnumStrings[sweetEnumIndex[i]:sweetEnumIndex[i+1]]
+	return sweetEnumStrings[sweetEnumIndex[o]:sweetEnumIndex[o+1]]
 }
 
 // Ordinal returns the ordinal number of a Sweet
@@ -38,12 +39,14 @@ func (i Sweet) Ordinal() int {
 	switch i {
 	case Mars:
 		return 0
-	case Snickers:
+	case Bounty:
 		return 1
-	case Kitkat:
+	case Snickers:
 		return 2
+	case Kitkat:
+		return 3
 	}
-	panic(fmt.Errorf("%d: unknown Sweet", i))
+	return -1
 }
 
 // Parse parses a string to find the corresponding Sweet
@@ -82,24 +85,25 @@ func (i *Sweet) UnmarshalText(text []byte) error {
 func TestWriteUpper(t *testing.T) {
 	Terst(t)
 	buf := &bytes.Buffer{}
-	write(buf, "Sweet", "int", "Sweets", "confectionary", []string{"Mars", "Snickers", "Kitkat"}, noop)
+	write(buf, "Sweet", "int", "Sweets", "confectionary", []string{"Mars", "Bounty", "Snickers", "Kitkat"}, noop)
 	got := buf.String()
-	strEq(t, got, e1 + `const sweetEnumStrings = "MarsSnickersKitkat"` + e2)
+	strEq(t, got, e1+`const sweetEnumStrings = "MarsBountySnickersKitkat"`+e2)
 }
 
 func TestWriteLower(t *testing.T) {
 	Terst(t)
 	buf := &bytes.Buffer{}
-	write(buf, "Sweet", "int", "Sweets", "confectionary", []string{"Mars", "Snickers", "Kitkat"}, strings.ToLower)
+	write(buf, "Sweet", "int", "Sweets", "confectionary", []string{"Mars", "Bounty", "Snickers", "Kitkat"}, strings.ToLower)
 	got := buf.String()
-	strEq(t, got, e1 + `const sweetEnumStrings = "marssnickerskitkat"` + e2)
+	strEq(t, got, e1+`const sweetEnumStrings = "marsbountysnickerskitkat"`+e2)
 }
 
 const enum1 = `
 // inline comments are allowed
 const (
 	Mars Sweet = iota
-	Snickers // I need this
+	Bounty    // coconuts and more
+	Snickers  // I need this
 
 	// yum yum
 	Kitkat
@@ -107,20 +111,21 @@ const (
 // as are blank lines
 `
 
-const enum2 = `
-const (
-	Mars Irrelevant = iota
-	Snickers
-	Kitkat
-)
-`
-
 func TestScanValuesHappy(t *testing.T) {
 	Terst(t)
 	s := bufio.NewScanner(bytes.NewBufferString(enum1))
 	values := scanValues(s, "Sweet")
-	Is(values, []string{"Mars", "Snickers", "Kitkat"})
+	Is(values, []string{"Mars", "Bounty", "Snickers", "Kitkat"})
 }
+
+const enum2 = `
+const (
+	Mars Irrelevant = iota
+	Bounty
+	Snickers
+	Kitkat
+)
+`
 
 func TestScanValuesIrrelevant(t *testing.T) {
 	Terst(t)
@@ -166,4 +171,96 @@ func strEq(t *testing.T, want, got string) {
 		fmt.Println("")
 		t.Fail()
 	}
+}
+
+// deeper edge-case testing for line processing
+func TestRemoveCommentsAndSplitWords(t *testing.T) {
+	Terst(t)
+	cases := []struct {
+		input    string
+		expected []string
+	}{
+		{"", []string{}},
+		{"one", []string{"one"}},
+		{"one two", []string{"one", "two"}},
+		{"one // two", []string{"one"}},
+		{"\tNotice\t          // announcements to all // old comment", []string{"Notice"}},
+	}
+	for _, c := range cases {
+		values := removeCommentsAndSplitWords(c.input)
+		Is(values, c.expected)
+	}
+}
+
+const enum3 = `
+type IgnoreMe int
+var s = "123"
+type Sweet int // <-- buried here
+type Foo struct {
+	V int
+}
+type Bar interface {
+	X()
+}
+var x = 0
+const (
+	Jam IgnoreMe = iota
+	Toast
+	Butter
+)
+var y = 1
+const (
+	Mars Sweet = iota
+	Bounty
+	Snickers
+	Kitkat
+)
+`
+
+func TestConvertHappy1(t *testing.T) {
+	Terst(t)
+	w := &bytes.Buffer{}
+	s := bytes.NewBufferString(enum3)
+	err := convert(w, s, "filename.go", "Sweet", "Sweets", "confectionary", noop)
+	Is(err, nil)
+	strEq(t, w.String(), e1+`const sweetEnumStrings = "MarsBountySnickersKitkat"`+e2)
+}
+
+const enum4 = `
+type Sweet int
+const (
+	Mars, Bounty, Snickers, Kitkat Sweet = 1, 2, 3, 4
+)
+`
+
+func TestConvertHappy2(t *testing.T) {
+	Terst(t)
+	w := &bytes.Buffer{}
+	s := bytes.NewBufferString(enum4)
+	err := convert(w, s, "filename.go", "Sweet", "Sweets", "confectionary", noop)
+	Is(err, nil)
+	strEq(t, w.String(), e1+`const sweetEnumStrings = "MarsBountySnickersKitkat"`+e2)
+}
+
+const enum5 = `
+type IgnoreMe int
+const (
+	Mars Sweet = iota
+	Bounty
+	Snickers
+	Kitkat
+)
+const (
+	Jam IgnoreMe = iota
+	Toast
+	Butter
+)
+`
+
+func TestConvertError(t *testing.T) {
+	Terst(t)
+	w := &bytes.Buffer{}
+	s := bytes.NewBufferString(enum5)
+	err := convert(w, s, "filename.go", "Sweet", "Sweets", "confectionary", noop)
+	Is(err.Error(), "Failed to find Sweet in filename.go")
 }

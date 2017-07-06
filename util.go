@@ -52,9 +52,18 @@ func removeBeforeC(s string, c byte) string {
 }
 
 func removeAfterS(s, sep string) string {
-	p := strings.LastIndex(s, sep)
+	p := strings.Index(s, sep)
 	if p < 0 {
 		return s
 	}
 	return s[:p]
+}
+
+func listIndexOf(words []string, target string) int {
+	for i, w := range words {
+		if w == target {
+			return i
+		}
+	}
+	return -1
 }

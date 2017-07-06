@@ -7,18 +7,19 @@ import (
 	"fmt"
 )
 
-const baseEnumStrings = "ACTG"
+const baseEnumStrings = "ACGT"
 
 var baseEnumIndex = [...]uint16{0, 1, 2, 3, 4}
 
-var AllBases = []Base{A, C, T, G}
+var AllBases = []Base{A, C, G, T}
 
 // String returns the string representation of a Base
 func (i Base) String() string {
-	if i < 0 || i >= Base(len(baseEnumIndex)-1) {
-		return fmt.Sprintf("Base(%d)", i)
+	o := i.Ordinal()
+	if o < 0 || o >= len(baseEnumIndex)-1 {
+		return fmt.Sprintf("Base(%v)", i)
 	}
-	return baseEnumStrings[baseEnumIndex[i]:baseEnumIndex[i+1]]
+	return baseEnumStrings[baseEnumIndex[o]:baseEnumIndex[o+1]]
 }
 
 // Ordinal returns the ordinal number of a Base
@@ -28,12 +29,12 @@ func (i Base) Ordinal() int {
 		return 0
 	case C:
 		return 1
-	case T:
-		return 2
 	case G:
+		return 2
+	case T:
 		return 3
 	}
-	panic(fmt.Errorf("%d: unknown Base", i))
+	return -1
 }
 
 // Parse parses a string to find the corresponding Base

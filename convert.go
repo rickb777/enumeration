@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"fmt"
 	"io"
 	"strings"
 )
@@ -10,42 +11,44 @@ func removeComments(line string) string {
 	return removeAfterS(line, "//")
 }
 
-func doRemoveBlanks(words []string) []string {
-	copy := make([]string, 0, len(words))
+func removeBlanks(words []string) []string {
+	cp := make([]string, 0, len(words))
 	for _, w := range words {
-		if w != " " {
-			copy = append(copy, w)
+		if w != "" {
+			cp = append(cp, w)
 		}
 	}
-	return copy
+	return cp
 }
 
-func removeBlanks(words []string) []string {
-	for _, w := range words {
-		if w == " " {
-			return doRemoveBlanks(words)
-		}
-	}
-	return words
+func removeCommentsAndSplitWords(line string) []string {
+	content := strings.TrimSpace(removeComments(line))
+	return removeBlanks(strings.Split(content, " "))
 }
 
 func scanValues(s *bufio.Scanner, mainType string) (result []string) {
 	debug("scanValues\n")
 	found := false
 	for s.Scan() {
-		line := s.Text()
-		content := strings.TrimSpace(removeComments(line))
-		words := removeBlanks(strings.Split(content, " "))
+		words := removeCommentsAndSplitWords(s.Text())
 		debug("%#v\n", words)
 
 		if len(words) == 1 && words[0] == ")" {
-			return
-		} else if found && len(words) >= 1 && len(words[0]) > 0 {
-			debug("added %s\n", words[0])
-			result = append(result, words[0])
-		} else if len(words) >= 3 && len(words[0]) > 0 && words[1] == mainType {
+			if found {
+				return
+			}
+		}
+
+		eq := listIndexOf(words, "=")
+		if eq >= 2 && len(words) >= 3 && words[eq-1] == mainType {
 			found = true
-			debug("started with %s\n", words[0])
+			for i := 0; i < eq-1; i++ {
+				names := removeBlanks(strings.Split(words[i], ","))
+				debug("started with %s\n", names)
+				result = append(result, names...)
+			}
+		} else if found && eq < 0 && len(words) >= 1 {
+			debug("added %s\n", words[0])
 			result = append(result, words[0])
 		}
 	}
@@ -59,14 +62,13 @@ func convert(w io.Writer, in io.Reader, input, mainType, plural, pkg string, xf 
 	s := bufio.NewScanner(in)
 
 	for s.Scan() {
-		line := strings.TrimSpace(removeComments(s.Text()))
-		words := removeBlanks(strings.Split(line, " "))
+		words := removeCommentsAndSplitWords(s.Text())
 		debug("%#v\n", words)
 
 		if len(words) == 3 && words[0] == "type" && words[1] == mainType {
-			debug("Found type %s\n", mainType)
 			foundMainType = true
 			baseType = words[2]
+			debug("type %s %s\n", mainType, baseType)
 
 		} else if foundMainType && len(words) == 2 && words[0] == "const" && words[1] == "(" {
 			values := scanValues(s, mainType)
@@ -76,6 +78,5 @@ func convert(w io.Writer, in io.Reader, input, mainType, plural, pkg string, xf 
 		}
 	}
 
-	fail("Failed to find", mainType, "in", input)
-	return nil
+	return fmt.Errorf("Failed to find %s in %s", mainType, input)
 }

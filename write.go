@@ -90,32 +90,33 @@ func writeAllItemsSlice(w io.Writer, mainType, plural string, values []string) e
 const stringMethod = `
 // String returns the string representation of a %s
 func (i %s) String() string {
-	if i < 0 || i >= %s(len(%s)-1) {
-		return fmt.Sprintf("%s(%%d)", i)
+	o := i.Ordinal()
+	if o < 0 || o >= len(%s)-1 {
+		return fmt.Sprintf("%s(%%v)", i)
 	}
-	return %s[%s[i]:%s[i+1]]
+	return %s[%s[o]:%s[o+1]]
 }
 `
 
 func writeFuncString(w io.Writer, mainType, names, indexes string) error {
-	_, err := fmt.Fprintf(w, stringMethod, mainType, mainType, mainType, indexes, mainType, names, indexes, indexes)
+	_, err := fmt.Fprintf(w, stringMethod, mainType, mainType, indexes, mainType, names, indexes, indexes)
 	return err
 }
 
 //-------------------------------------------------------------------------------------------------
 
-const ordinalMethod1 = `
+const ordinalMethodStart = `
 // Ordinal returns the ordinal number of a %s
 func (i %s) Ordinal() int {
 	switch i {
 `
-const ordinalMethod2 = `	}
-	panic(fmt.Errorf("%%d: unknown %s", i))
+const ordinalMethodEnd = `	}
+	return -1
 }
 `
 
 func writeFuncOrdinal(w io.Writer, mainType string, values []string) error {
-	_, err := fmt.Fprintf(w, ordinalMethod1, mainType, mainType)
+	_, err := fmt.Fprintf(w, ordinalMethodStart, mainType, mainType)
 	if err != nil {
 		return err
 	}
@@ -127,7 +128,7 @@ func writeFuncOrdinal(w io.Writer, mainType string, values []string) error {
 		}
 	}
 
-	_, err = fmt.Fprintf(w, ordinalMethod2, mainType)
+	_, err = fmt.Fprintf(w, ordinalMethodEnd)
 	return err
 }
 

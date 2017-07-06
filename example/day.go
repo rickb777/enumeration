@@ -9,6 +9,6 @@ const (
 	Wednesday
 	Thursday
 	Friday
-	Partyday
+	Saturday
 	numberOfDays // this constant is not exported
 )

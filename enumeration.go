@@ -92,7 +92,10 @@ func generate(mainType, plural string) {
 		transform = strings.ToUpper
 	}
 
-	convert(out, in, *input1, mainType, plural, pkg, transform)
+	err = convert(out, in, *input1, mainType, plural, pkg, transform)
+	if err != nil {
+		fail(err)
+	}
 	info("Generated %s.\n", *output1)
 }
 

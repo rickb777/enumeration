@@ -7,18 +7,19 @@ import (
 	"fmt"
 )
 
-const dayEnumStrings = "SundayMondayTuesdayWednesdayThursdayFridayPartydaynumberOfDays"
+const dayEnumStrings = "SundayMondayTuesdayWednesdayThursdayFridaySaturdaynumberOfDays"
 
 var dayEnumIndex = [...]uint16{0, 6, 12, 19, 28, 36, 42, 50, 62}
 
-var AllDays = []Day{Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Partyday, numberOfDays}
+var AllDays = []Day{Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, numberOfDays}
 
 // String returns the string representation of a Day
 func (i Day) String() string {
-	if i < 0 || i >= Day(len(dayEnumIndex)-1) {
-		return fmt.Sprintf("Day(%d)", i)
+	o := i.Ordinal()
+	if o < 0 || o >= len(dayEnumIndex)-1 {
+		return fmt.Sprintf("Day(%v)", i)
 	}
-	return dayEnumStrings[dayEnumIndex[i]:dayEnumIndex[i+1]]
+	return dayEnumStrings[dayEnumIndex[o]:dayEnumIndex[o+1]]
 }
 
 // Ordinal returns the ordinal number of a Day
@@ -36,12 +37,12 @@ func (i Day) Ordinal() int {
 		return 4
 	case Friday:
 		return 5
-	case Partyday:
+	case Saturday:
 		return 6
 	case numberOfDays:
 		return 7
 	}
-	panic(fmt.Errorf("%d: unknown Day", i))
+	return -1
 }
 
 // Parse parses a string to find the corresponding Day

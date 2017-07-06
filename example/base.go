@@ -1,10 +1,11 @@
 package example
 
-type Base int
+type Base float32
 
 const (
-	A Base = iota
-	C
-	T
-	G
+	// Nucleotide Molecular Weights, g/mol
+	A Base = 331.2
+	C Base = 307.2
+	G Base = 347.2
+	T Base = 322.2
 )
