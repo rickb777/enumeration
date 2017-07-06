@@ -137,6 +137,9 @@ the `Day` type above. You will get:
  * `var AllDays = []Day{ ... }`
     - Provides all the `Day` values in a single slice. This is particularly useful if you need to iterate over them. Usually, the identifier name depends on the name of your type, but it can be overridden using `-plural`.
 
+ * `encoding.TextMarshaler` and `encoding.TextUnmarshaler`
+    - Provides methods to satisfy these two interfaces so that your enumeration can be easily used by JSON, XML and other codecs in the standard Go library.
+
 ## Other Use Options
 
 This tool is compatible with `go generate` - [more](https://blog.golang.org/generate).
