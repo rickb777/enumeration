@@ -15,6 +15,7 @@ package %s
 import (
 	"errors"
 	"fmt"
+	"strconv"
 )
 
 `
@@ -134,9 +135,15 @@ func writeFuncOrdinal(w io.Writer, mainType string, values []string) error {
 
 //-------------------------------------------------------------------------------------------------
 
-const asMethod = `
-// Parse parses a string to find the corresponding %s
+const parseMethod = `
+// Parse parses a string to find the corresponding %s, accepting either one of the string
+// values or an ordinal number.
 func (v *%s) Parse(s string) error {
+	ord, err := strconv.Atoi(s)
+	if err == nil && 0 <= ord && ord < len(All%s) {
+		*v = All%s[ord]
+		return nil
+	}
 	var i0 uint16 = 0
 	for j := 1; j < len(%s); j++ {
 		i1 := %s[j]
@@ -149,8 +156,17 @@ func (v *%s) Parse(s string) error {
 	}
 	return errors.New(s + ": unrecognised %s")
 }
+`
+func writeFuncParse(w io.Writer, mainType, plural, names, indexes string) error {
+	_, err := fmt.Fprintf(w, parseMethod, mainType, mainType, plural, plural, indexes, indexes, names, plural, mainType)
+	return err
+}
 
-// As%s parses a string to find the corresponding %s
+//-------------------------------------------------------------------------------------------------
+
+const asMethod = `
+// As%s parses a string to find the corresponding %s, accepting either one of the string
+// values or an ordinal number.
 func As%s(s string) (%s, error) {
 	var i = new(%s)
 	err := i.Parse(s)
@@ -158,8 +174,8 @@ func As%s(s string) (%s, error) {
 }
 `
 
-func writeFuncParse(w io.Writer, mainType, plural, names, indexes string) error {
-	_, err := fmt.Fprintf(w, asMethod, mainType, mainType, indexes, indexes, names, plural, mainType, mainType, mainType, mainType, mainType, mainType)
+func writeFuncAs(w io.Writer, mainType, plural, names, indexes string) error {
+	_, err := fmt.Fprintf(w, asMethod, mainType, mainType, mainType, mainType, mainType)
 	return err
 }
 
@@ -221,6 +237,11 @@ func write(w io.Writer, mainType, baseType, plural, pkg string, values []string,
 	}
 
 	err = writeFuncParse(w, mainType, plural, names, indexes)
+	if err != nil {
+		return err
+	}
+
+	err = writeFuncAs(w, mainType, plural, names, indexes)
 	if err != nil {
 		return err
 	}
