@@ -5,6 +5,8 @@ package example
 import (
 	"errors"
 	"fmt"
+	"strconv"
+	"strings"
 )
 
 const monthEnumStrings = "JanuaryFebruaryMarchAprilMayJuneJulyAugustSeptemberOctoberNovemberDecember"
@@ -17,7 +19,7 @@ var AllMonths = []Month{January, February, March, April, May, June, July, August
 func (i Month) String() string {
 	o := i.Ordinal()
 	if o < 0 || o >= len(AllMonths) {
-		return fmt.Sprintf("Month(%v)", i)
+		return fmt.Sprintf("Month(%d)", i)
 	}
 	return monthEnumStrings[monthEnumIndex[o]:monthEnumIndex[o+1]]
 }
@@ -53,8 +55,14 @@ func (i Month) Ordinal() int {
 	return -1
 }
 
-// Parse parses a string to find the corresponding Month
+// Parse parses a string to find the corresponding Month, accepting either one of the string
+// values or an ordinal number.
 func (v *Month) Parse(s string) error {
+	ord, err := strconv.Atoi(s)
+	if err == nil && 0 <= ord && ord < len(AllMonths) {
+		*v = AllMonths[ord]
+		return nil
+	}
 	var i0 uint16 = 0
 	for j := 1; j < len(monthEnumIndex); j++ {
 		i1 := monthEnumIndex[j]
@@ -68,7 +76,8 @@ func (v *Month) Parse(s string) error {
 	return errors.New(s + ": unrecognised Month")
 }
 
-// AsMonth parses a string to find the corresponding Month
+// AsMonth parses a string to find the corresponding Month, accepting either one of the string
+// values or an ordinal number.
 func AsMonth(s string) (Month, error) {
 	var i = new(Month)
 	err := i.Parse(s)
@@ -83,4 +92,21 @@ func (i Month) MarshalText() (text []byte, err error) {
 // UnmarshalText converts transmitted values to ordinary values.
 func (i *Month) UnmarshalText(text []byte) error {
 	return i.Parse(string(text))
+}
+
+// MarshalJSON converts values to ordinals suitable for transmission via JSON.
+func (i Month) MarshalJSON() ([]byte, error) {
+	s := strconv.Itoa(i.Ordinal())
+	return []byte(s), nil
+}
+
+// UnmarshalJSON converts transmitted JSON values to ordinary values. It allows both
+// ordinals and strings to represent the values.
+func (i *Month) UnmarshalJSON(text []byte) error {
+	// Ignore null, like in the main JSON package.
+	if string(text) == "null" {
+		return nil
+	}
+    s := strings.Trim(string(text), "\"")
+	return i.Parse(s)
 }

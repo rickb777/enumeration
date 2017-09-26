@@ -5,6 +5,8 @@ package example
 import (
 	"errors"
 	"fmt"
+	"strconv"
+	"strings"
 )
 
 const baseEnumStrings = "ACGT"
@@ -17,7 +19,7 @@ var AllBases = []Base{A, C, G, T}
 func (i Base) String() string {
 	o := i.Ordinal()
 	if o < 0 || o >= len(AllBases) {
-		return fmt.Sprintf("Base(%v)", i)
+		return fmt.Sprintf("Base(%d)", i)
 	}
 	return baseEnumStrings[baseEnumIndex[o]:baseEnumIndex[o+1]]
 }
@@ -37,8 +39,14 @@ func (i Base) Ordinal() int {
 	return -1
 }
 
-// Parse parses a string to find the corresponding Base
+// Parse parses a string to find the corresponding Base, accepting either one of the string
+// values or an ordinal number.
 func (v *Base) Parse(s string) error {
+	ord, err := strconv.Atoi(s)
+	if err == nil && 0 <= ord && ord < len(AllBases) {
+		*v = AllBases[ord]
+		return nil
+	}
 	var i0 uint16 = 0
 	for j := 1; j < len(baseEnumIndex); j++ {
 		i1 := baseEnumIndex[j]
@@ -52,7 +60,8 @@ func (v *Base) Parse(s string) error {
 	return errors.New(s + ": unrecognised Base")
 }
 
-// AsBase parses a string to find the corresponding Base
+// AsBase parses a string to find the corresponding Base, accepting either one of the string
+// values or an ordinal number.
 func AsBase(s string) (Base, error) {
 	var i = new(Base)
 	err := i.Parse(s)
@@ -67,4 +76,21 @@ func (i Base) MarshalText() (text []byte, err error) {
 // UnmarshalText converts transmitted values to ordinary values.
 func (i *Base) UnmarshalText(text []byte) error {
 	return i.Parse(string(text))
+}
+
+// MarshalJSON converts values to ordinals suitable for transmission via JSON.
+func (i Base) MarshalJSON() ([]byte, error) {
+	s := strconv.Itoa(i.Ordinal())
+	return []byte(s), nil
+}
+
+// UnmarshalJSON converts transmitted JSON values to ordinary values. It allows both
+// ordinals and strings to represent the values.
+func (i *Base) UnmarshalJSON(text []byte) error {
+	// Ignore null, like in the main JSON package.
+	if string(text) == "null" {
+		return nil
+	}
+    s := strings.Trim(string(text), "\"")
+	return i.Parse(s)
 }

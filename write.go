@@ -16,6 +16,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"strings"
 )
 
 `
@@ -93,7 +94,7 @@ const stringMethod = `
 func (i %s) String() string {
 	o := i.Ordinal()
 	if o < 0 || o >= len(All%s) {
-		return fmt.Sprintf("%s(%%v)", i)
+		return fmt.Sprintf("%s(%%d)", i)
 	}
 	return %s[%s[o]:%s[o+1]]
 }
@@ -157,6 +158,7 @@ func (v *%s) Parse(s string) error {
 	return errors.New(s + ": unrecognised %s")
 }
 `
+
 func writeFuncParse(w io.Writer, mainType, plural, names, indexes string) error {
 	_, err := fmt.Fprintf(w, parseMethod, mainType, mainType, plural, plural, indexes, indexes, names, plural, mainType)
 	return err
@@ -195,6 +197,32 @@ func (i *%s) UnmarshalText(text []byte) error {
 
 func writeMarshalText(w io.Writer, mainType string) error {
 	_, err := fmt.Fprintf(w, marshalText, mainType, mainType)
+	return err
+}
+
+//-------------------------------------------------------------------------------------------------
+
+const marshalJson = `
+// MarshalJSON converts values to ordinals suitable for transmission via JSON.
+func (i %s) MarshalJSON() ([]byte, error) {
+	s := strconv.Itoa(i.Ordinal())
+	return []byte(s), nil
+}
+
+// UnmarshalJSON converts transmitted JSON values to ordinary values. It allows both
+// ordinals and strings to represent the values.
+func (i *%s) UnmarshalJSON(text []byte) error {
+	// Ignore null, like in the main JSON package.
+	if string(text) == "null" {
+		return nil
+	}
+    s := strings.Trim(string(text), "\"")
+	return i.Parse(s)
+}
+`
+
+func writeMarshalJson(w io.Writer, mainType string) error {
+	_, err := fmt.Fprintf(w, marshalJson, mainType, mainType)
 	return err
 }
 
@@ -247,6 +275,11 @@ func write(w io.Writer, mainType, baseType, plural, pkg string, values []string,
 	}
 
 	err = writeMarshalText(w, mainType)
+	if err != nil {
+		return err
+	}
+
+	err = writeMarshalJson(w, mainType)
 	if err != nil {
 		return err
 	}

@@ -5,6 +5,8 @@ package example
 import (
 	"errors"
 	"fmt"
+	"strconv"
+	"strings"
 )
 
 const dayEnumStrings = "SundayMondayTuesdayWednesdayThursdayFridaySaturday"
@@ -17,7 +19,7 @@ var AllDays = []Day{Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturd
 func (i Day) String() string {
 	o := i.Ordinal()
 	if o < 0 || o >= len(AllDays) {
-		return fmt.Sprintf("Day(%v)", i)
+		return fmt.Sprintf("Day(%d)", i)
 	}
 	return dayEnumStrings[dayEnumIndex[o]:dayEnumIndex[o+1]]
 }
@@ -43,8 +45,14 @@ func (i Day) Ordinal() int {
 	return -1
 }
 
-// Parse parses a string to find the corresponding Day
+// Parse parses a string to find the corresponding Day, accepting either one of the string
+// values or an ordinal number.
 func (v *Day) Parse(s string) error {
+	ord, err := strconv.Atoi(s)
+	if err == nil && 0 <= ord && ord < len(AllDays) {
+		*v = AllDays[ord]
+		return nil
+	}
 	var i0 uint16 = 0
 	for j := 1; j < len(dayEnumIndex); j++ {
 		i1 := dayEnumIndex[j]
@@ -58,7 +66,8 @@ func (v *Day) Parse(s string) error {
 	return errors.New(s + ": unrecognised Day")
 }
 
-// AsDay parses a string to find the corresponding Day
+// AsDay parses a string to find the corresponding Day, accepting either one of the string
+// values or an ordinal number.
 func AsDay(s string) (Day, error) {
 	var i = new(Day)
 	err := i.Parse(s)
@@ -73,4 +82,21 @@ func (i Day) MarshalText() (text []byte, err error) {
 // UnmarshalText converts transmitted values to ordinary values.
 func (i *Day) UnmarshalText(text []byte) error {
 	return i.Parse(string(text))
+}
+
+// MarshalJSON converts values to ordinals suitable for transmission via JSON.
+func (i Day) MarshalJSON() ([]byte, error) {
+	s := strconv.Itoa(i.Ordinal())
+	return []byte(s), nil
+}
+
+// UnmarshalJSON converts transmitted JSON values to ordinary values. It allows both
+// ordinals and strings to represent the values.
+func (i *Day) UnmarshalJSON(text []byte) error {
+	// Ignore null, like in the main JSON package.
+	if string(text) == "null" {
+		return nil
+	}
+    s := strings.Trim(string(text), "\"")
+	return i.Parse(s)
 }
