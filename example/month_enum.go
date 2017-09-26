@@ -94,8 +94,24 @@ func (i *Month) UnmarshalText(text []byte) error {
 	return i.Parse(string(text))
 }
 
-// MarshalJSON converts values to ordinals suitable for transmission via JSON.
+// MonthMarshalJSONUsingString controls whether generated JSON uses ordinals or strings. By default,
+// it is false and ordinals are used. Set it true to cause quoted strings to be used instead,
+// these being easier to read but taking more resources.
+var MonthMarshalJSONUsingString = false
+
+// MarshalJSON converts values to bytes suitable for transmission via JSON. By default, the
+// ordinal integer is emitted, but a quoted string is emitted instead if
+// MonthMarshalJSONUsingString is true.
 func (i Month) MarshalJSON() ([]byte, error) {
+	if MonthMarshalJSONUsingString {
+		s := []byte(i.String())
+		b := make([]byte, len(s)+2)
+		b[0] = '"'
+		copy(b[1:], s)
+		b[len(s)+1] = '"'
+		return b, nil
+	}
+	// else use the ordinal
 	s := strconv.Itoa(i.Ordinal())
 	return []byte(s), nil
 }

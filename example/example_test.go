@@ -58,12 +58,32 @@ type Three struct {
 	M Month
 }
 
-func TestMarshalJSON(t *testing.T) {
+func TestMarshalJSON1(t *testing.T) {
 	RegisterTestingT(t)
+
+	BaseMarshalJSONUsingString = false
+	DayMarshalJSONUsingString = false
+	MonthMarshalJSONUsingString = false
+
 	v := Three{G, Tuesday, November}
 	s, err := json.Marshal(v)
 	Ω(err).Should(BeNil())
 	Ω(string(s)).Should(Equal(`{"B":2,"D":2,"M":10}`))
+}
+
+func TestMarshalJSON2(t *testing.T) {
+	RegisterTestingT(t)
+
+	BaseMarshalJSONUsingString = true
+	DayMarshalJSONUsingString = true
+	MonthMarshalJSONUsingString = true
+
+	Ω(G.MarshalJSON()).Should(Equal([]byte{'"', 'G', '"'}))
+
+	v := Three{G, Tuesday, November}
+	s, err := json.Marshal(v)
+	Ω(err).Should(BeNil())
+	Ω(string(s)).Should(Equal(`{"B":"G","D":"Tuesday","M":"November"}`))
 }
 
 func TestUnmarshalJSON1(t *testing.T) {

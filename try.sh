@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash -ex
 go get github.com/onsi/gomega
 go test .
 go install .

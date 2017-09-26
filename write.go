@@ -203,8 +203,24 @@ func writeMarshalText(w io.Writer, mainType string) error {
 //-------------------------------------------------------------------------------------------------
 
 const marshalJson = `
-// MarshalJSON converts values to ordinals suitable for transmission via JSON.
+// %sMarshalJSONUsingString controls whether generated JSON uses ordinals or strings. By default,
+// it is false and ordinals are used. Set it true to cause quoted strings to be used instead,
+// these being easier to read but taking more resources.
+var %sMarshalJSONUsingString = false
+
+// MarshalJSON converts values to bytes suitable for transmission via JSON. By default, the
+// ordinal integer is emitted, but a quoted string is emitted instead if
+// %sMarshalJSONUsingString is true.
 func (i %s) MarshalJSON() ([]byte, error) {
+	if %sMarshalJSONUsingString {
+		s := []byte(i.String())
+		b := make([]byte, len(s)+2)
+		b[0] = '"'
+		copy(b[1:], s)
+		b[len(s)+1] = '"'
+		return b, nil
+	}
+	// else use the ordinal
 	s := strconv.Itoa(i.Ordinal())
 	return []byte(s), nil
 }
@@ -222,7 +238,7 @@ func (i *%s) UnmarshalJSON(text []byte) error {
 `
 
 func writeMarshalJson(w io.Writer, mainType string) error {
-	_, err := fmt.Fprintf(w, marshalJson, mainType, mainType)
+	_, err := fmt.Fprintf(w, marshalJson, mainType, mainType, mainType, mainType, mainType, mainType)
 	return err
 }
 
