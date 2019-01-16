@@ -1,4 +1,5 @@
 // generated code - do not edit
+// bitbucket.org/rickb777/enumeration v1.1.0
 
 package example
 
@@ -13,18 +14,19 @@ const baseEnumStrings = "ACGT"
 
 var baseEnumIndex = [...]uint16{0, 1, 2, 3, 4}
 
+// AllBases lists all 4 values in order.
 var AllBases = []Base{A, C, G, T}
 
-// String returns the string representation of a Base
+// String returns the string representation of a Base.
 func (i Base) String() string {
 	o := i.Ordinal()
 	if o < 0 || o >= len(AllBases) {
-		return fmt.Sprintf("Base(%d)", i)
+		return fmt.Sprintf("Base(%g)", i)
 	}
 	return baseEnumStrings[baseEnumIndex[o]:baseEnumIndex[o+1]]
 }
 
-// Ordinal returns the ordinal number of a Base
+// Ordinal returns the ordinal number of a Base.
 func (i Base) Ordinal() int {
 	switch i {
 	case A:
@@ -107,6 +109,6 @@ func (i *Base) UnmarshalJSON(text []byte) error {
 	if string(text) == "null" {
 		return nil
 	}
-    s := strings.Trim(string(text), "\"")
+	s := strings.Trim(string(text), "\"")
 	return i.Parse(s)
 }

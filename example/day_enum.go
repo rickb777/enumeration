@@ -1,4 +1,5 @@
 // generated code - do not edit
+// bitbucket.org/rickb777/enumeration v1.1.0
 
 package example
 
@@ -13,9 +14,10 @@ const dayEnumStrings = "SundayMondayTuesdayWednesdayThursdayFridaySaturday"
 
 var dayEnumIndex = [...]uint16{0, 6, 12, 19, 28, 36, 42, 50}
 
+// AllDays lists all 7 values in order.
 var AllDays = []Day{Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday}
 
-// String returns the string representation of a Day
+// String returns the string representation of a Day.
 func (i Day) String() string {
 	o := i.Ordinal()
 	if o < 0 || o >= len(AllDays) {
@@ -24,7 +26,7 @@ func (i Day) String() string {
 	return dayEnumStrings[dayEnumIndex[o]:dayEnumIndex[o+1]]
 }
 
-// Ordinal returns the ordinal number of a Day
+// Ordinal returns the ordinal number of a Day.
 func (i Day) Ordinal() int {
 	switch i {
 	case Sunday:
@@ -113,6 +115,6 @@ func (i *Day) UnmarshalJSON(text []byte) error {
 	if string(text) == "null" {
 		return nil
 	}
-    s := strings.Trim(string(text), "\"")
+	s := strings.Trim(string(text), "\"")
 	return i.Parse(s)
 }

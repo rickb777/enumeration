@@ -6,9 +6,21 @@ import (
 	"strings"
 )
 
+type printer struct {
+	w   io.Writer
+	err error
+}
+
+func (p *printer) Printf(message string, args ...interface{}) {
+	if p.err == nil {
+		_, p.err = fmt.Fprintf(p.w, message, args...)
+	}
+}
+
 //-------------------------------------------------------------------------------------------------
 
 const head = `// generated code - do not edit
+// bitbucket.org/rickb777/enumeration %s
 
 package %s
 
@@ -21,94 +33,83 @@ import (
 
 `
 
-func writeHead(w io.Writer, pkg string) error {
-	_, err := fmt.Fprintf(w, head, pkg)
-	return err
+func (m model) writeHead(p *printer) {
+	p.Printf(head, version, m.pkg)
 }
 
 //-------------------------------------------------------------------------------------------------
 
-func writeConst(w io.Writer, names string, values []string, xf func(string) string) error {
-	_, err := fmt.Fprintf(w, "const %s = \"", names)
-	if err != nil {
-		return err
+func (m model) writeConst(p *printer, names string) {
+	p.Printf("const %s = \"", names)
+
+	for _, s := range m.values {
+		p.Printf(m.xf.Func()(s))
 	}
 
-	for _, s := range values {
-		_, err = fmt.Fprintf(w, xf(s))
-		if err != nil {
-			return err
-		}
-	}
-
-	_, err = fmt.Fprintf(w, "\"\n\n")
-	return err
+	p.Printf("\"\n\n")
 }
 
 //-------------------------------------------------------------------------------------------------
 
-func writeIndexes(w io.Writer, index string, values []string) error {
-	_, err := fmt.Fprintf(w, "var %s = [...]uint16{0", index)
-	if err != nil {
-		return err
-	}
+func (m model) writeIndexes(p *printer, index string) {
+	p.Printf("var %s = [...]uint16{0", index)
 
 	n := 0
-	for _, s := range values {
+	for _, s := range m.values {
 		n += len(s)
-		_, err = fmt.Fprintf(w, ", %d", n)
-		if err != nil {
-			return err
-		}
+		p.Printf(", %d", n)
 	}
 
-	_, err = fmt.Fprintf(w, "}\n\n")
-	return err
+	p.Printf("}\n\n")
 }
 
 //-------------------------------------------------------------------------------------------------
 
-func writeAllItemsSlice(w io.Writer, mainType, plural string, values []string) error {
-	_, err := fmt.Fprintf(w, "var All%s = []%s{", plural, mainType)
-	if err != nil {
-		return err
-	}
+func (m model) writeAllItemsSlice(p *printer) {
+	p.Printf("// All%s lists all %d values in order.\n", m.plural, len(m.values))
+	p.Printf("var All%s = []%s{", m.plural, m.mainType)
 
 	comma := ""
-	for _, s := range values {
-		_, err = fmt.Fprintf(w, "%s%s", comma, s)
-		if err != nil {
-			return err
-		}
+	for _, s := range m.values {
+		p.Printf("%s%s", comma, s)
 		comma = ", "
 	}
 
-	_, err = fmt.Fprintf(w, "}\n")
-	return err
+	p.Printf("}\n")
 }
 
 //-------------------------------------------------------------------------------------------------
 
 const stringMethod = `
-// String returns the string representation of a %s
+// String returns the string representation of a %s.
 func (i %s) String() string {
 	o := i.Ordinal()
 	if o < 0 || o >= len(All%s) {
-		return fmt.Sprintf("%s(%%d)", i)
+		return fmt.Sprintf("%s(%s)", i)
 	}
 	return %s[%s[o]:%s[o+1]]
 }
 `
 
-func writeFuncString(w io.Writer, mainType, plural, names, indexes string) error {
-	_, err := fmt.Fprintf(w, stringMethod, mainType, mainType, plural, mainType, names, indexes, indexes)
-	return err
+func (m model) writeFuncString(p *printer, names, indexes string) {
+	placeholder := "%s"
+	switch m.baseType {
+	case "int", "uint",
+		"int8", "uint8",
+		"int16", "uint16",
+		"int32", "uint32",
+		"int64", "uint64":
+		placeholder = "%d"
+	case "float32", "float64":
+		placeholder = "%g"
+	}
+	p.Printf(stringMethod, m.mainType, m.mainType, m.plural, m.mainType, placeholder, names, indexes, indexes)
 }
 
 //-------------------------------------------------------------------------------------------------
 
 const ordinalMethodStart = `
-// Ordinal returns the ordinal number of a %s
+// Ordinal returns the ordinal number of a %s.
 func (i %s) Ordinal() int {
 	switch i {
 `
@@ -117,30 +118,24 @@ const ordinalMethodEnd = `	}
 }
 `
 
-func writeFuncOrdinal(w io.Writer, mainType string, values []string) error {
-	_, err := fmt.Fprintf(w, ordinalMethodStart, mainType, mainType)
-	if err != nil {
-		return err
+func (m model) writeFuncOrdinal(p *printer) {
+	p.Printf(ordinalMethodStart, m.mainType, m.mainType)
+
+	for i, s := range m.values {
+		p.Printf("\tcase %s:\n\t\treturn %d\n", s, i)
 	}
 
-	for i, s := range values {
-		_, err = fmt.Fprintf(w, "\tcase %s:\n\t\treturn %d\n", s, i)
-		if err != nil {
-			return err
-		}
-	}
-
-	_, err = fmt.Fprintf(w, ordinalMethodEnd)
-	return err
+	p.Printf(ordinalMethodEnd)
 }
 
 //-------------------------------------------------------------------------------------------------
 
-const parseMethod = `
+const parseMethodStart = `
 // Parse parses a string to find the corresponding %s, accepting either one of the string
 // values or an ordinal number.
-func (v *%s) Parse(s string) error {
-	ord, err := strconv.Atoi(s)
+`
+
+const parseMethodEnd = `	ord, err := strconv.Atoi(s)
 	if err == nil && 0 <= ord && ord < len(All%s) {
 		*v = All%s[ord]
 		return nil
@@ -159,26 +154,38 @@ func (v *%s) Parse(s string) error {
 }
 `
 
-func writeFuncParse(w io.Writer, mainType, plural, names, indexes string) error {
-	_, err := fmt.Fprintf(w, parseMethod, mainType, mainType, plural, plural, indexes, indexes, names, plural, mainType)
-	return err
+func (m model) writeFuncParse(p *printer, names, indexes string) {
+	p.Printf(parseMethodStart, m.mainType)
+	if m.xf != NoChange {
+		p.Printf("// The case of s does not matter.\n")
+	}
+	p.Printf("func (v *%s) Parse(s string) error {\n", m.mainType)
+	if m.xf != NoChange {
+		p.Printf("\ts = %s(s)\n", m.xf)
+	}
+	p.Printf(parseMethodEnd, m.plural, m.plural, indexes, indexes, names, m.plural, m.mainType)
 }
 
 //-------------------------------------------------------------------------------------------------
 
-const asMethod = `
+const asMethodStart = `
 // As%s parses a string to find the corresponding %s, accepting either one of the string
 // values or an ordinal number.
-func As%s(s string) (%s, error) {
+`
+
+const asMethodEnd = `func As%s(s string) (%s, error) {
 	var i = new(%s)
 	err := i.Parse(s)
 	return *i, err
 }
 `
 
-func writeFuncAs(w io.Writer, mainType, plural, names, indexes string) error {
-	_, err := fmt.Fprintf(w, asMethod, mainType, mainType, mainType, mainType, mainType)
-	return err
+func (m model) writeFuncAs(p *printer) {
+	p.Printf(asMethodStart, m.mainType, m.mainType)
+	if m.xf != NoChange {
+		p.Printf("// The case of s does not matter.\n")
+	}
+	p.Printf(asMethodEnd, m.mainType, m.mainType, m.mainType)
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -195,9 +202,8 @@ func (i *%s) UnmarshalText(text []byte) error {
 }
 `
 
-func writeMarshalText(w io.Writer, mainType string) error {
-	_, err := fmt.Fprintf(w, marshalText, mainType, mainType)
-	return err
+func (m model) writeMarshalText(p *printer) {
+	p.Printf(marshalText, m.mainType, m.mainType)
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -237,74 +243,36 @@ func (i *%s) UnmarshalJSON(text []byte) error {
 }
 `
 
-func writeMarshalJson(w io.Writer, mainType string) error {
-	_, err := fmt.Fprintf(w, marshalJson, mainType, mainType, mainType, mainType, mainType, mainType)
-	return err
+func (m model) writeMarshalJson(p *printer) {
+	p.Printf(marshalJson, m.mainType, m.mainType, m.mainType, m.mainType, m.mainType, m.mainType)
 }
 
 //-------------------------------------------------------------------------------------------------
 
-func write(w io.Writer, mainType, baseType, plural, pkg string, values []string, xf func(string) string) error {
-
-	lc := strings.ToLower(mainType)
+func (m model) write(w io.Writer) error {
+	lc := strings.ToLower(m.mainType)
 	names := fmt.Sprintf("%sEnumStrings", lc)
 	indexes := fmt.Sprintf("%sEnumIndex", lc)
 
-	err := writeHead(w, pkg)
-	if err != nil {
-		return err
-	}
+	p := &printer{w: w}
+	m.writeHead(p)
+	m.writeConst(p, names)
+	m.writeIndexes(p, indexes)
+	m.writeAllItemsSlice(p)
+	m.writeFuncString(p, names, indexes)
+	m.writeFuncOrdinal(p)
+	m.writeFuncParse(p, names, indexes)
+	m.writeFuncAs(p)
+	m.writeMarshalText(p)
+	m.writeMarshalJson(p)
 
-	err = writeConst(w, names, values, xf)
-	if err != nil {
-		return err
-	}
-
-	err = writeIndexes(w, indexes, values)
-	if err != nil {
-		return err
-	}
-
-	err = writeAllItemsSlice(w, mainType, plural, values)
-	if err != nil {
-		return err
-	}
-
-	err = writeFuncString(w, mainType, plural, names, indexes)
-	if err != nil {
-		return err
-	}
-
-	err = writeFuncOrdinal(w, mainType, values)
-	if err != nil {
-		return err
-	}
-
-	err = writeFuncParse(w, mainType, plural, names, indexes)
-	if err != nil {
-		return err
-	}
-
-	err = writeFuncAs(w, mainType, plural, names, indexes)
-	if err != nil {
-		return err
-	}
-
-	err = writeMarshalText(w, mainType)
-	if err != nil {
-		return err
-	}
-
-	err = writeMarshalJson(w, mainType)
-	if err != nil {
-		return err
+	if p.err != nil {
+		return p.err
 	}
 
 	if c, ok := w.(io.Closer); ok {
-		err = c.Close()
-		if err != nil {
-			return err
-		}
+		return c.Close()
 	}
+
 	return nil
 }

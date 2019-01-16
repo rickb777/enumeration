@@ -131,13 +131,16 @@ the `Day` type above. You will get:
  * `func (d Day) Ordinal() int`
     - Converts Day values into their ordinal numbers, i.e. the indexes indicating the order in which you declared the constants, starting from zero. These may happen to be the same as the values you chose, but need not be.
 
+ * `func (d *Day) Parse(s string) error`
+    - Converts Day values into their ordinal numbers, i.e. the indexes indicating the order in which you declared the constants, starting from zero. These may happen to be the same as the values you chose, but need not be.
+
  * `func AsDay(s string) (Day, error)`
     - Converts a string representation to a Day value, if it can. The name of this function depends on the name of your type (`AsDay` in this example).
 
  * `var AllDays = []Day{ ... }`
     - Provides all the `Day` values in a single slice. This is particularly useful if you need to iterate over them. Usually, the identifier name depends on the name of your type, but it can be overridden using `-plural`.
 
- * `encoding.TextMarshaler` and `encoding.TextUnmarshaler`
+ * `encoding.TextMarshaler`, `encoding.TextUnmarshaler`, `json.Marshaler`, `json.Unmarshaler`
     - Provides methods to satisfy these two interfaces so that your enumeration can be easily used by JSON, XML and other codecs in the standard Go library.
 
 ## Other Use Options

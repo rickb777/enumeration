@@ -1,4 +1,5 @@
 // generated code - do not edit
+// bitbucket.org/rickb777/enumeration v1.1.0
 
 package example
 
@@ -13,9 +14,10 @@ const monthEnumStrings = "JanuaryFebruaryMarchAprilMayJuneJulyAugustSeptemberOct
 
 var monthEnumIndex = [...]uint16{0, 7, 15, 20, 25, 28, 32, 36, 42, 51, 58, 66, 74}
 
+// AllMonths lists all 12 values in order.
 var AllMonths = []Month{January, February, March, April, May, June, July, August, September, October, November, December}
 
-// String returns the string representation of a Month
+// String returns the string representation of a Month.
 func (i Month) String() string {
 	o := i.Ordinal()
 	if o < 0 || o >= len(AllMonths) {
@@ -24,7 +26,7 @@ func (i Month) String() string {
 	return monthEnumStrings[monthEnumIndex[o]:monthEnumIndex[o+1]]
 }
 
-// Ordinal returns the ordinal number of a Month
+// Ordinal returns the ordinal number of a Month.
 func (i Month) Ordinal() int {
 	switch i {
 	case January:
@@ -123,6 +125,6 @@ func (i *Month) UnmarshalJSON(text []byte) error {
 	if string(text) == "null" {
 		return nil
 	}
-    s := strings.Trim(string(text), "\"")
+	s := strings.Trim(string(text), "\"")
 	return i.Parse(s)
 }

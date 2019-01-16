@@ -66,7 +66,7 @@ func scanValues(s *bufio.Scanner, mainType string) (result []string) {
 	return
 }
 
-func convert(w io.Writer, in io.Reader, input, mainType, plural, pkg string, xf func(string) string) error {
+func convert(w io.Writer, in io.Reader, input, mainType, plural, pkg string, xf Transform) error {
 	foundMainType := false
 	baseType := "int"
 	s := bufio.NewScanner(in)
@@ -83,10 +83,17 @@ func convert(w io.Writer, in io.Reader, input, mainType, plural, pkg string, xf 
 		} else if foundMainType && len(words) == 2 && words[0] == "const" && words[1] == "(" {
 			values := scanValues(s, mainType)
 			if values != nil {
-				return write(w, mainType, baseType, plural, pkg, values, xf)
+				m := model{mainType, baseType, plural, pkg, values, xf}
+				return m.write(w)
 			}
 		}
 	}
 
 	return fmt.Errorf("Failed to find %s in %s", mainType, input)
+}
+
+type model struct {
+	mainType, baseType, plural, pkg string
+	values                          []string
+	xf                              Transform
 }

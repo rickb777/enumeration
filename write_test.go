@@ -3,11 +3,13 @@ package main
 import (
 	"bytes"
 	. "github.com/onsi/gomega"
-	"strings"
 	"testing"
 )
 
-const e1 = `// generated code - do not edit
+const e0 = `// generated code - do not edit
+// bitbucket.org/rickb777/enumeration `
+
+const e1 = `
 
 package confectionary
 
@@ -24,11 +26,12 @@ const e3 = `
 
 var sweetEnumIndex = [...]uint16{0, 4, 10, 18, 24}
 
+// AllSweets lists all 4 values in order.
 var AllSweets = []Sweet{Mars, Bounty, Snickers, Kitkat}
 `
 
 const e4 = `
-// String returns the string representation of a Sweet
+// String returns the string representation of a Sweet.
 func (i Sweet) String() string {
 	o := i.Ordinal()
 	if o < 0 || o >= len(AllSweets) {
@@ -39,7 +42,7 @@ func (i Sweet) String() string {
 `
 
 const e5 = `
-// Ordinal returns the ordinal number of a Sweet
+// Ordinal returns the ordinal number of a Sweet.
 func (i Sweet) Ordinal() int {
 	switch i {
 	case Mars:
@@ -55,7 +58,7 @@ func (i Sweet) Ordinal() int {
 }
 `
 
-const e6 = `
+const e6nc = `
 // Parse parses a string to find the corresponding Sweet, accepting either one of the string
 // values or an ordinal number.
 func (v *Sweet) Parse(s string) error {
@@ -78,9 +81,45 @@ func (v *Sweet) Parse(s string) error {
 }
 `
 
-const e7 = `
+const e6lc = `
+// Parse parses a string to find the corresponding Sweet, accepting either one of the string
+// values or an ordinal number.
+// The case of s does not matter.
+func (v *Sweet) Parse(s string) error {
+	s = strings.ToLower(s)
+	ord, err := strconv.Atoi(s)
+	if err == nil && 0 <= ord && ord < len(AllSweets) {
+		*v = AllSweets[ord]
+		return nil
+	}
+	var i0 uint16 = 0
+	for j := 1; j < len(sweetEnumIndex); j++ {
+		i1 := sweetEnumIndex[j]
+		p := sweetEnumStrings[i0:i1]
+		if s == p {
+			*v = AllSweets[j-1]
+			return nil
+		}
+		i0 = i1
+	}
+	return errors.New(s + ": unrecognised Sweet")
+}
+`
+
+const e7nc = `
 // AsSweet parses a string to find the corresponding Sweet, accepting either one of the string
 // values or an ordinal number.
+func AsSweet(s string) (Sweet, error) {
+	var i = new(Sweet)
+	err := i.Parse(s)
+	return *i, err
+}
+`
+
+const e7lc = `
+// AsSweet parses a string to find the corresponding Sweet, accepting either one of the string
+// values or an ordinal number.
+// The case of s does not matter.
 func AsSweet(s string) (Sweet, error) {
 	var i = new(Sweet)
 	err := i.Parse(s)
@@ -138,7 +177,12 @@ func (i *Sweet) UnmarshalJSON(text []byte) error {
 func TestWriteFuncString(t *testing.T) {
 	RegisterTestingT(t)
 	buf := &bytes.Buffer{}
-	writeFuncString(buf, "Sweet", "Sweets", "sweetEnumStrings", "sweetEnumIndex")
+	m := model{
+		mainType: "Sweet",
+		baseType: "int",
+		plural:   "Sweets",
+	}
+	m.writeFuncString(&printer{w: buf}, "sweetEnumStrings", "sweetEnumIndex")
 	got := buf.String()
 	Ω(got).Should(Equal(e4), got)
 }
@@ -146,23 +190,48 @@ func TestWriteFuncString(t *testing.T) {
 func TestWriteFuncOrdinal(t *testing.T) {
 	RegisterTestingT(t)
 	buf := &bytes.Buffer{}
-	writeFuncOrdinal(buf, "Sweet", []string{"Mars", "Bounty", "Snickers", "Kitkat"})
+	m := model{
+		mainType: "Sweet",
+		baseType: "int",
+		plural:   "Sweets",
+		values:   []string{"Mars", "Bounty", "Snickers", "Kitkat"},
+		xf:       NoChange,
+	}
+	m.writeFuncOrdinal(&printer{w: buf})
 	got := buf.String()
 	Ω(got).Should(Equal(e5), got)
 }
 
-func TestWriteUpper(t *testing.T) {
+func TestWriteNoChange(t *testing.T) {
 	RegisterTestingT(t)
 	buf := &bytes.Buffer{}
-	write(buf, "Sweet", "int", "Sweets", "confectionary", []string{"Mars", "Bounty", "Snickers", "Kitkat"}, noop)
+	m := model{
+		mainType: "Sweet",
+		baseType: "int",
+		plural:   "Sweets",
+		pkg:      "confectionary",
+		values:   []string{"Mars", "Bounty", "Snickers", "Kitkat"},
+		xf:       NoChange,
+	}
+	err := m.write(buf)
 	got := buf.String()
-	Ω(got).Should(Equal(e1+`const sweetEnumStrings = "MarsBountySnickersKitkat"`+e3+e4+e5+e6+e7+e8+e9), got)
+	Ω(err).Should(Not(HaveOccurred()))
+	Ω(got).Should(Equal(e0+version+e1+`const sweetEnumStrings = "MarsBountySnickersKitkat"`+e3+e4+e5+e6nc+e7nc+e8+e9), got)
 }
 
 func TestWriteLower(t *testing.T) {
 	RegisterTestingT(t)
 	buf := &bytes.Buffer{}
-	write(buf, "Sweet", "int", "Sweets", "confectionary", []string{"Mars", "Bounty", "Snickers", "Kitkat"}, strings.ToLower)
+	m := model{
+		mainType: "Sweet",
+		baseType: "int",
+		plural:   "Sweets",
+		pkg:      "confectionary",
+		values:   []string{"Mars", "Bounty", "Snickers", "Kitkat"},
+		xf:       ToLower,
+	}
+	err := m.write(buf)
 	got := buf.String()
-	Ω(got).Should(Equal(e1+`const sweetEnumStrings = "marsbountysnickerskitkat"`+e3+e4+e5+e6+e7+e8+e9), got)
+	Ω(err).Should(Not(HaveOccurred()))
+	Ω(got).Should(Equal(e0+version+e1+`const sweetEnumStrings = "marsbountysnickerskitkat"`+e3+e4+e5+e6lc+e7lc+e8+e9), got)
 }

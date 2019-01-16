@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"io"
 	"os"
 	"strings"
@@ -20,6 +21,7 @@ var lowercase = flag.Bool("lc", false, "Convert strings to lowercase.")
 var uppercase = flag.Bool("uc", false, "Convert strings to uppercase.")
 var verbose = flag.Bool("v", false, "Verbose progress messages.")
 var dbg = flag.Bool("z", false, "Debug messages.")
+var showVersion = flag.Bool("version", false, "Print version number.")
 
 func choosePackage(outputFile string) string {
 	wd, err := os.Getwd()
@@ -85,11 +87,11 @@ func generate(mainType, plural string) {
 	}
 	debug("pkg=%s\n", pkg)
 
-	transform := noop
+	transform := NoChange
 	if *lowercase {
-		transform = strings.ToLower
+		transform = ToLower
 	} else if *uppercase {
-		transform = strings.ToUpper
+		transform = ToUpper
 	}
 
 	err = convert(out, in, *input1, mainType, plural, pkg, transform)
@@ -103,12 +105,13 @@ func sPtr(s string) *string {
 	return &s
 }
 
-func noop(s string) string {
-	return s
-}
-
 func main() {
 	flag.Parse()
+	if *showVersion {
+		fmt.Fprintln(os.Stderr, version)
+		os.Exit(1)
+	}
+
 	if pMainType == nil || *pMainType == "" {
 		fail("Must specify -type.")
 	}

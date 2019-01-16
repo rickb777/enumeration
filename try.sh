@@ -1,5 +1,6 @@
 #!/bin/bash -ex
-go get github.com/onsi/gomega
+unset GOPATH
+go mod download
 go test .
 go install .
 gofmt -l -w -s *.go
@@ -10,5 +11,6 @@ gofmt -l -w base.go day.go month.go
 enumeration -type Base -v -f
 enumeration -type Day -v -f
 enumeration -type Month -v -f
+enumeration -type Pet -v -f -lc
 
 go test .
