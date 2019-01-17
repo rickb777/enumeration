@@ -58,7 +58,30 @@ func (i Sweet) Ordinal() int {
 }
 `
 
-const e6nc = `
+const e6 = `
+// SweetOf returns a Sweet based on an ordinal number. This is the inverse of Ordinal.
+// If the ordinal is out of range, an invalid Sweet is returned.
+func SweetOf(i int) Sweet {
+	if 0 <= i && i < len(AllSweets) {
+		return AllSweets[i]
+	}
+	// an invalid result
+	return Mars + Bounty + Snickers + Kitkat
+}
+`
+
+const e7 = `
+// IsValid determines whether a Sweet is one of the defined constants.
+func (i Sweet) IsValid() bool {
+	switch i {
+	case Mars, Bounty, Snickers, Kitkat:
+		return true
+	}
+	return false
+}
+`
+
+const e8nc = `
 // Parse parses a string to find the corresponding Sweet, accepting either one of the string
 // values or an ordinal number.
 func (v *Sweet) Parse(s string) error {
@@ -81,7 +104,7 @@ func (v *Sweet) Parse(s string) error {
 }
 `
 
-const e6lc = `
+const e8lc = `
 // Parse parses a string to find the corresponding Sweet, accepting either one of the string
 // values or an ordinal number.
 // The case of s does not matter.
@@ -106,7 +129,7 @@ func (v *Sweet) Parse(s string) error {
 }
 `
 
-const e7nc = `
+const e9nc = `
 // AsSweet parses a string to find the corresponding Sweet, accepting either one of the string
 // values or an ordinal number.
 func AsSweet(s string) (Sweet, error) {
@@ -116,7 +139,7 @@ func AsSweet(s string) (Sweet, error) {
 }
 `
 
-const e7lc = `
+const e9lc = `
 // AsSweet parses a string to find the corresponding Sweet, accepting either one of the string
 // values or an ordinal number.
 // The case of s does not matter.
@@ -127,7 +150,7 @@ func AsSweet(s string) (Sweet, error) {
 }
 `
 
-const e8 = `
+const e10 = `
 // MarshalText converts values to a form suitable for transmission via JSON, XML etc.
 func (i Sweet) MarshalText() (text []byte, err error) {
 	return []byte(i.String()), nil
@@ -139,7 +162,7 @@ func (i *Sweet) UnmarshalText(text []byte) error {
 }
 `
 
-const e9 = `
+const e11 = `
 // SweetMarshalJSONUsingString controls whether generated JSON uses ordinals or strings. By default,
 // it is false and ordinals are used. Set it true to cause quoted strings to be used instead,
 // these being easier to read but taking more resources.
@@ -169,7 +192,7 @@ func (i *Sweet) UnmarshalJSON(text []byte) error {
 	if string(text) == "null" {
 		return nil
 	}
-    s := strings.Trim(string(text), "\"")
+	s := strings.Trim(string(text), "\"")
 	return i.Parse(s)
 }
 `
@@ -216,7 +239,7 @@ func TestWriteNoChange(t *testing.T) {
 	err := m.write(buf)
 	got := buf.String()
 	Ω(err).Should(Not(HaveOccurred()))
-	Ω(got).Should(Equal(e0+version+e1+`const sweetEnumStrings = "MarsBountySnickersKitkat"`+e3+e4+e5+e6nc+e7nc+e8+e9), got)
+	Ω(got).Should(Equal(e0+version+e1+`const sweetEnumStrings = "MarsBountySnickersKitkat"`+e3+e4+e5+e6+e7+e8nc+e9nc+e10+e11), got)
 }
 
 func TestWriteLower(t *testing.T) {
@@ -233,5 +256,5 @@ func TestWriteLower(t *testing.T) {
 	err := m.write(buf)
 	got := buf.String()
 	Ω(err).Should(Not(HaveOccurred()))
-	Ω(got).Should(Equal(e0+version+e1+`const sweetEnumStrings = "marsbountysnickerskitkat"`+e3+e4+e5+e6lc+e7lc+e8+e9), got)
+	Ω(got).Should(Equal(e0+version+e1+`const sweetEnumStrings = "marsbountysnickerskitkat"`+e3+e4+e5+e6+e7+e8lc+e9lc+e10+e11), got)
 }

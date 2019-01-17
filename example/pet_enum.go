@@ -1,5 +1,5 @@
 // generated code - do not edit
-// bitbucket.org/rickb777/enumeration v1.1.0
+// bitbucket.org/rickb777/enumeration v1.2.0
 
 package example
 
@@ -39,6 +39,25 @@ func (i Pet) Ordinal() int {
 		return 3
 	}
 	return -1
+}
+
+// PetOf returns a Pet based on an ordinal number. This is the inverse of Ordinal.
+// If the ordinal is out of range, an invalid Pet is returned.
+func PetOf(i int) Pet {
+	if 0 <= i && i < len(AllPets) {
+		return AllPets[i]
+	}
+	// an invalid result
+	return Cat + Dog + Mouse + Elephant
+}
+
+// IsValid determines whether a Pet is one of the defined constants.
+func (i Pet) IsValid() bool {
+	switch i {
+	case Cat, Dog, Mouse, Elephant:
+		return true
+	}
+	return false
 }
 
 // Parse parses a string to find the corresponding Pet, accepting either one of the string

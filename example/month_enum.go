@@ -1,5 +1,5 @@
 // generated code - do not edit
-// bitbucket.org/rickb777/enumeration v1.1.0
+// bitbucket.org/rickb777/enumeration v1.2.0
 
 package example
 
@@ -55,6 +55,27 @@ func (i Month) Ordinal() int {
 		return 11
 	}
 	return -1
+}
+
+// MonthOf returns a Month based on an ordinal number. This is the inverse of Ordinal.
+// If the ordinal is out of range, an invalid Month is returned.
+func MonthOf(i int) Month {
+	if 0 <= i && i < len(AllMonths) {
+		return AllMonths[i]
+	}
+	// an invalid result
+	return January + February + March + April + May + June + July + August + September + October + November + December
+}
+
+// IsValid determines whether a Month is one of the defined constants.
+func (i Month) IsValid() bool {
+	switch i {
+	case January, February, March, April,
+		May, June, July, August, September,
+		October, November, December:
+		return true
+	}
+	return false
 }
 
 // Parse parses a string to find the corresponding Month, accepting either one of the string

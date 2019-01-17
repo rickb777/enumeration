@@ -1,5 +1,5 @@
 // generated code - do not edit
-// bitbucket.org/rickb777/enumeration v1.1.0
+// bitbucket.org/rickb777/enumeration v1.2.0
 
 package example
 
@@ -45,6 +45,26 @@ func (i Day) Ordinal() int {
 		return 6
 	}
 	return -1
+}
+
+// DayOf returns a Day based on an ordinal number. This is the inverse of Ordinal.
+// If the ordinal is out of range, an invalid Day is returned.
+func DayOf(i int) Day {
+	if 0 <= i && i < len(AllDays) {
+		return AllDays[i]
+	}
+	// an invalid result
+	return Sunday + Monday + Tuesday + Wednesday + Thursday + Friday + Saturday
+}
+
+// IsValid determines whether a Day is one of the defined constants.
+func (i Day) IsValid() bool {
+	switch i {
+	case Sunday, Monday, Tuesday, Wednesday,
+		Thursday, Friday, Saturday:
+		return true
+	}
+	return false
 }
 
 // Parse parses a string to find the corresponding Day, accepting either one of the string

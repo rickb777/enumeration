@@ -130,6 +130,72 @@ func (m model) writeFuncOrdinal(p *printer) {
 
 //-------------------------------------------------------------------------------------------------
 
+const ofMethodStart = `
+// %sOf returns a %s based on an ordinal number. This is the inverse of Ordinal.
+// If the ordinal is out of range, an invalid %s is returned.
+func %sOf(i int) %s {
+	if 0 <= i && i < len(All%s) {
+		return All%s[i]
+	}
+	// an invalid result
+	return `
+
+const ofMethodEnd = `
+}
+`
+
+func (m model) writeFuncOf(p *printer) {
+	p.Printf(ofMethodStart, m.mainType, m.mainType, m.mainType, m.mainType, m.mainType, m.plural, m.plural)
+
+	for i, s := range m.values {
+		if i > 0 {
+			p.Printf(" + ")
+		}
+		p.Printf(s)
+	}
+
+	p.Printf(ofMethodEnd)
+}
+
+//-------------------------------------------------------------------------------------------------
+
+const isValidMethodStart = `
+// IsValid determines whether a %s is one of the defined constants.
+func (i %s) IsValid() bool {
+	switch i {
+	case `
+
+const isValidMethodEnd = `:
+		return true
+	}
+	return false
+}
+`
+
+func (m model) writeFuncIsValid(p *printer) {
+	p.Printf(isValidMethodStart, m.mainType, m.mainType)
+
+	nl := 5
+	for i, s := range m.values {
+		if i > 0 {
+			p.Printf(",")
+		}
+		nl--
+		if nl == 0 {
+			p.Printf("\n\t\t")
+			nl = 5
+		} else if i > 0 {
+			p.Printf(" ")
+		}
+		p.Printf("%s", s)
+
+	}
+
+	p.Printf(isValidMethodEnd)
+}
+
+//-------------------------------------------------------------------------------------------------
+
 const parseMethodStart = `
 // Parse parses a string to find the corresponding %s, accepting either one of the string
 // values or an ordinal number.
@@ -238,7 +304,7 @@ func (i *%s) UnmarshalJSON(text []byte) error {
 	if string(text) == "null" {
 		return nil
 	}
-    s := strings.Trim(string(text), "\"")
+	s := strings.Trim(string(text), "\"")
 	return i.Parse(s)
 }
 `
@@ -261,6 +327,8 @@ func (m model) write(w io.Writer) error {
 	m.writeAllItemsSlice(p)
 	m.writeFuncString(p, names, indexes)
 	m.writeFuncOrdinal(p)
+	m.writeFuncOf(p)
+	m.writeFuncIsValid(p)
 	m.writeFuncParse(p, names, indexes)
 	m.writeFuncAs(p)
 	m.writeMarshalText(p)

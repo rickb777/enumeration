@@ -1,5 +1,5 @@
 // generated code - do not edit
-// bitbucket.org/rickb777/enumeration v1.1.0
+// bitbucket.org/rickb777/enumeration v1.2.0
 
 package example
 
@@ -39,6 +39,25 @@ func (i Base) Ordinal() int {
 		return 3
 	}
 	return -1
+}
+
+// BaseOf returns a Base based on an ordinal number. This is the inverse of Ordinal.
+// If the ordinal is out of range, an invalid Base is returned.
+func BaseOf(i int) Base {
+	if 0 <= i && i < len(AllBases) {
+		return AllBases[i]
+	}
+	// an invalid result
+	return A + C + G + T
+}
+
+// IsValid determines whether a Base is one of the defined constants.
+func (i Base) IsValid() bool {
+	switch i {
+	case A, C, G, T:
+		return true
+	}
+	return false
 }
 
 // Parse parses a string to find the corresponding Base, accepting either one of the string
