@@ -52,10 +52,11 @@ func TestUnmarshalText(t *testing.T) {
 
 //-------------------------------------------------------------------------------------------------
 
-type Three struct {
+type Group struct {
 	B Base
 	D Day
 	M Month
+	P Pet
 }
 
 func TestMarshalJSON1(t *testing.T) {
@@ -64,11 +65,12 @@ func TestMarshalJSON1(t *testing.T) {
 	BaseMarshalJSONUsingString = false
 	DayMarshalJSONUsingString = false
 	MonthMarshalJSONUsingString = false
+	PetMarshalJSONUsingString = false
 
-	v := Three{G, Tuesday, November}
+	v := Group{G, Tuesday, November, Koala_Bear}
 	s, err := json.Marshal(v)
 	g.Expect(err).NotTo(HaveOccurred())
-	g.Expect(string(s)).Should(Equal(`{"B":2,"D":2,"M":10}`))
+	g.Expect(string(s)).Should(Equal(`{"B":2,"D":2,"M":10,"P":4}`))
 }
 
 func TestMarshalJSON2(t *testing.T) {
@@ -77,36 +79,37 @@ func TestMarshalJSON2(t *testing.T) {
 	BaseMarshalJSONUsingString = true
 	DayMarshalJSONUsingString = true
 	MonthMarshalJSONUsingString = true
+	PetMarshalJSONUsingString = true
 
-	g.Expect(G.MarshalJSON()).Should(Equal([]byte{'"', 'G', '"'}))
+	g.Expect(G.MarshalJSON()).Should(Equal([]byte{'"', 'g', '"'}))
 
-	v := Three{G, Tuesday, November}
+	v := Group{G, Tuesday, November, Koala_Bear}
 	s, err := json.Marshal(v)
 	g.Expect(err).NotTo(HaveOccurred())
-	g.Expect(string(s)).Should(Equal(`{"B":"G","D":"Tuesday","M":"November"}`))
+	g.Expect(string(s)).Should(Equal(`{"B":"g","D":"Tuesday","M":"November","P":"koala bear"}`))
 }
 
 func TestUnmarshalJSON1(t *testing.T) {
 	g := NewGomegaWithT(t)
-	s := `{"B":2,"D":2,"M":10}`
-	var v Three
+	s := `{"B":2,"D":2,"M":10,"P":4}`
+	var v Group
 	err := json.Unmarshal([]byte(s), &v)
 	g.Expect(err).NotTo(HaveOccurred())
-	g.Expect(v).Should(Equal(Three{G, Tuesday, November}))
+	g.Expect(v).Should(Equal(Group{G, Tuesday, November, Koala_Bear}))
 }
 
 func TestUnmarshalJSON2(t *testing.T) {
 	g := NewGomegaWithT(t)
-	s := `{"B":2,"D":"Tuesday","M":"November"}`
-	var v Three
+	s := `{"B":2,"D":"Tuesday","M":"November","P":"Koala Bear"}`
+	var v Group
 	err := json.Unmarshal([]byte(s), &v)
 	g.Expect(err).NotTo(HaveOccurred())
-	g.Expect(v).Should(Equal(Three{G, Tuesday, November}))
+	g.Expect(v).Should(Equal(Group{G, Tuesday, November, Koala_Bear}))
 }
 
 func TestGobEncodeAndDecode(t *testing.T) {
 	g := NewGomegaWithT(t)
-	v1 := Three{G, Tuesday, November}
+	v1 := Group{G, Tuesday, November, Koala_Bear}
 	gob.Register(v1)
 
 	// gob-encode
@@ -116,7 +119,7 @@ func TestGobEncodeAndDecode(t *testing.T) {
 	g.Expect(err).NotTo(HaveOccurred())
 
 	// gob-decode
-	var v2 Three
+	var v2 Group
 	dec := gob.NewDecoder(buf)
 	err = dec.Decode(&v2)
 	g.Expect(err).NotTo(HaveOccurred())

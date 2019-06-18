@@ -218,7 +218,7 @@ func TestWriteFuncOrdinal(t *testing.T) {
 		baseType: "int",
 		plural:   "Sweets",
 		values:   []string{"Mars", "Bounty", "Snickers", "Kitkat"},
-		xf:       NoChange,
+		xf:       nil,
 	}
 	m.writeFuncOrdinal(&printer{w: buf})
 	got := buf.String()
@@ -234,7 +234,7 @@ func TestWriteNoChange(t *testing.T) {
 		plural:   "Sweets",
 		pkg:      "confectionary",
 		values:   []string{"Mars", "Bounty", "Snickers", "Kitkat"},
-		xf:       NoChange,
+		xf:       nil,
 	}
 	err := m.write(buf)
 	got := buf.String()
@@ -251,7 +251,7 @@ func TestWriteLower(t *testing.T) {
 		plural:   "Sweets",
 		pkg:      "confectionary",
 		values:   []string{"Mars", "Bounty", "Snickers", "Kitkat"},
-		xf:       ToLower,
+		xf:       []Transform{ToLower},
 	}
 	err := m.write(buf)
 	got := buf.String()

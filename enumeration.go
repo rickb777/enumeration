@@ -19,6 +19,7 @@ var pPkg = flag.String("package", "", "Name of the output package (optional). De
 var force = flag.Bool("f", false, "Force writing the output file even if up to date (not used when piping stdin or stdout).")
 var lowercase = flag.Bool("lc", false, "Convert strings to lowercase.")
 var uppercase = flag.Bool("uc", false, "Convert strings to uppercase.")
+var unsnake = flag.Bool("unsnake", false, "Convert underscores in identifiers to spaces.")
 var verbose = flag.Bool("v", false, "Verbose progress messages.")
 var dbg = flag.Bool("z", false, "Debug messages.")
 var showVersion = flag.Bool("version", false, "Print version number.")
@@ -87,14 +88,17 @@ func generate(mainType, plural string) {
 	}
 	debug("pkg=%s\n", pkg)
 
-	transform := NoChange
+	var transforms []Transform
 	if *lowercase {
-		transform = ToLower
+		transforms = append(transforms, ToLower)
 	} else if *uppercase {
-		transform = ToUpper
+		transforms = append(transforms, ToUpper)
+	}
+	if *unsnake {
+		transforms = append(transforms, Unsnake)
 	}
 
-	err = convert(out, in, *input1, mainType, plural, pkg, transform)
+	err = convert(out, in, *input1, mainType, plural, pkg, transforms...)
 	if err != nil {
 		fail(err)
 	}

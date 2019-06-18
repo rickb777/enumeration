@@ -7,4 +7,5 @@ const (
 	Dog
 	Mouse
 	Elephant
+	Koala_Bear
 )

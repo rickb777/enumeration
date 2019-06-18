@@ -43,7 +43,10 @@ func (m model) writeConst(p *printer, names string) {
 	p.Printf("const %s = \"", names)
 
 	for _, s := range m.values {
-		p.Printf(m.xf.Func()(s))
+		for _, f := range m.xf {
+			s = f.Func()(s)
+		}
+		p.Printf(s)
 	}
 
 	p.Printf("\"\n\n")
@@ -222,12 +225,16 @@ const parseMethodEnd = `	ord, err := strconv.Atoi(s)
 
 func (m model) writeFuncParse(p *printer, names, indexes string) {
 	p.Printf(parseMethodStart, m.mainType)
-	if m.xf != NoChange {
-		p.Printf("// The case of s does not matter.\n")
+	for _, f := range m.xf {
+		if f.Info() != "" {
+			p.Printf("// %s\n", f.Info())
+		}
 	}
 	p.Printf("func (v *%s) Parse(s string) error {\n", m.mainType)
-	if m.xf != NoChange {
-		p.Printf("\ts = %s(s)\n", m.xf)
+	for _, f := range m.xf {
+		if f != NoChange {
+			p.Printf("\ts = %s\n", f)
+		}
 	}
 	p.Printf(parseMethodEnd, m.plural, m.plural, indexes, indexes, names, m.plural, m.mainType)
 }
@@ -248,8 +255,10 @@ const asMethodEnd = `func As%s(s string) (%s, error) {
 
 func (m model) writeFuncAs(p *printer) {
 	p.Printf(asMethodStart, m.mainType, m.mainType)
-	if m.xf != NoChange {
-		p.Printf("// The case of s does not matter.\n")
+	for _, f := range m.xf {
+		if f.Info() != "" {
+			p.Printf("// %s\n", f.Info())
+		}
 	}
 	p.Printf(asMethodEnd, m.mainType, m.mainType, m.mainType)
 }

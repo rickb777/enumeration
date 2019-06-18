@@ -66,7 +66,7 @@ func scanValues(s *bufio.Scanner, mainType string) (result []string) {
 	return
 }
 
-func convert(w io.Writer, in io.Reader, input, mainType, plural, pkg string, xf Transform) error {
+func convert(w io.Writer, in io.Reader, input, mainType, plural, pkg string, xf ...Transform) error {
 	foundMainType := false
 	baseType := "int"
 	s := bufio.NewScanner(in)
@@ -95,5 +95,5 @@ func convert(w io.Writer, in io.Reader, input, mainType, plural, pkg string, xf 
 type model struct {
 	mainType, baseType, plural, pkg string
 	values                          []string
-	xf                              Transform
+	xf                              []Transform
 }

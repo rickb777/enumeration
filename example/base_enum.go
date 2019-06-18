@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-const baseEnumStrings = "ACGT"
+const baseEnumStrings = "acgt"
 
 var baseEnumIndex = [...]uint16{0, 1, 2, 3, 4}
 
@@ -62,7 +62,9 @@ func (i Base) IsValid() bool {
 
 // Parse parses a string to find the corresponding Base, accepting either one of the string
 // values or an ordinal number.
+// The case of s does not matter.
 func (v *Base) Parse(s string) error {
+	s = strings.ToLower(s)
 	ord, err := strconv.Atoi(s)
 	if err == nil && 0 <= ord && ord < len(AllBases) {
 		*v = AllBases[ord]
@@ -83,6 +85,7 @@ func (v *Base) Parse(s string) error {
 
 // AsBase parses a string to find the corresponding Base, accepting either one of the string
 // values or an ordinal number.
+// The case of s does not matter.
 func AsBase(s string) (Base, error) {
 	var i = new(Base)
 	err := i.Parse(s)

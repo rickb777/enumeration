@@ -10,12 +10,12 @@ import (
 	"strings"
 )
 
-const petEnumStrings = "catdogmouseelephant"
+const petEnumStrings = "catdogmouseelephantkoala bear"
 
-var petEnumIndex = [...]uint16{0, 3, 6, 11, 19}
+var petEnumIndex = [...]uint16{0, 3, 6, 11, 19, 29}
 
-// AllPets lists all 4 values in order.
-var AllPets = []Pet{Cat, Dog, Mouse, Elephant}
+// AllPets lists all 5 values in order.
+var AllPets = []Pet{Cat, Dog, Mouse, Elephant, Koala_Bear}
 
 // String returns the string representation of a Pet.
 func (i Pet) String() string {
@@ -37,6 +37,8 @@ func (i Pet) Ordinal() int {
 		return 2
 	case Elephant:
 		return 3
+	case Koala_Bear:
+		return 4
 	}
 	return -1
 }
@@ -48,13 +50,14 @@ func PetOf(i int) Pet {
 		return AllPets[i]
 	}
 	// an invalid result
-	return Cat + Dog + Mouse + Elephant
+	return Cat + Dog + Mouse + Elephant + Koala_Bear
 }
 
 // IsValid determines whether a Pet is one of the defined constants.
 func (i Pet) IsValid() bool {
 	switch i {
-	case Cat, Dog, Mouse, Elephant:
+	case Cat, Dog, Mouse, Elephant,
+		Koala_Bear:
 		return true
 	}
 	return false
@@ -65,6 +68,7 @@ func (i Pet) IsValid() bool {
 // The case of s does not matter.
 func (v *Pet) Parse(s string) error {
 	s = strings.ToLower(s)
+	s = strings.ReplaceAll(s, "_", " ")
 	ord, err := strconv.Atoi(s)
 	if err == nil && 0 <= ord && ord < len(AllPets) {
 		*v = AllPets[ord]
