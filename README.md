@@ -1,5 +1,8 @@
 # Enumerations for Go
 
+[![Build Status](https://api.travis-ci.org/rickb777/enumeration.svg?branch=master)](https://travis-ci.org/rickb777/enumeration)
+[![Issues](https://img.shields.io/github/issues/rickb777/enumeration.svg)](https://github.com/rickb777/enumeration/issues)
+
 * Make simple Go enumerations work well for you using this easy-to-use code generator.
 
 You could use stringer [here](https://github.com/golang/tools) or a related alterative
@@ -18,7 +21,7 @@ It will not handle C-style comments though, so these must not be present. The no
 ## First, Install
 
 ```
-go get bitbucket.org/rickb777/enumeration
+go get github.com/rickb777/enumeration
 ```
 You should see that the `enumeration` binary is now in the bin folder on your GOPATH. Make sure this is
 on your PATH so it can be run.
