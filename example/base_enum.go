@@ -1,5 +1,5 @@
 // generated code - do not edit
-// bitbucket.org/rickb777/enumeration v1.2.0
+// bitbucket.org/rickb777/enumeration v1.3.1
 
 package example
 
