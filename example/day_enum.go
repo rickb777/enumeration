@@ -19,7 +19,7 @@ var dayEnumIndex = [...]uint16{0, 6, 12, 19, 28, 36, 42, 50}
 var AllDays = []Day{Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday}
 
 // AllDayEnums lists all 7 values in order.
-var AllDayEnums = []enum.Enum{Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday}
+var AllDayEnums = enum.Enums{Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday}
 
 // String returns the string representation of a Day.
 func (i Day) String() string {

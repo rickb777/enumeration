@@ -19,7 +19,7 @@ var petEnumIndex = [...]uint16{0, 3, 6, 11, 19, 29}
 var AllPets = []Pet{Cat, Dog, Mouse, Elephant, Koala_Bear}
 
 // AllPetEnums lists all 5 values in order.
-var AllPetEnums = []enum.Enum{Cat, Dog, Mouse, Elephant, Koala_Bear}
+var AllPetEnums = enum.Enums{Cat, Dog, Mouse, Elephant, Koala_Bear}
 
 // String returns the string representation of a Pet.
 func (i Pet) String() string {

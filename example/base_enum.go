@@ -19,7 +19,7 @@ var baseEnumIndex = [...]uint16{0, 1, 2, 3, 4}
 var AllBases = []Base{A, C, G, T}
 
 // AllBaseEnums lists all 4 values in order.
-var AllBaseEnums = []enum.Enum{A, C, G, T}
+var AllBaseEnums = enum.Enums{A, C, G, T}
 
 // String returns the string representation of a Base.
 func (i Base) String() string {

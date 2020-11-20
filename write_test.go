@@ -35,7 +35,7 @@ var sweetEnumIndex = [...]uint16{0, 4, 10, 18, 24}
 var AllSweets = []Sweet{Mars, Bounty, Snickers, Kitkat}
 
 // AllSweetEnums lists all 4 values in order.
-var AllSweetEnums = []enum.Enum{Mars, Bounty, Snickers, Kitkat}
+var AllSweetEnums = enum.Enums{Mars, Bounty, Snickers, Kitkat}
 `
 
 const e4 = `

@@ -70,7 +70,7 @@ func (m model) writeIndexes(p *printer, index string) {
 
 func (m model) writeAllItemsSlice(p *printer, name, mainType string) {
 	p.Printf("\n// All%s lists all %d values in order.\n", name, len(m.values))
-	p.Printf("var All%s = []%s{", name, mainType)
+	p.Printf("var All%s = %s{", name, mainType)
 
 	comma := ""
 	for _, s := range m.values {
@@ -333,8 +333,8 @@ func (m model) write(w io.Writer) error {
 	m.writeHead(p)
 	m.writeConst(p, names)
 	m.writeIndexes(p, indexes)
-	m.writeAllItemsSlice(p, m.plural, m.mainType)
-	m.writeAllItemsSlice(p, m.mainType+"Enums", "enum.Enum")
+	m.writeAllItemsSlice(p, m.plural, "[]"+m.mainType)
+	m.writeAllItemsSlice(p, m.mainType+"Enums", "enum.Enums")
 	m.writeFuncString(p, names, indexes)
 	m.writeFuncOrdinal(p)
 	m.writeFuncOf(p)

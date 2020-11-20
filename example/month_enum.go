@@ -19,7 +19,7 @@ var monthEnumIndex = [...]uint16{0, 7, 15, 20, 25, 28, 32, 36, 42, 51, 58, 66, 7
 var AllMonths = []Month{January, February, March, April, May, June, July, August, September, October, November, December}
 
 // AllMonthEnums lists all 12 values in order.
-var AllMonthEnums = []enum.Enum{January, February, March, April, May, June, July, August, September, October, November, December}
+var AllMonthEnums = enum.Enums{January, February, March, April, May, June, July, August, September, October, November, December}
 
 // String returns the string representation of a Month.
 func (i Month) String() string {
