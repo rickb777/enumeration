@@ -1,6 +1,7 @@
 # Enumerations for Go
 
 [![Build Status](https://api.travis-ci.org/rickb777/enumeration.svg?branch=master)](https://travis-ci.org/rickb777/enumeration/builds)
+[![GoDoc](https://img.shields.io/badge/api-Godoc-blue.svg)](https://pkg.go.dev/github.com/rickb777/enumeration/enum)
 [![Issues](https://img.shields.io/github/issues/rickb777/enumeration.svg)](https://github.com/rickb777/enumeration/issues)
 
 * Make simple Go enumerations work well for you using this easy-to-use code generator.
