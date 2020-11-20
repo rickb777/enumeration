@@ -7,7 +7,7 @@ import (
 )
 
 const e0 = `// generated code - do not edit
-// bitbucket.org/rickb777/enumeration `
+// github.com/rickb777/enumeration `
 
 const e1 = `
 
@@ -18,9 +18,14 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"github.com/rickb777/enumeration/enum"
 )
 
 `
+
+const e2nc = `const sweetEnumStrings = "MarsBountySnickersKitkat"`
+
+const e2lc = `const sweetEnumStrings = "marsbountysnickerskitkat"`
 
 const e3 = `
 
@@ -28,6 +33,9 @@ var sweetEnumIndex = [...]uint16{0, 4, 10, 18, 24}
 
 // AllSweets lists all 4 values in order.
 var AllSweets = []Sweet{Mars, Bounty, Snickers, Kitkat}
+
+// AllSweetEnums lists all 4 values in order.
+var AllSweetEnums = []enum.Enum{Mars, Bounty, Snickers, Kitkat}
 `
 
 const e4 = `
@@ -207,7 +215,7 @@ func TestWriteFuncString(t *testing.T) {
 	}
 	m.writeFuncString(&printer{w: buf}, "sweetEnumStrings", "sweetEnumIndex")
 	got := buf.String()
-	Ω(got).Should(Equal(e4), got)
+	Ω(got).Should(Equal(e4))
 }
 
 func TestWriteFuncOrdinal(t *testing.T) {
@@ -222,7 +230,7 @@ func TestWriteFuncOrdinal(t *testing.T) {
 	}
 	m.writeFuncOrdinal(&printer{w: buf})
 	got := buf.String()
-	Ω(got).Should(Equal(e5), got)
+	Ω(got).Should(Equal(e5))
 }
 
 func TestWriteNoChange(t *testing.T) {
@@ -239,7 +247,7 @@ func TestWriteNoChange(t *testing.T) {
 	err := m.write(buf)
 	got := buf.String()
 	Ω(err).Should(Not(HaveOccurred()))
-	Ω(got).Should(Equal(e0+version+e1+`const sweetEnumStrings = "MarsBountySnickersKitkat"`+e3+e4+e5+e6+e7+e8nc+e9nc+e10+e11), got)
+	Ω(got).Should(Equal(e0+version+e1+e2nc+e3+e4+e5+e6+e7+e8nc+e9nc+e10+e11), got)
 }
 
 func TestWriteLower(t *testing.T) {
@@ -256,5 +264,5 @@ func TestWriteLower(t *testing.T) {
 	err := m.write(buf)
 	got := buf.String()
 	Ω(err).Should(Not(HaveOccurred()))
-	Ω(got).Should(Equal(e0+version+e1+`const sweetEnumStrings = "marsbountysnickerskitkat"`+e3+e4+e5+e6+e7+e8lc+e9lc+e10+e11), got)
+	Ω(got).Should(Equal(e0+version+e1+e2lc+e3+e4+e5+e6+e7+e8lc+e9lc+e10+e11), got)
 }

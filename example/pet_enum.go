@@ -1,11 +1,12 @@
 // generated code - do not edit
-// bitbucket.org/rickb777/enumeration v1.4.1
+// github.com/rickb777/enumeration v1.6.0
 
 package example
 
 import (
 	"errors"
 	"fmt"
+	"github.com/rickb777/enumeration/enum"
 	"strconv"
 	"strings"
 )
@@ -16,6 +17,9 @@ var petEnumIndex = [...]uint16{0, 3, 6, 11, 19, 29}
 
 // AllPets lists all 5 values in order.
 var AllPets = []Pet{Cat, Dog, Mouse, Elephant, Koala_Bear}
+
+// AllPetEnums lists all 5 values in order.
+var AllPetEnums = []enum.Enum{Cat, Dog, Mouse, Elephant, Koala_Bear}
 
 // String returns the string representation of a Pet.
 func (i Pet) String() string {

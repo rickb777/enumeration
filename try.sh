@@ -1,7 +1,6 @@
 #!/bin/bash -ex
 unset GOPATH
 go mod download
-go test .
 go install .
 gofmt -l -w -s *.go
 
@@ -13,4 +12,5 @@ enumeration -type Day -v -f
 enumeration -type Month -v -f
 enumeration -type Pet -v -f -unsnake -lc
 
-go test .
+cd ..
+go test ./...

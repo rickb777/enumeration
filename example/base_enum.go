@@ -1,11 +1,12 @@
 // generated code - do not edit
-// bitbucket.org/rickb777/enumeration v1.4.1
+// github.com/rickb777/enumeration v1.6.0
 
 package example
 
 import (
 	"errors"
 	"fmt"
+	"github.com/rickb777/enumeration/enum"
 	"strconv"
 	"strings"
 )
@@ -16,6 +17,9 @@ var baseEnumIndex = [...]uint16{0, 1, 2, 3, 4}
 
 // AllBases lists all 4 values in order.
 var AllBases = []Base{A, C, G, T}
+
+// AllBaseEnums lists all 4 values in order.
+var AllBaseEnums = []enum.Enum{A, C, G, T}
 
 // String returns the string representation of a Base.
 func (i Base) String() string {

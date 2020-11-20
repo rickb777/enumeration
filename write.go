@@ -20,7 +20,7 @@ func (p *printer) Printf(message string, args ...interface{}) {
 //-------------------------------------------------------------------------------------------------
 
 const head = `// generated code - do not edit
-// bitbucket.org/rickb777/enumeration %s
+// github.com/rickb777/enumeration %s
 
 package %s
 
@@ -29,8 +29,8 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"github.com/rickb777/enumeration/enum"
 )
-
 `
 
 func (m model) writeHead(p *printer) {
@@ -40,7 +40,7 @@ func (m model) writeHead(p *printer) {
 //-------------------------------------------------------------------------------------------------
 
 func (m model) writeConst(p *printer, names string) {
-	p.Printf("const %s = \"", names)
+	p.Printf("\nconst %s = \"", names)
 
 	for _, s := range m.values {
 		for _, f := range m.xf {
@@ -49,13 +49,13 @@ func (m model) writeConst(p *printer, names string) {
 		p.Printf(s)
 	}
 
-	p.Printf("\"\n\n")
+	p.Printf("\"\n")
 }
 
 //-------------------------------------------------------------------------------------------------
 
 func (m model) writeIndexes(p *printer, index string) {
-	p.Printf("var %s = [...]uint16{0", index)
+	p.Printf("\nvar %s = [...]uint16{0", index)
 
 	n := 0
 	for _, s := range m.values {
@@ -63,14 +63,14 @@ func (m model) writeIndexes(p *printer, index string) {
 		p.Printf(", %d", n)
 	}
 
-	p.Printf("}\n\n")
+	p.Printf("}\n")
 }
 
 //-------------------------------------------------------------------------------------------------
 
-func (m model) writeAllItemsSlice(p *printer) {
-	p.Printf("// All%s lists all %d values in order.\n", m.plural, len(m.values))
-	p.Printf("var All%s = []%s{", m.plural, m.mainType)
+func (m model) writeAllItemsSlice(p *printer, name, mainType string) {
+	p.Printf("\n// All%s lists all %d values in order.\n", name, len(m.values))
+	p.Printf("var All%s = []%s{", name, mainType)
 
 	comma := ""
 	for _, s := range m.values {
@@ -333,7 +333,8 @@ func (m model) write(w io.Writer) error {
 	m.writeHead(p)
 	m.writeConst(p, names)
 	m.writeIndexes(p, indexes)
-	m.writeAllItemsSlice(p)
+	m.writeAllItemsSlice(p, m.plural, m.mainType)
+	m.writeAllItemsSlice(p, m.mainType+"Enums", "enum.Enum")
 	m.writeFuncString(p, names, indexes)
 	m.writeFuncOrdinal(p)
 	m.writeFuncOf(p)

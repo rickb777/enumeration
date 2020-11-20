@@ -1,11 +1,12 @@
 // generated code - do not edit
-// bitbucket.org/rickb777/enumeration v1.4.1
+// github.com/rickb777/enumeration v1.6.0
 
 package example
 
 import (
 	"errors"
 	"fmt"
+	"github.com/rickb777/enumeration/enum"
 	"strconv"
 	"strings"
 )
@@ -16,6 +17,9 @@ var dayEnumIndex = [...]uint16{0, 6, 12, 19, 28, 36, 42, 50}
 
 // AllDays lists all 7 values in order.
 var AllDays = []Day{Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday}
+
+// AllDayEnums lists all 7 values in order.
+var AllDayEnums = []enum.Enum{Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday}
 
 // String returns the string representation of a Day.
 func (i Day) String() string {

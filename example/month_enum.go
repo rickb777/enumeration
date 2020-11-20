@@ -1,11 +1,12 @@
 // generated code - do not edit
-// bitbucket.org/rickb777/enumeration v1.4.1
+// github.com/rickb777/enumeration v1.6.0
 
 package example
 
 import (
 	"errors"
 	"fmt"
+	"github.com/rickb777/enumeration/enum"
 	"strconv"
 	"strings"
 )
@@ -16,6 +17,9 @@ var monthEnumIndex = [...]uint16{0, 7, 15, 20, 25, 28, 32, 36, 42, 51, 58, 66, 7
 
 // AllMonths lists all 12 values in order.
 var AllMonths = []Month{January, February, March, April, May, June, July, August, September, October, November, December}
+
+// AllMonthEnums lists all 12 values in order.
+var AllMonthEnums = []enum.Enum{January, February, March, April, May, June, July, August, September, October, November, December}
 
 // String returns the string representation of a Month.
 func (i Month) String() string {
