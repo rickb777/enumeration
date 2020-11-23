@@ -35,7 +35,7 @@ var sweetEnumIndex = [...]uint16{0, 4, 10, 18, 24}
 var AllSweets = []Sweet{Mars, Bounty, Snickers, Kitkat}
 
 // AllSweetEnums lists all 4 values in order.
-var AllSweetEnums = enum.Enums{Mars, Bounty, Snickers, Kitkat}
+var AllSweetEnums = enum.IntEnums{Mars, Bounty, Snickers, Kitkat}
 `
 
 const e4 = `
@@ -67,6 +67,14 @@ func (i Sweet) Ordinal() int {
 `
 
 const e6 = `
+// Int returns the int value. This is not necessarily the same as the ordinal.
+// It serves to facilitate polymorphism (see enum.IntEnum).
+func (i Sweet) Int() int {
+	return int(i)
+}
+`
+
+const e7 = `
 // SweetOf returns a Sweet based on an ordinal number. This is the inverse of Ordinal.
 // If the ordinal is out of range, an invalid Sweet is returned.
 func SweetOf(i int) Sweet {
@@ -78,7 +86,7 @@ func SweetOf(i int) Sweet {
 }
 `
 
-const e7 = `
+const e8 = `
 // IsValid determines whether a Sweet is one of the defined constants.
 func (i Sweet) IsValid() bool {
 	switch i {
@@ -89,7 +97,7 @@ func (i Sweet) IsValid() bool {
 }
 `
 
-const e8nc = `
+const e9nc = `
 // Parse parses a string to find the corresponding Sweet, accepting either one of the string
 // values or an ordinal number.
 func (v *Sweet) Parse(s string) error {
@@ -112,7 +120,7 @@ func (v *Sweet) Parse(s string) error {
 }
 `
 
-const e8lc = `
+const e9lc = `
 // Parse parses a string to find the corresponding Sweet, accepting either one of the string
 // values or an ordinal number.
 // The case of s does not matter.
@@ -137,7 +145,7 @@ func (v *Sweet) Parse(s string) error {
 }
 `
 
-const e9nc = `
+const e10nc = `
 // AsSweet parses a string to find the corresponding Sweet, accepting either one of the string
 // values or an ordinal number.
 func AsSweet(s string) (Sweet, error) {
@@ -147,7 +155,7 @@ func AsSweet(s string) (Sweet, error) {
 }
 `
 
-const e9lc = `
+const e10lc = `
 // AsSweet parses a string to find the corresponding Sweet, accepting either one of the string
 // values or an ordinal number.
 // The case of s does not matter.
@@ -158,7 +166,7 @@ func AsSweet(s string) (Sweet, error) {
 }
 `
 
-const e10 = `
+const e11 = `
 // MarshalText converts values to a form suitable for transmission via JSON, XML etc.
 func (i Sweet) MarshalText() (text []byte, err error) {
 	return []byte(i.String()), nil
@@ -170,7 +178,7 @@ func (i *Sweet) UnmarshalText(text []byte) error {
 }
 `
 
-const e11 = `
+const e12 = `
 // SweetMarshalJSONUsingString controls whether generated JSON uses ordinals or strings. By default,
 // it is false and ordinals are used. Set it true to cause quoted strings to be used instead,
 // these being easier to read but taking more resources.
@@ -247,7 +255,7 @@ func TestWriteNoChange(t *testing.T) {
 	err := m.write(buf)
 	got := buf.String()
 	Ω(err).Should(Not(HaveOccurred()))
-	Ω(got).Should(Equal(e0+version+e1+e2nc+e3+e4+e5+e6+e7+e8nc+e9nc+e10+e11), got)
+	Ω(got).Should(Equal(e0+version+e1+e2nc+e3+e4+e5+e6+e7+e8+e9nc+e10nc+e11+e12), got)
 }
 
 func TestWriteLower(t *testing.T) {
@@ -264,5 +272,5 @@ func TestWriteLower(t *testing.T) {
 	err := m.write(buf)
 	got := buf.String()
 	Ω(err).Should(Not(HaveOccurred()))
-	Ω(got).Should(Equal(e0+version+e1+e2lc+e3+e4+e5+e6+e7+e8lc+e9lc+e10+e11), got)
+	Ω(got).Should(Equal(e0+version+e1+e2lc+e3+e4+e5+e6+e7+e8+e9lc+e10lc+e11+e12), got)
 }

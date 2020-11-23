@@ -19,7 +19,7 @@ var petEnumIndex = [...]uint16{0, 3, 6, 11, 19, 29}
 var AllPets = []Pet{Cat, Dog, Mouse, Elephant, Koala_Bear}
 
 // AllPetEnums lists all 5 values in order.
-var AllPetEnums = enum.Enums{Cat, Dog, Mouse, Elephant, Koala_Bear}
+var AllPetEnums = enum.IntEnums{Cat, Dog, Mouse, Elephant, Koala_Bear}
 
 // String returns the string representation of a Pet.
 func (i Pet) String() string {
@@ -45,6 +45,12 @@ func (i Pet) Ordinal() int {
 		return 4
 	}
 	return -1
+}
+
+// Int returns the int value. This is not necessarily the same as the ordinal.
+// It serves to facilitate polymorphism (see enum.IntEnum).
+func (i Pet) Int() int {
+	return int(i)
 }
 
 // PetOf returns a Pet based on an ordinal number. This is the inverse of Ordinal.

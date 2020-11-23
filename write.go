@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"go/types"
 	"io"
 	"strings"
 )
@@ -68,9 +69,9 @@ func (m model) writeIndexes(p *printer, index string) {
 
 //-------------------------------------------------------------------------------------------------
 
-func (m model) writeAllItemsSlice(p *printer, name, mainType string) {
+func (m model) doWriteAllItemsSlice(p *printer, name, enumsType string) {
 	p.Printf("\n// All%s lists all %d values in order.\n", name, len(m.values))
-	p.Printf("var All%s = %s{", name, mainType)
+	p.Printf("var All%s = %s{", name, enumsType)
 
 	comma := ""
 	for _, s := range m.values {
@@ -79,6 +80,20 @@ func (m model) writeAllItemsSlice(p *printer, name, mainType string) {
 	}
 
 	p.Printf("}\n")
+}
+
+func (m model) writeAllItemsSlice(p *printer) {
+	m.doWriteAllItemsSlice(p, m.plural, "[]"+m.mainType)
+
+	enumsType := "enum.Enums"
+	switch m.BaseKind() {
+	case types.Int:
+		enumsType = "enum.IntEnums"
+	case types.Float64:
+		enumsType = "enum.FloatEnums"
+	}
+
+	m.doWriteAllItemsSlice(p, m.mainType+"Enums", enumsType)
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -96,14 +111,10 @@ func (i %s) String() string {
 
 func (m model) writeFuncString(p *printer, names, indexes string) {
 	placeholder := "%s"
-	switch m.baseType {
-	case "int", "uint",
-		"int8", "uint8",
-		"int16", "uint16",
-		"int32", "uint32",
-		"int64", "uint64":
+	switch m.BaseKind() {
+	case types.Int:
 		placeholder = "%d"
-	case "float32", "float64":
+	case types.Float64:
 		placeholder = "%g"
 	}
 	p.Printf(stringMethod, m.mainType, m.mainType, m.plural, m.mainType, placeholder, names, indexes, indexes)
@@ -129,6 +140,29 @@ func (m model) writeFuncOrdinal(p *printer) {
 	}
 
 	p.Printf(ordinalMethodEnd)
+}
+
+//-------------------------------------------------------------------------------------------------
+
+const valueMethod = `
+// %s returns the %s value. This is not necessarily the same as the ordinal.
+// It serves to facilitate polymorphism (see enum.%sEnum).
+func (i %s) %s() %s {
+	return %s(i)
+}
+`
+
+func (m model) writeFuncValue(p *printer) {
+	var name, base string
+	switch m.BaseKind() {
+	case types.Int:
+		name = "Int"
+		base = "int"
+	case types.Float64:
+		name = "Float"
+		base = "float64"
+	}
+	p.Printf(valueMethod, name, base, name, m.mainType, name, base, base)
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -333,10 +367,10 @@ func (m model) write(w io.Writer) error {
 	m.writeHead(p)
 	m.writeConst(p, names)
 	m.writeIndexes(p, indexes)
-	m.writeAllItemsSlice(p, m.plural, "[]"+m.mainType)
-	m.writeAllItemsSlice(p, m.mainType+"Enums", "enum.Enums")
+	m.writeAllItemsSlice(p)
 	m.writeFuncString(p, names, indexes)
 	m.writeFuncOrdinal(p)
+	m.writeFuncValue(p)
 	m.writeFuncOf(p)
 	m.writeFuncIsValid(p)
 	m.writeFuncParse(p, names, indexes)

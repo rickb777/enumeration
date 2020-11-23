@@ -23,6 +23,15 @@ func TestOrdinal(t *testing.T) {
 	g.Expect(numberOfDays).Should(Equal(7))
 }
 
+func TestValue(t *testing.T) {
+	g := NewGomegaWithT(t)
+	g.Expect(int(Sunday)).Should(Equal(1))
+	g.Expect(Sunday.Ordinal(), 0)
+	g.Expect(int(Monday)).Should(Equal(2))
+	g.Expect(Monday.Ordinal(), 1)
+	g.Expect(numberOfDays).Should(Equal(7))
+}
+
 func TestAllDays(t *testing.T) {
 	g := NewGomegaWithT(t)
 	g.Expect(AllDays[0]).Should(Equal(Sunday))

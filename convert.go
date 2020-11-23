@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"go/types"
 	"io"
 	"strings"
 )
@@ -96,4 +97,19 @@ type model struct {
 	mainType, baseType, plural, pkg string
 	values                          []string
 	xf                              []Transform
+}
+
+func (m model) BaseKind() types.BasicKind {
+	var kind types.BasicKind
+	switch m.baseType {
+	case "int", "uint",
+		"int8", "uint8",
+		"int16", "uint16",
+		"int32", "uint32",
+		"int64", "uint64":
+		kind = types.Int
+	case "float32", "float64":
+		kind = types.Float64
+	}
+	return kind
 }
