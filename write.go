@@ -22,9 +22,9 @@ func (p *printer) Printf(message string, args ...interface{}) {
 //-------------------------------------------------------------------------------------------------
 
 const head = `// generated code - do not edit
-// github.com/rickb777/enumeration {{.Version}}
+// github.com/rickb777/enumeration <<.Version>>
 
-package {{.Pkg}}
+package <<.Pkg>>
 
 import (
 	"errors"
@@ -70,17 +70,15 @@ func (m model) writeIndexes(p *printer, index string) {
 
 //-------------------------------------------------------------------------------------------------
 
+const allItems = `
+// All<<.S1>> lists all <<len .Values>> values in order.
+var All<<.S1>> = <<.S2>>{<<.ValuesJoined>>}
+`
+
 func (m model) doWriteAllItemsSlice(p *printer, name, enumsType string) {
-	p.Printf("\n// All%s lists all %d values in order.\n", name, len(m.Values))
-	p.Printf("var All%s = %s{", name, enumsType)
-
-	comma := ""
-	for _, s := range m.Values {
-		p.Printf("%s%s", comma, s)
-		comma = ", "
-	}
-
-	p.Printf("}\n")
+	m.S1 = name
+	m.S2 = enumsType
+	m.execTemplate(p, allItems)
 }
 
 func (m model) writeAllItemsSlice(p *printer) {
@@ -100,13 +98,13 @@ func (m model) writeAllItemsSlice(p *printer) {
 //-------------------------------------------------------------------------------------------------
 
 const stringMethod = `
-// String returns the string representation of a {{.MainType}}.
-func (i {{.MainType}}) String() string {
+// String returns the string representation of a <<.MainType>>.
+func (i <<.MainType>>) String() string {
 	o := i.Ordinal()
-	if o < 0 || o >= len(All{{.Plural}}) {
-		return fmt.Sprintf("{{.MainType}}({{.Placeholder}})", i)
+	if o < 0 || o >= len(All<<.Plural>>) {
+		return fmt.Sprintf("<<.MainType>>(<<.Placeholder>>)", i)
 	}
-	return {{.LcType}}EnumStrings[{{.LcType}}EnumIndex[o]:{{.LcType}}EnumIndex[o+1]]
+	return <<.LcType>>EnumStrings[<<.LcType>>EnumIndex[o]:<<.LcType>>EnumIndex[o+1]]
 }
 `
 
@@ -139,10 +137,10 @@ func (m model) writeFuncOrdinal(p *printer) {
 //-------------------------------------------------------------------------------------------------
 
 const valueMethod = `
-// {{.BaseApproxUC}} returns the {{.BaseApproxLC}} value. This is not necessarily the same as the ordinal.
-// It serves to facilitate polymorphism (see enum.{{.BaseApproxUC}}Enum).
-func (i {{.MainType}}) {{.BaseApproxUC}}() {{.BaseApproxLC}} {
-	return {{.BaseApproxLC}}(i)
+// <<.BaseApproxUC>> returns the <<.BaseApproxLC>> value. This is not necessarily the same as the ordinal.
+// It serves to facilitate polymorphism (see enum.<<.BaseApproxUC>>Enum).
+func (i <<.MainType>>) <<.BaseApproxUC>>() <<.BaseApproxLC>> {
+	return <<.BaseApproxLC>>(i)
 }
 `
 
@@ -286,25 +284,25 @@ func (m model) writeFuncAs(p *printer) {
 
 const marshalJson = `
 // MarshalText converts values to a form suitable for transmission via JSON, XML etc.
-func (i {{.MainType}}) MarshalText() (text []byte, err error) {
+func (i <<.MainType>>) MarshalText() (text []byte, err error) {
 	return []byte(i.String()), nil
 }
 
 // UnmarshalText converts transmitted values to ordinary values.
-func (i *{{.MainType}}) UnmarshalText(text []byte) error {
+func (i *<<.MainType>>) UnmarshalText(text []byte) error {
 	return i.Parse(string(text))
 }
 
-// {{.MainType}}MarshalJSONUsingString controls whether generated JSON uses ordinals or strings. By default,
+// <<.MainType>>MarshalJSONUsingString controls whether generated JSON uses ordinals or strings. By default,
 // it is false and ordinals are used. Set it true to cause quoted strings to be used instead,
 // these being easier to read but taking more resources.
-var {{.MainType}}MarshalJSONUsingString = false
+var <<.MainType>>MarshalJSONUsingString = false
 
 // MarshalJSON converts values to bytes suitable for transmission via JSON. By default, the
 // ordinal integer is emitted, but a quoted string is emitted instead if
-// {{.MainType}}MarshalJSONUsingString is true.
-func (i {{.MainType}}) MarshalJSON() ([]byte, error) {
-	if {{.MainType}}MarshalJSONUsingString {
+// <<.MainType>>MarshalJSONUsingString is true.
+func (i <<.MainType>>) MarshalJSON() ([]byte, error) {
+	if <<.MainType>>MarshalJSONUsingString {
 		s := []byte(i.String())
 		b := make([]byte, len(s)+2)
 		b[0] = '"'
@@ -319,7 +317,7 @@ func (i {{.MainType}}) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON converts transmitted JSON values to ordinary values. It allows both
 // ordinals and strings to represent the values.
-func (i *{{.MainType}}) UnmarshalJSON(text []byte) error {
+func (i *<<.MainType>>) UnmarshalJSON(text []byte) error {
 	if len(text) >= 2 && text[0] == '"' && text[len(text)-1] == '"' {
 		s := string(text[1:len(text)-1])
 		return i.Parse(s)
@@ -371,7 +369,7 @@ func (m model) write(w io.Writer) error {
 }
 
 func (m model) execTemplate(p *printer, tpl string) {
-	tmpl, err := template.New("t").Parse(tpl)
+	tmpl, err := template.New("t").Delims("<<", ">>").Parse(tpl)
 	if err != nil {
 		panic(err)
 	}

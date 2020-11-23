@@ -107,6 +107,7 @@ type model struct {
 	Plural, Pkg, Version       string
 	Values                     []string
 	XF                         []Transformer
+	S1, S2                     string
 }
 
 func (m model) BaseApproxLC() string {
@@ -152,4 +153,8 @@ func (m model) Placeholder() string {
 		return "%g"
 	}
 	return "%s"
+}
+
+func (m model) ValuesJoined() string {
+	return strings.Join(m.Values, ", ")
 }
