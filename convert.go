@@ -67,7 +67,7 @@ func scanValues(s *bufio.Scanner, mainType string) (result []string) {
 	return
 }
 
-func convert(w io.Writer, in io.Reader, input, mainType, plural, pkg string, xf ...Transform) error {
+func convert(w io.Writer, in io.Reader, input, mainType, plural, pkg string, xf ...Transformer) error {
 	foundMainType := false
 	baseType := "int"
 	s := bufio.NewScanner(in)
@@ -84,7 +84,16 @@ func convert(w io.Writer, in io.Reader, input, mainType, plural, pkg string, xf 
 		} else if foundMainType && len(words) == 2 && words[0] == "const" && words[1] == "(" {
 			values := scanValues(s, mainType)
 			if values != nil {
-				m := model{mainType, baseType, plural, pkg, values, xf}
+				m := model{
+					MainType: mainType,
+					LcType:   strings.ToLower(mainType),
+					BaseType: baseType,
+					Plural:   plural,
+					Pkg:      pkg,
+					Version:  version,
+					Values:   values,
+					XF:       xf,
+				}
 				return m.write(w)
 			}
 		}
@@ -94,14 +103,35 @@ func convert(w io.Writer, in io.Reader, input, mainType, plural, pkg string, xf 
 }
 
 type model struct {
-	mainType, baseType, plural, pkg string
-	values                          []string
-	xf                              []Transform
+	MainType, LcType, BaseType string
+	Plural, Pkg, Version       string
+	Values                     []string
+	XF                         []Transformer
+}
+
+func (m model) BaseApproxLC() string {
+	switch m.BaseKind() {
+	case types.Int:
+		return "int"
+	case types.Float64:
+		return "float64"
+	}
+	return ""
+}
+
+func (m model) BaseApproxUC() string {
+	switch m.BaseKind() {
+	case types.Int:
+		return "Int"
+	case types.Float64:
+		return "Float"
+	}
+	return ""
 }
 
 func (m model) BaseKind() types.BasicKind {
 	var kind types.BasicKind
-	switch m.baseType {
+	switch m.BaseType {
 	case "int", "uint",
 		"int8", "uint8",
 		"int16", "uint16",
@@ -112,4 +142,14 @@ func (m model) BaseKind() types.BasicKind {
 		kind = types.Float64
 	}
 	return kind
+}
+
+func (m model) Placeholder() string {
+	switch m.BaseKind() {
+	case types.Int:
+		return "%d"
+	case types.Float64:
+		return "%g"
+	}
+	return "%s"
 }

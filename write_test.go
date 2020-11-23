@@ -204,6 +204,11 @@ func (i Sweet) MarshalJSON() ([]byte, error) {
 // UnmarshalJSON converts transmitted JSON values to ordinary values. It allows both
 // ordinals and strings to represent the values.
 func (i *Sweet) UnmarshalJSON(text []byte) error {
+	if len(text) >= 2 && text[0] == '"' && text[len(text)-1] == '"' {
+		s := string(text[1:len(text)-1])
+		return i.Parse(s)
+	}
+
 	// Ignore null, like in the main JSON package.
 	if string(text) == "null" {
 		return nil
@@ -217,9 +222,10 @@ func TestWriteFuncString(t *testing.T) {
 	RegisterTestingT(t)
 	buf := &bytes.Buffer{}
 	m := model{
-		mainType: "Sweet",
-		baseType: "int",
-		plural:   "Sweets",
+		MainType: "Sweet",
+		LcType:   "sweet",
+		BaseType: "int",
+		Plural:   "Sweets",
 	}
 	m.writeFuncString(&printer{w: buf}, "sweetEnumStrings", "sweetEnumIndex")
 	got := buf.String()
@@ -230,11 +236,12 @@ func TestWriteFuncOrdinal(t *testing.T) {
 	RegisterTestingT(t)
 	buf := &bytes.Buffer{}
 	m := model{
-		mainType: "Sweet",
-		baseType: "int",
-		plural:   "Sweets",
-		values:   []string{"Mars", "Bounty", "Snickers", "Kitkat"},
-		xf:       nil,
+		MainType: "Sweet",
+		LcType:   "sweet",
+		BaseType: "int",
+		Plural:   "Sweets",
+		Values:   []string{"Mars", "Bounty", "Snickers", "Kitkat"},
+		XF:       nil,
 	}
 	m.writeFuncOrdinal(&printer{w: buf})
 	got := buf.String()
@@ -245,12 +252,14 @@ func TestWriteNoChange(t *testing.T) {
 	RegisterTestingT(t)
 	buf := &bytes.Buffer{}
 	m := model{
-		mainType: "Sweet",
-		baseType: "int",
-		plural:   "Sweets",
-		pkg:      "confectionary",
-		values:   []string{"Mars", "Bounty", "Snickers", "Kitkat"},
-		xf:       nil,
+		MainType: "Sweet",
+		LcType:   "sweet",
+		BaseType: "int",
+		Plural:   "Sweets",
+		Pkg:      "confectionary",
+		Version:  version,
+		Values:   []string{"Mars", "Bounty", "Snickers", "Kitkat"},
+		XF:       nil,
 	}
 	err := m.write(buf)
 	got := buf.String()
@@ -262,12 +271,14 @@ func TestWriteLower(t *testing.T) {
 	RegisterTestingT(t)
 	buf := &bytes.Buffer{}
 	m := model{
-		mainType: "Sweet",
-		baseType: "int",
-		plural:   "Sweets",
-		pkg:      "confectionary",
-		values:   []string{"Mars", "Bounty", "Snickers", "Kitkat"},
-		xf:       []Transform{ToLower},
+		MainType: "Sweet",
+		LcType:   "sweet",
+		BaseType: "int",
+		Plural:   "Sweets",
+		Pkg:      "confectionary",
+		Version:  version,
+		Values:   []string{"Mars", "Bounty", "Snickers", "Kitkat"},
+		XF:       []Transformer{toLower},
 	}
 	err := m.write(buf)
 	got := buf.String()

@@ -88,14 +88,14 @@ func generate(mainType, plural string) {
 	}
 	debug("pkg=%s\n", pkg)
 
-	var transforms []Transform
+	var transforms []Transformer
 	if *lowercase {
-		transforms = append(transforms, ToLower)
+		transforms = append(transforms, toLower)
 	} else if *uppercase {
-		transforms = append(transforms, ToUpper)
+		transforms = append(transforms, toUpper)
 	}
 	if *unsnake {
-		transforms = append(transforms, Unsnake)
+		transforms = append(transforms, xUnsnake)
 	}
 
 	err = convert(out, in, *input1, mainType, plural, pkg, transforms...)

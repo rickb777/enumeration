@@ -137,6 +137,11 @@ func (i Base) MarshalJSON() ([]byte, error) {
 // UnmarshalJSON converts transmitted JSON values to ordinary values. It allows both
 // ordinals and strings to represent the values.
 func (i *Base) UnmarshalJSON(text []byte) error {
+	if len(text) >= 2 && text[0] == '"' && text[len(text)-1] == '"' {
+		s := string(text[1 : len(text)-1])
+		return i.Parse(s)
+	}
+
 	// Ignore null, like in the main JSON package.
 	if string(text) == "null" {
 		return nil
