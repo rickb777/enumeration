@@ -218,36 +218,6 @@ func (i *Sweet) UnmarshalJSON(text []byte) error {
 }
 `
 
-func TestWriteFuncString(t *testing.T) {
-	RegisterTestingT(t)
-	buf := &bytes.Buffer{}
-	m := model{
-		MainType: "Sweet",
-		LcType:   "sweet",
-		BaseType: "int",
-		Plural:   "Sweets",
-	}
-	m.writeFuncString(&printer{w: buf}, "sweetEnumStrings", "sweetEnumIndex")
-	got := buf.String()
-	Ω(got).Should(Equal(e4))
-}
-
-func TestWriteFuncOrdinal(t *testing.T) {
-	RegisterTestingT(t)
-	buf := &bytes.Buffer{}
-	m := model{
-		MainType: "Sweet",
-		LcType:   "sweet",
-		BaseType: "int",
-		Plural:   "Sweets",
-		Values:   []string{"Mars", "Bounty", "Snickers", "Kitkat"},
-		XF:       nil,
-	}
-	m.writeFuncOrdinal(&printer{w: buf})
-	got := buf.String()
-	Ω(got).Should(Equal(e5))
-}
-
 func TestWriteNoChange(t *testing.T) {
 	RegisterTestingT(t)
 	buf := &bytes.Buffer{}

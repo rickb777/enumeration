@@ -97,7 +97,7 @@ func (m model) writeAllItemsSlice(p *printer) {
 
 //-------------------------------------------------------------------------------------------------
 
-const stringMethod = `
+const methods = `
 // String returns the string representation of a <<.MainType>>.
 func (i <<.MainType>>) String() string {
 	o := i.Ordinal()
@@ -106,37 +106,18 @@ func (i <<.MainType>>) String() string {
 	}
 	return <<.LcType>>EnumStrings[<<.LcType>>EnumIndex[o]:<<.LcType>>EnumIndex[o+1]]
 }
-`
 
-func (m model) writeFuncString(p *printer, names, indexes string) {
-	m.execTemplate(p, stringMethod)
-}
-
-//-------------------------------------------------------------------------------------------------
-
-const ordinalMethodStart = `
-// Ordinal returns the ordinal number of a %s.
-func (i %s) Ordinal() int {
+// Ordinal returns the ordinal number of a <<.MainType>>.
+func (i <<.MainType>>) Ordinal() int {
 	switch i {
-`
-const ordinalMethodEnd = `	}
+	<<- range $i, $v := .Values>>
+	case <<$v>>:
+		return <<$i>>
+	<<- end>>
+	}
 	return -1
 }
-`
 
-func (m model) writeFuncOrdinal(p *printer) {
-	p.Printf(ordinalMethodStart, m.MainType, m.MainType)
-
-	for i, s := range m.Values {
-		p.Printf("\tcase %s:\n\t\treturn %d\n", s, i)
-	}
-
-	p.Printf(ordinalMethodEnd)
-}
-
-//-------------------------------------------------------------------------------------------------
-
-const valueMethod = `
 // <<.BaseApproxUC>> returns the <<.BaseApproxLC>> value. This is not necessarily the same as the ordinal.
 // It serves to facilitate polymorphism (see enum.<<.BaseApproxUC>>Enum).
 func (i <<.MainType>>) <<.BaseApproxUC>>() <<.BaseApproxLC>> {
@@ -145,7 +126,7 @@ func (i <<.MainType>>) <<.BaseApproxUC>>() <<.BaseApproxLC>> {
 `
 
 func (m model) writeFuncValue(p *printer) {
-	m.execTemplate(p, valueMethod)
+	m.execTemplate(p, methods)
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -348,8 +329,6 @@ func (m model) write(w io.Writer) error {
 	m.writeConst(p, names)
 	m.writeIndexes(p, indexes)
 	m.writeAllItemsSlice(p)
-	m.writeFuncString(p, names, indexes)
-	m.writeFuncOrdinal(p)
 	m.writeFuncValue(p)
 	m.writeFuncOf(p)
 	m.writeFuncIsValid(p)
