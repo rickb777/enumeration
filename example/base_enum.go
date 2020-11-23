@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration v1.7.1
+// github.com/rickb777/enumeration v1.7.2
 
 package example
 

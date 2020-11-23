@@ -93,7 +93,7 @@ Options are:
     - the name of the primary Go type for which code generation is being used.
 
  * `-plural <name>`
-    - the plural equivalent for the name of the primary Go type. This is optional and the default is to use the type name and append letter 's', as is common for many English nouns. For example, with `-type Party`, you might usefuly specify `-plural Parties`.
+    - the plural equivalent for the name of the primary Go type. This is optional and the default is to use the type name and append letter 's', as is common for many English nouns. For example, with `-type Party`, you might usefully specify `-plural Parties`.
 
  * `-i <name>` or `-input <name>`
     - the name of the input Go source file containing the `type` and `const` declarations.
@@ -111,7 +111,7 @@ Options are:
     - convert to upper case the string representations of the enumeration values.
 
  * `-f`
-    - force output generation; if this is not set the output file is only produced when it is is absent or when it is older than the input file.
+    - force output generation; if this is not set, the output file is only produced when it is is absent or when it is older than the input file.
 
  * `-v`
     - verbose info messages
@@ -135,14 +135,33 @@ the `Day` type above. You will get:
  * `func (d Day) Ordinal() int`
     - Converts Day values into their ordinal numbers, i.e. the indexes indicating the order in which you declared the constants, starting from zero. These may happen to be the same as the values you chose, but need not be.
 
+ * `func (d Day) IsValid() bool`
+    - Tests whether a given value is one of the defined `Day` constants. Type conversion allows possibly out-of range values to be created; these can be tested with this method. 
+
+ * `func (d Day) Int() int`
+    - Converts Day values into their int values, i.e. just the value of the constant int. This is merely a type conversion to `int`, but conveniently matches the `enum.IntEnum` interface, allowing polymorphism. This method is only present when the base type is any integer type.
+
+ * `func (d Day) Float() float64`
+    - Converts Day values into their float values, i.e. just the value of the constant float. This is merely a type conversion to `float64`, but conveniently matches the `enum.FloatEnum` interface, allowing polymorphism. This method is only present when the base type is `float32` or `float64`.
+
  * `func (d *Day) Parse(s string) error`
-    - Converts Day values into their ordinal numbers, i.e. the indexes indicating the order in which you declared the constants, starting from zero. These may happen to be the same as the values you chose, but need not be.
+    - Converts a string representation to a Day value, if it can, then assigns it to `d`. If `s` holds an integer, it
+     is treated as an ordinal and will result in the corresponding 
 
  * `func AsDay(s string) (Day, error)`
     - Converts a string representation to a Day value, if it can. The name of this function depends on the name of your type (`AsDay` in this example).
 
+ * `func DayOf(o int) Day`
+    - Converts an ordinal to a Day value, if it can. The name of this function depends on the name of your type (`DayOf` in this example). The related type conversion `Day(i)` should be used when converting a value instead of an ordinal.
+
  * `var AllDays = []Day{ ... }`
     - Provides all the `Day` values in a single slice. This is particularly useful if you need to iterate over them. Usually, the identifier name depends on the name of your type, but it can be overridden using `-plural`.
+
+ * `var AllDayEnums = enum.IntEnums{ ... }`
+    - Provides all the `Day` values in a single slice, held using an interface for polymorphism. The slice type would instead be `enum.FloatEnums` if the base type is `float32` or `float64`.
+
+ * `var DayMarshalJSONUsingString = false`
+    - Controls whether JSON represents the values as a number (default), or as a string.
 
  * `encoding.TextMarshaler`, `encoding.TextUnmarshaler`, `json.Marshaler`, `json.Unmarshaler`
     - Provides methods to satisfy these two interfaces so that your enumeration can be easily used by JSON, XML and other codecs in the standard Go library.
@@ -150,3 +169,9 @@ the `Day` type above. You will get:
 ## Other Use Options
 
 This tool is compatible with `go generate` - [more](https://blog.golang.org/generate).
+
+## Credits
+
+Thanks are due to others for their earlier work. Notable is the earlier stringer
+[here](https://github.com/golang/tools) by Rob Pike or a related alterative
+[here](https://github.com/clipperhouse/stringer) by Matt Sherman.
