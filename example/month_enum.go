@@ -16,10 +16,18 @@ const monthEnumStrings = "JanuaryFebruaryMarchAprilMayJuneJulyAugustSeptemberOct
 var monthEnumIndex = [...]uint16{0, 7, 15, 20, 25, 28, 32, 36, 42, 51, 58, 66, 74}
 
 // AllMonths lists all 12 values in order.
-var AllMonths = []Month{January, February, March, April, May, June, July, August, September, October, November, December}
+var AllMonths = []Month{
+	January, February, March, April,
+	May, June, July, August, September,
+	October, November, December,
+}
 
 // AllMonthEnums lists all 12 values in order.
-var AllMonthEnums = enum.IntEnums{January, February, March, April, May, June, July, August, September, October, November, December}
+var AllMonthEnums = enum.IntEnums{
+	January, February, March, April,
+	May, June, July, August, September,
+	October, November, December,
+}
 
 // String returns the string representation of a Month.
 func (i Month) String() string {
@@ -61,7 +69,7 @@ func (i Month) Ordinal() int {
 	return -1
 }
 
-// Int returns the int value. This is not necessarily the same as the ordinal.
+// Int returns the int value, which is not necessarily the same as the ordinal.
 // It serves to facilitate polymorphism (see enum.IntEnum).
 func (i Month) Int() int {
 	return int(i)

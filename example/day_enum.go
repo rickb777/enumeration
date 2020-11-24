@@ -16,10 +16,16 @@ const dayEnumStrings = "SundayMondayTuesdayWednesdayThursdayFridaySaturday"
 var dayEnumIndex = [...]uint16{0, 6, 12, 19, 28, 36, 42, 50}
 
 // AllDays lists all 7 values in order.
-var AllDays = []Day{Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday}
+var AllDays = []Day{
+	Sunday, Monday, Tuesday, Wednesday,
+	Thursday, Friday, Saturday,
+}
 
 // AllDayEnums lists all 7 values in order.
-var AllDayEnums = enum.IntEnums{Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday}
+var AllDayEnums = enum.IntEnums{
+	Sunday, Monday, Tuesday, Wednesday,
+	Thursday, Friday, Saturday,
+}
 
 // String returns the string representation of a Day.
 func (i Day) String() string {
@@ -51,7 +57,7 @@ func (i Day) Ordinal() int {
 	return -1
 }
 
-// Int returns the int value. This is not necessarily the same as the ordinal.
+// Int returns the int value, which is not necessarily the same as the ordinal.
 // It serves to facilitate polymorphism (see enum.IntEnum).
 func (i Day) Int() int {
 	return int(i)

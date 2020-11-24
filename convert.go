@@ -110,24 +110,8 @@ type model struct {
 	S1, S2                     string
 }
 
-func (m model) BaseApproxLC() string {
-	switch m.BaseKind() {
-	case types.Int:
-		return "int"
-	case types.Float64:
-		return "float64"
-	}
-	return ""
-}
-
-func (m model) BaseApproxUC() string {
-	switch m.BaseKind() {
-	case types.Int:
-		return "Int"
-	case types.Float64:
-		return "Float"
-	}
-	return ""
+func (m model) IsFloat() bool {
+	return m.BaseKind() == types.Float64
 }
 
 func (m model) BaseKind() types.BasicKind {

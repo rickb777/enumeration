@@ -16,10 +16,14 @@ const baseEnumStrings = "acgt"
 var baseEnumIndex = [...]uint16{0, 1, 2, 3, 4}
 
 // AllBases lists all 4 values in order.
-var AllBases = []Base{A, C, G, T}
+var AllBases = []Base{
+	A, C, G, T,
+}
 
 // AllBaseEnums lists all 4 values in order.
-var AllBaseEnums = enum.FloatEnums{A, C, G, T}
+var AllBaseEnums = enum.FloatEnums{
+	A, C, G, T,
+}
 
 // String returns the string representation of a Base.
 func (i Base) String() string {
@@ -45,8 +49,7 @@ func (i Base) Ordinal() int {
 	return -1
 }
 
-// Float returns the float64 value. This is not necessarily the same as the ordinal.
-// It serves to facilitate polymorphism (see enum.FloatEnum).
+// Float returns the float64 value. It serves to facilitate polymorphism (see enum.FloatEnum).
 func (i Base) Float() float64 {
 	return float64(i)
 }

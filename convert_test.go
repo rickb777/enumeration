@@ -96,7 +96,7 @@ func TestConvertHappy1(t *testing.T) {
 	str := w.String()
 	Ω(str).Should(ContainSubstring(`const sweetEnumStrings = "MarsBountySnickersKitkat"`), str)
 	Ω(str).Should(ContainSubstring(`var sweetEnumIndex = [...]uint16{0, 4, 10, 18, 24}`), str)
-	Ω(str).Should(ContainSubstring(`var AllSweets = []Sweet{Mars, Bounty, Snickers, Kitkat}`), str)
+	Ω(str).Should(ContainSubstring("var AllSweets = []Sweet{\n\tMars, Bounty, Snickers, Kitkat,\n}"), str)
 }
 
 const enum4 = `
@@ -115,7 +115,7 @@ func TestConvertHappy2(t *testing.T) {
 	str := w.String()
 	Ω(str).Should(ContainSubstring(`const sweetEnumStrings = "MarsBountySnickersKitkat"`), str)
 	Ω(str).Should(ContainSubstring(`var sweetEnumIndex = [...]uint16{0, 4, 10, 18, 24}`), str)
-	Ω(str).Should(ContainSubstring(`var AllSweets = []Sweet{Mars, Bounty, Snickers, Kitkat}`), str)
+	Ω(str).Should(ContainSubstring("var AllSweets = []Sweet{\n\tMars, Bounty, Snickers, Kitkat,\n}"), str)
 }
 
 const enum5 = `

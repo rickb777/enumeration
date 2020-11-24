@@ -56,10 +56,14 @@ func (m model) Indexes() string {
 
 const allItems = `
 // All<<.Plural>> lists all <<len .Values>> values in order.
-var All<<.Plural>> = []<<.MainType>>{<<.ValuesJoined 0 ", ">>}
+var All<<.Plural>> = []<<.MainType>>{
+	<<.ValuesWithWrapping 1>>,
+}
 
 // All<<.MainType>>Enums lists all <<len .Values>> values in order.
-var All<<.MainType>>Enums = <<.AllItemsSlice>>{<<.ValuesJoined 0 ", ">>}
+var All<<.MainType>>Enums = <<.AllItemsSlice>>{
+	<<.ValuesWithWrapping 1>>,
+}
 `
 
 func (m model) AllItemsSlice() string {
@@ -102,12 +106,18 @@ func (i <<.MainType>>) Ordinal() int {
 
 //-------------------------------------------------------------------------------------------------
 
-const baseMethod = `
-// <<.BaseApproxUC>> returns the <<.BaseApproxLC>> value. This is not necessarily the same as the ordinal.
-// It serves to facilitate polymorphism (see enum.<<.BaseApproxUC>>Enum).
-func (i <<.MainType>>) <<.BaseApproxUC>>() <<.BaseApproxLC>> {
-	return <<.BaseApproxLC>>(i)
+const baseMethod = `<<if .IsFloat>>
+// Float returns the float64 value. It serves to facilitate polymorphism (see enum.FloatEnum).
+func (i <<.MainType>>) Float() float64 {
+	return float64(i)
 }
+<<- else>>
+// Int returns the int value, which is not necessarily the same as the ordinal.
+// It serves to facilitate polymorphism (see enum.IntEnum).
+func (i <<.MainType>>) Int() int {
+	return int(i)
+}
+<<- end>>
 `
 
 //-------------------------------------------------------------------------------------------------
@@ -130,28 +140,30 @@ const isValidMethod = `
 // IsValid determines whether a <<.MainType>> is one of the defined constants.
 func (i <<.MainType>>) IsValid() bool {
 	switch i {
-	case <<.ValuesWithWrapping>>:
+	case <<.ValuesWithWrapping 2>>:
 		return true
 	}
 	return false
 }
 `
 
-func (m model) ValuesWithWrapping() string {
+func (m model) ValuesWithWrapping(nTabs int) string {
+	tabs := "\t\t"[:nTabs]
 	buf := &strings.Builder{}
 	nl := 5
 	for i, s := range m.Values {
 		if i > 0 {
-			fmt.Fprintf(buf, ",")
+			buf.WriteString(",")
 		}
 		nl--
 		if nl == 0 {
-			fmt.Fprintf(buf, "\n\t\t")
+			buf.WriteString("\n")
+			buf.WriteString(tabs)
 			nl = 5
 		} else if i > 0 {
-			fmt.Fprintf(buf, " ")
+			buf.WriteString(" ")
 		}
-		fmt.Fprintf(buf, "%s", s)
+		buf.WriteString(s)
 	}
 	return buf.String()
 }
