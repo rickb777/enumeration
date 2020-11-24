@@ -8,19 +8,6 @@ import (
 	"text/template"
 )
 
-type printer struct {
-	w   io.Writer
-	err error
-}
-
-func (p *printer) Printf(message string, args ...interface{}) {
-	if p.err == nil {
-		_, p.err = fmt.Fprintf(p.w, message, args...)
-	}
-}
-
-//-------------------------------------------------------------------------------------------------
-
 const head = `// generated code - do not edit
 // github.com/rickb777/enumeration <<.Version>>
 
@@ -35,64 +22,54 @@ import (
 )
 `
 
-func (m model) writeHead(p *printer) {
-	m.execTemplate(p, head)
-}
-
 //-------------------------------------------------------------------------------------------------
 
-func (m model) writeConst(p *printer, names string) {
-	p.Printf("\nconst %s = \"", names)
+const joinedStringAndIndexes = `
+const <<.LcType>>EnumStrings = "<<.TransformedValues>>"
 
+var <<.LcType>>EnumIndex = [...]uint16{<<.Indexes>>}
+`
+
+func (m model) TransformedValues() string {
+	buf := &strings.Builder{}
 	for _, s := range m.Values {
 		for _, f := range m.XF {
 			s = f.Fn(s)
 		}
-		p.Printf(s)
+		fmt.Fprintf(buf, s)
 	}
-
-	p.Printf("\"\n")
+	return buf.String()
 }
 
-//-------------------------------------------------------------------------------------------------
-
-func (m model) writeIndexes(p *printer, index string) {
-	p.Printf("\nvar %s = [...]uint16{0", index)
-
+func (m model) Indexes() string {
+	buf := &strings.Builder{}
+	fmt.Fprintf(buf, "0")
 	n := 0
 	for _, s := range m.Values {
 		n += len(s)
-		p.Printf(", %d", n)
+		fmt.Fprintf(buf, ", %d", n)
 	}
-
-	p.Printf("}\n")
+	return buf.String()
 }
 
 //-------------------------------------------------------------------------------------------------
 
 const allItems = `
-// All<<.S1>> lists all <<len .Values>> values in order.
-var All<<.S1>> = <<.S2>>{<<.ValuesJoined 0 ", ">>}
+// All<<.Plural>> lists all <<len .Values>> values in order.
+var All<<.Plural>> = []<<.MainType>>{<<.ValuesJoined 0 ", ">>}
+
+// All<<.MainType>>Enums lists all <<len .Values>> values in order.
+var All<<.MainType>>Enums = <<.AllItemsSlice>>{<<.ValuesJoined 0 ", ">>}
 `
 
-func (m model) doWriteAllItemsSlice(p *printer, name, enumsType string) {
-	m.S1 = name
-	m.S2 = enumsType
-	m.execTemplate(p, allItems)
-}
-
-func (m model) writeAllItemsSlice(p *printer) {
-	m.doWriteAllItemsSlice(p, m.Plural, "[]"+m.MainType)
-
-	enumsType := "enum.Enums"
+func (m model) AllItemsSlice() string {
 	switch m.BaseKind() {
 	case types.Int:
-		enumsType = "enum.IntEnums"
+		return "enum.IntEnums"
 	case types.Float64:
-		enumsType = "enum.FloatEnums"
+		return "enum.FloatEnums"
 	}
-
-	m.doWriteAllItemsSlice(p, m.MainType+"Enums", enumsType)
+	panic("undefined")
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -107,6 +84,9 @@ func (i <<.MainType>>) String() string {
 	return <<.LcType>>EnumStrings[<<.LcType>>EnumIndex[o]:<<.LcType>>EnumIndex[o+1]]
 }
 `
+
+//-------------------------------------------------------------------------------------------------
+
 const ordinalMethod = `
 // Ordinal returns the ordinal number of a <<.MainType>>.
 func (i <<.MainType>>) Ordinal() int {
@@ -118,7 +98,11 @@ func (i <<.MainType>>) Ordinal() int {
 	}
 	return -1
 }
+`
 
+//-------------------------------------------------------------------------------------------------
+
+const baseMethod = `
 // <<.BaseApproxUC>> returns the <<.BaseApproxLC>> value. This is not necessarily the same as the ordinal.
 // It serves to facilitate polymorphism (see enum.<<.BaseApproxUC>>Enum).
 func (i <<.MainType>>) <<.BaseApproxUC>>() <<.BaseApproxLC>> {
@@ -146,14 +130,14 @@ const isValidMethod = `
 // IsValid determines whether a <<.MainType>> is one of the defined constants.
 func (i <<.MainType>>) IsValid() bool {
 	switch i {
-	case <<.FuncIsValid>>:
+	case <<.ValuesWithWrapping>>:
 		return true
 	}
 	return false
 }
 `
 
-func (m model) FuncIsValid() string {
+func (m model) ValuesWithWrapping() string {
 	buf := &strings.Builder{}
 	nl := 5
 	for i, s := range m.Values {
@@ -223,7 +207,7 @@ func As<<.MainType>>(s string) (<<.MainType>>, error) {
 
 //-------------------------------------------------------------------------------------------------
 
-const marshalMethods = `
+const marshalText = `
 // MarshalText converts values to a form suitable for transmission via JSON, XML etc.
 func (i <<.MainType>>) MarshalText() (text []byte, err error) {
 	return []byte(i.String()), nil
@@ -233,7 +217,11 @@ func (i <<.MainType>>) MarshalText() (text []byte, err error) {
 func (i *<<.MainType>>) UnmarshalText(text []byte) error {
 	return i.Parse(string(text))
 }
+`
 
+//-------------------------------------------------------------------------------------------------
+
+const marshalJSON = `
 // <<.MainType>>MarshalJSONUsingString controls whether generated JSON uses ordinals or strings. By default,
 // it is false and ordinals are used. Set it true to cause quoted strings to be used instead,
 // these being easier to read but taking more resources.
@@ -275,31 +263,23 @@ func (i *<<.MainType>>) UnmarshalJSON(text []byte) error {
 
 //-------------------------------------------------------------------------------------------------
 
-func (m model) writeMethods(p *printer) {
-	m.execTemplate(p,
-		stringMethod+
+func (m model) write(w io.Writer) error {
+	err := m.execTemplate(w,
+		head+
+			joinedStringAndIndexes+
+			allItems+
+			stringMethod+
 			ordinalMethod+
+			baseMethod+
 			ofMethod+
 			isValidMethod+
 			parseMethod+
 			asMethod+
-			marshalMethods)
-}
+			marshalText+
+			marshalJSON)
 
-func (m model) write(w io.Writer) error {
-	lc := strings.ToLower(m.MainType)
-	names := fmt.Sprintf("%sEnumStrings", lc)
-	indexes := fmt.Sprintf("%sEnumIndex", lc)
-
-	p := &printer{w: w}
-	m.writeHead(p)
-	m.writeConst(p, names)
-	m.writeIndexes(p, indexes)
-	m.writeAllItemsSlice(p)
-	m.writeMethods(p)
-
-	if p.err != nil {
-		return p.err
+	if err != nil {
+		return err
 	}
 
 	if c, ok := w.(io.Closer); ok {
@@ -309,10 +289,10 @@ func (m model) write(w io.Writer) error {
 	return nil
 }
 
-func (m model) execTemplate(p *printer, tpl string) {
+func (m model) execTemplate(w io.Writer, tpl string) error {
 	tmpl, err := template.New("t").Delims("<<", ">>").Parse(tpl)
 	if err != nil {
 		panic(err)
 	}
-	p.err = tmpl.Execute(p.w, m)
+	return tmpl.Execute(w, m)
 }
