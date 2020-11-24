@@ -97,7 +97,7 @@ func (m model) writeAllItemsSlice(p *printer) {
 
 //-------------------------------------------------------------------------------------------------
 
-const methods = `
+const stringMethod = `
 // String returns the string representation of a <<.MainType>>.
 func (i <<.MainType>>) String() string {
 	o := i.Ordinal()
@@ -106,7 +106,8 @@ func (i <<.MainType>>) String() string {
 	}
 	return <<.LcType>>EnumStrings[<<.LcType>>EnumIndex[o]:<<.LcType>>EnumIndex[o+1]]
 }
-
+`
+const ordinalMethod = `
 // Ordinal returns the ordinal number of a <<.MainType>>.
 func (i <<.MainType>>) Ordinal() int {
 	switch i {
@@ -125,10 +126,6 @@ func (i <<.MainType>>) <<.BaseApproxUC>>() <<.BaseApproxLC>> {
 }
 `
 
-func (m model) writeFuncValue(p *printer) {
-	m.execTemplate(p, methods)
-}
-
 //-------------------------------------------------------------------------------------------------
 
 const ofMethod = `
@@ -142,10 +139,6 @@ func <<.MainType>>Of(i int) <<.MainType>> {
 	return <<.ValuesJoined 0 " + ">>
 }
 `
-
-func (m model) writeFuncOf(p *printer) {
-	m.execTemplate(p, ofMethod)
-}
 
 //-------------------------------------------------------------------------------------------------
 
@@ -179,79 +172,58 @@ func (m model) FuncIsValid() string {
 	return buf.String()
 }
 
-func (m model) writeFuncIsValid(p *printer) {
-	m.execTemplate(p, isValidMethod)
-}
-
 //-------------------------------------------------------------------------------------------------
 
-const parseMethodStart = `
-// Parse parses a string to find the corresponding %s, accepting either one of the string
+const parseMethod = `
+// Parse parses a string to find the corresponding <<.MainType>>, accepting either one of the string
 // values or an ordinal number.
-`
-
-const parseMethodEnd = `	ord, err := strconv.Atoi(s)
-	if err == nil && 0 <= ord && ord < len(All%s) {
-		*v = All%s[ord]
+<<- range .XF>><<if ne .Info "">>
+// <<.Info>>
+<<- end>>
+<<- end>>
+func (v *<<.MainType>>) Parse(s string) error {
+<<- range .XF>><<if ne .Str "">>
+	s = <<.Str>>
+<<- end>>
+<<- end>>
+	ord, err := strconv.Atoi(s)
+	if err == nil && 0 <= ord && ord < len(All<<.Plural>>) {
+		*v = All<<.Plural>>[ord]
 		return nil
 	}
 	var i0 uint16 = 0
-	for j := 1; j < len(%s); j++ {
-		i1 := %s[j]
-		p := %s[i0:i1]
+	for j := 1; j < len(<<.LcType>>EnumIndex); j++ {
+		i1 := <<.LcType>>EnumIndex[j]
+		p := <<.LcType>>EnumStrings[i0:i1]
 		if s == p {
-			*v = All%s[j-1]
+			*v = All<<.Plural>>[j-1]
 			return nil
 		}
 		i0 = i1
 	}
-	return errors.New(s + ": unrecognised %s")
+	return errors.New(s + ": unrecognised <<.MainType>>")
 }
 `
-
-func (m model) writeFuncParse(p *printer, names, indexes string) {
-	p.Printf(parseMethodStart, m.MainType)
-	for _, f := range m.XF {
-		if f.Info != "" {
-			p.Printf("// %s\n", f.Info)
-		}
-	}
-	p.Printf("func (v *%s) Parse(s string) error {\n", m.MainType)
-	for _, f := range m.XF {
-		if f.Str != "" {
-			p.Printf("\ts = %s\n", f.Str)
-		}
-	}
-	p.Printf(parseMethodEnd, m.Plural, m.Plural, indexes, indexes, names, m.Plural, m.MainType)
-}
 
 //-------------------------------------------------------------------------------------------------
 
-const asMethodStart = `
-// As%s parses a string to find the corresponding %s, accepting either one of the string
+const asMethod = `
+// As<<.MainType>> parses a string to find the corresponding <<.MainType>>, accepting either one of the string
 // values or an ordinal number.
-`
-
-const asMethodEnd = `func As%s(s string) (%s, error) {
-	var i = new(%s)
+<<- range .XF>><<if ne .Info "">>
+// <<.Info>>
+<<- end>>
+<<- end>>
+func As<<.MainType>>(s string) (<<.MainType>>, error) {
+	var i = new(<<.MainType>>)
 	err := i.Parse(s)
 	return *i, err
 }
 `
 
-func (m model) writeFuncAs(p *printer) {
-	p.Printf(asMethodStart, m.MainType, m.MainType)
-	for _, f := range m.XF {
-		if f.Info != "" {
-			p.Printf("// %s\n", f.Info)
-		}
-	}
-	p.Printf(asMethodEnd, m.MainType, m.MainType, m.MainType)
-}
-
 //-------------------------------------------------------------------------------------------------
 
-const marshalJson = `
+const marshalMethods = `
 // MarshalText converts values to a form suitable for transmission via JSON, XML etc.
 func (i <<.MainType>>) MarshalText() (text []byte, err error) {
 	return []byte(i.String()), nil
@@ -301,11 +273,18 @@ func (i *<<.MainType>>) UnmarshalJSON(text []byte) error {
 }
 `
 
-func (m model) writeMarshal(p *printer) {
-	m.execTemplate(p, marshalJson)
-}
-
 //-------------------------------------------------------------------------------------------------
+
+func (m model) writeMethods(p *printer) {
+	m.execTemplate(p,
+		stringMethod+
+			ordinalMethod+
+			ofMethod+
+			isValidMethod+
+			parseMethod+
+			asMethod+
+			marshalMethods)
+}
 
 func (m model) write(w io.Writer) error {
 	lc := strings.ToLower(m.MainType)
@@ -317,12 +296,7 @@ func (m model) write(w io.Writer) error {
 	m.writeConst(p, names)
 	m.writeIndexes(p, indexes)
 	m.writeAllItemsSlice(p)
-	m.writeFuncValue(p)
-	m.writeFuncOf(p)
-	m.writeFuncIsValid(p)
-	m.writeFuncParse(p, names, indexes)
-	m.writeFuncAs(p)
-	m.writeMarshal(p)
+	m.writeMethods(p)
 
 	if p.err != nil {
 		return p.err
