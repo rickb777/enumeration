@@ -161,7 +161,7 @@ the `Day` type above. You will get:
     - Provides all the `Day` values in a single slice, held using an interface for polymorphism. The slice type would instead be `enum.FloatEnums` if the base type is `float32` or `float64`.
 
  * `var DayMarshalJSONUsingString = false`
-    - Controls whether JSON represents the values as a number (default), or as a string.
+    - Controls whether marshalling to JSON represents the values as a number (default), or as a string.
 
  * `encoding.TextMarshaler`, `encoding.TextUnmarshaler`, `json.Marshaler`, `json.Unmarshaler`
     - Provides methods to satisfy these two interfaces so that your enumeration can be easily used by JSON, XML and other codecs in the standard Go library.

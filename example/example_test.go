@@ -17,19 +17,17 @@ func TestString(t *testing.T) {
 func TestOrdinal(t *testing.T) {
 	g := NewGomegaWithT(t)
 	g.Expect(int(Sunday)).Should(Equal(1))
-	g.Expect(Sunday.Ordinal(), 0)
+	g.Expect(Sunday.Ordinal()).Should(Equal(0))
 	g.Expect(int(Monday)).Should(Equal(2))
-	g.Expect(Monday.Ordinal(), 1)
+	g.Expect(Monday.Ordinal()).Should(Equal(1))
+	g.Expect(DayOf(3)).Should(Equal(Wednesday))
 	g.Expect(numberOfDays).Should(Equal(7))
 }
 
 func TestValue(t *testing.T) {
 	g := NewGomegaWithT(t)
-	g.Expect(int(Sunday)).Should(Equal(1))
-	g.Expect(Sunday.Ordinal(), 0)
-	g.Expect(int(Monday)).Should(Equal(2))
-	g.Expect(Monday.Ordinal(), 1)
-	g.Expect(numberOfDays).Should(Equal(7))
+	g.Expect(Sunday.Int()).Should(Equal(1))
+	g.Expect(Wednesday.Int()).Should(Equal(4))
 }
 
 func TestAllDays(t *testing.T) {
@@ -43,7 +41,7 @@ func TestAsDay(t *testing.T) {
 	v, err := AsDay("Tuesday")
 	g.Expect(v, err).Should(Equal(Tuesday))
 	_, err = AsDay("Nosuchday")
-	g.Expect(err).ShouldNot(BeNil())
+	g.Expect(err).Should(HaveOccurred())
 }
 
 func TestMarshalText(t *testing.T) {

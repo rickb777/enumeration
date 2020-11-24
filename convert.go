@@ -155,6 +155,6 @@ func (m model) Placeholder() string {
 	return "%s"
 }
 
-func (m model) ValuesJoined() string {
-	return strings.Join(m.Values, ", ")
+func (m model) ValuesJoined(from int, separator string) string {
+	return strings.Join(m.Values[from:], separator)
 }

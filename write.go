@@ -72,7 +72,7 @@ func (m model) writeIndexes(p *printer, index string) {
 
 const allItems = `
 // All<<.S1>> lists all <<len .Values>> values in order.
-var All<<.S1>> = <<.S2>>{<<.ValuesJoined>>}
+var All<<.S1>> = <<.S2>>{<<.ValuesJoined 0 ", ">>}
 `
 
 func (m model) doWriteAllItemsSlice(p *printer, name, enumsType string) {
@@ -131,68 +131,56 @@ func (m model) writeFuncValue(p *printer) {
 
 //-------------------------------------------------------------------------------------------------
 
-const ofMethodStart = `
-// %sOf returns a %s based on an ordinal number. This is the inverse of Ordinal.
-// If the ordinal is out of range, an invalid %s is returned.
-func %sOf(i int) %s {
-	if 0 <= i && i < len(All%s) {
-		return All%s[i]
+const ofMethod = `
+// <<.MainType>>Of returns a <<.MainType>> based on an ordinal number. This is the inverse of Ordinal.
+// If the ordinal is out of range, an invalid <<.MainType>> is returned.
+func <<.MainType>>Of(i int) <<.MainType>> {
+	if 0 <= i && i < len(All<<.Plural>>) {
+		return All<<.Plural>>[i]
 	}
 	// an invalid result
-	return `
-
-const ofMethodEnd = `
+	return <<.ValuesJoined 0 " + ">>
 }
 `
 
 func (m model) writeFuncOf(p *printer) {
-	p.Printf(ofMethodStart, m.MainType, m.MainType, m.MainType, m.MainType, m.MainType, m.Plural, m.Plural)
-
-	for i, s := range m.Values {
-		if i > 0 {
-			p.Printf(" + ")
-		}
-		p.Printf(s)
-	}
-
-	p.Printf(ofMethodEnd)
+	m.execTemplate(p, ofMethod)
 }
 
 //-------------------------------------------------------------------------------------------------
 
-const isValidMethodStart = `
-// IsValid determines whether a %s is one of the defined constants.
-func (i %s) IsValid() bool {
+const isValidMethod = `
+// IsValid determines whether a <<.MainType>> is one of the defined constants.
+func (i <<.MainType>>) IsValid() bool {
 	switch i {
-	case `
-
-const isValidMethodEnd = `:
+	case <<.FuncIsValid>>:
 		return true
 	}
 	return false
 }
 `
 
-func (m model) writeFuncIsValid(p *printer) {
-	p.Printf(isValidMethodStart, m.MainType, m.MainType)
-
+func (m model) FuncIsValid() string {
+	buf := &strings.Builder{}
 	nl := 5
 	for i, s := range m.Values {
 		if i > 0 {
-			p.Printf(",")
+			fmt.Fprintf(buf, ",")
 		}
 		nl--
 		if nl == 0 {
-			p.Printf("\n\t\t")
+			fmt.Fprintf(buf, "\n\t\t")
 			nl = 5
 		} else if i > 0 {
-			p.Printf(" ")
+			fmt.Fprintf(buf, " ")
 		}
-		p.Printf("%s", s)
-
+		fmt.Fprintf(buf, "%s", s)
 	}
+	return buf.String()
+}
 
-	p.Printf(isValidMethodEnd)
+func (m model) writeFuncIsValid(p *printer) {
+	m.execTemplate(p, isValidMethod)
 }
 
 //-------------------------------------------------------------------------------------------------
