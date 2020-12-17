@@ -89,6 +89,33 @@ func (i <<.MainType>>) String() string {
 }
 `
 
+const byoStringMethod = `
+var <<.LookupTable>>Inverse = map[string]<<.MainType>>{}
+
+func init() {
+	if len(<<.LookupTable>>) != <<len .Values>> {
+		panic(fmt.Sprintf("<<.LookupTable>> has %d items but there are missing ones", len(<<.LookupTable>>)))
+	}
+
+	for k, v := range <<.LookupTable>> {
+		<<.LookupTable>>Inverse[v] = k
+	}
+
+	if len(<<.LookupTable>>) != len(<<.LookupTable>>Inverse) {
+		panic(fmt.Sprintf("<<.LookupTable>> has %d items but they are not distinct", len(<<.LookupTable>>)))
+	}
+}
+
+// String returns the string representation of a <<.MainType>>.
+func (i <<.MainType>>) String() string {
+	s, ok := <<.LookupTable>>[i]
+	if ok {
+		return s
+	}
+	return fmt.Sprintf("%02d", i)
+}
+`
+
 //-------------------------------------------------------------------------------------------------
 
 const ordinalMethod = `
@@ -130,7 +157,7 @@ func <<.MainType>>Of(i int) <<.MainType>> {
 		return All<<.Plural>>[i]
 	}
 	// an invalid result
-	return <<.ValuesJoined 0 " + ">>
+	return <<.ValuesJoined 0 " + ">> + 1
 }
 `
 
@@ -196,6 +223,25 @@ func (v *<<.MainType>>) Parse(s string) error {
 			return nil
 		}
 		i0 = i1
+	}
+	return errors.New(s + ": unrecognised <<.MainType>>")
+}
+`
+
+//-------------------------------------------------------------------------------------------------
+
+const byoParseMethod = `
+// Parse parses a string to find the corresponding <<.MainType>>, accepting either one of the string
+// values or an ordinal number.
+<<- range .XF>><<if ne .Info "">>
+// <<.Info>>
+<<- end>>
+<<- end>>
+func (v *<<.MainType>>) Parse(s string) error {
+	var ok bool
+	*v, ok = <<.LookupTable>>Inverse[s]
+	if ok {
+		return nil
 	}
 	return errors.New(s + ": unrecognised <<.MainType>>")
 }
@@ -275,20 +321,71 @@ func (i *<<.MainType>>) UnmarshalJSON(text []byte) error {
 
 //-------------------------------------------------------------------------------------------------
 
+const scanValue = `
+// Scan parses some value, which can be a number, a string or []byte.
+// It implements sql.Scanner, https://golang.org/pkg/database/sql/#Scanner
+func (i *<<.MainType>>) Scan(value interface{}) (err error) {
+	if value == nil {
+		return nil
+	}
+
+	err = nil
+	switch v := value.(type) {
+	case int64:
+		*i = <<.MainType>>(v)
+	case float64:
+		*i = <<.MainType>>(v)
+	case []byte:
+		err = i.Parse(string(v))
+	case string:
+		err = i.Parse(v)
+	default:
+		err = fmt.Errorf("%T %+v is not a meaningful <<.MainType>>", value, value)
+	}
+
+	return err
+}
+
+// -- copy this somewhere and uncomment it if you need DB storage to use strings --
+// Value converts the period to a string. 
+// It implements driver.Valuer, https://golang.org/pkg/database/sql/driver/#Valuer
+//func (i <<.MainType>>) Value() (driver.Value, error) {
+//    return i.String(), nil
+//}
+`
+
+//-------------------------------------------------------------------------------------------------
+
 func (m model) write(w io.Writer) error {
-	err := m.execTemplate(w,
-		head+
-			joinedStringAndIndexes+
-			allItems+
-			stringMethod+
-			ordinalMethod+
-			baseMethod+
-			ofMethod+
-			isValidMethod+
-			parseMethod+
-			asMethod+
-			marshalText+
-			marshalJSON)
+	template := head +
+		joinedStringAndIndexes +
+		allItems +
+		stringMethod +
+		ordinalMethod +
+		baseMethod +
+		ofMethod +
+		isValidMethod +
+		parseMethod +
+		asMethod +
+		marshalText +
+		marshalJSON +
+		scanValue
+
+	if *usingTable != "" {
+		template = head +
+			allItems +
+			byoStringMethod +
+			ordinalMethod +
+			baseMethod +
+			ofMethod +
+			isValidMethod +
+			byoParseMethod +
+			asMethod +
+			marshalText +
+			marshalJSON +
+			scanValue
+	}
+	err := m.execTemplate(w, template)
 
 	if err != nil {
 		return err

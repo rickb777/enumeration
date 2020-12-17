@@ -85,14 +85,15 @@ func convert(w io.Writer, in io.Reader, input, mainType, plural, pkg string, xf 
 			values := scanValues(s, mainType)
 			if values != nil {
 				m := model{
-					MainType: mainType,
-					LcType:   strings.ToLower(mainType),
-					BaseType: baseType,
-					Plural:   plural,
-					Pkg:      pkg,
-					Version:  version,
-					Values:   values,
-					XF:       xf,
+					MainType:    mainType,
+					LcType:      strings.ToLower(mainType),
+					BaseType:    baseType,
+					Plural:      plural,
+					Pkg:         pkg,
+					Version:     version,
+					Values:      values,
+					XF:          xf,
+					LookupTable: *usingTable,
 				}
 				return m.write(w)
 			}
@@ -108,6 +109,7 @@ type model struct {
 	Values                     []string
 	XF                         []Transformer
 	S1, S2                     string
+	LookupTable                string
 }
 
 func (m model) IsFloat() bool {

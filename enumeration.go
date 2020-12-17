@@ -13,6 +13,7 @@ var output1 = flag.String("o", "", "Name of the output file. May be '-' for stdo
 
 var pMainType = flag.String("type", "", "Name of the enumeration type (required).")
 var pPlural = flag.String("plural", "", "Plural name of the enumeration type (optional).")
+var usingTable = flag.String("using", "", "Uses your own map[Type]string instead of generating one.")
 
 //var force = flag.Bool("f", false, "Force output generation, even if up to date.")
 var pPkg = flag.String("package", "", "Name of the output package (optional). Defaults to the output directory).")

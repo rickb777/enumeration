@@ -86,7 +86,7 @@ func SweetOf(i int) Sweet {
 		return AllSweets[i]
 	}
 	// an invalid result
-	return Mars + Bounty + Snickers + Kitkat
+	return Mars + Bounty + Snickers + Kitkat + 1
 }
 `
 
@@ -222,6 +222,39 @@ func (i *Sweet) UnmarshalJSON(text []byte) error {
 }
 `
 
+const e13 = `
+// Scan parses some value, which can be a number, a string or []byte.
+// It implements sql.Scanner, https://golang.org/pkg/database/sql/#Scanner
+func (i *Sweet) Scan(value interface{}) (err error) {
+	if value == nil {
+		return nil
+	}
+
+	err = nil
+	switch v := value.(type) {
+	case int64:
+		*i = Sweet(v)
+	case float64:
+		*i = Sweet(v)
+	case []byte:
+		err = i.Parse(string(v))
+	case string:
+		err = i.Parse(v)
+	default:
+		err = fmt.Errorf("%T %+v is not a meaningful Sweet", value, value)
+	}
+
+	return err
+}
+
+// -- copy this somewhere and uncomment it if you need DB storage to use strings --
+// Value converts the period to a string. 
+// It implements driver.Valuer, https://golang.org/pkg/database/sql/driver/#Valuer
+//func (i Sweet) Value() (driver.Value, error) {
+//    return i.String(), nil
+//}
+`
+
 func TestWriteNoChange(t *testing.T) {
 	RegisterTestingT(t)
 	buf := &bytes.Buffer{}
@@ -238,7 +271,7 @@ func TestWriteNoChange(t *testing.T) {
 	err := m.write(buf)
 	got := buf.String()
 	Ω(err).Should(Not(HaveOccurred()))
-	Ω(got).Should(Equal(e0+version+e1+e2nc+e3+e4+e5+e6+e7+e8+e9nc+e10nc+e11+e12), got)
+	Ω(got).Should(Equal(e0+version+e1+e2nc+e3+e4+e5+e6+e7+e8+e9nc+e10nc+e11+e12+e13), got)
 }
 
 func TestWriteLower(t *testing.T) {
@@ -257,5 +290,5 @@ func TestWriteLower(t *testing.T) {
 	err := m.write(buf)
 	got := buf.String()
 	Ω(err).Should(Not(HaveOccurred()))
-	Ω(got).Should(Equal(e0+version+e1+e2lc+e3+e4+e5+e6+e7+e8+e9lc+e10lc+e11+e12), got)
+	Ω(got).Should(Equal(e0+version+e1+e2lc+e3+e4+e5+e6+e7+e8+e9lc+e10lc+e11+e12+e13), got)
 }

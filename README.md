@@ -48,9 +48,11 @@ const (
 
 this example comes from the [Go Language Reference](https://golang.org/ref/spec#Constant_declarations). 
 
-Another example,
+Another example, which also includes the optional `go:generate` line,
 
 ```Go
+//go:generate enumeration -type Month
+
 type Month uint
 
 const (
@@ -63,7 +65,7 @@ const (
 
 Note that the full language specification is flexible, allowing several alternative equivalent syntaxes for declaring constants. The `enumeration` tool only handles the most common two cases, illustrated above.
 
-The base type does not have to be an integer; other base types can be used, for example
+Above, `Month` is based on `uint`; the base type does not have to be an `int`; any integer or float base type can be used, for example
 
 ```Go
 type Base float32
@@ -77,7 +79,33 @@ const (
 )
 ```
 
-There is one other restriction: the type declaration must be *before* the constants, as it does in all the examples above. White-space should be canonically formatted using `gofmt` before using the tool (the results are unpredictable otherwise).
+There is one other restriction: the type declaration must be *before* the constants, as it does in all the examples above. White-space should be canonically formatted using `gofmt` before using the tool (the results are unpredictable otherwise). (This is because of the limited parser used, for the reasons given earlier.)
+
+Although the default behaviour is to generate strings for each enumeration value which match the constants you declared, you can take full control and override this with your own lookup table. The `-using` argument needed:
+
+```Go
+//go:generate enumeration -type Day -using shortDayNames
+
+type Day int
+
+const (
+	Sunday Day = iota
+	Monday
+	Tuesday
+	Wednesday
+	Thursday
+	Friday
+)
+
+var shortDayNames = map[Day]string{
+    Sunday:    "Su",
+    Monday:    "Mo",
+    Tuesday:   "Tu",
+    Wednesday: "We",
+    Thursday:  "Th",
+    Friday:    "Fr",
+}
+```
 
 ## Next, Run The Tool
 
@@ -110,11 +138,20 @@ Options are:
  * `-uc`
     - convert to upper case the string representations of the enumeration values.
 
+ * `-unsnake`
+    - convert underscores in identifiers to spaces (e.g. `Hello_world` becomes "Hello world")
+
+ * `-using <map-name>`
+    - bring your own lookup table: you declare a `var <map-name> = map[Type]string{ ... }` that gives the required string representations. This gives you full control, if you need it. (n.b. `-lc`, `-uc`, `-unsnake` will be ignored)
+
  * `-f`
     - force output generation; if this is not set, the output file is only produced when it is is absent or when it is older than the input file.
 
  * `-v`
     - verbose info messages
+
+ * `-version`
+    - print the version and exit.
 
 The option parser will also infer the source and output file names, so it is also permitted to use
 
@@ -135,6 +172,9 @@ the `Day` type above. You will get:
  * `func (d Day) Ordinal() int`
     - Converts Day values into their ordinal numbers, i.e. the indexes indicating the order in which you declared the constants, starting from zero. These may happen to be the same as the values you chose, but need not be.
 
+* `func DayOf(o int) Day`
+   - Converts an ordinal to a Day value, if it can. The name of this function depends on the name of your type (`DayOf` in this example). The related type conversion `Day(i)` should be used when converting a value instead of an ordinal.
+
  * `func (d Day) IsValid() bool`
     - Tests whether a given value is one of the defined `Day` constants. Type conversion allows possibly out-of range values to be created; these can be tested with this method. 
 
@@ -151,9 +191,6 @@ the `Day` type above. You will get:
  * `func AsDay(s string) (Day, error)`
     - Converts a string representation to a Day value, if it can. The name of this function depends on the name of your type (`AsDay` in this example).
 
- * `func DayOf(o int) Day`
-    - Converts an ordinal to a Day value, if it can. The name of this function depends on the name of your type (`DayOf` in this example). The related type conversion `Day(i)` should be used when converting a value instead of an ordinal.
-
  * `var AllDays = []Day{ ... }`
     - Provides all the `Day` values in a single slice. This is particularly useful if you need to iterate over them. Usually, the identifier name depends on the name of your type, but it can be overridden using `-plural`.
 
@@ -164,11 +201,16 @@ the `Day` type above. You will get:
     - Controls whether marshalling to JSON represents the values as a number (default), or as a string.
 
  * `encoding.TextMarshaler`, `encoding.TextUnmarshaler`, `json.Marshaler`, `json.Unmarshaler`
-    - Provides methods to satisfy these two interfaces so that your enumeration can be easily used by JSON, XML and other codecs in the standard Go library.
+    - Provides methods to satisfy these interfaces so that your enumeration can be easily used by JSON, XML and other codecs in the standard Go library.
+
+ * `sql.Scanner`, `driver.Valuer`
+    - Provides methods to satisfy these two interfaces so that your enumeration can be easily used by SQL drivers in 
+      the standard Go library. Note that `driver.Valuer` is provided as a template for you to copy if you need it;
+      otherwise the SQL driver will automatically make use of the numeric values of enumerations.
 
 ## Other Use Options
 
-This tool is compatible with `go generate` - [more](https://blog.golang.org/generate).
+This tool is compatible with `go generate` - [more](https://blog.golang.org/generate). However, `go generate` may not always work if the code is still incomplete and doesn't yet compile, in which case you can try just running `enumeration` directly on the command line.
 
 ## Credits
 

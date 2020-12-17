@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration v1.8.0
+// github.com/rickb777/enumeration v1.9.0
 
 package example
 
@@ -70,7 +70,7 @@ func DayOf(i int) Day {
 		return AllDays[i]
 	}
 	// an invalid result
-	return Sunday + Monday + Tuesday + Wednesday + Thursday + Friday + Saturday
+	return Sunday + Monday + Tuesday + Wednesday + Thursday + Friday + Saturday + 1
 }
 
 // IsValid determines whether a Day is one of the defined constants.
@@ -159,3 +159,34 @@ func (i *Day) UnmarshalJSON(text []byte) error {
 	s := strings.Trim(string(text), "\"")
 	return i.Parse(s)
 }
+
+// Scan parses some value, which can be a number, a string or []byte.
+// It implements sql.Scanner, https://golang.org/pkg/database/sql/#Scanner
+func (i *Day) Scan(value interface{}) (err error) {
+	if value == nil {
+		return nil
+	}
+
+	err = nil
+	switch v := value.(type) {
+	case int64:
+		*i = Day(v)
+	case float64:
+		*i = Day(v)
+	case []byte:
+		err = i.Parse(string(v))
+	case string:
+		err = i.Parse(v)
+	default:
+		err = fmt.Errorf("%T %+v is not a meaningful Day", value, value)
+	}
+
+	return err
+}
+
+// -- copy this somewhere and uncomment it if you need DB storage to use strings --
+// Value converts the period to a string.
+// It implements driver.Valuer, https://golang.org/pkg/database/sql/driver/#Valuer
+//func (i Day) Value() (driver.Value, error) {
+//    return i.String(), nil
+//}

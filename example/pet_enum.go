@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration v1.8.0
+// github.com/rickb777/enumeration v1.9.0
 
 package example
 
@@ -66,7 +66,7 @@ func PetOf(i int) Pet {
 		return AllPets[i]
 	}
 	// an invalid result
-	return Cat + Dog + Mouse + Elephant + Koala_Bear
+	return Cat + Dog + Mouse + Elephant + Koala_Bear + 1
 }
 
 // IsValid determines whether a Pet is one of the defined constants.
@@ -159,3 +159,34 @@ func (i *Pet) UnmarshalJSON(text []byte) error {
 	s := strings.Trim(string(text), "\"")
 	return i.Parse(s)
 }
+
+// Scan parses some value, which can be a number, a string or []byte.
+// It implements sql.Scanner, https://golang.org/pkg/database/sql/#Scanner
+func (i *Pet) Scan(value interface{}) (err error) {
+	if value == nil {
+		return nil
+	}
+
+	err = nil
+	switch v := value.(type) {
+	case int64:
+		*i = Pet(v)
+	case float64:
+		*i = Pet(v)
+	case []byte:
+		err = i.Parse(string(v))
+	case string:
+		err = i.Parse(v)
+	default:
+		err = fmt.Errorf("%T %+v is not a meaningful Pet", value, value)
+	}
+
+	return err
+}
+
+// -- copy this somewhere and uncomment it if you need DB storage to use strings --
+// Value converts the period to a string.
+// It implements driver.Valuer, https://golang.org/pkg/database/sql/driver/#Valuer
+//func (i Pet) Value() (driver.Value, error) {
+//    return i.String(), nil
+//}

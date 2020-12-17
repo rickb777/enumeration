@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration v1.8.0
+// github.com/rickb777/enumeration v1.9.0
 
 package example
 
@@ -82,7 +82,7 @@ func MonthOf(i int) Month {
 		return AllMonths[i]
 	}
 	// an invalid result
-	return January + February + March + April + May + June + July + August + September + October + November + December
+	return January + February + March + April + May + June + July + August + September + October + November + December + 1
 }
 
 // IsValid determines whether a Month is one of the defined constants.
@@ -172,3 +172,34 @@ func (i *Month) UnmarshalJSON(text []byte) error {
 	s := strings.Trim(string(text), "\"")
 	return i.Parse(s)
 }
+
+// Scan parses some value, which can be a number, a string or []byte.
+// It implements sql.Scanner, https://golang.org/pkg/database/sql/#Scanner
+func (i *Month) Scan(value interface{}) (err error) {
+	if value == nil {
+		return nil
+	}
+
+	err = nil
+	switch v := value.(type) {
+	case int64:
+		*i = Month(v)
+	case float64:
+		*i = Month(v)
+	case []byte:
+		err = i.Parse(string(v))
+	case string:
+		err = i.Parse(v)
+	default:
+		err = fmt.Errorf("%T %+v is not a meaningful Month", value, value)
+	}
+
+	return err
+}
+
+// -- copy this somewhere and uncomment it if you need DB storage to use strings --
+// Value converts the period to a string.
+// It implements driver.Valuer, https://golang.org/pkg/database/sql/driver/#Valuer
+//func (i Month) Value() (driver.Value, error) {
+//    return i.String(), nil
+//}
