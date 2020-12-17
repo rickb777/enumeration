@@ -95,7 +95,8 @@ func convert(w io.Writer, in io.Reader, input, mainType, plural, pkg string, xf 
 					XF:          xf,
 					LookupTable: *usingTable,
 				}
-				return m.write(w)
+				m.write(w)
+				return nil
 			}
 		}
 	}

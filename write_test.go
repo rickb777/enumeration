@@ -1,8 +1,8 @@
 package main
 
 import (
-	"bytes"
 	. "github.com/onsi/gomega"
+	"strings"
 	"testing"
 )
 
@@ -20,17 +20,43 @@ import (
 	"strings"
 	"github.com/rickb777/enumeration/enum"
 )
-
 `
 
-const e2nc = `const sweetEnumStrings = "MarsBountySnickersKitkat"`
+func TestWriteHead(t *testing.T) {
+	RegisterTestingT(t)
+	buf := &strings.Builder{}
+	modelNoChange.writeHead(buf)
+	Ω(buf.String()).Should(Equal(e0+version+e1), buf.String())
+}
 
-const e2lc = `const sweetEnumStrings = "marsbountysnickerskitkat"`
+//-------------------------------------------------------------------------------------------------
 
-const e3 = `
+const e2nc = `
+const sweetEnumStrings = "MarsBountySnickersKitkat"
 
 var sweetEnumIndex = [...]uint16{0, 4, 10, 18, 24}
+`
 
+const e2lc = `
+const sweetEnumStrings = "marsbountysnickerskitkat"
+
+var sweetEnumIndex = [...]uint16{0, 4, 10, 18, 24}
+`
+
+func TestWriteJoinedStringAndIndexes(t *testing.T) {
+	RegisterTestingT(t)
+	buf := &strings.Builder{}
+	modelNoChange.writeJoinedStringAndIndexes(buf)
+	Ω(buf.String()).Should(Equal(e2nc), buf.String())
+
+	buf.Reset()
+	modelLowerWithLookupTable.writeJoinedStringAndIndexes(buf)
+	Ω(buf.String()).Should(Equal(e2lc), buf.String())
+}
+
+//-------------------------------------------------------------------------------------------------
+
+const e3 = `
 // AllSweets lists all 4 values in order.
 var AllSweets = []Sweet{
 	Mars, Bounty, Snickers, Kitkat,
@@ -42,9 +68,19 @@ var AllSweetEnums = enum.IntEnums{
 }
 `
 
-const e4 = `
-// String returns the string representation of a Sweet.
-func (i Sweet) String() string {
+func TestWriteAllItems(t *testing.T) {
+	RegisterTestingT(t)
+	buf := &strings.Builder{}
+	modelNoChange.writeAllItems(buf)
+	Ω(buf.String()).Should(Equal(e3), buf.String())
+}
+
+//-------------------------------------------------------------------------------------------------
+
+const e4nc = `
+// Literal returns the literal string representation of a Sweet, which is
+// the same as the const identifier.
+func (i Sweet) Literal() string {
 	o := i.Ordinal()
 	if o < 0 || o >= len(AllSweets) {
 		return fmt.Sprintf("Sweet(%d)", i)
@@ -53,7 +89,79 @@ func (i Sweet) String() string {
 }
 `
 
-const e5 = `
+const e4lc = `
+// Literal returns the literal string representation of a Sweet, which is
+// the same as the const identifier.
+func (i Sweet) Literal() string {
+	o := i.Ordinal()
+	if o < 0 || o >= len(AllSweets) {
+		return fmt.Sprintf("Sweet(%g)", i)
+	}
+	return sweetEnumStrings[sweetEnumIndex[o]:sweetEnumIndex[o+1]]
+}
+`
+
+func TestWriteLiteralMethod(t *testing.T) {
+	RegisterTestingT(t)
+	buf := &strings.Builder{}
+	modelNoChange.writeLiteralMethod(buf)
+	Ω(buf.String()).Should(Equal(e4nc), buf.String())
+
+	buf.Reset()
+	modelLowerWithLookupTable.writeLiteralMethod(buf)
+	Ω(buf.String()).Should(Equal(e4lc), buf.String())
+}
+
+//-------------------------------------------------------------------------------------------------
+
+const e5nc = `
+// String returns the string representation of a Sweet. This uses Literal.
+func (i Sweet) String() string {
+	return i.Literal()
+}
+`
+
+const e5lc = `
+var sweetNamesInverse = map[string]Sweet{}
+
+func init() {
+	if len(sweetNames) != 4 {
+		panic(fmt.Sprintf("sweetNames has %d items but should have 4", len(sweetNames)))
+	}
+
+	for k, v := range sweetNames {
+		sweetNamesInverse[v] = k
+	}
+
+	if len(sweetNames) != len(sweetNamesInverse) {
+		panic(fmt.Sprintf("sweetNames has %d items but they are not distinct", len(sweetNames)))
+	}
+}
+
+// String returns the string representation of a Sweet.
+func (i Sweet) String() string {
+	s, ok := sweetNames[i]
+	if ok {
+		return s
+	}
+	return fmt.Sprintf("%02d", i)
+}
+`
+
+func TestWriteStringMethod(t *testing.T) {
+	RegisterTestingT(t)
+	buf := &strings.Builder{}
+	modelNoChange.writeStringMethod(buf)
+	Ω(buf.String()).Should(Equal(e5nc), buf.String())
+
+	buf.Reset()
+	modelLowerWithLookupTable.writeStringMethod(buf)
+	Ω(buf.String()).Should(Equal(e5lc), buf.String())
+}
+
+//-------------------------------------------------------------------------------------------------
+
+const e6 = `
 // Ordinal returns the ordinal number of a Sweet.
 func (i Sweet) Ordinal() int {
 	switch i {
@@ -70,7 +178,20 @@ func (i Sweet) Ordinal() int {
 }
 `
 
-const e6 = `
+func TestWriteOrdinalMethod(t *testing.T) {
+	RegisterTestingT(t)
+	buf := &strings.Builder{}
+	modelNoChange.writeOrdinalMethod(buf)
+	Ω(buf.String()).Should(Equal(e6), buf.String())
+
+	buf.Reset()
+	modelLowerWithLookupTable.writeOrdinalMethod(buf)
+	Ω(buf.String()).Should(Equal(e6), buf.String())
+}
+
+//-------------------------------------------------------------------------------------------------
+
+const e7nc = `
 // Int returns the int value, which is not necessarily the same as the ordinal.
 // It serves to facilitate polymorphism (see enum.IntEnum).
 func (i Sweet) Int() int {
@@ -78,7 +199,27 @@ func (i Sweet) Int() int {
 }
 `
 
-const e7 = `
+const e7lc = `
+// Float returns the float64 value. It serves to facilitate polymorphism (see enum.FloatEnum).
+func (i Sweet) Float() float64 {
+	return float64(i)
+}
+`
+
+func TestWriteBaseMethod(t *testing.T) {
+	RegisterTestingT(t)
+	buf := &strings.Builder{}
+	modelNoChange.writeBaseMethod(buf)
+	Ω(buf.String()).Should(Equal(e7nc), buf.String())
+
+	buf.Reset()
+	modelLowerWithLookupTable.writeBaseMethod(buf)
+	Ω(buf.String()).Should(Equal(e7lc), buf.String())
+}
+
+//-------------------------------------------------------------------------------------------------
+
+const e8 = `
 // SweetOf returns a Sweet based on an ordinal number. This is the inverse of Ordinal.
 // If the ordinal is out of range, an invalid Sweet is returned.
 func SweetOf(i int) Sweet {
@@ -90,7 +231,19 @@ func SweetOf(i int) Sweet {
 }
 `
 
-const e8 = `
+func TestWriteOfMethod(t *testing.T) {
+	RegisterTestingT(t)
+	buf := &strings.Builder{}
+	modelNoChange.writeOfMethod(buf)
+	Ω(buf.String()).Should(Equal(e8), buf.String())
+
+	buf.Reset()
+	modelLowerWithLookupTable.writeOfMethod(buf)
+	Ω(buf.String()).Should(Equal(e8), buf.String())
+}
+
+//-------------------------------------------------------------------------------------------------
+const e9 = `
 // IsValid determines whether a Sweet is one of the defined constants.
 func (i Sweet) IsValid() bool {
 	switch i {
@@ -101,65 +254,104 @@ func (i Sweet) IsValid() bool {
 }
 `
 
-const e9nc = `
-// Parse parses a string to find the corresponding Sweet, accepting either one of the string
-// values or an ordinal number.
-func (v *Sweet) Parse(s string) error {
-	ord, err := strconv.Atoi(s)
-	if err == nil && 0 <= ord && ord < len(AllSweets) {
-		*v = AllSweets[ord]
-		return nil
-	}
-	var i0 uint16 = 0
-	for j := 1; j < len(sweetEnumIndex); j++ {
-		i1 := sweetEnumIndex[j]
-		p := sweetEnumStrings[i0:i1]
-		if s == p {
-			*v = AllSweets[j-1]
-			return nil
-		}
-		i0 = i1
-	}
-	return errors.New(s + ": unrecognised Sweet")
-}
-`
+func TestWriteIsValid(t *testing.T) {
+	RegisterTestingT(t)
+	buf := &strings.Builder{}
+	modelNoChange.writeIsValidMethod(buf)
+	Ω(buf.String()).Should(Equal(e9), buf.String())
 
-const e9lc = `
-// Parse parses a string to find the corresponding Sweet, accepting either one of the string
-// values or an ordinal number.
-// The case of s does not matter.
-func (v *Sweet) Parse(s string) error {
-	s = strings.ToLower(s)
-	ord, err := strconv.Atoi(s)
-	if err == nil && 0 <= ord && ord < len(AllSweets) {
-		*v = AllSweets[ord]
-		return nil
-	}
-	var i0 uint16 = 0
-	for j := 1; j < len(sweetEnumIndex); j++ {
-		i1 := sweetEnumIndex[j]
-		p := sweetEnumStrings[i0:i1]
-		if s == p {
-			*v = AllSweets[j-1]
-			return nil
-		}
-		i0 = i1
-	}
-	return errors.New(s + ": unrecognised Sweet")
+	buf.Reset()
+	modelLowerWithLookupTable.writeIsValidMethod(buf)
+	Ω(buf.String()).Should(Equal(e9), buf.String())
 }
-`
+
+//-------------------------------------------------------------------------------------------------
 
 const e10nc = `
-// AsSweet parses a string to find the corresponding Sweet, accepting either one of the string
+// Parse parses a string to find the corresponding Sweet, accepting one of the string
 // values or an ordinal number.
-func AsSweet(s string) (Sweet, error) {
-	var i = new(Sweet)
-	err := i.Parse(s)
-	return *i, err
+func (v *Sweet) Parse(s string) error {
+	// attempt to convert ordinal value
+	ord, err := strconv.Atoi(s)
+	if err == nil && 0 <= ord && ord < len(AllSweets) {
+		*v = AllSweets[ord]
+		return nil
+	}
+
+	// attempt to match an identifier
+	var i0 uint16 = 0
+	for j := 1; j < len(sweetEnumIndex); j++ {
+		i1 := sweetEnumIndex[j]
+		p := sweetEnumStrings[i0:i1]
+		if s == p {
+			*v = AllSweets[j-1]
+			return nil
+		}
+		i0 = i1
+	}
+	return errors.New(s + ": unrecognised Sweet")
 }
 `
 
 const e10lc = `
+// Parse parses a string to find the corresponding Sweet, accepting one of the string
+// values or an ordinal number.
+// The case of s does not matter.
+func (v *Sweet) Parse(s string) error {
+	s = strings.ToLower(s)
+	// attempt to convert ordinal value
+	ord, err := strconv.Atoi(s)
+	if err == nil && 0 <= ord && ord < len(AllSweets) {
+		*v = AllSweets[ord]
+		return nil
+	}
+
+	// attempt to match an entry in sweetNamesInverse
+	var ok bool
+	*v, ok = sweetNamesInverse[s]
+	if ok {
+		return nil
+	}
+
+	// attempt to match an identifier
+	var i0 uint16 = 0
+	for j := 1; j < len(sweetEnumIndex); j++ {
+		i1 := sweetEnumIndex[j]
+		p := sweetEnumStrings[i0:i1]
+		if s == p {
+			*v = AllSweets[j-1]
+			return nil
+		}
+		i0 = i1
+	}
+	return errors.New(s + ": unrecognised Sweet")
+}
+`
+
+func TestWriteParseMethod(t *testing.T) {
+	RegisterTestingT(t)
+	buf := &strings.Builder{}
+	modelNoChange.writeParseMethod(buf)
+	Ω(buf.String()).Should(Equal(e10nc), buf.String())
+
+	buf.Reset()
+	modelLowerWithLookupTable.writeParseMethod(buf)
+	Ω(buf.String()).Should(Equal(e10lc), buf.String())
+}
+
+//-------------------------------------------------------------------------------------------------
+
+const e11nc = `
+// AsSweet parses a string to find the corresponding Sweet, accepting either one of the string
+// values or an ordinal number.
+func AsSweet(s string) (Sweet, error) {
+	var i = new(Sweet)
+	err := i.Parse(s)
+	return *i, err
+}
+`
+
+const e11lc = `
 // AsSweet parses a string to find the corresponding Sweet, accepting either one of the string
 // values or an ordinal number.
 // The case of s does not matter.
@@ -170,7 +362,20 @@ func AsSweet(s string) (Sweet, error) {
 }
 `
 
-const e11 = `
+func TestWriteAsMethod(t *testing.T) {
+	RegisterTestingT(t)
+	buf := &strings.Builder{}
+	modelNoChange.writeAsMethod(buf)
+	Ω(buf.String()).Should(Equal(e11nc), buf.String())
+
+	buf.Reset()
+	modelLowerWithLookupTable.writeAsMethod(buf)
+	Ω(buf.String()).Should(Equal(e11lc), buf.String())
+}
+
+//-------------------------------------------------------------------------------------------------
+
+const e12nc = `
 // MarshalText converts values to a form suitable for transmission via JSON, XML etc.
 func (i Sweet) MarshalText() (text []byte, err error) {
 	return []byte(i.String()), nil
@@ -182,7 +387,35 @@ func (i *Sweet) UnmarshalText(text []byte) error {
 }
 `
 
-const e12 = `
+const e12lc = `
+// MarshalText converts values to a form suitable for transmission via JSON, XML etc.
+func (i Sweet) MarshalText() (text []byte, err error) {
+	if sweetMarshalTextUsingLiteral {
+		return []byte(i.Literal()), nil
+	}
+	return []byte(i.String()), nil
+}
+
+// UnmarshalText converts transmitted values to ordinary values.
+func (i *Sweet) UnmarshalText(text []byte) error {
+	return i.Parse(string(text))
+}
+`
+
+func TestWriteMarshalText(t *testing.T) {
+	RegisterTestingT(t)
+	buf := &strings.Builder{}
+	modelNoChange.writeMarshalText(buf)
+	Ω(buf.String()).Should(Equal(e12nc), buf.String())
+
+	buf.Reset()
+	modelLowerWithLookupTable.writeMarshalText(buf)
+	Ω(buf.String()).Should(Equal(e12lc), buf.String())
+}
+
+//-------------------------------------------------------------------------------------------------
+
+const e13nc = `
 // SweetMarshalJSONUsingString controls whether generated JSON uses ordinals or strings. By default,
 // it is false and ordinals are used. Set it true to cause quoted strings to be used instead,
 // these being easier to read but taking more resources.
@@ -192,19 +425,71 @@ var SweetMarshalJSONUsingString = false
 // ordinal integer is emitted, but a quoted string is emitted instead if
 // SweetMarshalJSONUsingString is true.
 func (i Sweet) MarshalJSON() ([]byte, error) {
-	if SweetMarshalJSONUsingString {
-		s := []byte(i.String())
-		b := make([]byte, len(s)+2)
-		b[0] = '"'
-		copy(b[1:], s)
-		b[len(s)+1] = '"'
-		return b, nil
+	if !SweetMarshalJSONUsingString {
+		// use the ordinal
+		s := strconv.Itoa(i.Ordinal())
+		return []byte(s), nil
 	}
-	// else use the ordinal
-	s := strconv.Itoa(i.Ordinal())
-	return []byte(s), nil
+	return i.quotedString(i.String())
 }
 
+func (i Sweet) quotedString(s string) ([]byte, error) {
+	b := make([]byte, len(s)+2)
+	b[0] = '"'
+	copy(b[1:], s)
+	b[len(s)+1] = '"'
+	return b, nil
+}
+`
+
+const e13lc = `
+// SweetMarshalJSONUsingString controls whether generated JSON uses ordinals or strings. By default,
+// it is false and ordinals are used. Set it true to cause quoted strings to be used instead,
+// these being easier to read but taking more resources.
+var SweetMarshalJSONUsingString = false
+
+// sweetMarshalTextUsingLiteral controls whether generated XML or JSON uses the String()
+// or the Literal() method.
+var sweetMarshalTextUsingLiteral = false
+
+// MarshalJSON converts values to bytes suitable for transmission via JSON. By default, the
+// ordinal integer is emitted, but a quoted string is emitted instead if
+// SweetMarshalJSONUsingString is true.
+func (i Sweet) MarshalJSON() ([]byte, error) {
+	if !SweetMarshalJSONUsingString {
+		// use the ordinal
+		s := strconv.Itoa(i.Ordinal())
+		return []byte(s), nil
+	}
+	if sweetMarshalTextUsingLiteral {
+		return i.quotedString(i.Literal())
+	}
+	return i.quotedString(i.String())
+}
+
+func (i Sweet) quotedString(s string) ([]byte, error) {
+	b := make([]byte, len(s)+2)
+	b[0] = '"'
+	copy(b[1:], s)
+	b[len(s)+1] = '"'
+	return b, nil
+}
+`
+
+func TestWriteMarshaJSON(t *testing.T) {
+	RegisterTestingT(t)
+	buf := &strings.Builder{}
+	modelNoChange.writeMarshalJSON(buf)
+	Ω(buf.String()).Should(Equal(e13nc), buf.String())
+
+	buf.Reset()
+	modelLowerWithLookupTable.writeMarshalJSON(buf)
+	Ω(buf.String()).Should(Equal(e13lc), buf.String())
+}
+
+//-------------------------------------------------------------------------------------------------
+
+const e14 = `
 // UnmarshalJSON converts transmitted JSON values to ordinary values. It allows both
 // ordinals and strings to represent the values.
 func (i *Sweet) UnmarshalJSON(text []byte) error {
@@ -222,7 +507,20 @@ func (i *Sweet) UnmarshalJSON(text []byte) error {
 }
 `
 
-const e13 = `
+func TestWriteUnmarshaJSON(t *testing.T) {
+	RegisterTestingT(t)
+	buf := &strings.Builder{}
+	modelNoChange.writeUnmarshalJSON(buf)
+	Ω(buf.String()).Should(Equal(e14), buf.String())
+
+	buf.Reset()
+	modelLowerWithLookupTable.writeUnmarshalJSON(buf)
+	Ω(buf.String()).Should(Equal(e14), buf.String())
+}
+
+//-------------------------------------------------------------------------------------------------
+
+const e15 = `
 // Scan parses some value, which can be a number, a string or []byte.
 // It implements sql.Scanner, https://golang.org/pkg/database/sql/#Scanner
 func (i *Sweet) Scan(value interface{}) (err error) {
@@ -255,40 +553,38 @@ func (i *Sweet) Scan(value interface{}) (err error) {
 //}
 `
 
-func TestWriteNoChange(t *testing.T) {
+func TestWriteScanValue(t *testing.T) {
 	RegisterTestingT(t)
-	buf := &bytes.Buffer{}
-	m := model{
-		MainType: "Sweet",
-		LcType:   "sweet",
-		BaseType: "int",
-		Plural:   "Sweets",
-		Pkg:      "confectionary",
-		Version:  version,
-		Values:   []string{"Mars", "Bounty", "Snickers", "Kitkat"},
-		XF:       nil,
-	}
-	err := m.write(buf)
-	got := buf.String()
-	Ω(err).Should(Not(HaveOccurred()))
-	Ω(got).Should(Equal(e0+version+e1+e2nc+e3+e4+e5+e6+e7+e8+e9nc+e10nc+e11+e12+e13), got)
+	buf := &strings.Builder{}
+	modelNoChange.writeScanValue(buf)
+	Ω(buf.String()).Should(Equal(e15), buf.String())
+
+	buf.Reset()
+	modelLowerWithLookupTable.writeScanValue(buf)
+	Ω(buf.String()).Should(Equal(e15), buf.String())
 }
 
-func TestWriteLower(t *testing.T) {
-	RegisterTestingT(t)
-	buf := &bytes.Buffer{}
-	m := model{
-		MainType: "Sweet",
-		LcType:   "sweet",
-		BaseType: "int",
-		Plural:   "Sweets",
-		Pkg:      "confectionary",
-		Version:  version,
-		Values:   []string{"Mars", "Bounty", "Snickers", "Kitkat"},
-		XF:       []Transformer{toLower},
-	}
-	err := m.write(buf)
-	got := buf.String()
-	Ω(err).Should(Not(HaveOccurred()))
-	Ω(got).Should(Equal(e0+version+e1+e2lc+e3+e4+e5+e6+e7+e8+e9lc+e10lc+e11+e12+e13), got)
+//-------------------------------------------------------------------------------------------------
+
+var modelNoChange = model{
+	MainType: "Sweet",
+	LcType:   "sweet",
+	BaseType: "int",
+	Plural:   "Sweets",
+	Pkg:      "confectionary",
+	Version:  version,
+	Values:   []string{"Mars", "Bounty", "Snickers", "Kitkat"},
+	XF:       nil,
+}
+
+var modelLowerWithLookupTable = model{
+	MainType:    "Sweet",
+	LcType:      "sweet",
+	BaseType:    "float64",
+	Plural:      "Sweets",
+	Pkg:         "confectionary",
+	Version:     version,
+	Values:      []string{"Mars", "Bounty", "Snickers", "Kitkat"},
+	XF:          []Transformer{toLower},
+	LookupTable: "sweetNames",
 }

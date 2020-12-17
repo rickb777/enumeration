@@ -6,9 +6,9 @@ package example
 import (
 	"errors"
 	"fmt"
+	"github.com/rickb777/enumeration/enum"
 	"strconv"
 	"strings"
-	"github.com/rickb777/enumeration/enum"
 )
 
 const baseEnumStrings = "acgt"
@@ -25,13 +25,19 @@ var AllBaseEnums = enum.FloatEnums{
 	A, C, G, T,
 }
 
-// String returns the string representation of a Base.
-func (i Base) String() string {
+// Literal returns the literal string representation of a Base, which is
+// the same as the const identifier.
+func (i Base) Literal() string {
 	o := i.Ordinal()
 	if o < 0 || o >= len(AllBases) {
 		return fmt.Sprintf("Base(%g)", i)
 	}
 	return baseEnumStrings[baseEnumIndex[o]:baseEnumIndex[o+1]]
+}
+
+// String returns the string representation of a Base. This uses Literal.
+func (i Base) String() string {
+	return i.Literal()
 }
 
 // Ordinal returns the ordinal number of a Base.
@@ -73,16 +79,19 @@ func (i Base) IsValid() bool {
 	return false
 }
 
-// Parse parses a string to find the corresponding Base, accepting either one of the string
+// Parse parses a string to find the corresponding Base, accepting one of the string
 // values or an ordinal number.
 // The case of s does not matter.
 func (v *Base) Parse(s string) error {
 	s = strings.ToLower(s)
+	// attempt to convert ordinal value
 	ord, err := strconv.Atoi(s)
 	if err == nil && 0 <= ord && ord < len(AllBases) {
 		*v = AllBases[ord]
 		return nil
 	}
+
+	// attempt to match an identifier
 	var i0 uint16 = 0
 	for j := 1; j < len(baseEnumIndex); j++ {
 		i1 := baseEnumIndex[j]
@@ -124,24 +133,27 @@ var BaseMarshalJSONUsingString = false
 // ordinal integer is emitted, but a quoted string is emitted instead if
 // BaseMarshalJSONUsingString is true.
 func (i Base) MarshalJSON() ([]byte, error) {
-	if BaseMarshalJSONUsingString {
-		s := []byte(i.String())
-		b := make([]byte, len(s)+2)
-		b[0] = '"'
-		copy(b[1:], s)
-		b[len(s)+1] = '"'
-		return b, nil
+	if !BaseMarshalJSONUsingString {
+		// use the ordinal
+		s := strconv.Itoa(i.Ordinal())
+		return []byte(s), nil
 	}
-	// else use the ordinal
-	s := strconv.Itoa(i.Ordinal())
-	return []byte(s), nil
+	return i.quotedString(i.String())
+}
+
+func (i Base) quotedString(s string) ([]byte, error) {
+	b := make([]byte, len(s)+2)
+	b[0] = '"'
+	copy(b[1:], s)
+	b[len(s)+1] = '"'
+	return b, nil
 }
 
 // UnmarshalJSON converts transmitted JSON values to ordinary values. It allows both
 // ordinals and strings to represent the values.
 func (i *Base) UnmarshalJSON(text []byte) error {
 	if len(text) >= 2 && text[0] == '"' && text[len(text)-1] == '"' {
-		s := string(text[1:len(text)-1])
+		s := string(text[1 : len(text)-1])
 		return i.Parse(s)
 	}
 
@@ -178,7 +190,7 @@ func (i *Base) Scan(value interface{}) (err error) {
 }
 
 // -- copy this somewhere and uncomment it if you need DB storage to use strings --
-// Value converts the period to a string. 
+// Value converts the period to a string.
 // It implements driver.Valuer, https://golang.org/pkg/database/sql/driver/#Valuer
 //func (i Base) Value() (driver.Value, error) {
 //    return i.String(), nil

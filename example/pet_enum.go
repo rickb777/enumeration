@@ -6,9 +6,9 @@ package example
 import (
 	"errors"
 	"fmt"
+	"github.com/rickb777/enumeration/enum"
 	"strconv"
 	"strings"
-	"github.com/rickb777/enumeration/enum"
 )
 
 const petEnumStrings = "catdogmouseelephantkoala bear"
@@ -27,13 +27,19 @@ var AllPetEnums = enum.IntEnums{
 	Koala_Bear,
 }
 
-// String returns the string representation of a Pet.
-func (i Pet) String() string {
+// Literal returns the literal string representation of a Pet, which is
+// the same as the const identifier.
+func (i Pet) Literal() string {
 	o := i.Ordinal()
 	if o < 0 || o >= len(AllPets) {
 		return fmt.Sprintf("Pet(%d)", i)
 	}
 	return petEnumStrings[petEnumIndex[o]:petEnumIndex[o+1]]
+}
+
+// String returns the string representation of a Pet. This uses Literal.
+func (i Pet) String() string {
+	return i.Literal()
 }
 
 // Ordinal returns the ordinal number of a Pet.
@@ -79,17 +85,20 @@ func (i Pet) IsValid() bool {
 	return false
 }
 
-// Parse parses a string to find the corresponding Pet, accepting either one of the string
+// Parse parses a string to find the corresponding Pet, accepting one of the string
 // values or an ordinal number.
 // The case of s does not matter.
 func (v *Pet) Parse(s string) error {
 	s = strings.ToLower(s)
 	s = strings.ReplaceAll(s, "_", " ")
+	// attempt to convert ordinal value
 	ord, err := strconv.Atoi(s)
 	if err == nil && 0 <= ord && ord < len(AllPets) {
 		*v = AllPets[ord]
 		return nil
 	}
+
+	// attempt to match an identifier
 	var i0 uint16 = 0
 	for j := 1; j < len(petEnumIndex); j++ {
 		i1 := petEnumIndex[j]
@@ -131,24 +140,27 @@ var PetMarshalJSONUsingString = false
 // ordinal integer is emitted, but a quoted string is emitted instead if
 // PetMarshalJSONUsingString is true.
 func (i Pet) MarshalJSON() ([]byte, error) {
-	if PetMarshalJSONUsingString {
-		s := []byte(i.String())
-		b := make([]byte, len(s)+2)
-		b[0] = '"'
-		copy(b[1:], s)
-		b[len(s)+1] = '"'
-		return b, nil
+	if !PetMarshalJSONUsingString {
+		// use the ordinal
+		s := strconv.Itoa(i.Ordinal())
+		return []byte(s), nil
 	}
-	// else use the ordinal
-	s := strconv.Itoa(i.Ordinal())
-	return []byte(s), nil
+	return i.quotedString(i.String())
+}
+
+func (i Pet) quotedString(s string) ([]byte, error) {
+	b := make([]byte, len(s)+2)
+	b[0] = '"'
+	copy(b[1:], s)
+	b[len(s)+1] = '"'
+	return b, nil
 }
 
 // UnmarshalJSON converts transmitted JSON values to ordinary values. It allows both
 // ordinals and strings to represent the values.
 func (i *Pet) UnmarshalJSON(text []byte) error {
 	if len(text) >= 2 && text[0] == '"' && text[len(text)-1] == '"' {
-		s := string(text[1:len(text)-1])
+		s := string(text[1 : len(text)-1])
 		return i.Parse(s)
 	}
 
@@ -185,7 +197,7 @@ func (i *Pet) Scan(value interface{}) (err error) {
 }
 
 // -- copy this somewhere and uncomment it if you need DB storage to use strings --
-// Value converts the period to a string. 
+// Value converts the period to a string.
 // It implements driver.Valuer, https://golang.org/pkg/database/sql/driver/#Valuer
 //func (i Pet) Value() (driver.Value, error) {
 //    return i.String(), nil

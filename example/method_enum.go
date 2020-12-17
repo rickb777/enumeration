@@ -6,10 +6,14 @@ package example
 import (
 	"errors"
 	"fmt"
+	"github.com/rickb777/enumeration/enum"
 	"strconv"
 	"strings"
-	"github.com/rickb777/enumeration/enum"
 )
+
+const methodEnumStrings = "HEADGETPUTPOSTPATCHDELETE"
+
+var methodEnumIndex = [...]uint16{0, 4, 7, 10, 14, 19, 25}
 
 // AllMethods lists all 6 values in order.
 var AllMethods = []Method{
@@ -23,11 +27,21 @@ var AllMethodEnums = enum.IntEnums{
 	PATCH, DELETE,
 }
 
+// Literal returns the literal string representation of a Method, which is
+// the same as the const identifier.
+func (i Method) Literal() string {
+	o := i.Ordinal()
+	if o < 0 || o >= len(AllMethods) {
+		return fmt.Sprintf("Method(%d)", i)
+	}
+	return methodEnumStrings[methodEnumIndex[o]:methodEnumIndex[o+1]]
+}
+
 var methodStringsInverse = map[string]Method{}
 
 func init() {
 	if len(methodStrings) != 6 {
-		panic(fmt.Sprintf("methodStrings has %d items but there are missing ones", len(methodStrings)))
+		panic(fmt.Sprintf("methodStrings has %d items but should have 6", len(methodStrings)))
 	}
 
 	for k, v := range methodStrings {
@@ -93,13 +107,33 @@ func (i Method) IsValid() bool {
 	return false
 }
 
-// Parse parses a string to find the corresponding Method, accepting either one of the string
+// Parse parses a string to find the corresponding Method, accepting one of the string
 // values or an ordinal number.
 func (v *Method) Parse(s string) error {
+	// attempt to convert ordinal value
+	ord, err := strconv.Atoi(s)
+	if err == nil && 0 <= ord && ord < len(AllMethods) {
+		*v = AllMethods[ord]
+		return nil
+	}
+
+	// attempt to match an entry in methodStringsInverse
 	var ok bool
 	*v, ok = methodStringsInverse[s]
 	if ok {
 		return nil
+	}
+
+	// attempt to match an identifier
+	var i0 uint16 = 0
+	for j := 1; j < len(methodEnumIndex); j++ {
+		i1 := methodEnumIndex[j]
+		p := methodEnumStrings[i0:i1]
+		if s == p {
+			*v = AllMethods[j-1]
+			return nil
+		}
+		i0 = i1
 	}
 	return errors.New(s + ": unrecognised Method")
 }
@@ -114,6 +148,9 @@ func AsMethod(s string) (Method, error) {
 
 // MarshalText converts values to a form suitable for transmission via JSON, XML etc.
 func (i Method) MarshalText() (text []byte, err error) {
+	if methodMarshalTextUsingLiteral {
+		return []byte(i.Literal()), nil
+	}
 	return []byte(i.String()), nil
 }
 
@@ -127,28 +164,38 @@ func (i *Method) UnmarshalText(text []byte) error {
 // these being easier to read but taking more resources.
 var MethodMarshalJSONUsingString = false
 
+// methodMarshalTextUsingLiteral controls whether generated XML or JSON uses the String()
+// or the Literal() method.
+var methodMarshalTextUsingLiteral = false
+
 // MarshalJSON converts values to bytes suitable for transmission via JSON. By default, the
 // ordinal integer is emitted, but a quoted string is emitted instead if
 // MethodMarshalJSONUsingString is true.
 func (i Method) MarshalJSON() ([]byte, error) {
-	if MethodMarshalJSONUsingString {
-		s := []byte(i.String())
-		b := make([]byte, len(s)+2)
-		b[0] = '"'
-		copy(b[1:], s)
-		b[len(s)+1] = '"'
-		return b, nil
+	if !MethodMarshalJSONUsingString {
+		// use the ordinal
+		s := strconv.Itoa(i.Ordinal())
+		return []byte(s), nil
 	}
-	// else use the ordinal
-	s := strconv.Itoa(i.Ordinal())
-	return []byte(s), nil
+	if methodMarshalTextUsingLiteral {
+		return i.quotedString(i.Literal())
+	}
+	return i.quotedString(i.String())
+}
+
+func (i Method) quotedString(s string) ([]byte, error) {
+	b := make([]byte, len(s)+2)
+	b[0] = '"'
+	copy(b[1:], s)
+	b[len(s)+1] = '"'
+	return b, nil
 }
 
 // UnmarshalJSON converts transmitted JSON values to ordinary values. It allows both
 // ordinals and strings to represent the values.
 func (i *Method) UnmarshalJSON(text []byte) error {
 	if len(text) >= 2 && text[0] == '"' && text[len(text)-1] == '"' {
-		s := string(text[1:len(text)-1])
+		s := string(text[1 : len(text)-1])
 		return i.Parse(s)
 	}
 
@@ -185,7 +232,7 @@ func (i *Method) Scan(value interface{}) (err error) {
 }
 
 // -- copy this somewhere and uncomment it if you need DB storage to use strings --
-// Value converts the period to a string. 
+// Value converts the period to a string.
 // It implements driver.Valuer, https://golang.org/pkg/database/sql/driver/#Valuer
 //func (i Method) Value() (driver.Value, error) {
 //    return i.String(), nil

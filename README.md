@@ -142,7 +142,7 @@ Options are:
     - convert underscores in identifiers to spaces (e.g. `Hello_world` becomes "Hello world")
 
  * `-using <map-name>`
-    - bring your own lookup table: you declare a `var <map-name> = map[Type]string{ ... }` that gives the required string representations. This gives you full control, if you need it. (n.b. `-lc`, `-uc`, `-unsnake` will be ignored)
+    - bring your own lookup table: you declare a `var <map-name> = map[Type]string{ ... }` that gives the required string representations. This gives you full control, if you need it.
 
  * `-f`
     - force output generation; if this is not set, the output file is only produced when it is is absent or when it is older than the input file.

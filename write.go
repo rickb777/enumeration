@@ -8,6 +8,8 @@ import (
 	"text/template"
 )
 
+//-------------------------------------------------------------------------------------------------
+
 const head = `// generated code - do not edit
 // github.com/rickb777/enumeration <<.Version>>
 
@@ -21,6 +23,10 @@ import (
 	"github.com/rickb777/enumeration/enum"
 )
 `
+
+func (m model) writeHead(w io.Writer) {
+	m.execTemplate(w, head)
+}
 
 //-------------------------------------------------------------------------------------------------
 
@@ -52,6 +58,10 @@ func (m model) Indexes() string {
 	return buf.String()
 }
 
+func (m model) writeJoinedStringAndIndexes(w io.Writer) {
+	m.execTemplate(w, joinedStringAndIndexes)
+}
+
 //-------------------------------------------------------------------------------------------------
 
 const allItems = `
@@ -76,11 +86,16 @@ func (m model) AllItemsSlice() string {
 	panic("undefined")
 }
 
+func (m model) writeAllItems(w io.Writer) {
+	m.execTemplate(w, allItems)
+}
+
 //-------------------------------------------------------------------------------------------------
 
-const stringMethod = `
-// String returns the string representation of a <<.MainType>>.
-func (i <<.MainType>>) String() string {
+const literalMethod = `
+// Literal returns the literal string representation of a <<.MainType>>, which is
+// the same as the const identifier.
+func (i <<.MainType>>) Literal() string {
 	o := i.Ordinal()
 	if o < 0 || o >= len(All<<.Plural>>) {
 		return fmt.Sprintf("<<.MainType>>(<<.Placeholder>>)", i)
@@ -89,12 +104,18 @@ func (i <<.MainType>>) String() string {
 }
 `
 
-const byoStringMethod = `
+func (m model) writeLiteralMethod(w io.Writer) {
+	m.execTemplate(w, literalMethod)
+}
+
+//-------------------------------------------------------------------------------------------------
+
+const stringMethod = `<<if .LookupTable>>
 var <<.LookupTable>>Inverse = map[string]<<.MainType>>{}
 
 func init() {
 	if len(<<.LookupTable>>) != <<len .Values>> {
-		panic(fmt.Sprintf("<<.LookupTable>> has %d items but there are missing ones", len(<<.LookupTable>>)))
+		panic(fmt.Sprintf("<<.LookupTable>> has %d items but should have <<len .Values>>", len(<<.LookupTable>>)))
 	}
 
 	for k, v := range <<.LookupTable>> {
@@ -114,7 +135,17 @@ func (i <<.MainType>>) String() string {
 	}
 	return fmt.Sprintf("%02d", i)
 }
+<<- else>>
+// String returns the string representation of a <<.MainType>>. This uses Literal.
+func (i <<.MainType>>) String() string {
+	return i.Literal()
+}
+<<- end>>
 `
+
+func (m model) writeStringMethod(w io.Writer) {
+	m.execTemplate(w, stringMethod)
+}
 
 //-------------------------------------------------------------------------------------------------
 
@@ -130,6 +161,10 @@ func (i <<.MainType>>) Ordinal() int {
 	return -1
 }
 `
+
+func (m model) writeOrdinalMethod(w io.Writer) {
+	m.execTemplate(w, ordinalMethod)
+}
 
 //-------------------------------------------------------------------------------------------------
 
@@ -147,6 +182,10 @@ func (i <<.MainType>>) Int() int {
 <<- end>>
 `
 
+func (m model) writeBaseMethod(w io.Writer) {
+	m.execTemplate(w, baseMethod)
+}
+
 //-------------------------------------------------------------------------------------------------
 
 const ofMethod = `
@@ -160,6 +199,10 @@ func <<.MainType>>Of(i int) <<.MainType>> {
 	return <<.ValuesJoined 0 " + ">> + 1
 }
 `
+
+func (m model) writeOfMethod(w io.Writer) {
+	m.execTemplate(w, ofMethod)
+}
 
 //-------------------------------------------------------------------------------------------------
 
@@ -195,10 +238,14 @@ func (m model) ValuesWithWrapping(nTabs int) string {
 	return buf.String()
 }
 
+func (m model) writeIsValidMethod(w io.Writer) {
+	m.execTemplate(w, isValidMethod)
+}
+
 //-------------------------------------------------------------------------------------------------
 
 const parseMethod = `
-// Parse parses a string to find the corresponding <<.MainType>>, accepting either one of the string
+// Parse parses a string to find the corresponding <<.MainType>>, accepting one of the string
 // values or an ordinal number.
 <<- range .XF>><<if ne .Info "">>
 // <<.Info>>
@@ -209,11 +256,23 @@ func (v *<<.MainType>>) Parse(s string) error {
 	s = <<.Str>>
 <<- end>>
 <<- end>>
+	// attempt to convert ordinal value
 	ord, err := strconv.Atoi(s)
 	if err == nil && 0 <= ord && ord < len(All<<.Plural>>) {
 		*v = All<<.Plural>>[ord]
 		return nil
 	}
+<<- if .LookupTable>>
+
+	// attempt to match an entry in <<.LookupTable>>Inverse
+	var ok bool
+	*v, ok = <<.LookupTable>>Inverse[s]
+	if ok {
+		return nil
+	}
+<<- end>>
+
+	// attempt to match an identifier
 	var i0 uint16 = 0
 	for j := 1; j < len(<<.LcType>>EnumIndex); j++ {
 		i1 := <<.LcType>>EnumIndex[j]
@@ -228,24 +287,9 @@ func (v *<<.MainType>>) Parse(s string) error {
 }
 `
 
-//-------------------------------------------------------------------------------------------------
-
-const byoParseMethod = `
-// Parse parses a string to find the corresponding <<.MainType>>, accepting either one of the string
-// values or an ordinal number.
-<<- range .XF>><<if ne .Info "">>
-// <<.Info>>
-<<- end>>
-<<- end>>
-func (v *<<.MainType>>) Parse(s string) error {
-	var ok bool
-	*v, ok = <<.LookupTable>>Inverse[s]
-	if ok {
-		return nil
-	}
-	return errors.New(s + ": unrecognised <<.MainType>>")
+func (m model) writeParseMethod(w io.Writer) {
+	m.execTemplate(w, parseMethod)
 }
-`
 
 //-------------------------------------------------------------------------------------------------
 
@@ -263,11 +307,20 @@ func As<<.MainType>>(s string) (<<.MainType>>, error) {
 }
 `
 
+func (m model) writeAsMethod(w io.Writer) {
+	m.execTemplate(w, asMethod)
+}
+
 //-------------------------------------------------------------------------------------------------
 
 const marshalText = `
 // MarshalText converts values to a form suitable for transmission via JSON, XML etc.
 func (i <<.MainType>>) MarshalText() (text []byte, err error) {
+<<- if .LookupTable>>
+	if <<.LcType>>MarshalTextUsingLiteral {
+		return []byte(i.Literal()), nil
+	}
+<<- end>>
 	return []byte(i.String()), nil
 }
 
@@ -277,6 +330,10 @@ func (i *<<.MainType>>) UnmarshalText(text []byte) error {
 }
 `
 
+func (m model) writeMarshalText(w io.Writer) {
+	m.execTemplate(w, marshalText)
+}
+
 //-------------------------------------------------------------------------------------------------
 
 const marshalJSON = `
@@ -284,24 +341,46 @@ const marshalJSON = `
 // it is false and ordinals are used. Set it true to cause quoted strings to be used instead,
 // these being easier to read but taking more resources.
 var <<.MainType>>MarshalJSONUsingString = false
+<<- if .LookupTable>>
+
+// <<.LcType>>MarshalTextUsingLiteral controls whether generated XML or JSON uses the String()
+// or the Literal() method.
+var <<.LcType>>MarshalTextUsingLiteral = false
+<<- end>>
 
 // MarshalJSON converts values to bytes suitable for transmission via JSON. By default, the
 // ordinal integer is emitted, but a quoted string is emitted instead if
 // <<.MainType>>MarshalJSONUsingString is true.
 func (i <<.MainType>>) MarshalJSON() ([]byte, error) {
-	if <<.MainType>>MarshalJSONUsingString {
-		s := []byte(i.String())
-		b := make([]byte, len(s)+2)
-		b[0] = '"'
-		copy(b[1:], s)
-		b[len(s)+1] = '"'
-		return b, nil
+	if !<<.MainType>>MarshalJSONUsingString {
+		// use the ordinal
+		s := strconv.Itoa(i.Ordinal())
+		return []byte(s), nil
 	}
-	// else use the ordinal
-	s := strconv.Itoa(i.Ordinal())
-	return []byte(s), nil
+<<- if .LookupTable>>
+	if <<.LcType>>MarshalTextUsingLiteral {
+		return i.quotedString(i.Literal())
+	}
+<<- end>>
+	return i.quotedString(i.String())
 }
 
+func (i <<.MainType>>) quotedString(s string) ([]byte, error) {
+	b := make([]byte, len(s)+2)
+	b[0] = '"'
+	copy(b[1:], s)
+	b[len(s)+1] = '"'
+	return b, nil
+}
+`
+
+func (m model) writeMarshalJSON(w io.Writer) {
+	m.execTemplate(w, marshalJSON)
+}
+
+//-------------------------------------------------------------------------------------------------
+
+const unmarshalJSON = `
 // UnmarshalJSON converts transmitted JSON values to ordinary values. It allows both
 // ordinals and strings to represent the values.
 func (i *<<.MainType>>) UnmarshalJSON(text []byte) error {
@@ -318,6 +397,10 @@ func (i *<<.MainType>>) UnmarshalJSON(text []byte) error {
 	return i.Parse(s)
 }
 `
+
+func (m model) writeUnmarshalJSON(w io.Writer) {
+	m.execTemplate(w, unmarshalJSON)
+}
 
 //-------------------------------------------------------------------------------------------------
 
@@ -354,54 +437,42 @@ func (i *<<.MainType>>) Scan(value interface{}) (err error) {
 //}
 `
 
-//-------------------------------------------------------------------------------------------------
-
-func (m model) write(w io.Writer) error {
-	template := head +
-		joinedStringAndIndexes +
-		allItems +
-		stringMethod +
-		ordinalMethod +
-		baseMethod +
-		ofMethod +
-		isValidMethod +
-		parseMethod +
-		asMethod +
-		marshalText +
-		marshalJSON +
-		scanValue
-
-	if *usingTable != "" {
-		template = head +
-			allItems +
-			byoStringMethod +
-			ordinalMethod +
-			baseMethod +
-			ofMethod +
-			isValidMethod +
-			byoParseMethod +
-			asMethod +
-			marshalText +
-			marshalJSON +
-			scanValue
-	}
-	err := m.execTemplate(w, template)
-
-	if err != nil {
-		return err
-	}
-
-	if c, ok := w.(io.Closer); ok {
-		return c.Close()
-	}
-
-	return nil
+func (m model) writeScanValue(w io.Writer) {
+	m.execTemplate(w, scanValue)
 }
 
-func (m model) execTemplate(w io.Writer, tpl string) error {
+//-------------------------------------------------------------------------------------------------
+
+func (m model) write(w io.Writer) {
+	m.writeHead(w)
+	m.writeJoinedStringAndIndexes(w)
+	m.writeAllItems(w)
+	m.writeLiteralMethod(w)
+	m.writeStringMethod(w)
+	m.writeOrdinalMethod(w)
+	m.writeBaseMethod(w)
+	m.writeOfMethod(w)
+	m.writeIsValidMethod(w)
+	m.writeParseMethod(w)
+	m.writeAsMethod(w)
+	m.writeMarshalText(w)
+	m.writeMarshalJSON(w)
+	m.writeUnmarshalJSON(w)
+	m.writeScanValue(w)
+
+	if c, ok := w.(io.Closer); ok {
+		checkErr(c.Close())
+	}
+}
+
+func (m model) execTemplate(w io.Writer, tpl string) {
 	tmpl, err := template.New("t").Delims("<<", ">>").Parse(tpl)
+	checkErr(err)
+	checkErr(tmpl.Execute(w, m))
+}
+
+func checkErr(err error) {
 	if err != nil {
 		panic(err)
 	}
-	return tmpl.Execute(w, m)
 }
