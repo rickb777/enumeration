@@ -1,14 +1,14 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration v1.9.0
+// github.com/rickb777/enumeration v1.10.0
 
 package example
 
 import (
 	"errors"
 	"fmt"
-	"github.com/rickb777/enumeration/enum"
 	"strconv"
 	"strings"
+	"github.com/rickb777/enumeration/enum"
 )
 
 const monthEnumStrings = "JanuaryFebruaryMarchAprilMayJuneJulyAugustSeptemberOctoberNovemberDecember"
@@ -173,7 +173,7 @@ func (i Month) quotedString(s string) ([]byte, error) {
 // ordinals and strings to represent the values.
 func (i *Month) UnmarshalJSON(text []byte) error {
 	if len(text) >= 2 && text[0] == '"' && text[len(text)-1] == '"' {
-		s := string(text[1 : len(text)-1])
+		s := string(text[1:len(text)-1])
 		return i.Parse(s)
 	}
 
@@ -210,7 +210,7 @@ func (i *Month) Scan(value interface{}) (err error) {
 }
 
 // -- copy this somewhere and uncomment it if you need DB storage to use strings --
-// Value converts the period to a string.
+// Value converts the period to a string. 
 // It implements driver.Valuer, https://golang.org/pkg/database/sql/driver/#Valuer
 //func (i Month) Value() (driver.Value, error) {
 //    return i.String(), nil
