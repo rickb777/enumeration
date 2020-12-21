@@ -91,16 +91,18 @@ func (i Day) IsValid() bool {
 
 // Parse parses a string to find the corresponding Day, accepting one of the string
 // values or an ordinal number.
-func (v *Day) Parse(s string) error {
-	if v.parseOrdinal(s) {
+func (v *Day) Parse(in string) error {
+	if v.parseOrdinal(in) {
 		return nil
 	}
+
+	s := in
 
 	if v.parseIdentifier(s) {
 		return nil
 	}
 
-	return errors.New(s + ": unrecognised Day")
+	return errors.New(in + ": unrecognised Day")
 }
 
 // parseOrdinal attempts to convert ordinal value

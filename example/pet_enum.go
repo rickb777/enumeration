@@ -88,18 +88,20 @@ func (i Pet) IsValid() bool {
 // Parse parses a string to find the corresponding Pet, accepting one of the string
 // values or an ordinal number.
 // The case of s does not matter.
-func (v *Pet) Parse(s string) error {
-	s = strings.ToLower(s)
-	s = strings.ReplaceAll(s, "_", " ")
-	if v.parseOrdinal(s) {
+func (v *Pet) Parse(in string) error {
+	if v.parseOrdinal(in) {
 		return nil
 	}
+
+	s := in
+	s = strings.ToLower(s)
+	s = strings.ReplaceAll(s, "_", " ")
 
 	if v.parseIdentifier(s) {
 		return nil
 	}
 
-	return errors.New(s + ": unrecognised Pet")
+	return errors.New(in + ": unrecognised Pet")
 }
 
 // parseOrdinal attempts to convert ordinal value

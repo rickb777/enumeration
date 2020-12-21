@@ -109,22 +109,24 @@ func (i Method) IsValid() bool {
 
 // Parse parses a string to find the corresponding Method, accepting one of the string
 // values or an ordinal number.
-func (v *Method) Parse(s string) error {
-	if v.parseOrdinal(s) {
+func (v *Method) Parse(in string) error {
+	if v.parseOrdinal(in) {
 		return nil
 	}
 
+	s := in
+
 	if methodMarshalTextUsingLiteral {
-		if v.parseIdentifier(s) || v.parseString(s) {
+		if v.parseIdentifier(s) || v.parseString(in) {
 			return nil
 		}
 	} else {
-		if v.parseString(s) || v.parseIdentifier(s) {
+		if v.parseString(in) || v.parseIdentifier(s) {
 			return nil
 		}
 	}
 
-	return errors.New(s + ": unrecognised Method")
+	return errors.New(in + ": unrecognised Method")
 }
 
 // parseOrdinal attempts to convert ordinal value

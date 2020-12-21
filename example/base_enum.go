@@ -82,17 +82,19 @@ func (i Base) IsValid() bool {
 // Parse parses a string to find the corresponding Base, accepting one of the string
 // values or an ordinal number.
 // The case of s does not matter.
-func (v *Base) Parse(s string) error {
-	s = strings.ToLower(s)
-	if v.parseOrdinal(s) {
+func (v *Base) Parse(in string) error {
+	if v.parseOrdinal(in) {
 		return nil
 	}
+
+	s := in
+	s = strings.ToLower(s)
 
 	if v.parseIdentifier(s) {
 		return nil
 	}
 
-	return errors.New(s + ": unrecognised Base")
+	return errors.New(in + ": unrecognised Base")
 }
 
 // parseOrdinal attempts to convert ordinal value

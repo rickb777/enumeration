@@ -104,16 +104,18 @@ func (i Month) IsValid() bool {
 
 // Parse parses a string to find the corresponding Month, accepting one of the string
 // values or an ordinal number.
-func (v *Month) Parse(s string) error {
-	if v.parseOrdinal(s) {
+func (v *Month) Parse(in string) error {
+	if v.parseOrdinal(in) {
 		return nil
 	}
+
+	s := in
 
 	if v.parseIdentifier(s) {
 		return nil
 	}
 
-	return errors.New(s + ": unrecognised Month")
+	return errors.New(in + ": unrecognised Month")
 }
 
 // parseOrdinal attempts to convert ordinal value

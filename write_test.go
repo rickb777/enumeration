@@ -16,9 +16,9 @@ package confectionary
 import (
 	"errors"
 	"fmt"
+	"github.com/rickb777/enumeration/enum"
 	"strconv"
 	"strings"
-	"github.com/rickb777/enumeration/enum"
 )
 `
 
@@ -270,16 +270,18 @@ func TestWriteIsValid(t *testing.T) {
 const e10nc = `
 // Parse parses a string to find the corresponding Sweet, accepting one of the string
 // values or an ordinal number.
-func (v *Sweet) Parse(s string) error {
-	if v.parseOrdinal(s) {
+func (v *Sweet) Parse(in string) error {
+	if v.parseOrdinal(in) {
 		return nil
 	}
+
+	s := in
 
 	if v.parseIdentifier(s) {
 		return nil
 	}
 
-	return errors.New(s + ": unrecognised Sweet")
+	return errors.New(in + ": unrecognised Sweet")
 }
 
 // parseOrdinal attempts to convert ordinal value
@@ -312,23 +314,25 @@ const e10lc = `
 // Parse parses a string to find the corresponding Sweet, accepting one of the string
 // values or an ordinal number.
 // The case of s does not matter.
-func (v *Sweet) Parse(s string) error {
-	s = strings.ToLower(s)
-	if v.parseOrdinal(s) {
+func (v *Sweet) Parse(in string) error {
+	if v.parseOrdinal(in) {
 		return nil
 	}
 
+	s := in
+	s = strings.ToLower(s)
+
 	if sweetMarshalTextUsingLiteral {
-		if v.parseIdentifier(s) || v.parseString(s) {
+		if v.parseIdentifier(s) || v.parseString(in) {
 			return nil
 		}
 	} else {
-		if v.parseString(s) || v.parseIdentifier(s) {
+		if v.parseString(in) || v.parseIdentifier(s) {
 			return nil
 		}
 	}
 
-	return errors.New(s + ": unrecognised Sweet")
+	return errors.New(in + ": unrecognised Sweet")
 }
 
 // parseOrdinal attempts to convert ordinal value
