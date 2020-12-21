@@ -6,9 +6,9 @@ package example
 import (
 	"errors"
 	"fmt"
+	"github.com/rickb777/enumeration/enum"
 	"strconv"
 	"strings"
-	"github.com/rickb777/enumeration/enum"
 )
 
 const methodEnumStrings = "HEADGETPUTPOSTPATCHDELETE"
@@ -110,32 +110,52 @@ func (i Method) IsValid() bool {
 // Parse parses a string to find the corresponding Method, accepting one of the string
 // values or an ordinal number.
 func (v *Method) Parse(s string) error {
-	// attempt to convert ordinal value
+	if v.parseOrdinal(s) {
+		return nil
+	}
+
+	if methodMarshalTextUsingLiteral {
+		if v.parseIdentifier(s) || v.parseString(s) {
+			return nil
+		}
+	} else {
+		if v.parseString(s) || v.parseIdentifier(s) {
+			return nil
+		}
+	}
+
+	return errors.New(s + ": unrecognised Method")
+}
+
+// parseOrdinal attempts to convert ordinal value
+func (v *Method) parseOrdinal(s string) (ok bool) {
 	ord, err := strconv.Atoi(s)
 	if err == nil && 0 <= ord && ord < len(AllMethods) {
 		*v = AllMethods[ord]
-		return nil
+		return true
 	}
+	return false
+}
 
-	// attempt to match an entry in methodStringsInverse
-	var ok bool
+// parseString attempts to match an entry in methodStringsInverse
+func (v *Method) parseString(s string) (ok bool) {
 	*v, ok = methodStringsInverse[s]
-	if ok {
-		return nil
-	}
+	return ok
+}
 
-	// attempt to match an identifier
+// parseIdentifier attempts to match an identifier.
+func (v *Method) parseIdentifier(s string) (ok bool) {
 	var i0 uint16 = 0
 	for j := 1; j < len(methodEnumIndex); j++ {
 		i1 := methodEnumIndex[j]
 		p := methodEnumStrings[i0:i1]
 		if s == p {
 			*v = AllMethods[j-1]
-			return nil
+			return true
 		}
 		i0 = i1
 	}
-	return errors.New(s + ": unrecognised Method")
+	return false
 }
 
 // AsMethod parses a string to find the corresponding Method, accepting either one of the string
@@ -195,7 +215,7 @@ func (i Method) quotedString(s string) ([]byte, error) {
 // ordinals and strings to represent the values.
 func (i *Method) UnmarshalJSON(text []byte) error {
 	if len(text) >= 2 && text[0] == '"' && text[len(text)-1] == '"' {
-		s := string(text[1:len(text)-1])
+		s := string(text[1 : len(text)-1])
 		return i.Parse(s)
 	}
 
@@ -232,7 +252,7 @@ func (i *Method) Scan(value interface{}) (err error) {
 }
 
 // -- copy this somewhere and uncomment it if you need DB storage to use strings --
-// Value converts the period to a string. 
+// Value converts the period to a string.
 // It implements driver.Valuer, https://golang.org/pkg/database/sql/driver/#Valuer
 //func (i Method) Value() (driver.Value, error) {
 //    return i.String(), nil

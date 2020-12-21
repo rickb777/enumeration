@@ -6,9 +6,9 @@ package example
 import (
 	"errors"
 	"fmt"
+	"github.com/rickb777/enumeration/enum"
 	"strconv"
 	"strings"
-	"github.com/rickb777/enumeration/enum"
 )
 
 const monthEnumStrings = "JanuaryFebruaryMarchAprilMayJuneJulyAugustSeptemberOctoberNovemberDecember"
@@ -105,25 +105,40 @@ func (i Month) IsValid() bool {
 // Parse parses a string to find the corresponding Month, accepting one of the string
 // values or an ordinal number.
 func (v *Month) Parse(s string) error {
-	// attempt to convert ordinal value
-	ord, err := strconv.Atoi(s)
-	if err == nil && 0 <= ord && ord < len(AllMonths) {
-		*v = AllMonths[ord]
+	if v.parseOrdinal(s) {
 		return nil
 	}
 
-	// attempt to match an identifier
+	if v.parseIdentifier(s) {
+		return nil
+	}
+
+	return errors.New(s + ": unrecognised Month")
+}
+
+// parseOrdinal attempts to convert ordinal value
+func (v *Month) parseOrdinal(s string) (ok bool) {
+	ord, err := strconv.Atoi(s)
+	if err == nil && 0 <= ord && ord < len(AllMonths) {
+		*v = AllMonths[ord]
+		return true
+	}
+	return false
+}
+
+// parseIdentifier attempts to match an identifier.
+func (v *Month) parseIdentifier(s string) (ok bool) {
 	var i0 uint16 = 0
 	for j := 1; j < len(monthEnumIndex); j++ {
 		i1 := monthEnumIndex[j]
 		p := monthEnumStrings[i0:i1]
 		if s == p {
 			*v = AllMonths[j-1]
-			return nil
+			return true
 		}
 		i0 = i1
 	}
-	return errors.New(s + ": unrecognised Month")
+	return false
 }
 
 // AsMonth parses a string to find the corresponding Month, accepting either one of the string
@@ -173,7 +188,7 @@ func (i Month) quotedString(s string) ([]byte, error) {
 // ordinals and strings to represent the values.
 func (i *Month) UnmarshalJSON(text []byte) error {
 	if len(text) >= 2 && text[0] == '"' && text[len(text)-1] == '"' {
-		s := string(text[1:len(text)-1])
+		s := string(text[1 : len(text)-1])
 		return i.Parse(s)
 	}
 
@@ -210,7 +225,7 @@ func (i *Month) Scan(value interface{}) (err error) {
 }
 
 // -- copy this somewhere and uncomment it if you need DB storage to use strings --
-// Value converts the period to a string. 
+// Value converts the period to a string.
 // It implements driver.Valuer, https://golang.org/pkg/database/sql/driver/#Valuer
 //func (i Month) Value() (driver.Value, error) {
 //    return i.String(), nil

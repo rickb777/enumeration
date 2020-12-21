@@ -271,25 +271,40 @@ const e10nc = `
 // Parse parses a string to find the corresponding Sweet, accepting one of the string
 // values or an ordinal number.
 func (v *Sweet) Parse(s string) error {
-	// attempt to convert ordinal value
-	ord, err := strconv.Atoi(s)
-	if err == nil && 0 <= ord && ord < len(AllSweets) {
-		*v = AllSweets[ord]
+	if v.parseOrdinal(s) {
 		return nil
 	}
 
-	// attempt to match an identifier
+	if v.parseIdentifier(s) {
+		return nil
+	}
+
+	return errors.New(s + ": unrecognised Sweet")
+}
+
+// parseOrdinal attempts to convert ordinal value
+func (v *Sweet) parseOrdinal(s string) (ok bool) {
+	ord, err := strconv.Atoi(s)
+	if err == nil && 0 <= ord && ord < len(AllSweets) {
+		*v = AllSweets[ord]
+		return true
+	}
+	return false
+}
+
+// parseIdentifier attempts to match an identifier.
+func (v *Sweet) parseIdentifier(s string) (ok bool) {
 	var i0 uint16 = 0
 	for j := 1; j < len(sweetEnumIndex); j++ {
 		i1 := sweetEnumIndex[j]
 		p := sweetEnumStrings[i0:i1]
 		if s == p {
 			*v = AllSweets[j-1]
-			return nil
+			return true
 		}
 		i0 = i1
 	}
-	return errors.New(s + ": unrecognised Sweet")
+	return false
 }
 `
 
@@ -299,32 +314,52 @@ const e10lc = `
 // The case of s does not matter.
 func (v *Sweet) Parse(s string) error {
 	s = strings.ToLower(s)
-	// attempt to convert ordinal value
+	if v.parseOrdinal(s) {
+		return nil
+	}
+
+	if sweetMarshalTextUsingLiteral {
+		if v.parseIdentifier(s) || v.parseString(s) {
+			return nil
+		}
+	} else {
+		if v.parseString(s) || v.parseIdentifier(s) {
+			return nil
+		}
+	}
+
+	return errors.New(s + ": unrecognised Sweet")
+}
+
+// parseOrdinal attempts to convert ordinal value
+func (v *Sweet) parseOrdinal(s string) (ok bool) {
 	ord, err := strconv.Atoi(s)
 	if err == nil && 0 <= ord && ord < len(AllSweets) {
 		*v = AllSweets[ord]
-		return nil
+		return true
 	}
+	return false
+}
 
-	// attempt to match an entry in sweetNamesInverse
-	var ok bool
+// parseString attempts to match an entry in sweetNamesInverse
+func (v *Sweet) parseString(s string) (ok bool) {
 	*v, ok = sweetNamesInverse[s]
-	if ok {
-		return nil
-	}
+	return ok
+}
 
-	// attempt to match an identifier
+// parseIdentifier attempts to match an identifier.
+func (v *Sweet) parseIdentifier(s string) (ok bool) {
 	var i0 uint16 = 0
 	for j := 1; j < len(sweetEnumIndex); j++ {
 		i1 := sweetEnumIndex[j]
 		p := sweetEnumStrings[i0:i1]
 		if s == p {
 			*v = AllSweets[j-1]
-			return nil
+			return true
 		}
 		i0 = i1
 	}
-	return errors.New(s + ": unrecognised Sweet")
+	return false
 }
 `
 

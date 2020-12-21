@@ -6,9 +6,9 @@ package example
 import (
 	"errors"
 	"fmt"
+	"github.com/rickb777/enumeration/enum"
 	"strconv"
 	"strings"
-	"github.com/rickb777/enumeration/enum"
 )
 
 const baseEnumStrings = "acgt"
@@ -84,25 +84,40 @@ func (i Base) IsValid() bool {
 // The case of s does not matter.
 func (v *Base) Parse(s string) error {
 	s = strings.ToLower(s)
-	// attempt to convert ordinal value
-	ord, err := strconv.Atoi(s)
-	if err == nil && 0 <= ord && ord < len(AllBases) {
-		*v = AllBases[ord]
+	if v.parseOrdinal(s) {
 		return nil
 	}
 
-	// attempt to match an identifier
+	if v.parseIdentifier(s) {
+		return nil
+	}
+
+	return errors.New(s + ": unrecognised Base")
+}
+
+// parseOrdinal attempts to convert ordinal value
+func (v *Base) parseOrdinal(s string) (ok bool) {
+	ord, err := strconv.Atoi(s)
+	if err == nil && 0 <= ord && ord < len(AllBases) {
+		*v = AllBases[ord]
+		return true
+	}
+	return false
+}
+
+// parseIdentifier attempts to match an identifier.
+func (v *Base) parseIdentifier(s string) (ok bool) {
 	var i0 uint16 = 0
 	for j := 1; j < len(baseEnumIndex); j++ {
 		i1 := baseEnumIndex[j]
 		p := baseEnumStrings[i0:i1]
 		if s == p {
 			*v = AllBases[j-1]
-			return nil
+			return true
 		}
 		i0 = i1
 	}
-	return errors.New(s + ": unrecognised Base")
+	return false
 }
 
 // AsBase parses a string to find the corresponding Base, accepting either one of the string
@@ -153,7 +168,7 @@ func (i Base) quotedString(s string) ([]byte, error) {
 // ordinals and strings to represent the values.
 func (i *Base) UnmarshalJSON(text []byte) error {
 	if len(text) >= 2 && text[0] == '"' && text[len(text)-1] == '"' {
-		s := string(text[1:len(text)-1])
+		s := string(text[1 : len(text)-1])
 		return i.Parse(s)
 	}
 
@@ -190,7 +205,7 @@ func (i *Base) Scan(value interface{}) (err error) {
 }
 
 // -- copy this somewhere and uncomment it if you need DB storage to use strings --
-// Value converts the period to a string. 
+// Value converts the period to a string.
 // It implements driver.Valuer, https://golang.org/pkg/database/sql/driver/#Valuer
 //func (i Base) Value() (driver.Value, error) {
 //    return i.String(), nil

@@ -256,34 +256,61 @@ func (v *<<.MainType>>) Parse(s string) error {
 	s = <<.Str>>
 <<- end>>
 <<- end>>
-	// attempt to convert ordinal value
-	ord, err := strconv.Atoi(s)
-	if err == nil && 0 <= ord && ord < len(All<<.Plural>>) {
-		*v = All<<.Plural>>[ord]
+	if v.parseOrdinal(s) {
 		return nil
 	}
 <<- if .LookupTable>>
 
-	// attempt to match an entry in <<.LookupTable>>Inverse
-	var ok bool
-	*v, ok = <<.LookupTable>>Inverse[s]
-	if ok {
+	if <<.LcType>>MarshalTextUsingLiteral {
+		if v.parseIdentifier(s) || v.parseString(s) {
+			return nil
+		}
+	} else {
+		if v.parseString(s) || v.parseIdentifier(s) {
+			return nil
+		}
+	}
+<<- else>>
+
+	if v.parseIdentifier(s) {
 		return nil
 	}
 <<- end>>
 
-	// attempt to match an identifier
+	return errors.New(s + ": unrecognised <<.MainType>>")
+}
+
+// parseOrdinal attempts to convert ordinal value
+func (v *<<.MainType>>) parseOrdinal(s string) (ok bool) {
+	ord, err := strconv.Atoi(s)
+	if err == nil && 0 <= ord && ord < len(All<<.Plural>>) {
+		*v = All<<.Plural>>[ord]
+		return true
+	}
+	return false
+}
+<<- if .LookupTable>>
+
+// parseString attempts to match an entry in <<.LookupTable>>Inverse
+func (v *<<.MainType>>) parseString(s string) (ok bool) {
+	*v, ok = <<.LookupTable>>Inverse[s]
+	return ok
+}
+<<- end>>
+
+// parseIdentifier attempts to match an identifier.
+func (v *<<.MainType>>) parseIdentifier(s string) (ok bool) {
 	var i0 uint16 = 0
 	for j := 1; j < len(<<.LcType>>EnumIndex); j++ {
 		i1 := <<.LcType>>EnumIndex[j]
 		p := <<.LcType>>EnumStrings[i0:i1]
 		if s == p {
 			*v = All<<.Plural>>[j-1]
-			return nil
+			return true
 		}
 		i0 = i1
 	}
-	return errors.New(s + ": unrecognised <<.MainType>>")
+	return false
 }
 `
 
