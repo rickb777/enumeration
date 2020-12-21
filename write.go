@@ -414,7 +414,7 @@ const unmarshalJSON = `
 // ordinals and strings to represent the values.
 func (i *<<.MainType>>) UnmarshalJSON(text []byte) error {
 	if len(text) >= 2 && text[0] == '"' && text[len(text)-1] == '"' {
-		s := string(text[1:len(text)-1])
+		s := string(text[1 : len(text)-1])
 		return i.Parse(s)
 	}
 
@@ -459,7 +459,7 @@ func (i *<<.MainType>>) Scan(value interface{}) (err error) {
 }
 
 // -- copy this somewhere and uncomment it if you need DB storage to use strings --
-// Value converts the period to a string. 
+// Value converts the <<.MainType>> to a string.
 // It implements driver.Valuer, https://golang.org/pkg/database/sql/driver/#Valuer
 //func (i <<.MainType>>) Value() (driver.Value, error) {
 //    return i.String(), nil

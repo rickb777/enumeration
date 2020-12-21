@@ -533,7 +533,7 @@ const e14 = `
 // ordinals and strings to represent the values.
 func (i *Sweet) UnmarshalJSON(text []byte) error {
 	if len(text) >= 2 && text[0] == '"' && text[len(text)-1] == '"' {
-		s := string(text[1:len(text)-1])
+		s := string(text[1 : len(text)-1])
 		return i.Parse(s)
 	}
 
@@ -585,7 +585,7 @@ func (i *Sweet) Scan(value interface{}) (err error) {
 }
 
 // -- copy this somewhere and uncomment it if you need DB storage to use strings --
-// Value converts the period to a string. 
+// Value converts the Sweet to a string.
 // It implements driver.Valuer, https://golang.org/pkg/database/sql/driver/#Valuer
 //func (i Sweet) Value() (driver.Value, error) {
 //    return i.String(), nil

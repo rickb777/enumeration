@@ -227,7 +227,7 @@ func (i *Month) Scan(value interface{}) (err error) {
 }
 
 // -- copy this somewhere and uncomment it if you need DB storage to use strings --
-// Value converts the period to a string.
+// Value converts the Month to a string.
 // It implements driver.Valuer, https://golang.org/pkg/database/sql/driver/#Valuer
 //func (i Month) Value() (driver.Value, error) {
 //    return i.String(), nil
