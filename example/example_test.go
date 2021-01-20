@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"encoding/xml"
 	. "github.com/onsi/gomega"
-	"github.com/rickb777/enumeration/enum"
+	"github.com/rickb777/enumeration/v2/enum"
 	"testing"
 )
 

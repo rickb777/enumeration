@@ -17,7 +17,7 @@ import (
 	"database/sql/driver"
 	"errors"
 	"fmt"
-	"github.com/rickb777/enumeration/enum"
+	"github.com/rickb777/enumeration/v2/enum"
 	"strconv"
 	"strings"
 )

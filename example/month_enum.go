@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration v2.0.0
+// github.com/rickb777/enumeration v2.0.1
 
 package example
 
@@ -7,7 +7,7 @@ import (
 	"database/sql/driver"
 	"errors"
 	"fmt"
-	"github.com/rickb777/enumeration/enum"
+	"github.com/rickb777/enumeration/v2/enum"
 	"strconv"
 	"strings"
 )
