@@ -14,6 +14,7 @@ const e1 = `
 package confectionary
 
 import (
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"github.com/rickb777/enumeration/enum"
@@ -271,7 +272,11 @@ const e10nc = `
 // Parse parses a string to find the corresponding Sweet, accepting one of the string
 // values or a number.
 func (v *Sweet) Parse(in string) error {
-	if sweetMarshalTextUsing == enum.Ordinal {
+	return v.parse(in, sweetMarshalTextRep)
+}
+
+func (v *Sweet) parse(in string, rep enum.Representation) error {
+	if rep == enum.Ordinal {
 		if v.parseOrdinal(in) {
 			return nil
 		}
@@ -331,7 +336,11 @@ const e10lc = `
 // values or a number.
 // The case of s does not matter.
 func (v *Sweet) Parse(in string) error {
-	if sweetMarshalTextUsing == enum.Ordinal {
+	return v.parse(in, sweetMarshalTextRep)
+}
+
+func (v *Sweet) parse(in string, rep enum.Representation) error {
+	if rep == enum.Ordinal {
 		if v.parseOrdinal(in) {
 			return nil
 		}
@@ -344,7 +353,7 @@ func (v *Sweet) Parse(in string) error {
 	s := in
 	s = strings.ToLower(s)
 
-	if sweetMarshalTextUsing == enum.Identifier {
+	if rep == enum.Identifier {
 		if v.parseIdentifier(s) || v.parseTag(in) {
 			return nil
 		}
@@ -447,58 +456,100 @@ func TestWriteAsMethod(t *testing.T) {
 //-------------------------------------------------------------------------------------------------
 
 const e12nc = `
-// sweetMarshalTextUsingLiteral controls representation used for XML and other text encodings.
+// sweetMarshalTextRep controls representation used for XML and other text encodings.
 // By default, it is enum.Identifier and quoted strings are used.
-var sweetMarshalTextUsing = enum.Identifier
+var sweetMarshalTextRep = enum.Identifier
 
 // MarshalText converts values to a form suitable for transmission via JSON, XML etc.
-// The representation is chosen according to SweetMarshalTextUsing. 
+// The representation is chosen according to SweetMarshalTextRep. 
 func (i Sweet) MarshalText() (text []byte, err error) {
-	var s string
-	switch sweetMarshalTextUsing {
-	case enum.Number:
-		s = strconv.FormatInt(int64(i), 10)
-	case enum.Ordinal:
-		s = strconv.Itoa(i.Ordinal())
-	case enum.Tag:
-		s = i.Tag()
-	default:
-		s = i.String()
-	}
-	return []byte(s), nil
+	return i.marshalText(sweetMarshalTextRep, false)
 }
 
-// UnmarshalText converts transmitted values to ordinary values.
-func (i *Sweet) UnmarshalText(text []byte) error {
-	return i.Parse(string(text))
+// MarshalJSON converts values to bytes suitable for transmission via JSON.
+// The representation is chosen according to SweetMarshalTextRep. 
+func (i Sweet) MarshalJSON() ([]byte, error) {
+	return i.marshalText(sweetMarshalTextRep, true)
+}
+
+func (i Sweet) marshalText(rep enum.Representation, quoted bool) (text []byte, err error) {
+	var bs []byte
+	switch rep {
+	case enum.Number:
+		bs = []byte(strconv.FormatInt(int64(i), 10))
+	case enum.Ordinal:
+		bs = []byte(strconv.Itoa(i.Ordinal()))
+	case enum.Tag:
+		if quoted {
+			bs = i.quotedString(i.Tag())
+		} else {
+			bs = []byte(i.Tag())
+		}
+	default:
+		if quoted {
+			bs = []byte(i.quotedString(i.String()))
+		} else {
+			bs = []byte(i.String())
+		}
+	}
+	return bs, nil
+}
+
+func (i Sweet) quotedString(s string) []byte {
+	b := make([]byte, len(s)+2)
+	b[0] = '"'
+	copy(b[1:], s)
+	b[len(s)+1] = '"'
+	return b
 }
 `
 
 const e12lc = `
-// sweetMarshalTextUsingLiteral controls representation used for XML and other text encodings.
+// sweetMarshalTextRep controls representation used for XML and other text encodings.
 // By default, it is enum.Identifier and quoted strings are used.
-var sweetMarshalTextUsing = enum.Identifier
+var sweetMarshalTextRep = enum.Identifier
 
 // MarshalText converts values to a form suitable for transmission via JSON, XML etc.
-// The representation is chosen according to SweetMarshalTextUsing. 
+// The representation is chosen according to SweetMarshalTextRep. 
 func (i Sweet) MarshalText() (text []byte, err error) {
-	var s string
-	switch sweetMarshalTextUsing {
-	case enum.Number:
-		s = strconv.FormatFloat(float64(i), 'g', 7, 64)
-	case enum.Ordinal:
-		s = strconv.Itoa(i.Ordinal())
-	case enum.Tag:
-		s = i.Tag()
-	default:
-		s = i.String()
-	}
-	return []byte(s), nil
+	return i.marshalText(sweetMarshalTextRep, false)
 }
 
-// UnmarshalText converts transmitted values to ordinary values.
-func (i *Sweet) UnmarshalText(text []byte) error {
-	return i.Parse(string(text))
+// MarshalJSON converts values to bytes suitable for transmission via JSON.
+// The representation is chosen according to SweetMarshalTextRep. 
+func (i Sweet) MarshalJSON() ([]byte, error) {
+	return i.marshalText(sweetMarshalTextRep, true)
+}
+
+func (i Sweet) marshalText(rep enum.Representation, quoted bool) (text []byte, err error) {
+	var bs []byte
+	switch rep {
+	case enum.Number:
+		bs = []byte(strconv.FormatFloat(float64(i), 'g', 7, 64))
+	case enum.Ordinal:
+		bs = []byte(strconv.Itoa(i.Ordinal()))
+	case enum.Tag:
+		if quoted {
+			bs = i.quotedString(i.Tag())
+		} else {
+			bs = []byte(i.Tag())
+		}
+	default:
+		if quoted {
+			bs = []byte(i.quotedString(i.String()))
+		} else {
+			bs = []byte(i.String())
+		}
+	}
+	return bs, nil
+}
+
+func (i Sweet) quotedString(s string) []byte {
+	b := make([]byte, len(s)+2)
+	b[0] = '"'
+	copy(b[1:], s)
+	b[len(s)+1] = '"'
+	return b
 }
 `
 
@@ -515,74 +566,12 @@ func TestWriteMarshalText(t *testing.T) {
 
 //-------------------------------------------------------------------------------------------------
 
-const e13nc = `
-// MarshalJSON converts values to bytes suitable for transmission via JSON.
-// The representation is chosen according to SweetMarshalTextUsing. 
-func (i Sweet) MarshalJSON() ([]byte, error) {
-	var s []byte
-	switch sweetMarshalTextUsing {
-	case enum.Number:
-		s = []byte(strconv.FormatInt(int64(i), 10))
-	case enum.Ordinal:
-		s = []byte(strconv.Itoa(i.Ordinal()))
-	case enum.Tag:
-		s = i.quotedString(i.Tag())
-	default:
-		s = i.quotedString(i.String())
-	}
-	return s, nil
-}
-
-func (i Sweet) quotedString(s string) []byte {
-	b := make([]byte, len(s)+2)
-	b[0] = '"'
-	copy(b[1:], s)
-	b[len(s)+1] = '"'
-	return b
-}
-`
-
-const e13lc = `
-// MarshalJSON converts values to bytes suitable for transmission via JSON.
-// The representation is chosen according to SweetMarshalTextUsing. 
-func (i Sweet) MarshalJSON() ([]byte, error) {
-	var s []byte
-	switch sweetMarshalTextUsing {
-	case enum.Number:
-		s = []byte(strconv.FormatFloat(float64(i), 'g', 7, 64))
-	case enum.Ordinal:
-		s = []byte(strconv.Itoa(i.Ordinal()))
-	case enum.Tag:
-		s = i.quotedString(i.Tag())
-	default:
-		s = i.quotedString(i.String())
-	}
-	return s, nil
-}
-
-func (i Sweet) quotedString(s string) []byte {
-	b := make([]byte, len(s)+2)
-	b[0] = '"'
-	copy(b[1:], s)
-	b[len(s)+1] = '"'
-	return b
-}
-`
-
-func TestWriteMarshaJSON(t *testing.T) {
-	RegisterTestingT(t)
-	buf := &strings.Builder{}
-	modelNoChange.writeMarshalJSON(buf)
-	Ω(buf.String()).Should(Equal(e13nc), buf.String())
-
-	buf.Reset()
-	modelLowerWithLookupTable.writeMarshalJSON(buf)
-	Ω(buf.String()).Should(Equal(e13lc), buf.String())
-}
-
-//-------------------------------------------------------------------------------------------------
-
 const e14 = `
+// UnmarshalText converts transmitted values to ordinary values.
+func (i *Sweet) UnmarshalText(text []byte) error {
+	return i.Parse(string(text))
+}
+
 // UnmarshalJSON converts transmitted JSON values to ordinary values. It allows both
 // ordinals and strings to represent the values.
 func (i *Sweet) UnmarshalJSON(text []byte) error {
@@ -596,20 +585,24 @@ func (i *Sweet) UnmarshalJSON(text []byte) error {
 }
 `
 
-func TestWriteUnmarshaJSON(t *testing.T) {
+func TestWriteUnmarshalText(t *testing.T) {
 	RegisterTestingT(t)
 	buf := &strings.Builder{}
-	modelNoChange.writeUnmarshalJSON(buf)
+	modelNoChange.writeUnmarshalText(buf)
 	Ω(buf.String()).Should(Equal(e14), buf.String())
 
 	buf.Reset()
-	modelLowerWithLookupTable.writeUnmarshalJSON(buf)
+	modelLowerWithLookupTable.writeUnmarshalText(buf)
 	Ω(buf.String()).Should(Equal(e14), buf.String())
 }
 
 //-------------------------------------------------------------------------------------------------
 
-const e15 = `
+const e15nc = `
+// sweetStoreRep controls database storage via the Scan and Value methods.
+// By default, it is enum.Identifier and quoted strings are used.
+var sweetStoreRep = enum.Identifier
+
 // Scan parses some value, which can be a number, a string or []byte.
 // It implements sql.Scanner, https://golang.org/pkg/database/sql/#Scanner
 func (i *Sweet) Scan(value interface{}) (err error) {
@@ -620,37 +613,98 @@ func (i *Sweet) Scan(value interface{}) (err error) {
 	err = nil
 	switch v := value.(type) {
 	case int64:
-		*i = Sweet(v)
+		if sweetStoreRep == enum.Ordinal {
+			*i = SweetOf(int(v))
+		} else {
+			*i = Sweet(v)
+		}
 	case float64:
 		*i = Sweet(v)
 	case []byte:
-		err = i.Parse(string(v))
+		err = i.parse(string(v), sweetStoreRep)
 	case string:
-		err = i.Parse(v)
+		err = i.parse(v, sweetStoreRep)
 	default:
-		err = fmt.Errorf("%T %+v is not a meaningful Sweet", value, value)
+		err = fmt.Errorf("%T %+v is not a meaningful sweet", value, value)
 	}
 
 	return err
 }
 
-// -- copy this somewhere and uncomment it if you need DB storage to use strings --
 // Value converts the Sweet to a string.
 // It implements driver.Valuer, https://golang.org/pkg/database/sql/driver/#Valuer
-//func (i Sweet) Value() (driver.Value, error) {
-//    return i.String(), nil
-//}
+func (i Sweet) Value() (driver.Value, error) {
+	switch sweetStoreRep {
+	case enum.Number:
+		return int64(i), nil
+	case enum.Ordinal:
+		return int64(i.Ordinal()), nil
+	case enum.Tag:
+		return i.Tag(), nil
+	default:
+		return i.String(), nil
+	}
+}
+`
+
+const e15lc = `
+// sweetStoreRep controls database storage via the Scan and Value methods.
+// By default, it is enum.Identifier and quoted strings are used.
+var sweetStoreRep = enum.Identifier
+
+// Scan parses some value, which can be a number, a string or []byte.
+// It implements sql.Scanner, https://golang.org/pkg/database/sql/#Scanner
+func (i *Sweet) Scan(value interface{}) (err error) {
+	if value == nil {
+		return nil
+	}
+
+	err = nil
+	switch v := value.(type) {
+	case int64:
+		if sweetStoreRep == enum.Ordinal {
+			*i = SweetOf(int(v))
+		} else {
+			*i = Sweet(v)
+		}
+	case float64:
+		*i = Sweet(v)
+	case []byte:
+		err = i.parse(string(v), sweetStoreRep)
+	case string:
+		err = i.parse(v, sweetStoreRep)
+	default:
+		err = fmt.Errorf("%T %+v is not a meaningful sweet", value, value)
+	}
+
+	return err
+}
+
+// Value converts the Sweet to a string.
+// It implements driver.Valuer, https://golang.org/pkg/database/sql/driver/#Valuer
+func (i Sweet) Value() (driver.Value, error) {
+	switch sweetStoreRep {
+	case enum.Number:
+		return float64(i), nil
+	case enum.Ordinal:
+		return int64(i.Ordinal()), nil
+	case enum.Tag:
+		return i.Tag(), nil
+	default:
+		return i.String(), nil
+	}
+}
 `
 
 func TestWriteScanValue(t *testing.T) {
 	RegisterTestingT(t)
 	buf := &strings.Builder{}
 	modelNoChange.writeScanValue(buf)
-	Ω(buf.String()).Should(Equal(e15), buf.String())
+	Ω(buf.String()).Should(Equal(e15nc), buf.String())
 
 	buf.Reset()
 	modelLowerWithLookupTable.writeScanValue(buf)
-	Ω(buf.String()).Should(Equal(e15), buf.String())
+	Ω(buf.String()).Should(Equal(e15lc), buf.String())
 }
 
 //-------------------------------------------------------------------------------------------------

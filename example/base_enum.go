@@ -4,6 +4,7 @@
 package example
 
 import (
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"github.com/rickb777/enumeration/enum"
@@ -83,7 +84,11 @@ func (i Base) IsValid() bool {
 // values or a number.
 // The case of s does not matter.
 func (v *Base) Parse(in string) error {
-	if baseMarshalTextUsing == enum.Ordinal {
+	return v.parse(in, baseMarshalTextRep)
+}
+
+func (v *Base) parse(in string, rep enum.Representation) error {
+	if rep == enum.Ordinal {
 		if v.parseOrdinal(in) {
 			return nil
 		}
@@ -147,47 +152,43 @@ func AsBase(s string) (Base, error) {
 	return *i, err
 }
 
-// baseMarshalTextUsingLiteral controls representation used for XML and other text encodings.
+// baseMarshalTextRep controls representation used for XML and other text encodings.
 // By default, it is enum.Identifier and quoted strings are used.
-var baseMarshalTextUsing = enum.Identifier
+var baseMarshalTextRep = enum.Identifier
 
 // MarshalText converts values to a form suitable for transmission via JSON, XML etc.
-// The representation is chosen according to BaseMarshalTextUsing.
+// The representation is chosen according to BaseMarshalTextRep.
 func (i Base) MarshalText() (text []byte, err error) {
-	var s string
-	switch baseMarshalTextUsing {
-	case enum.Number:
-		s = strconv.FormatFloat(float64(i), 'g', 7, 64)
-	case enum.Ordinal:
-		s = strconv.Itoa(i.Ordinal())
-	case enum.Tag:
-		s = i.Tag()
-	default:
-		s = i.String()
-	}
-	return []byte(s), nil
-}
-
-// UnmarshalText converts transmitted values to ordinary values.
-func (i *Base) UnmarshalText(text []byte) error {
-	return i.Parse(string(text))
+	return i.marshalText(baseMarshalTextRep, false)
 }
 
 // MarshalJSON converts values to bytes suitable for transmission via JSON.
-// The representation is chosen according to BaseMarshalTextUsing.
+// The representation is chosen according to BaseMarshalTextRep.
 func (i Base) MarshalJSON() ([]byte, error) {
-	var s []byte
-	switch baseMarshalTextUsing {
+	return i.marshalText(baseMarshalTextRep, true)
+}
+
+func (i Base) marshalText(rep enum.Representation, quoted bool) (text []byte, err error) {
+	var bs []byte
+	switch rep {
 	case enum.Number:
-		s = []byte(strconv.FormatFloat(float64(i), 'g', 7, 64))
+		bs = []byte(strconv.FormatFloat(float64(i), 'g', 7, 64))
 	case enum.Ordinal:
-		s = []byte(strconv.Itoa(i.Ordinal()))
+		bs = []byte(strconv.Itoa(i.Ordinal()))
 	case enum.Tag:
-		s = i.quotedString(i.Tag())
+		if quoted {
+			bs = i.quotedString(i.Tag())
+		} else {
+			bs = []byte(i.Tag())
+		}
 	default:
-		s = i.quotedString(i.String())
+		if quoted {
+			bs = []byte(i.quotedString(i.String()))
+		} else {
+			bs = []byte(i.String())
+		}
 	}
-	return s, nil
+	return bs, nil
 }
 
 func (i Base) quotedString(s string) []byte {
@@ -196,6 +197,11 @@ func (i Base) quotedString(s string) []byte {
 	copy(b[1:], s)
 	b[len(s)+1] = '"'
 	return b
+}
+
+// UnmarshalText converts transmitted values to ordinary values.
+func (i *Base) UnmarshalText(text []byte) error {
+	return i.Parse(string(text))
 }
 
 // UnmarshalJSON converts transmitted JSON values to ordinary values. It allows both
@@ -210,6 +216,10 @@ func (i *Base) UnmarshalJSON(text []byte) error {
 	return i.Parse(s)
 }
 
+// baseStoreRep controls database storage via the Scan and Value methods.
+// By default, it is enum.Identifier and quoted strings are used.
+var baseStoreRep = enum.Identifier
+
 // Scan parses some value, which can be a number, a string or []byte.
 // It implements sql.Scanner, https://golang.org/pkg/database/sql/#Scanner
 func (i *Base) Scan(value interface{}) (err error) {
@@ -220,23 +230,35 @@ func (i *Base) Scan(value interface{}) (err error) {
 	err = nil
 	switch v := value.(type) {
 	case int64:
-		*i = Base(v)
+		if baseStoreRep == enum.Ordinal {
+			*i = BaseOf(int(v))
+		} else {
+			*i = Base(v)
+		}
 	case float64:
 		*i = Base(v)
 	case []byte:
-		err = i.Parse(string(v))
+		err = i.parse(string(v), baseStoreRep)
 	case string:
-		err = i.Parse(v)
+		err = i.parse(v, baseStoreRep)
 	default:
-		err = fmt.Errorf("%T %+v is not a meaningful Base", value, value)
+		err = fmt.Errorf("%T %+v is not a meaningful base", value, value)
 	}
 
 	return err
 }
 
-// -- copy this somewhere and uncomment it if you need DB storage to use strings --
 // Value converts the Base to a string.
 // It implements driver.Valuer, https://golang.org/pkg/database/sql/driver/#Valuer
-//func (i Base) Value() (driver.Value, error) {
-//    return i.String(), nil
-//}
+func (i Base) Value() (driver.Value, error) {
+	switch baseStoreRep {
+	case enum.Number:
+		return float64(i), nil
+	case enum.Ordinal:
+		return int64(i.Ordinal()), nil
+	case enum.Tag:
+		return i.Tag(), nil
+	default:
+		return i.String(), nil
+	}
+}

@@ -49,7 +49,7 @@ func TestAsDay(t *testing.T) {
 
 func TestAsMethod(t *testing.T) {
 	g := NewGomegaWithT(t)
-	methodMarshalTextUsing = enum.Identifier
+	methodMarshalTextRep = enum.Identifier
 	g.Expect(AsMethod("POST")).Should(Equal(POST))
 	g.Expect(AsMethod("PO")).Should(Equal(POST))
 	g.Expect(AsMethod("3")).Should(Equal(POST))
@@ -72,11 +72,11 @@ type Group struct {
 func TestMarshalUsingNumber(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	baseMarshalTextUsing = enum.Number
-	dayMarshalTextUsing = enum.Number
-	methodMarshalTextUsing = enum.Number
-	monthMarshalTextUsing = enum.Number
-	petMarshalTextUsing = enum.Number
+	baseMarshalTextRep = enum.Number
+	dayMarshalTextRep = enum.Number
+	methodMarshalTextRep = enum.Number
+	monthMarshalTextRep = enum.Number
+	petMarshalTextRep = enum.Number
 
 	v := Group{G, Tuesday, POST, November, Koala_Bear}
 	s, err := json.Marshal(v)
@@ -90,11 +90,11 @@ func TestMarshalUsingNumber(t *testing.T) {
 func TestMarshalUsingOrdinal(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	baseMarshalTextUsing = enum.Ordinal
-	dayMarshalTextUsing = enum.Ordinal
-	methodMarshalTextUsing = enum.Ordinal
-	monthMarshalTextUsing = enum.Ordinal
-	petMarshalTextUsing = enum.Ordinal
+	baseMarshalTextRep = enum.Ordinal
+	dayMarshalTextRep = enum.Ordinal
+	methodMarshalTextRep = enum.Ordinal
+	monthMarshalTextRep = enum.Ordinal
+	petMarshalTextRep = enum.Ordinal
 
 	v := Group{G, Tuesday, POST, November, Koala_Bear}
 	s, err := json.Marshal(v)
@@ -108,11 +108,11 @@ func TestMarshalUsingOrdinal(t *testing.T) {
 func TestMarshalUsingIdentifier(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	baseMarshalTextUsing = enum.Identifier
-	dayMarshalTextUsing = enum.Identifier
-	methodMarshalTextUsing = enum.Identifier
-	monthMarshalTextUsing = enum.Identifier
-	petMarshalTextUsing = enum.Identifier
+	baseMarshalTextRep = enum.Identifier
+	dayMarshalTextRep = enum.Identifier
+	methodMarshalTextRep = enum.Identifier
+	monthMarshalTextRep = enum.Identifier
+	petMarshalTextRep = enum.Identifier
 
 	g.Expect(G.MarshalJSON()).Should(Equal([]byte{'"', 'g', '"'}))
 
@@ -128,11 +128,11 @@ func TestMarshalUsingIdentifier(t *testing.T) {
 func TestMarshalUsingTag(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	baseMarshalTextUsing = enum.Tag
-	dayMarshalTextUsing = enum.Tag
-	methodMarshalTextUsing = enum.Tag
-	monthMarshalTextUsing = enum.Tag
-	petMarshalTextUsing = enum.Tag
+	baseMarshalTextRep = enum.Tag
+	dayMarshalTextRep = enum.Tag
+	methodMarshalTextRep = enum.Tag
+	monthMarshalTextRep = enum.Tag
+	petMarshalTextRep = enum.Tag
 
 	g.Expect(G.MarshalJSON()).Should(Equal([]byte{'"', 'g', '"'}))
 
@@ -147,7 +147,7 @@ func TestMarshalUsingTag(t *testing.T) {
 
 func TestUnmarshalJSON1(t *testing.T) {
 	g := NewGomegaWithT(t)
-	methodMarshalTextUsing = enum.Identifier
+	methodMarshalTextRep = enum.Identifier
 	cases := []struct {
 		input string
 		rep   enum.Representation
@@ -165,11 +165,11 @@ func TestUnmarshalJSON1(t *testing.T) {
 		{input: `{"B":"g","D":"Tuesday","X":"PO","M":"November","P":"Koala Bear"}`, rep: enum.Ordinal},
 	}
 	for _, c := range cases {
-		baseMarshalTextUsing = c.rep
-		dayMarshalTextUsing = c.rep
-		methodMarshalTextUsing = c.rep
-		monthMarshalTextUsing = c.rep
-		petMarshalTextUsing = c.rep
+		baseMarshalTextRep = c.rep
+		dayMarshalTextRep = c.rep
+		methodMarshalTextRep = c.rep
+		monthMarshalTextRep = c.rep
+		petMarshalTextRep = c.rep
 		var v Group
 		err := json.Unmarshal([]byte(c.input), &v)
 		g.Expect(err).NotTo(HaveOccurred(), "%s %d", c.input, c.rep)
@@ -179,7 +179,7 @@ func TestUnmarshalJSON1(t *testing.T) {
 
 func TestMethodScan(t *testing.T) {
 	g := NewGomegaWithT(t)
-	methodMarshalTextUsing = enum.Identifier
+	methodMarshalTextRep = enum.Identifier
 	cases := []interface{}{
 		int64(3), "POST", "PO", []byte("POST"), []byte("PO"),
 	}

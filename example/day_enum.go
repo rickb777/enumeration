@@ -4,6 +4,7 @@
 package example
 
 import (
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"github.com/rickb777/enumeration/enum"
@@ -92,7 +93,11 @@ func (i Day) IsValid() bool {
 // Parse parses a string to find the corresponding Day, accepting one of the string
 // values or a number.
 func (v *Day) Parse(in string) error {
-	if dayMarshalTextUsing == enum.Ordinal {
+	return v.parse(in, dayMarshalTextRep)
+}
+
+func (v *Day) parse(in string, rep enum.Representation) error {
+	if rep == enum.Ordinal {
 		if v.parseOrdinal(in) {
 			return nil
 		}
@@ -154,47 +159,43 @@ func AsDay(s string) (Day, error) {
 	return *i, err
 }
 
-// dayMarshalTextUsingLiteral controls representation used for XML and other text encodings.
+// dayMarshalTextRep controls representation used for XML and other text encodings.
 // By default, it is enum.Identifier and quoted strings are used.
-var dayMarshalTextUsing = enum.Identifier
+var dayMarshalTextRep = enum.Identifier
 
 // MarshalText converts values to a form suitable for transmission via JSON, XML etc.
-// The representation is chosen according to DayMarshalTextUsing.
+// The representation is chosen according to DayMarshalTextRep.
 func (i Day) MarshalText() (text []byte, err error) {
-	var s string
-	switch dayMarshalTextUsing {
-	case enum.Number:
-		s = strconv.FormatInt(int64(i), 10)
-	case enum.Ordinal:
-		s = strconv.Itoa(i.Ordinal())
-	case enum.Tag:
-		s = i.Tag()
-	default:
-		s = i.String()
-	}
-	return []byte(s), nil
-}
-
-// UnmarshalText converts transmitted values to ordinary values.
-func (i *Day) UnmarshalText(text []byte) error {
-	return i.Parse(string(text))
+	return i.marshalText(dayMarshalTextRep, false)
 }
 
 // MarshalJSON converts values to bytes suitable for transmission via JSON.
-// The representation is chosen according to DayMarshalTextUsing.
+// The representation is chosen according to DayMarshalTextRep.
 func (i Day) MarshalJSON() ([]byte, error) {
-	var s []byte
-	switch dayMarshalTextUsing {
+	return i.marshalText(dayMarshalTextRep, true)
+}
+
+func (i Day) marshalText(rep enum.Representation, quoted bool) (text []byte, err error) {
+	var bs []byte
+	switch rep {
 	case enum.Number:
-		s = []byte(strconv.FormatInt(int64(i), 10))
+		bs = []byte(strconv.FormatInt(int64(i), 10))
 	case enum.Ordinal:
-		s = []byte(strconv.Itoa(i.Ordinal()))
+		bs = []byte(strconv.Itoa(i.Ordinal()))
 	case enum.Tag:
-		s = i.quotedString(i.Tag())
+		if quoted {
+			bs = i.quotedString(i.Tag())
+		} else {
+			bs = []byte(i.Tag())
+		}
 	default:
-		s = i.quotedString(i.String())
+		if quoted {
+			bs = []byte(i.quotedString(i.String()))
+		} else {
+			bs = []byte(i.String())
+		}
 	}
-	return s, nil
+	return bs, nil
 }
 
 func (i Day) quotedString(s string) []byte {
@@ -203,6 +204,11 @@ func (i Day) quotedString(s string) []byte {
 	copy(b[1:], s)
 	b[len(s)+1] = '"'
 	return b
+}
+
+// UnmarshalText converts transmitted values to ordinary values.
+func (i *Day) UnmarshalText(text []byte) error {
+	return i.Parse(string(text))
 }
 
 // UnmarshalJSON converts transmitted JSON values to ordinary values. It allows both
@@ -217,6 +223,10 @@ func (i *Day) UnmarshalJSON(text []byte) error {
 	return i.Parse(s)
 }
 
+// dayStoreRep controls database storage via the Scan and Value methods.
+// By default, it is enum.Identifier and quoted strings are used.
+var dayStoreRep = enum.Identifier
+
 // Scan parses some value, which can be a number, a string or []byte.
 // It implements sql.Scanner, https://golang.org/pkg/database/sql/#Scanner
 func (i *Day) Scan(value interface{}) (err error) {
@@ -227,23 +237,35 @@ func (i *Day) Scan(value interface{}) (err error) {
 	err = nil
 	switch v := value.(type) {
 	case int64:
-		*i = Day(v)
+		if dayStoreRep == enum.Ordinal {
+			*i = DayOf(int(v))
+		} else {
+			*i = Day(v)
+		}
 	case float64:
 		*i = Day(v)
 	case []byte:
-		err = i.Parse(string(v))
+		err = i.parse(string(v), dayStoreRep)
 	case string:
-		err = i.Parse(v)
+		err = i.parse(v, dayStoreRep)
 	default:
-		err = fmt.Errorf("%T %+v is not a meaningful Day", value, value)
+		err = fmt.Errorf("%T %+v is not a meaningful day", value, value)
 	}
 
 	return err
 }
 
-// -- copy this somewhere and uncomment it if you need DB storage to use strings --
 // Value converts the Day to a string.
 // It implements driver.Valuer, https://golang.org/pkg/database/sql/driver/#Valuer
-//func (i Day) Value() (driver.Value, error) {
-//    return i.String(), nil
-//}
+func (i Day) Value() (driver.Value, error) {
+	switch dayStoreRep {
+	case enum.Number:
+		return int64(i), nil
+	case enum.Ordinal:
+		return int64(i.Ordinal()), nil
+	case enum.Tag:
+		return i.Tag(), nil
+	default:
+		return i.String(), nil
+	}
+}

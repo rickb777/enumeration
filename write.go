@@ -16,6 +16,7 @@ const head = `// generated code - do not edit
 package <<.Pkg>>
 
 import (
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"github.com/rickb777/enumeration/enum"
@@ -252,7 +253,11 @@ const parseMethod = `
 <<- end>>
 <<- end>>
 func (v *<<.MainType>>) Parse(in string) error {
-	if <<.LcType>>MarshalTextUsing == enum.Ordinal {
+	return v.parse(in, <<.LcType>>MarshalTextRep)
+}
+
+func (v *<<.MainType>>) parse(in string, rep enum.Representation) error {
+	if rep == enum.Ordinal {
 		if v.parseOrdinal(in) {
 			return nil
 		}
@@ -269,7 +274,7 @@ func (v *<<.MainType>>) Parse(in string) error {
 <<- end>>
 <<- if .LookupTable>>
 
-	if <<.LcType>>MarshalTextUsing == enum.Identifier {
+	if rep == enum.Identifier {
 		if v.parseIdentifier(s) || v.parseTag(in) {
 			return nil
 		}
@@ -363,63 +368,47 @@ func (m model) writeAsMethod(w io.Writer) {
 //-------------------------------------------------------------------------------------------------
 
 const marshalText = `
-// <<.LcType>>MarshalTextUsingLiteral controls representation used for XML and other text encodings.
+// <<.LcType>>MarshalTextRep controls representation used for XML and other text encodings.
 // By default, it is enum.Identifier and quoted strings are used.
-var <<.LcType>>MarshalTextUsing = enum.Identifier
+var <<.LcType>>MarshalTextRep = enum.Identifier
 
 // MarshalText converts values to a form suitable for transmission via JSON, XML etc.
-// The representation is chosen according to <<.MainType>>MarshalTextUsing. 
+// The representation is chosen according to <<.MainType>>MarshalTextRep. 
 func (i <<.MainType>>) MarshalText() (text []byte, err error) {
-	var s string
-	switch <<.LcType>>MarshalTextUsing {
-	case enum.Number:
-<<- if .IsFloat>>
-		s = strconv.FormatFloat(float64(i), 'g', 7, 64)
-<<- else>>
-		s = strconv.FormatInt(int64(i), 10)
-<<- end>>
-	case enum.Ordinal:
-		s = strconv.Itoa(i.Ordinal())
-	case enum.Tag:
-		s = i.Tag()
-	default:
-		s = i.String()
-	}
-	return []byte(s), nil
+	return i.marshalText(<<.LcType>>MarshalTextRep, false)
 }
 
-// UnmarshalText converts transmitted values to ordinary values.
-func (i *<<.MainType>>) UnmarshalText(text []byte) error {
-	return i.Parse(string(text))
-}
-`
-
-func (m model) writeMarshalText(w io.Writer) {
-	m.execTemplate(w, marshalText)
-}
-
-//-------------------------------------------------------------------------------------------------
-
-const marshalJSON = `
 // MarshalJSON converts values to bytes suitable for transmission via JSON.
-// The representation is chosen according to <<.MainType>>MarshalTextUsing. 
+// The representation is chosen according to <<.MainType>>MarshalTextRep. 
 func (i <<.MainType>>) MarshalJSON() ([]byte, error) {
-	var s []byte
-	switch <<.LcType>>MarshalTextUsing {
+	return i.marshalText(<<.LcType>>MarshalTextRep, true)
+}
+
+func (i <<.MainType>>) marshalText(rep enum.Representation, quoted bool) (text []byte, err error) {
+	var bs []byte
+	switch rep {
 	case enum.Number:
 <<- if .IsFloat>>
-		s = []byte(strconv.FormatFloat(float64(i), 'g', 7, 64))
+		bs = []byte(strconv.FormatFloat(float64(i), 'g', 7, 64))
 <<- else>>
-		s = []byte(strconv.FormatInt(int64(i), 10))
+		bs = []byte(strconv.FormatInt(int64(i), 10))
 <<- end>>
 	case enum.Ordinal:
-		s = []byte(strconv.Itoa(i.Ordinal()))
+		bs = []byte(strconv.Itoa(i.Ordinal()))
 	case enum.Tag:
-		s = i.quotedString(i.Tag())
+		if quoted {
+			bs = i.quotedString(i.Tag())
+		} else {
+			bs = []byte(i.Tag())
+		}
 	default:
-		s = i.quotedString(i.String())
+		if quoted {
+			bs = []byte(i.quotedString(i.String()))
+		} else {
+			bs = []byte(i.String())
+		}
 	}
-	return s, nil
+	return bs, nil
 }
 
 func (i <<.MainType>>) quotedString(s string) []byte {
@@ -431,13 +420,18 @@ func (i <<.MainType>>) quotedString(s string) []byte {
 }
 `
 
-func (m model) writeMarshalJSON(w io.Writer) {
-	m.execTemplate(w, marshalJSON)
+func (m model) writeMarshalText(w io.Writer) {
+	m.execTemplate(w, marshalText)
 }
 
 //-------------------------------------------------------------------------------------------------
 
-const unmarshalJSON = `
+const unmarshalText = `
+// UnmarshalText converts transmitted values to ordinary values.
+func (i *<<.MainType>>) UnmarshalText(text []byte) error {
+	return i.Parse(string(text))
+}
+
 // UnmarshalJSON converts transmitted JSON values to ordinary values. It allows both
 // ordinals and strings to represent the values.
 func (i *<<.MainType>>) UnmarshalJSON(text []byte) error {
@@ -451,13 +445,17 @@ func (i *<<.MainType>>) UnmarshalJSON(text []byte) error {
 }
 `
 
-func (m model) writeUnmarshalJSON(w io.Writer) {
-	m.execTemplate(w, unmarshalJSON)
+func (m model) writeUnmarshalText(w io.Writer) {
+	m.execTemplate(w, unmarshalText)
 }
 
 //-------------------------------------------------------------------------------------------------
 
 const scanValue = `
+// <<.LcType>>StoreRep controls database storage via the Scan and Value methods.
+// By default, it is enum.Identifier and quoted strings are used.
+var <<.LcType>>StoreRep = enum.Identifier
+
 // Scan parses some value, which can be a number, a string or []byte.
 // It implements sql.Scanner, https://golang.org/pkg/database/sql/#Scanner
 func (i *<<.MainType>>) Scan(value interface{}) (err error) {
@@ -468,26 +466,42 @@ func (i *<<.MainType>>) Scan(value interface{}) (err error) {
 	err = nil
 	switch v := value.(type) {
 	case int64:
-		*i = <<.MainType>>(v)
+		if <<.LcType>>StoreRep == enum.Ordinal {
+			*i = <<.MainType>>Of(int(v))
+		} else {
+			*i = <<.MainType>>(v)
+		}
 	case float64:
 		*i = <<.MainType>>(v)
 	case []byte:
-		err = i.Parse(string(v))
+		err = i.parse(string(v), <<.LcType>>StoreRep)
 	case string:
-		err = i.Parse(v)
+		err = i.parse(v, <<.LcType>>StoreRep)
 	default:
-		err = fmt.Errorf("%T %+v is not a meaningful <<.MainType>>", value, value)
+		err = fmt.Errorf("%T %+v is not a meaningful <<.LcType>>", value, value)
 	}
 
 	return err
 }
 
-// -- copy this somewhere and uncomment it if you need DB storage to use strings --
 // Value converts the <<.MainType>> to a string.
 // It implements driver.Valuer, https://golang.org/pkg/database/sql/driver/#Valuer
-//func (i <<.MainType>>) Value() (driver.Value, error) {
-//    return i.String(), nil
-//}
+func (i <<.MainType>>) Value() (driver.Value, error) {
+	switch <<.LcType>>StoreRep {
+	case enum.Number:
+<<- if .IsFloat>>
+		return float64(i), nil
+<<- else>>
+		return int64(i), nil
+<<- end>>
+	case enum.Ordinal:
+		return int64(i.Ordinal()), nil
+	case enum.Tag:
+		return i.Tag(), nil
+	default:
+		return i.String(), nil
+	}
+}
 `
 
 func (m model) writeScanValue(w io.Writer) {
@@ -509,8 +523,7 @@ func (m model) write(w io.Writer) {
 	m.writeParseMethod(w)
 	m.writeAsMethod(w)
 	m.writeMarshalText(w)
-	m.writeMarshalJSON(w)
-	m.writeUnmarshalJSON(w)
+	m.writeUnmarshalText(w)
 	m.writeScanValue(w)
 
 	if c, ok := w.(io.Closer); ok {

@@ -4,6 +4,7 @@
 package example
 
 import (
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"github.com/rickb777/enumeration/enum"
@@ -89,7 +90,11 @@ func (i Pet) IsValid() bool {
 // values or a number.
 // The case of s does not matter.
 func (v *Pet) Parse(in string) error {
-	if petMarshalTextUsing == enum.Ordinal {
+	return v.parse(in, petMarshalTextRep)
+}
+
+func (v *Pet) parse(in string, rep enum.Representation) error {
+	if rep == enum.Ordinal {
 		if v.parseOrdinal(in) {
 			return nil
 		}
@@ -154,47 +159,43 @@ func AsPet(s string) (Pet, error) {
 	return *i, err
 }
 
-// petMarshalTextUsingLiteral controls representation used for XML and other text encodings.
+// petMarshalTextRep controls representation used for XML and other text encodings.
 // By default, it is enum.Identifier and quoted strings are used.
-var petMarshalTextUsing = enum.Identifier
+var petMarshalTextRep = enum.Identifier
 
 // MarshalText converts values to a form suitable for transmission via JSON, XML etc.
-// The representation is chosen according to PetMarshalTextUsing.
+// The representation is chosen according to PetMarshalTextRep.
 func (i Pet) MarshalText() (text []byte, err error) {
-	var s string
-	switch petMarshalTextUsing {
-	case enum.Number:
-		s = strconv.FormatInt(int64(i), 10)
-	case enum.Ordinal:
-		s = strconv.Itoa(i.Ordinal())
-	case enum.Tag:
-		s = i.Tag()
-	default:
-		s = i.String()
-	}
-	return []byte(s), nil
-}
-
-// UnmarshalText converts transmitted values to ordinary values.
-func (i *Pet) UnmarshalText(text []byte) error {
-	return i.Parse(string(text))
+	return i.marshalText(petMarshalTextRep, false)
 }
 
 // MarshalJSON converts values to bytes suitable for transmission via JSON.
-// The representation is chosen according to PetMarshalTextUsing.
+// The representation is chosen according to PetMarshalTextRep.
 func (i Pet) MarshalJSON() ([]byte, error) {
-	var s []byte
-	switch petMarshalTextUsing {
+	return i.marshalText(petMarshalTextRep, true)
+}
+
+func (i Pet) marshalText(rep enum.Representation, quoted bool) (text []byte, err error) {
+	var bs []byte
+	switch rep {
 	case enum.Number:
-		s = []byte(strconv.FormatInt(int64(i), 10))
+		bs = []byte(strconv.FormatInt(int64(i), 10))
 	case enum.Ordinal:
-		s = []byte(strconv.Itoa(i.Ordinal()))
+		bs = []byte(strconv.Itoa(i.Ordinal()))
 	case enum.Tag:
-		s = i.quotedString(i.Tag())
+		if quoted {
+			bs = i.quotedString(i.Tag())
+		} else {
+			bs = []byte(i.Tag())
+		}
 	default:
-		s = i.quotedString(i.String())
+		if quoted {
+			bs = []byte(i.quotedString(i.String()))
+		} else {
+			bs = []byte(i.String())
+		}
 	}
-	return s, nil
+	return bs, nil
 }
 
 func (i Pet) quotedString(s string) []byte {
@@ -203,6 +204,11 @@ func (i Pet) quotedString(s string) []byte {
 	copy(b[1:], s)
 	b[len(s)+1] = '"'
 	return b
+}
+
+// UnmarshalText converts transmitted values to ordinary values.
+func (i *Pet) UnmarshalText(text []byte) error {
+	return i.Parse(string(text))
 }
 
 // UnmarshalJSON converts transmitted JSON values to ordinary values. It allows both
@@ -217,6 +223,10 @@ func (i *Pet) UnmarshalJSON(text []byte) error {
 	return i.Parse(s)
 }
 
+// petStoreRep controls database storage via the Scan and Value methods.
+// By default, it is enum.Identifier and quoted strings are used.
+var petStoreRep = enum.Identifier
+
 // Scan parses some value, which can be a number, a string or []byte.
 // It implements sql.Scanner, https://golang.org/pkg/database/sql/#Scanner
 func (i *Pet) Scan(value interface{}) (err error) {
@@ -227,23 +237,35 @@ func (i *Pet) Scan(value interface{}) (err error) {
 	err = nil
 	switch v := value.(type) {
 	case int64:
-		*i = Pet(v)
+		if petStoreRep == enum.Ordinal {
+			*i = PetOf(int(v))
+		} else {
+			*i = Pet(v)
+		}
 	case float64:
 		*i = Pet(v)
 	case []byte:
-		err = i.Parse(string(v))
+		err = i.parse(string(v), petStoreRep)
 	case string:
-		err = i.Parse(v)
+		err = i.parse(v, petStoreRep)
 	default:
-		err = fmt.Errorf("%T %+v is not a meaningful Pet", value, value)
+		err = fmt.Errorf("%T %+v is not a meaningful pet", value, value)
 	}
 
 	return err
 }
 
-// -- copy this somewhere and uncomment it if you need DB storage to use strings --
 // Value converts the Pet to a string.
 // It implements driver.Valuer, https://golang.org/pkg/database/sql/driver/#Valuer
-//func (i Pet) Value() (driver.Value, error) {
-//    return i.String(), nil
-//}
+func (i Pet) Value() (driver.Value, error) {
+	switch petStoreRep {
+	case enum.Number:
+		return int64(i), nil
+	case enum.Ordinal:
+		return int64(i.Ordinal()), nil
+	case enum.Tag:
+		return i.Tag(), nil
+	default:
+		return i.String(), nil
+	}
+}
