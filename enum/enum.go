@@ -5,6 +5,7 @@ package enum
 type Enum interface {
 	Ordinal() int
 	String() string
+	Tag() string
 	IsValid() bool
 }
 

@@ -7,8 +7,7 @@ package example
 type Method uint
 
 const (
-	_ Method = iota
-	HEAD
+	HEAD Method = iota
 	GET
 	PUT
 	POST

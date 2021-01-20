@@ -78,9 +78,9 @@ func TestWriteAllItems(t *testing.T) {
 //-------------------------------------------------------------------------------------------------
 
 const e4nc = `
-// Literal returns the literal string representation of a Sweet, which is
+// String returns the literal string representation of a Sweet, which is
 // the same as the const identifier.
-func (i Sweet) Literal() string {
+func (i Sweet) String() string {
 	o := i.Ordinal()
 	if o < 0 || o >= len(AllSweets) {
 		return fmt.Sprintf("Sweet(%d)", i)
@@ -90,9 +90,9 @@ func (i Sweet) Literal() string {
 `
 
 const e4lc = `
-// Literal returns the literal string representation of a Sweet, which is
+// String returns the literal string representation of a Sweet, which is
 // the same as the const identifier.
-func (i Sweet) Literal() string {
+func (i Sweet) String() string {
 	o := i.Ordinal()
 	if o < 0 || o >= len(AllSweets) {
 		return fmt.Sprintf("Sweet(%g)", i)
@@ -104,20 +104,20 @@ func (i Sweet) Literal() string {
 func TestWriteLiteralMethod(t *testing.T) {
 	RegisterTestingT(t)
 	buf := &strings.Builder{}
-	modelNoChange.writeLiteralMethod(buf)
+	modelNoChange.writeStringMethod(buf)
 	Ω(buf.String()).Should(Equal(e4nc), buf.String())
 
 	buf.Reset()
-	modelLowerWithLookupTable.writeLiteralMethod(buf)
+	modelLowerWithLookupTable.writeStringMethod(buf)
 	Ω(buf.String()).Should(Equal(e4lc), buf.String())
 }
 
 //-------------------------------------------------------------------------------------------------
 
 const e5nc = `
-// String returns the string representation of a Sweet. This uses Literal.
-func (i Sweet) String() string {
-	return i.Literal()
+// Tag returns the string representation of a Sweet. This is an alias for String.
+func (i Sweet) Tag() string {
+	return i.String()
 }
 `
 
@@ -138,8 +138,8 @@ func init() {
 	}
 }
 
-// String returns the string representation of a Sweet.
-func (i Sweet) String() string {
+// Tag returns the string representation of a Sweet.
+func (i Sweet) Tag() string {
 	s, ok := sweetNames[i]
 	if ok {
 		return s
@@ -148,14 +148,14 @@ func (i Sweet) String() string {
 }
 `
 
-func TestWriteStringMethod(t *testing.T) {
+func TestWriteTagMethod(t *testing.T) {
 	RegisterTestingT(t)
 	buf := &strings.Builder{}
-	modelNoChange.writeStringMethod(buf)
+	modelNoChange.writeTagMethod(buf)
 	Ω(buf.String()).Should(Equal(e5nc), buf.String())
 
 	buf.Reset()
-	modelLowerWithLookupTable.writeStringMethod(buf)
+	modelLowerWithLookupTable.writeTagMethod(buf)
 	Ω(buf.String()).Should(Equal(e5lc), buf.String())
 }
 
@@ -269,10 +269,16 @@ func TestWriteIsValid(t *testing.T) {
 
 const e10nc = `
 // Parse parses a string to find the corresponding Sweet, accepting one of the string
-// values or an ordinal number.
+// values or a number.
 func (v *Sweet) Parse(in string) error {
-	if v.parseOrdinal(in) {
-		return nil
+	if sweetMarshalTextUsing == enum.Ordinal {
+		if v.parseOrdinal(in) {
+			return nil
+		}
+	} else {
+		if v.parseNumber(in) {
+			return nil
+		}
 	}
 
 	s := in
@@ -281,10 +287,20 @@ func (v *Sweet) Parse(in string) error {
 		return nil
 	}
 
-	return errors.New(in + ": unrecognised Sweet")
+	return errors.New(in + ": unrecognised sweet")
 }
 
-// parseOrdinal attempts to convert ordinal value
+// parseNumber attempts to convert a decimal value
+func (v *Sweet) parseNumber(s string) (ok bool) {
+	num, err := strconv.ParseInt(s, 10, 64)
+	if err == nil {
+		*v = Sweet(num)
+		return v.IsValid()
+	}
+	return false
+}
+
+// parseOrdinal attempts to convert an ordinal value
 func (v *Sweet) parseOrdinal(s string) (ok bool) {
 	ord, err := strconv.Atoi(s)
 	if err == nil && 0 <= ord && ord < len(AllSweets) {
@@ -312,30 +328,46 @@ func (v *Sweet) parseIdentifier(s string) (ok bool) {
 
 const e10lc = `
 // Parse parses a string to find the corresponding Sweet, accepting one of the string
-// values or an ordinal number.
+// values or a number.
 // The case of s does not matter.
 func (v *Sweet) Parse(in string) error {
-	if v.parseOrdinal(in) {
-		return nil
+	if sweetMarshalTextUsing == enum.Ordinal {
+		if v.parseOrdinal(in) {
+			return nil
+		}
+	} else {
+		if v.parseNumber(in) {
+			return nil
+		}
 	}
 
 	s := in
 	s = strings.ToLower(s)
 
-	if sweetMarshalTextUsingLiteral {
-		if v.parseIdentifier(s) || v.parseString(in) {
+	if sweetMarshalTextUsing == enum.Identifier {
+		if v.parseIdentifier(s) || v.parseTag(in) {
 			return nil
 		}
 	} else {
-		if v.parseString(in) || v.parseIdentifier(s) {
+		if v.parseTag(in) || v.parseIdentifier(s) {
 			return nil
 		}
 	}
 
-	return errors.New(in + ": unrecognised Sweet")
+	return errors.New(in + ": unrecognised sweet")
 }
 
-// parseOrdinal attempts to convert ordinal value
+// parseNumber attempts to convert a decimal value
+func (v *Sweet) parseNumber(s string) (ok bool) {
+	num, err := strconv.ParseFloat(s, 64)
+	if err == nil {
+		*v = Sweet(num)
+		return v.IsValid()
+	}
+	return false
+}
+
+// parseOrdinal attempts to convert an ordinal value
 func (v *Sweet) parseOrdinal(s string) (ok bool) {
 	ord, err := strconv.Atoi(s)
 	if err == nil && 0 <= ord && ord < len(AllSweets) {
@@ -345,8 +377,8 @@ func (v *Sweet) parseOrdinal(s string) (ok bool) {
 	return false
 }
 
-// parseString attempts to match an entry in sweetNamesInverse
-func (v *Sweet) parseString(s string) (ok bool) {
+// parseTag attempts to match an entry in sweetNamesInverse
+func (v *Sweet) parseTag(s string) (ok bool) {
 	*v, ok = sweetNamesInverse[s]
 	return ok
 }
@@ -415,9 +447,25 @@ func TestWriteAsMethod(t *testing.T) {
 //-------------------------------------------------------------------------------------------------
 
 const e12nc = `
+// sweetMarshalTextUsingLiteral controls representation used for XML and other text encodings.
+// By default, it is enum.Identifier and quoted strings are used.
+var sweetMarshalTextUsing = enum.Identifier
+
 // MarshalText converts values to a form suitable for transmission via JSON, XML etc.
+// The representation is chosen according to SweetMarshalTextUsing. 
 func (i Sweet) MarshalText() (text []byte, err error) {
-	return []byte(i.String()), nil
+	var s string
+	switch sweetMarshalTextUsing {
+	case enum.Number:
+		s = strconv.FormatInt(int64(i), 10)
+	case enum.Ordinal:
+		s = strconv.Itoa(i.Ordinal())
+	case enum.Tag:
+		s = i.Tag()
+	default:
+		s = i.String()
+	}
+	return []byte(s), nil
 }
 
 // UnmarshalText converts transmitted values to ordinary values.
@@ -427,12 +475,25 @@ func (i *Sweet) UnmarshalText(text []byte) error {
 `
 
 const e12lc = `
+// sweetMarshalTextUsingLiteral controls representation used for XML and other text encodings.
+// By default, it is enum.Identifier and quoted strings are used.
+var sweetMarshalTextUsing = enum.Identifier
+
 // MarshalText converts values to a form suitable for transmission via JSON, XML etc.
+// The representation is chosen according to SweetMarshalTextUsing. 
 func (i Sweet) MarshalText() (text []byte, err error) {
-	if sweetMarshalTextUsingLiteral {
-		return []byte(i.Literal()), nil
+	var s string
+	switch sweetMarshalTextUsing {
+	case enum.Number:
+		s = strconv.FormatFloat(float64(i), 'g', 7, 64)
+	case enum.Ordinal:
+		s = strconv.Itoa(i.Ordinal())
+	case enum.Tag:
+		s = i.Tag()
+	default:
+		s = i.String()
 	}
-	return []byte(i.String()), nil
+	return []byte(s), nil
 }
 
 // UnmarshalText converts transmitted values to ordinary values.
@@ -455,63 +516,56 @@ func TestWriteMarshalText(t *testing.T) {
 //-------------------------------------------------------------------------------------------------
 
 const e13nc = `
-// SweetMarshalJSONUsingString controls whether generated JSON uses ordinals or strings. By default,
-// it is false and ordinals are used. Set it true to cause quoted strings to be used instead,
-// these being easier to read but taking more resources.
-var SweetMarshalJSONUsingString = false
-
-// MarshalJSON converts values to bytes suitable for transmission via JSON. By default, the
-// ordinal integer is emitted, but a quoted string is emitted instead if
-// SweetMarshalJSONUsingString is true.
+// MarshalJSON converts values to bytes suitable for transmission via JSON.
+// The representation is chosen according to SweetMarshalTextUsing. 
 func (i Sweet) MarshalJSON() ([]byte, error) {
-	if !SweetMarshalJSONUsingString {
-		// use the ordinal
-		s := strconv.Itoa(i.Ordinal())
-		return []byte(s), nil
+	var s []byte
+	switch sweetMarshalTextUsing {
+	case enum.Number:
+		s = []byte(strconv.FormatInt(int64(i), 10))
+	case enum.Ordinal:
+		s = []byte(strconv.Itoa(i.Ordinal()))
+	case enum.Tag:
+		s = i.quotedString(i.Tag())
+	default:
+		s = i.quotedString(i.String())
 	}
-	return i.quotedString(i.String())
+	return s, nil
 }
 
-func (i Sweet) quotedString(s string) ([]byte, error) {
+func (i Sweet) quotedString(s string) []byte {
 	b := make([]byte, len(s)+2)
 	b[0] = '"'
 	copy(b[1:], s)
 	b[len(s)+1] = '"'
-	return b, nil
+	return b
 }
 `
 
 const e13lc = `
-// SweetMarshalJSONUsingString controls whether generated JSON uses ordinals or strings. By default,
-// it is false and ordinals are used. Set it true to cause quoted strings to be used instead,
-// these being easier to read but taking more resources.
-var SweetMarshalJSONUsingString = false
-
-// sweetMarshalTextUsingLiteral controls whether generated XML or JSON uses the String()
-// or the Literal() method.
-var sweetMarshalTextUsingLiteral = false
-
-// MarshalJSON converts values to bytes suitable for transmission via JSON. By default, the
-// ordinal integer is emitted, but a quoted string is emitted instead if
-// SweetMarshalJSONUsingString is true.
+// MarshalJSON converts values to bytes suitable for transmission via JSON.
+// The representation is chosen according to SweetMarshalTextUsing. 
 func (i Sweet) MarshalJSON() ([]byte, error) {
-	if !SweetMarshalJSONUsingString {
-		// use the ordinal
-		s := strconv.Itoa(i.Ordinal())
-		return []byte(s), nil
+	var s []byte
+	switch sweetMarshalTextUsing {
+	case enum.Number:
+		s = []byte(strconv.FormatFloat(float64(i), 'g', 7, 64))
+	case enum.Ordinal:
+		s = []byte(strconv.Itoa(i.Ordinal()))
+	case enum.Tag:
+		s = i.quotedString(i.Tag())
+	default:
+		s = i.quotedString(i.String())
 	}
-	if sweetMarshalTextUsingLiteral {
-		return i.quotedString(i.Literal())
-	}
-	return i.quotedString(i.String())
+	return s, nil
 }
 
-func (i Sweet) quotedString(s string) ([]byte, error) {
+func (i Sweet) quotedString(s string) []byte {
 	b := make([]byte, len(s)+2)
 	b[0] = '"'
 	copy(b[1:], s)
 	b[len(s)+1] = '"'
-	return b, nil
+	return b
 }
 `
 
@@ -532,16 +586,12 @@ const e14 = `
 // UnmarshalJSON converts transmitted JSON values to ordinary values. It allows both
 // ordinals and strings to represent the values.
 func (i *Sweet) UnmarshalJSON(text []byte) error {
-	if len(text) >= 2 && text[0] == '"' && text[len(text)-1] == '"' {
-		s := string(text[1 : len(text)-1])
-		return i.Parse(s)
-	}
-
-	// Ignore null, like in the main JSON package.
-	if string(text) == "null" {
+	s := string(text)
+	if s == "null" {
+		// Ignore null, like in the main JSON package.
 		return nil
 	}
-	s := strings.Trim(string(text), "\"")
+	s = strings.Trim(s, "\"")
 	return i.Parse(s)
 }
 `

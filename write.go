@@ -92,10 +92,10 @@ func (m model) writeAllItems(w io.Writer) {
 
 //-------------------------------------------------------------------------------------------------
 
-const literalMethod = `
-// Literal returns the literal string representation of a <<.MainType>>, which is
+const stringMethod = `
+// String returns the literal string representation of a <<.MainType>>, which is
 // the same as the const identifier.
-func (i <<.MainType>>) Literal() string {
+func (i <<.MainType>>) String() string {
 	o := i.Ordinal()
 	if o < 0 || o >= len(All<<.Plural>>) {
 		return fmt.Sprintf("<<.MainType>>(<<.Placeholder>>)", i)
@@ -104,13 +104,13 @@ func (i <<.MainType>>) Literal() string {
 }
 `
 
-func (m model) writeLiteralMethod(w io.Writer) {
-	m.execTemplate(w, literalMethod)
+func (m model) writeStringMethod(w io.Writer) {
+	m.execTemplate(w, stringMethod)
 }
 
 //-------------------------------------------------------------------------------------------------
 
-const stringMethod = `<<if .LookupTable>>
+const tagMethod = `<<if .LookupTable>>
 var <<.LookupTable>>Inverse = map[string]<<.MainType>>{}
 
 func init() {
@@ -127,8 +127,8 @@ func init() {
 	}
 }
 
-// String returns the string representation of a <<.MainType>>.
-func (i <<.MainType>>) String() string {
+// Tag returns the string representation of a <<.MainType>>.
+func (i <<.MainType>>) Tag() string {
 	s, ok := <<.LookupTable>>[i]
 	if ok {
 		return s
@@ -136,15 +136,15 @@ func (i <<.MainType>>) String() string {
 	return fmt.Sprintf("%02d", i)
 }
 <<- else>>
-// String returns the string representation of a <<.MainType>>. This uses Literal.
-func (i <<.MainType>>) String() string {
-	return i.Literal()
+// Tag returns the string representation of a <<.MainType>>. This is an alias for String.
+func (i <<.MainType>>) Tag() string {
+	return i.String()
 }
 <<- end>>
 `
 
-func (m model) writeStringMethod(w io.Writer) {
-	m.execTemplate(w, stringMethod)
+func (m model) writeTagMethod(w io.Writer) {
+	m.execTemplate(w, tagMethod)
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -246,14 +246,20 @@ func (m model) writeIsValidMethod(w io.Writer) {
 
 const parseMethod = `
 // Parse parses a string to find the corresponding <<.MainType>>, accepting one of the string
-// values or an ordinal number.
+// values or a number.
 <<- range .XF>><<if ne .Info "">>
 // <<.Info>>
 <<- end>>
 <<- end>>
 func (v *<<.MainType>>) Parse(in string) error {
-	if v.parseOrdinal(in) {
-		return nil
+	if <<.LcType>>MarshalTextUsing == enum.Ordinal {
+		if v.parseOrdinal(in) {
+			return nil
+		}
+	} else {
+		if v.parseNumber(in) {
+			return nil
+		}
 	}
 
 	s := in
@@ -263,12 +269,12 @@ func (v *<<.MainType>>) Parse(in string) error {
 <<- end>>
 <<- if .LookupTable>>
 
-	if <<.LcType>>MarshalTextUsingLiteral {
-		if v.parseIdentifier(s) || v.parseString(in) {
+	if <<.LcType>>MarshalTextUsing == enum.Identifier {
+		if v.parseIdentifier(s) || v.parseTag(in) {
 			return nil
 		}
 	} else {
-		if v.parseString(in) || v.parseIdentifier(s) {
+		if v.parseTag(in) || v.parseIdentifier(s) {
 			return nil
 		}
 	}
@@ -279,10 +285,24 @@ func (v *<<.MainType>>) Parse(in string) error {
 	}
 <<- end>>
 
-	return errors.New(in + ": unrecognised <<.MainType>>")
+	return errors.New(in + ": unrecognised <<.LcType>>")
 }
 
-// parseOrdinal attempts to convert ordinal value
+// parseNumber attempts to convert a decimal value
+func (v *<<.MainType>>) parseNumber(s string) (ok bool) {
+<<- if .IsFloat>>
+	num, err := strconv.ParseFloat(s, 64)
+<<- else>>
+	num, err := strconv.ParseInt(s, 10, 64)
+<<- end>>
+	if err == nil {
+		*v = <<.MainType>>(num)
+		return v.IsValid()
+	}
+	return false
+}
+
+// parseOrdinal attempts to convert an ordinal value
 func (v *<<.MainType>>) parseOrdinal(s string) (ok bool) {
 	ord, err := strconv.Atoi(s)
 	if err == nil && 0 <= ord && ord < len(All<<.Plural>>) {
@@ -293,8 +313,8 @@ func (v *<<.MainType>>) parseOrdinal(s string) (ok bool) {
 }
 <<- if .LookupTable>>
 
-// parseString attempts to match an entry in <<.LookupTable>>Inverse
-func (v *<<.MainType>>) parseString(s string) (ok bool) {
+// parseTag attempts to match an entry in <<.LookupTable>>Inverse
+func (v *<<.MainType>>) parseTag(s string) (ok bool) {
 	*v, ok = <<.LookupTable>>Inverse[s]
 	return ok
 }
@@ -343,14 +363,29 @@ func (m model) writeAsMethod(w io.Writer) {
 //-------------------------------------------------------------------------------------------------
 
 const marshalText = `
+// <<.LcType>>MarshalTextUsingLiteral controls representation used for XML and other text encodings.
+// By default, it is enum.Identifier and quoted strings are used.
+var <<.LcType>>MarshalTextUsing = enum.Identifier
+
 // MarshalText converts values to a form suitable for transmission via JSON, XML etc.
+// The representation is chosen according to <<.MainType>>MarshalTextUsing. 
 func (i <<.MainType>>) MarshalText() (text []byte, err error) {
-<<- if .LookupTable>>
-	if <<.LcType>>MarshalTextUsingLiteral {
-		return []byte(i.Literal()), nil
-	}
+	var s string
+	switch <<.LcType>>MarshalTextUsing {
+	case enum.Number:
+<<- if .IsFloat>>
+		s = strconv.FormatFloat(float64(i), 'g', 7, 64)
+<<- else>>
+		s = strconv.FormatInt(int64(i), 10)
 <<- end>>
-	return []byte(i.String()), nil
+	case enum.Ordinal:
+		s = strconv.Itoa(i.Ordinal())
+	case enum.Tag:
+		s = i.Tag()
+	default:
+		s = i.String()
+	}
+	return []byte(s), nil
 }
 
 // UnmarshalText converts transmitted values to ordinary values.
@@ -366,40 +401,33 @@ func (m model) writeMarshalText(w io.Writer) {
 //-------------------------------------------------------------------------------------------------
 
 const marshalJSON = `
-// <<.MainType>>MarshalJSONUsingString controls whether generated JSON uses ordinals or strings. By default,
-// it is false and ordinals are used. Set it true to cause quoted strings to be used instead,
-// these being easier to read but taking more resources.
-var <<.MainType>>MarshalJSONUsingString = false
-<<- if .LookupTable>>
-
-// <<.LcType>>MarshalTextUsingLiteral controls whether generated XML or JSON uses the String()
-// or the Literal() method.
-var <<.LcType>>MarshalTextUsingLiteral = false
-<<- end>>
-
-// MarshalJSON converts values to bytes suitable for transmission via JSON. By default, the
-// ordinal integer is emitted, but a quoted string is emitted instead if
-// <<.MainType>>MarshalJSONUsingString is true.
+// MarshalJSON converts values to bytes suitable for transmission via JSON.
+// The representation is chosen according to <<.MainType>>MarshalTextUsing. 
 func (i <<.MainType>>) MarshalJSON() ([]byte, error) {
-	if !<<.MainType>>MarshalJSONUsingString {
-		// use the ordinal
-		s := strconv.Itoa(i.Ordinal())
-		return []byte(s), nil
-	}
-<<- if .LookupTable>>
-	if <<.LcType>>MarshalTextUsingLiteral {
-		return i.quotedString(i.Literal())
-	}
+	var s []byte
+	switch <<.LcType>>MarshalTextUsing {
+	case enum.Number:
+<<- if .IsFloat>>
+		s = []byte(strconv.FormatFloat(float64(i), 'g', 7, 64))
+<<- else>>
+		s = []byte(strconv.FormatInt(int64(i), 10))
 <<- end>>
-	return i.quotedString(i.String())
+	case enum.Ordinal:
+		s = []byte(strconv.Itoa(i.Ordinal()))
+	case enum.Tag:
+		s = i.quotedString(i.Tag())
+	default:
+		s = i.quotedString(i.String())
+	}
+	return s, nil
 }
 
-func (i <<.MainType>>) quotedString(s string) ([]byte, error) {
+func (i <<.MainType>>) quotedString(s string) []byte {
 	b := make([]byte, len(s)+2)
 	b[0] = '"'
 	copy(b[1:], s)
 	b[len(s)+1] = '"'
-	return b, nil
+	return b
 }
 `
 
@@ -413,16 +441,12 @@ const unmarshalJSON = `
 // UnmarshalJSON converts transmitted JSON values to ordinary values. It allows both
 // ordinals and strings to represent the values.
 func (i *<<.MainType>>) UnmarshalJSON(text []byte) error {
-	if len(text) >= 2 && text[0] == '"' && text[len(text)-1] == '"' {
-		s := string(text[1 : len(text)-1])
-		return i.Parse(s)
-	}
-
-	// Ignore null, like in the main JSON package.
-	if string(text) == "null" {
+	s := string(text)
+	if s == "null" {
+		// Ignore null, like in the main JSON package.
 		return nil
 	}
-	s := strings.Trim(string(text), "\"")
+	s = strings.Trim(s, "\"")
 	return i.Parse(s)
 }
 `
@@ -476,8 +500,8 @@ func (m model) write(w io.Writer) {
 	m.writeHead(w)
 	m.writeJoinedStringAndIndexes(w)
 	m.writeAllItems(w)
-	m.writeLiteralMethod(w)
 	m.writeStringMethod(w)
+	m.writeTagMethod(w)
 	m.writeOrdinalMethod(w)
 	m.writeBaseMethod(w)
 	m.writeOfMethod(w)

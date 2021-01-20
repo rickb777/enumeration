@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration v1.10.0
+// github.com/rickb777/enumeration v2.0.0
 
 package example
 
@@ -27,9 +27,9 @@ var AllMethodEnums = enum.IntEnums{
 	PATCH, DELETE,
 }
 
-// Literal returns the literal string representation of a Method, which is
+// String returns the literal string representation of a Method, which is
 // the same as the const identifier.
-func (i Method) Literal() string {
+func (i Method) String() string {
 	o := i.Ordinal()
 	if o < 0 || o >= len(AllMethods) {
 		return fmt.Sprintf("Method(%d)", i)
@@ -53,8 +53,8 @@ func init() {
 	}
 }
 
-// String returns the string representation of a Method.
-func (i Method) String() string {
+// Tag returns the string representation of a Method.
+func (i Method) Tag() string {
 	s, ok := methodStrings[i]
 	if ok {
 		return s
@@ -108,28 +108,44 @@ func (i Method) IsValid() bool {
 }
 
 // Parse parses a string to find the corresponding Method, accepting one of the string
-// values or an ordinal number.
+// values or a number.
 func (v *Method) Parse(in string) error {
-	if v.parseOrdinal(in) {
-		return nil
+	if methodMarshalTextUsing == enum.Ordinal {
+		if v.parseOrdinal(in) {
+			return nil
+		}
+	} else {
+		if v.parseNumber(in) {
+			return nil
+		}
 	}
 
 	s := in
 
-	if methodMarshalTextUsingLiteral {
-		if v.parseIdentifier(s) || v.parseString(in) {
+	if methodMarshalTextUsing == enum.Identifier {
+		if v.parseIdentifier(s) || v.parseTag(in) {
 			return nil
 		}
 	} else {
-		if v.parseString(in) || v.parseIdentifier(s) {
+		if v.parseTag(in) || v.parseIdentifier(s) {
 			return nil
 		}
 	}
 
-	return errors.New(in + ": unrecognised Method")
+	return errors.New(in + ": unrecognised method")
 }
 
-// parseOrdinal attempts to convert ordinal value
+// parseNumber attempts to convert a decimal value
+func (v *Method) parseNumber(s string) (ok bool) {
+	num, err := strconv.ParseInt(s, 10, 64)
+	if err == nil {
+		*v = Method(num)
+		return v.IsValid()
+	}
+	return false
+}
+
+// parseOrdinal attempts to convert an ordinal value
 func (v *Method) parseOrdinal(s string) (ok bool) {
 	ord, err := strconv.Atoi(s)
 	if err == nil && 0 <= ord && ord < len(AllMethods) {
@@ -139,8 +155,8 @@ func (v *Method) parseOrdinal(s string) (ok bool) {
 	return false
 }
 
-// parseString attempts to match an entry in methodStringsInverse
-func (v *Method) parseString(s string) (ok bool) {
+// parseTag attempts to match an entry in methodStringsInverse
+func (v *Method) parseTag(s string) (ok bool) {
 	*v, ok = methodStringsInverse[s]
 	return ok
 }
@@ -168,12 +184,25 @@ func AsMethod(s string) (Method, error) {
 	return *i, err
 }
 
+// methodMarshalTextUsingLiteral controls representation used for XML and other text encodings.
+// By default, it is enum.Identifier and quoted strings are used.
+var methodMarshalTextUsing = enum.Identifier
+
 // MarshalText converts values to a form suitable for transmission via JSON, XML etc.
+// The representation is chosen according to MethodMarshalTextUsing.
 func (i Method) MarshalText() (text []byte, err error) {
-	if methodMarshalTextUsingLiteral {
-		return []byte(i.Literal()), nil
+	var s string
+	switch methodMarshalTextUsing {
+	case enum.Number:
+		s = strconv.FormatInt(int64(i), 10)
+	case enum.Ordinal:
+		s = strconv.Itoa(i.Ordinal())
+	case enum.Tag:
+		s = i.Tag()
+	default:
+		s = i.String()
 	}
-	return []byte(i.String()), nil
+	return []byte(s), nil
 }
 
 // UnmarshalText converts transmitted values to ordinary values.
@@ -181,51 +210,40 @@ func (i *Method) UnmarshalText(text []byte) error {
 	return i.Parse(string(text))
 }
 
-// MethodMarshalJSONUsingString controls whether generated JSON uses ordinals or strings. By default,
-// it is false and ordinals are used. Set it true to cause quoted strings to be used instead,
-// these being easier to read but taking more resources.
-var MethodMarshalJSONUsingString = false
-
-// methodMarshalTextUsingLiteral controls whether generated XML or JSON uses the String()
-// or the Literal() method.
-var methodMarshalTextUsingLiteral = false
-
-// MarshalJSON converts values to bytes suitable for transmission via JSON. By default, the
-// ordinal integer is emitted, but a quoted string is emitted instead if
-// MethodMarshalJSONUsingString is true.
+// MarshalJSON converts values to bytes suitable for transmission via JSON.
+// The representation is chosen according to MethodMarshalTextUsing.
 func (i Method) MarshalJSON() ([]byte, error) {
-	if !MethodMarshalJSONUsingString {
-		// use the ordinal
-		s := strconv.Itoa(i.Ordinal())
-		return []byte(s), nil
+	var s []byte
+	switch methodMarshalTextUsing {
+	case enum.Number:
+		s = []byte(strconv.FormatInt(int64(i), 10))
+	case enum.Ordinal:
+		s = []byte(strconv.Itoa(i.Ordinal()))
+	case enum.Tag:
+		s = i.quotedString(i.Tag())
+	default:
+		s = i.quotedString(i.String())
 	}
-	if methodMarshalTextUsingLiteral {
-		return i.quotedString(i.Literal())
-	}
-	return i.quotedString(i.String())
+	return s, nil
 }
 
-func (i Method) quotedString(s string) ([]byte, error) {
+func (i Method) quotedString(s string) []byte {
 	b := make([]byte, len(s)+2)
 	b[0] = '"'
 	copy(b[1:], s)
 	b[len(s)+1] = '"'
-	return b, nil
+	return b
 }
 
 // UnmarshalJSON converts transmitted JSON values to ordinary values. It allows both
 // ordinals and strings to represent the values.
 func (i *Method) UnmarshalJSON(text []byte) error {
-	if len(text) >= 2 && text[0] == '"' && text[len(text)-1] == '"' {
-		s := string(text[1 : len(text)-1])
-		return i.Parse(s)
-	}
-
-	// Ignore null, like in the main JSON package.
-	if string(text) == "null" {
+	s := string(text)
+	if s == "null" {
+		// Ignore null, like in the main JSON package.
 		return nil
 	}
-	s := strings.Trim(string(text), "\"")
+	s = strings.Trim(s, "\"")
 	return i.Parse(s)
 }
 

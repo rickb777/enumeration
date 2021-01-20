@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration v1.10.0
+// github.com/rickb777/enumeration v2.0.0
 
 package example
 
@@ -27,9 +27,9 @@ var AllDayEnums = enum.IntEnums{
 	Thursday, Friday, Saturday,
 }
 
-// Literal returns the literal string representation of a Day, which is
+// String returns the literal string representation of a Day, which is
 // the same as the const identifier.
-func (i Day) Literal() string {
+func (i Day) String() string {
 	o := i.Ordinal()
 	if o < 0 || o >= len(AllDays) {
 		return fmt.Sprintf("Day(%d)", i)
@@ -37,9 +37,9 @@ func (i Day) Literal() string {
 	return dayEnumStrings[dayEnumIndex[o]:dayEnumIndex[o+1]]
 }
 
-// String returns the string representation of a Day. This uses Literal.
-func (i Day) String() string {
-	return i.Literal()
+// Tag returns the string representation of a Day. This is an alias for String.
+func (i Day) Tag() string {
+	return i.String()
 }
 
 // Ordinal returns the ordinal number of a Day.
@@ -90,10 +90,16 @@ func (i Day) IsValid() bool {
 }
 
 // Parse parses a string to find the corresponding Day, accepting one of the string
-// values or an ordinal number.
+// values or a number.
 func (v *Day) Parse(in string) error {
-	if v.parseOrdinal(in) {
-		return nil
+	if dayMarshalTextUsing == enum.Ordinal {
+		if v.parseOrdinal(in) {
+			return nil
+		}
+	} else {
+		if v.parseNumber(in) {
+			return nil
+		}
 	}
 
 	s := in
@@ -102,10 +108,20 @@ func (v *Day) Parse(in string) error {
 		return nil
 	}
 
-	return errors.New(in + ": unrecognised Day")
+	return errors.New(in + ": unrecognised day")
 }
 
-// parseOrdinal attempts to convert ordinal value
+// parseNumber attempts to convert a decimal value
+func (v *Day) parseNumber(s string) (ok bool) {
+	num, err := strconv.ParseInt(s, 10, 64)
+	if err == nil {
+		*v = Day(num)
+		return v.IsValid()
+	}
+	return false
+}
+
+// parseOrdinal attempts to convert an ordinal value
 func (v *Day) parseOrdinal(s string) (ok bool) {
 	ord, err := strconv.Atoi(s)
 	if err == nil && 0 <= ord && ord < len(AllDays) {
@@ -138,9 +154,25 @@ func AsDay(s string) (Day, error) {
 	return *i, err
 }
 
+// dayMarshalTextUsingLiteral controls representation used for XML and other text encodings.
+// By default, it is enum.Identifier and quoted strings are used.
+var dayMarshalTextUsing = enum.Identifier
+
 // MarshalText converts values to a form suitable for transmission via JSON, XML etc.
+// The representation is chosen according to DayMarshalTextUsing.
 func (i Day) MarshalText() (text []byte, err error) {
-	return []byte(i.String()), nil
+	var s string
+	switch dayMarshalTextUsing {
+	case enum.Number:
+		s = strconv.FormatInt(int64(i), 10)
+	case enum.Ordinal:
+		s = strconv.Itoa(i.Ordinal())
+	case enum.Tag:
+		s = i.Tag()
+	default:
+		s = i.String()
+	}
+	return []byte(s), nil
 }
 
 // UnmarshalText converts transmitted values to ordinary values.
@@ -148,44 +180,40 @@ func (i *Day) UnmarshalText(text []byte) error {
 	return i.Parse(string(text))
 }
 
-// DayMarshalJSONUsingString controls whether generated JSON uses ordinals or strings. By default,
-// it is false and ordinals are used. Set it true to cause quoted strings to be used instead,
-// these being easier to read but taking more resources.
-var DayMarshalJSONUsingString = false
-
-// MarshalJSON converts values to bytes suitable for transmission via JSON. By default, the
-// ordinal integer is emitted, but a quoted string is emitted instead if
-// DayMarshalJSONUsingString is true.
+// MarshalJSON converts values to bytes suitable for transmission via JSON.
+// The representation is chosen according to DayMarshalTextUsing.
 func (i Day) MarshalJSON() ([]byte, error) {
-	if !DayMarshalJSONUsingString {
-		// use the ordinal
-		s := strconv.Itoa(i.Ordinal())
-		return []byte(s), nil
+	var s []byte
+	switch dayMarshalTextUsing {
+	case enum.Number:
+		s = []byte(strconv.FormatInt(int64(i), 10))
+	case enum.Ordinal:
+		s = []byte(strconv.Itoa(i.Ordinal()))
+	case enum.Tag:
+		s = i.quotedString(i.Tag())
+	default:
+		s = i.quotedString(i.String())
 	}
-	return i.quotedString(i.String())
+	return s, nil
 }
 
-func (i Day) quotedString(s string) ([]byte, error) {
+func (i Day) quotedString(s string) []byte {
 	b := make([]byte, len(s)+2)
 	b[0] = '"'
 	copy(b[1:], s)
 	b[len(s)+1] = '"'
-	return b, nil
+	return b
 }
 
 // UnmarshalJSON converts transmitted JSON values to ordinary values. It allows both
 // ordinals and strings to represent the values.
 func (i *Day) UnmarshalJSON(text []byte) error {
-	if len(text) >= 2 && text[0] == '"' && text[len(text)-1] == '"' {
-		s := string(text[1 : len(text)-1])
-		return i.Parse(s)
-	}
-
-	// Ignore null, like in the main JSON package.
-	if string(text) == "null" {
+	s := string(text)
+	if s == "null" {
+		// Ignore null, like in the main JSON package.
 		return nil
 	}
-	s := strings.Trim(string(text), "\"")
+	s = strings.Trim(s, "\"")
 	return i.Parse(s)
 }
 

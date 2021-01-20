@@ -4,7 +4,9 @@ import (
 	"bytes"
 	"encoding/gob"
 	"encoding/json"
+	"encoding/xml"
 	. "github.com/onsi/gomega"
+	"github.com/rickb777/enumeration/enum"
 	"testing"
 )
 
@@ -45,52 +47,13 @@ func TestAsDay(t *testing.T) {
 	g.Expect(err).Should(HaveOccurred())
 }
 
-func TestDayMarshalText(t *testing.T) {
-	g := NewGomegaWithT(t)
-	tt, err := Friday.MarshalText()
-	g.Expect(tt, err).Should(Equal([]byte("Friday")))
-}
-
-func TestDayUnmarshalText(t *testing.T) {
-	g := NewGomegaWithT(t)
-	var d = new(Day)
-	err := d.UnmarshalText([]byte("Friday"))
-	g.Expect(*d, err).Should(Equal(Friday))
-	err = d.UnmarshalText([]byte("5"))
-	g.Expect(*d, err).Should(Equal(Friday))
-}
-
-func TestMethodMarshalText(t *testing.T) {
-	g := NewGomegaWithT(t)
-	methodMarshalTextUsingLiteral = true
-	tt, err := POST.MarshalText()
-	g.Expect(tt, err).Should(Equal([]byte("POST")))
-
-	methodMarshalTextUsingLiteral = false
-	tt, err = POST.MarshalText()
-	g.Expect(tt, err).Should(Equal([]byte("PO")))
-}
-
-func TestMethodUnmarshalText(t *testing.T) {
-	g := NewGomegaWithT(t)
-	var m = new(Method)
-	methodMarshalTextUsingLiteral = false
-	err := m.UnmarshalText([]byte("POST"))
-	g.Expect(*m, err).Should(Equal(POST))
-
-	methodMarshalTextUsingLiteral = true
-	err = m.UnmarshalText([]byte("POST"))
-	g.Expect(*m, err).Should(Equal(POST))
-}
-
 func TestAsMethod(t *testing.T) {
 	g := NewGomegaWithT(t)
-	methodMarshalTextUsingLiteral = false
+	methodMarshalTextUsing = enum.Identifier
 	g.Expect(AsMethod("POST")).Should(Equal(POST))
 	g.Expect(AsMethod("PO")).Should(Equal(POST))
 	g.Expect(AsMethod("3")).Should(Equal(POST))
 
-	methodMarshalTextUsingLiteral = true
 	g.Expect(AsMethod("PUT")).Should(Equal(PUT))
 	g.Expect(AsMethod("PU")).Should(Equal(PUT))
 	g.Expect(AsMethod("2")).Should(Equal(PUT))
@@ -106,59 +69,119 @@ type Group struct {
 	P Pet
 }
 
-func TestMarshalJSONUsingOrdinal(t *testing.T) {
+func TestMarshalUsingNumber(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	BaseMarshalJSONUsingString = false
-	DayMarshalJSONUsingString = false
-	MethodMarshalJSONUsingString = false
-	MonthMarshalJSONUsingString = false
-	PetMarshalJSONUsingString = false
+	baseMarshalTextUsing = enum.Number
+	dayMarshalTextUsing = enum.Number
+	methodMarshalTextUsing = enum.Number
+	monthMarshalTextUsing = enum.Number
+	petMarshalTextUsing = enum.Number
 
 	v := Group{G, Tuesday, POST, November, Koala_Bear}
 	s, err := json.Marshal(v)
 	g.Expect(err).NotTo(HaveOccurred())
-	g.Expect(string(s)).Should(Equal(`{"B":2,"D":2,"X":3,"M":10,"P":4}`))
+	x, err := xml.Marshal(v)
+	g.Expect(err).NotTo(HaveOccurred())
+	g.Expect(string(s)).Should(Equal(`{"B":347.2,"D":3,"X":3,"M":11,"P":4}`))
+	g.Expect(string(x)).Should(Equal(`<Group><B>347.2</B><D>3</D><X>3</X><M>11</M><P>4</P></Group>`), string(x))
 }
 
-func TestMarshalJSONUsingString(t *testing.T) {
+func TestMarshalUsingOrdinal(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	BaseMarshalJSONUsingString = true
-	DayMarshalJSONUsingString = true
-	MethodMarshalJSONUsingString = true
-	methodMarshalTextUsingLiteral = true
-	MonthMarshalJSONUsingString = true
-	PetMarshalJSONUsingString = true
+	baseMarshalTextUsing = enum.Ordinal
+	dayMarshalTextUsing = enum.Ordinal
+	methodMarshalTextUsing = enum.Ordinal
+	monthMarshalTextUsing = enum.Ordinal
+	petMarshalTextUsing = enum.Ordinal
+
+	v := Group{G, Tuesday, POST, November, Koala_Bear}
+	s, err := json.Marshal(v)
+	g.Expect(err).NotTo(HaveOccurred())
+	x, err := xml.Marshal(v)
+	g.Expect(err).NotTo(HaveOccurred())
+	g.Expect(string(s)).Should(Equal(`{"B":2,"D":2,"X":3,"M":10,"P":4}`))
+	g.Expect(string(x)).Should(Equal(`<Group><B>2</B><D>2</D><X>3</X><M>10</M><P>4</P></Group>`), string(x))
+}
+
+func TestMarshalUsingIdentifier(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	baseMarshalTextUsing = enum.Identifier
+	dayMarshalTextUsing = enum.Identifier
+	methodMarshalTextUsing = enum.Identifier
+	monthMarshalTextUsing = enum.Identifier
+	petMarshalTextUsing = enum.Identifier
 
 	g.Expect(G.MarshalJSON()).Should(Equal([]byte{'"', 'g', '"'}))
 
 	v := Group{G, Tuesday, POST, November, Koala_Bear}
 	s, err := json.Marshal(v)
 	g.Expect(err).NotTo(HaveOccurred())
+	x, err := xml.Marshal(v)
+	g.Expect(err).NotTo(HaveOccurred())
 	g.Expect(string(s)).Should(Equal(`{"B":"g","D":"Tuesday","X":"POST","M":"November","P":"koala bear"}`))
+	g.Expect(string(x)).Should(Equal(`<Group><B>g</B><D>Tuesday</D><X>POST</X><M>November</M><P>koala bear</P></Group>`), string(x))
+}
+
+func TestMarshalUsingTag(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	baseMarshalTextUsing = enum.Tag
+	dayMarshalTextUsing = enum.Tag
+	methodMarshalTextUsing = enum.Tag
+	monthMarshalTextUsing = enum.Tag
+	petMarshalTextUsing = enum.Tag
+
+	g.Expect(G.MarshalJSON()).Should(Equal([]byte{'"', 'g', '"'}))
+
+	v := Group{G, Tuesday, POST, November, Koala_Bear}
+	s, err := json.Marshal(v)
+	g.Expect(err).NotTo(HaveOccurred())
+	x, err := xml.Marshal(v)
+	g.Expect(err).NotTo(HaveOccurred())
+	g.Expect(string(s)).Should(Equal(`{"B":"g","D":"Tuesday","X":"PO","M":"November","P":"koala bear"}`))
+	g.Expect(string(x)).Should(Equal(`<Group><B>g</B><D>Tuesday</D><X>PO</X><M>November</M><P>koala bear</P></Group>`), string(x))
 }
 
 func TestUnmarshalJSON1(t *testing.T) {
 	g := NewGomegaWithT(t)
-	methodMarshalTextUsingLiteral = false
-	cases := []string{
-		`{"B":2,"D":2,"X":3,"M":10,"P":4}`,
-		`{"B":2,"D":"Tuesday","X":"PO","M":"November","P":"Koala Bear"}`,
+	methodMarshalTextUsing = enum.Identifier
+	cases := []struct {
+		input string
+		rep   enum.Representation
+	}{
+		{input: `{"B":347.2,"D":3,"X":3,"M":11,"P":4}`, rep: enum.Identifier},
+		{input: `{"B":"g","D":"Tuesday","X":"PO","M":"November","P":"Koala Bear"}`, rep: enum.Identifier},
+
+		{input: `{"B":347.2,"D":3,"X":3,"M":11,"P":4}`, rep: enum.Tag},
+		{input: `{"B":"g","D":"Tuesday","X":"PO","M":"November","P":"Koala Bear"}`, rep: enum.Tag},
+
+		{input: `{"B":347.2,"D":3,"X":3,"M":11,"P":4}`, rep: enum.Number},
+		{input: `{"B":"g","D":"Tuesday","X":"PO","M":"November","P":"Koala Bear"}`, rep: enum.Number},
+
+		{input: `{"B":2,"D":2,"X":3,"M":10,"P":4}`, rep: enum.Ordinal},
+		{input: `{"B":"g","D":"Tuesday","X":"PO","M":"November","P":"Koala Bear"}`, rep: enum.Ordinal},
 	}
-	for _, s := range cases {
+	for _, c := range cases {
+		baseMarshalTextUsing = c.rep
+		dayMarshalTextUsing = c.rep
+		methodMarshalTextUsing = c.rep
+		monthMarshalTextUsing = c.rep
+		petMarshalTextUsing = c.rep
 		var v Group
-		err := json.Unmarshal([]byte(s), &v)
-		g.Expect(err).NotTo(HaveOccurred())
-		g.Expect(v).Should(Equal(Group{G, Tuesday, POST, November, Koala_Bear}))
+		err := json.Unmarshal([]byte(c.input), &v)
+		g.Expect(err).NotTo(HaveOccurred(), "%s %d", c.input, c.rep)
+		g.Expect(v).Should(Equal(Group{G, Tuesday, POST, November, Koala_Bear}), "%s %d", c.input, c.rep)
 	}
 }
 
 func TestMethodScan(t *testing.T) {
 	g := NewGomegaWithT(t)
-	methodMarshalTextUsingLiteral = false
+	methodMarshalTextUsing = enum.Identifier
 	cases := []interface{}{
-		int64(4), "POST", "PO", []byte("POST"), []byte("PO"),
+		int64(3), "POST", "PO", []byte("POST"), []byte("PO"),
 	}
 	for _, s := range cases {
 		var m = new(Method)

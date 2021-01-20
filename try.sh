@@ -1,6 +1,7 @@
 #!/bin/bash -ex
 unset GOPATH
 go mod download
+go test -v .
 go install .
 gofmt -l -w -s *.go
 
