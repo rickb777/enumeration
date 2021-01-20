@@ -177,13 +177,13 @@ func AsMonth(s string) (Month, error) {
 var monthMarshalTextRep = enum.Identifier
 
 // MarshalText converts values to a form suitable for transmission via JSON, XML etc.
-// The representation is chosen according to MonthMarshalTextRep.
+// The representation is chosen according to monthMarshalTextRep.
 func (i Month) MarshalText() (text []byte, err error) {
 	return i.marshalText(monthMarshalTextRep, false)
 }
 
 // MarshalJSON converts values to bytes suitable for transmission via JSON.
-// The representation is chosen according to MonthMarshalTextRep.
+// The representation is chosen according to monthMarshalTextRep.
 func (i Month) MarshalJSON() ([]byte, error) {
 	return i.marshalText(monthMarshalTextRep, true)
 }

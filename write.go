@@ -373,13 +373,13 @@ const marshalText = `
 var <<.LcType>>MarshalTextRep = enum.Identifier
 
 // MarshalText converts values to a form suitable for transmission via JSON, XML etc.
-// The representation is chosen according to <<.MainType>>MarshalTextRep. 
+// The representation is chosen according to <<.LcType>>MarshalTextRep.
 func (i <<.MainType>>) MarshalText() (text []byte, err error) {
 	return i.marshalText(<<.LcType>>MarshalTextRep, false)
 }
 
 // MarshalJSON converts values to bytes suitable for transmission via JSON.
-// The representation is chosen according to <<.MainType>>MarshalTextRep. 
+// The representation is chosen according to <<.LcType>>MarshalTextRep.
 func (i <<.MainType>>) MarshalJSON() ([]byte, error) {
 	return i.marshalText(<<.LcType>>MarshalTextRep, true)
 }

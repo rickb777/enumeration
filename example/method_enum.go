@@ -194,13 +194,13 @@ func AsMethod(s string) (Method, error) {
 var methodMarshalTextRep = enum.Identifier
 
 // MarshalText converts values to a form suitable for transmission via JSON, XML etc.
-// The representation is chosen according to MethodMarshalTextRep.
+// The representation is chosen according to methodMarshalTextRep.
 func (i Method) MarshalText() (text []byte, err error) {
 	return i.marshalText(methodMarshalTextRep, false)
 }
 
 // MarshalJSON converts values to bytes suitable for transmission via JSON.
-// The representation is chosen according to MethodMarshalTextRep.
+// The representation is chosen according to methodMarshalTextRep.
 func (i Method) MarshalJSON() ([]byte, error) {
 	return i.marshalText(methodMarshalTextRep, true)
 }

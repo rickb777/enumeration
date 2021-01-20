@@ -29,8 +29,12 @@ func TestOrdinal(t *testing.T) {
 
 func TestValue(t *testing.T) {
 	g := NewGomegaWithT(t)
+	g.Expect(G.Float()).Should(Equal(347.20001220703125))
 	g.Expect(Sunday.Int()).Should(Equal(1))
 	g.Expect(Wednesday.Int()).Should(Equal(4))
+	g.Expect(POST.Int()).Should(Equal(3))
+	g.Expect(November.Int()).Should(Equal(11))
+	g.Expect(Koala_Bear.Int()).Should(Equal(4))
 }
 
 func TestAllDays(t *testing.T) {
@@ -147,7 +151,6 @@ func TestMarshalUsingTag(t *testing.T) {
 
 func TestUnmarshalJSON1(t *testing.T) {
 	g := NewGomegaWithT(t)
-	methodMarshalTextRep = enum.Identifier
 	cases := []struct {
 		input string
 		rep   enum.Representation
@@ -179,16 +182,117 @@ func TestUnmarshalJSON1(t *testing.T) {
 
 func TestMethodScan(t *testing.T) {
 	g := NewGomegaWithT(t)
-	methodMarshalTextRep = enum.Identifier
+	methodStoreRep = enum.Ordinal
 	cases := []interface{}{
-		int64(3), "POST", "PO", []byte("POST"), []byte("PO"),
+		int64(3), int64(3), float64(3), "POST", "PO", []byte("POST"), []byte("PO"),
 	}
-	for _, s := range cases {
+	for i, s := range cases {
+		if i > 0 {
+			methodStoreRep = enum.Identifier
+		}
 		var m = new(Method)
 		err := m.Scan(s)
 		g.Expect(err).NotTo(HaveOccurred())
 		g.Expect(*m).Should(Equal(POST))
 	}
+}
+
+func TestMonthScan(t *testing.T) {
+	g := NewGomegaWithT(t)
+	monthStoreRep = enum.Ordinal
+	cases := []interface{}{
+		int64(10), int64(11), float64(11), "November", []byte("November"),
+	}
+	for i, s := range cases {
+		if i > 0 {
+			monthStoreRep = enum.Identifier
+		}
+		var m = new(Month)
+		err := m.Scan(s)
+		g.Expect(err).NotTo(HaveOccurred())
+		g.Expect(*m).Should(Equal(November))
+	}
+}
+
+func TestPetScan(t *testing.T) {
+	g := NewGomegaWithT(t)
+	petStoreRep = enum.Ordinal
+	cases := []interface{}{
+		int64(4), int64(4), float64(4), "Koala Bear", "koala bear", []byte("Koala Bear"),
+	}
+	for i, s := range cases {
+		if i > 0 {
+			petStoreRep = enum.Identifier
+		}
+		var m = new(Pet)
+		err := m.Scan(s)
+		g.Expect(err).NotTo(HaveOccurred())
+		g.Expect(*m).Should(Equal(Koala_Bear))
+	}
+}
+
+func TestValueUsingNumber(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	baseStoreRep = enum.Number
+	dayStoreRep = enum.Number
+	methodStoreRep = enum.Number
+	monthStoreRep = enum.Number
+	petStoreRep = enum.Number
+
+	g.Expect(G.Value()).To(Equal(float64(347.20001220703125)))
+	g.Expect(Tuesday.Value()).To(Equal(int64(3)))
+	g.Expect(POST.Value()).To(Equal(int64(3)))
+	g.Expect(November.Value()).To(Equal(int64(11)))
+	g.Expect(Koala_Bear.Value()).To(Equal(int64(4)))
+}
+
+func TestValueUsingOrdinal(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	baseStoreRep = enum.Ordinal
+	dayStoreRep = enum.Ordinal
+	methodStoreRep = enum.Ordinal
+	monthStoreRep = enum.Ordinal
+	petStoreRep = enum.Ordinal
+
+	g.Expect(G.Value()).To(Equal(int64(2)))
+	g.Expect(Tuesday.Value()).To(Equal(int64(2)))
+	g.Expect(POST.Value()).To(Equal(int64(3)))
+	g.Expect(November.Value()).To(Equal(int64(10)))
+	g.Expect(Koala_Bear.Value()).To(Equal(int64(4)))
+}
+
+func TestValueUsingTag(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	baseStoreRep = enum.Tag
+	dayStoreRep = enum.Tag
+	methodStoreRep = enum.Tag
+	monthStoreRep = enum.Tag
+	petStoreRep = enum.Tag
+
+	g.Expect(G.Value()).To(Equal("g"))
+	g.Expect(Tuesday.Value()).To(Equal("Tuesday"))
+	g.Expect(POST.Value()).To(Equal("PO"))
+	g.Expect(November.Value()).To(Equal("November"))
+	g.Expect(Koala_Bear.Value()).To(Equal("koala bear"))
+}
+
+func TestValueUsingIdentifier(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	baseStoreRep = enum.Identifier
+	dayStoreRep = enum.Identifier
+	methodStoreRep = enum.Identifier
+	monthStoreRep = enum.Identifier
+	petStoreRep = enum.Identifier
+
+	g.Expect(G.Value()).To(Equal("g"))
+	g.Expect(Tuesday.Value()).To(Equal("Tuesday"))
+	g.Expect(POST.Value()).To(Equal("POST"))
+	g.Expect(November.Value()).To(Equal("November"))
+	g.Expect(Koala_Bear.Value()).To(Equal("koala bear"))
 }
 
 func TestGobEncodeAndDecode(t *testing.T) {

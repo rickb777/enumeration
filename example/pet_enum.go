@@ -164,13 +164,13 @@ func AsPet(s string) (Pet, error) {
 var petMarshalTextRep = enum.Identifier
 
 // MarshalText converts values to a form suitable for transmission via JSON, XML etc.
-// The representation is chosen according to PetMarshalTextRep.
+// The representation is chosen according to petMarshalTextRep.
 func (i Pet) MarshalText() (text []byte, err error) {
 	return i.marshalText(petMarshalTextRep, false)
 }
 
 // MarshalJSON converts values to bytes suitable for transmission via JSON.
-// The representation is chosen according to PetMarshalTextRep.
+// The representation is chosen according to petMarshalTextRep.
 func (i Pet) MarshalJSON() ([]byte, error) {
 	return i.marshalText(petMarshalTextRep, true)
 }

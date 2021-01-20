@@ -461,13 +461,13 @@ const e12nc = `
 var sweetMarshalTextRep = enum.Identifier
 
 // MarshalText converts values to a form suitable for transmission via JSON, XML etc.
-// The representation is chosen according to SweetMarshalTextRep. 
+// The representation is chosen according to sweetMarshalTextRep.
 func (i Sweet) MarshalText() (text []byte, err error) {
 	return i.marshalText(sweetMarshalTextRep, false)
 }
 
 // MarshalJSON converts values to bytes suitable for transmission via JSON.
-// The representation is chosen according to SweetMarshalTextRep. 
+// The representation is chosen according to sweetMarshalTextRep.
 func (i Sweet) MarshalJSON() ([]byte, error) {
 	return i.marshalText(sweetMarshalTextRep, true)
 }
@@ -510,13 +510,13 @@ const e12lc = `
 var sweetMarshalTextRep = enum.Identifier
 
 // MarshalText converts values to a form suitable for transmission via JSON, XML etc.
-// The representation is chosen according to SweetMarshalTextRep. 
+// The representation is chosen according to sweetMarshalTextRep.
 func (i Sweet) MarshalText() (text []byte, err error) {
 	return i.marshalText(sweetMarshalTextRep, false)
 }
 
 // MarshalJSON converts values to bytes suitable for transmission via JSON.
-// The representation is chosen according to SweetMarshalTextRep. 
+// The representation is chosen according to sweetMarshalTextRep.
 func (i Sweet) MarshalJSON() ([]byte, error) {
 	return i.marshalText(sweetMarshalTextRep, true)
 }

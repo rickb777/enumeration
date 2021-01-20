@@ -157,13 +157,13 @@ func AsBase(s string) (Base, error) {
 var baseMarshalTextRep = enum.Identifier
 
 // MarshalText converts values to a form suitable for transmission via JSON, XML etc.
-// The representation is chosen according to BaseMarshalTextRep.
+// The representation is chosen according to baseMarshalTextRep.
 func (i Base) MarshalText() (text []byte, err error) {
 	return i.marshalText(baseMarshalTextRep, false)
 }
 
 // MarshalJSON converts values to bytes suitable for transmission via JSON.
-// The representation is chosen according to BaseMarshalTextRep.
+// The representation is chosen according to baseMarshalTextRep.
 func (i Base) MarshalJSON() ([]byte, error) {
 	return i.marshalText(baseMarshalTextRep, true)
 }
