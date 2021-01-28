@@ -9,3 +9,11 @@ const (
 	Elephant
 	Koala_Bear
 )
+
+var petStrings = map[Pet]string{
+	Cat:        "Felis Catus",
+	Dog:        "Canis Lupus",
+	Mouse:      "Mus Musculus",
+	Elephant:   "Loxodonta Africana",
+	Koala_Bear: "Phascolarctos Cinereus",
+}

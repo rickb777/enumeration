@@ -6,6 +6,7 @@ import (
 	"go/types"
 	"io"
 	"strings"
+	"text/template"
 )
 
 func removeComments(line string) string {
@@ -108,9 +109,15 @@ type model struct {
 	MainType, LcType, BaseType string
 	Plural, Pkg, Version       string
 	Values                     []string
-	XF                         []Transformer
+	XF                         Transformers
 	S1, S2                     string
 	LookupTable                string
+}
+
+func (m model) FnMap() template.FuncMap {
+	fns := make(template.FuncMap)
+	fns["transform"] = m.XF.TransformFunc()
+	return fns
 }
 
 func (m model) IsFloat() bool {

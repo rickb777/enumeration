@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration v2.0.1
+// github.com/rickb777/enumeration/v2 v2.0.2
 
 package example
 
@@ -92,8 +92,8 @@ func (i Day) IsValid() bool {
 
 // Parse parses a string to find the corresponding Day, accepting one of the string
 // values or a number.
-func (v *Day) Parse(in string) error {
-	return v.parse(in, dayMarshalTextRep)
+func (v *Day) Parse(s string) error {
+	return v.parse(s, dayMarshalTextRep)
 }
 
 func (v *Day) parse(in string, rep enum.Representation) error {

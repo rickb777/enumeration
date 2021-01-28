@@ -2,8 +2,8 @@ package enum_test
 
 import (
 	. "github.com/onsi/gomega"
-	"github.com/rickb777/enumeration/enum"
-	"github.com/rickb777/enumeration/example"
+	"github.com/rickb777/enumeration/v2/enum"
+	"github.com/rickb777/enumeration/v2/example"
 	"strings"
 	"testing"
 )

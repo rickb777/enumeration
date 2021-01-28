@@ -7,7 +7,7 @@ import (
 )
 
 const e0 = `// generated code - do not edit
-// github.com/rickb777/enumeration `
+// github.com/rickb777/enumeration/v2 `
 
 const e1 = `
 
@@ -24,10 +24,10 @@ import (
 `
 
 func TestWriteHead(t *testing.T) {
-	RegisterTestingT(t)
+	g := NewGomegaWithT(t)
 	buf := &strings.Builder{}
 	modelNoChange.writeHead(buf)
-	Ω(buf.String()).Should(Equal(e0+version+e1), buf.String())
+	g.Expect(buf.String()).Should(Equal(e0+version+e1), buf.String())
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -45,14 +45,14 @@ var sweetEnumIndex = [...]uint16{0, 4, 10, 18, 24}
 `
 
 func TestWriteJoinedStringAndIndexes(t *testing.T) {
-	RegisterTestingT(t)
+	g := NewGomegaWithT(t)
 	buf := &strings.Builder{}
 	modelNoChange.writeJoinedStringAndIndexes(buf)
-	Ω(buf.String()).Should(Equal(e2nc), buf.String())
+	g.Expect(buf.String()).Should(Equal(e2nc), buf.String())
 
 	buf.Reset()
 	modelLowerWithLookupTable.writeJoinedStringAndIndexes(buf)
-	Ω(buf.String()).Should(Equal(e2lc), buf.String())
+	g.Expect(buf.String()).Should(Equal(e2lc), buf.String())
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -70,10 +70,10 @@ var AllSweetEnums = enum.IntEnums{
 `
 
 func TestWriteAllItems(t *testing.T) {
-	RegisterTestingT(t)
+	g := NewGomegaWithT(t)
 	buf := &strings.Builder{}
 	modelNoChange.writeAllItems(buf)
-	Ω(buf.String()).Should(Equal(e3), buf.String())
+	g.Expect(buf.String()).Should(Equal(e3), buf.String())
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -103,14 +103,14 @@ func (i Sweet) String() string {
 `
 
 func TestWriteLiteralMethod(t *testing.T) {
-	RegisterTestingT(t)
+	g := NewGomegaWithT(t)
 	buf := &strings.Builder{}
 	modelNoChange.writeStringMethod(buf)
-	Ω(buf.String()).Should(Equal(e4nc), buf.String())
+	g.Expect(buf.String()).Should(Equal(e4nc), buf.String())
 
 	buf.Reset()
 	modelLowerWithLookupTable.writeStringMethod(buf)
-	Ω(buf.String()).Should(Equal(e4lc), buf.String())
+	g.Expect(buf.String()).Should(Equal(e4lc), buf.String())
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -131,6 +131,7 @@ func init() {
 	}
 
 	for k, v := range sweetNames {
+		v = strings.ToLower(v)
 		sweetNamesInverse[v] = k
 	}
 
@@ -150,14 +151,14 @@ func (i Sweet) Tag() string {
 `
 
 func TestWriteTagMethod(t *testing.T) {
-	RegisterTestingT(t)
+	g := NewGomegaWithT(t)
 	buf := &strings.Builder{}
 	modelNoChange.writeTagMethod(buf)
-	Ω(buf.String()).Should(Equal(e5nc), buf.String())
+	g.Expect(buf.String()).Should(Equal(e5nc), buf.String())
 
 	buf.Reset()
 	modelLowerWithLookupTable.writeTagMethod(buf)
-	Ω(buf.String()).Should(Equal(e5lc), buf.String())
+	g.Expect(buf.String()).Should(Equal(e5lc), buf.String())
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -180,14 +181,14 @@ func (i Sweet) Ordinal() int {
 `
 
 func TestWriteOrdinalMethod(t *testing.T) {
-	RegisterTestingT(t)
+	g := NewGomegaWithT(t)
 	buf := &strings.Builder{}
 	modelNoChange.writeOrdinalMethod(buf)
-	Ω(buf.String()).Should(Equal(e6), buf.String())
+	g.Expect(buf.String()).Should(Equal(e6), buf.String())
 
 	buf.Reset()
 	modelLowerWithLookupTable.writeOrdinalMethod(buf)
-	Ω(buf.String()).Should(Equal(e6), buf.String())
+	g.Expect(buf.String()).Should(Equal(e6), buf.String())
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -208,14 +209,14 @@ func (i Sweet) Float() float64 {
 `
 
 func TestWriteBaseMethod(t *testing.T) {
-	RegisterTestingT(t)
+	g := NewGomegaWithT(t)
 	buf := &strings.Builder{}
 	modelNoChange.writeBaseMethod(buf)
-	Ω(buf.String()).Should(Equal(e7nc), buf.String())
+	g.Expect(buf.String()).Should(Equal(e7nc), buf.String())
 
 	buf.Reset()
 	modelLowerWithLookupTable.writeBaseMethod(buf)
-	Ω(buf.String()).Should(Equal(e7lc), buf.String())
+	g.Expect(buf.String()).Should(Equal(e7lc), buf.String())
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -233,14 +234,14 @@ func SweetOf(i int) Sweet {
 `
 
 func TestWriteOfMethod(t *testing.T) {
-	RegisterTestingT(t)
+	g := NewGomegaWithT(t)
 	buf := &strings.Builder{}
 	modelNoChange.writeOfMethod(buf)
-	Ω(buf.String()).Should(Equal(e8), buf.String())
+	g.Expect(buf.String()).Should(Equal(e8), buf.String())
 
 	buf.Reset()
 	modelLowerWithLookupTable.writeOfMethod(buf)
-	Ω(buf.String()).Should(Equal(e8), buf.String())
+	g.Expect(buf.String()).Should(Equal(e8), buf.String())
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -256,14 +257,14 @@ func (i Sweet) IsValid() bool {
 `
 
 func TestWriteIsValid(t *testing.T) {
-	RegisterTestingT(t)
+	g := NewGomegaWithT(t)
 	buf := &strings.Builder{}
 	modelNoChange.writeIsValidMethod(buf)
-	Ω(buf.String()).Should(Equal(e9), buf.String())
+	g.Expect(buf.String()).Should(Equal(e9), buf.String())
 
 	buf.Reset()
 	modelLowerWithLookupTable.writeIsValidMethod(buf)
-	Ω(buf.String()).Should(Equal(e9), buf.String())
+	g.Expect(buf.String()).Should(Equal(e9), buf.String())
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -271,8 +272,8 @@ func TestWriteIsValid(t *testing.T) {
 const e10nc = `
 // Parse parses a string to find the corresponding Sweet, accepting one of the string
 // values or a number.
-func (v *Sweet) Parse(in string) error {
-	return v.parse(in, sweetMarshalTextRep)
+func (v *Sweet) Parse(s string) error {
+	return v.parse(s, sweetMarshalTextRep)
 }
 
 func (v *Sweet) parse(in string, rep enum.Representation) error {
@@ -335,8 +336,8 @@ const e10lc = `
 // Parse parses a string to find the corresponding Sweet, accepting one of the string
 // values or a number.
 // The case of s does not matter.
-func (v *Sweet) Parse(in string) error {
-	return v.parse(in, sweetMarshalTextRep)
+func (v *Sweet) Parse(s string) error {
+	return v.parse(s, sweetMarshalTextRep)
 }
 
 func (v *Sweet) parse(in string, rep enum.Representation) error {
@@ -350,15 +351,14 @@ func (v *Sweet) parse(in string, rep enum.Representation) error {
 		}
 	}
 
-	s := in
-	s = strings.ToLower(s)
+	s := strings.ToLower(in)
 
 	if rep == enum.Identifier {
-		if v.parseIdentifier(s) || v.parseTag(in) {
+		if v.parseIdentifier(s) || v.parseTag(s) {
 			return nil
 		}
 	} else {
-		if v.parseTag(in) || v.parseIdentifier(s) {
+		if v.parseTag(s) || v.parseIdentifier(s) {
 			return nil
 		}
 	}
@@ -409,14 +409,14 @@ func (v *Sweet) parseIdentifier(s string) (ok bool) {
 `
 
 func TestWriteParseMethod(t *testing.T) {
-	RegisterTestingT(t)
+	g := NewGomegaWithT(t)
 	buf := &strings.Builder{}
 	modelNoChange.writeParseMethod(buf)
-	Ω(buf.String()).Should(Equal(e10nc), buf.String())
+	g.Expect(buf.String()).Should(Equal(e10nc), buf.String())
 
 	buf.Reset()
 	modelLowerWithLookupTable.writeParseMethod(buf)
-	Ω(buf.String()).Should(Equal(e10lc), buf.String())
+	g.Expect(buf.String()).Should(Equal(e10lc), buf.String())
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -443,14 +443,14 @@ func AsSweet(s string) (Sweet, error) {
 `
 
 func TestWriteAsMethod(t *testing.T) {
-	RegisterTestingT(t)
+	g := NewGomegaWithT(t)
 	buf := &strings.Builder{}
 	modelNoChange.writeAsMethod(buf)
-	Ω(buf.String()).Should(Equal(e11nc), buf.String())
+	g.Expect(buf.String()).Should(Equal(e11nc), buf.String())
 
 	buf.Reset()
 	modelLowerWithLookupTable.writeAsMethod(buf)
-	Ω(buf.String()).Should(Equal(e11lc), buf.String())
+	g.Expect(buf.String()).Should(Equal(e11lc), buf.String())
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -554,14 +554,14 @@ func (i Sweet) quotedString(s string) []byte {
 `
 
 func TestWriteMarshalText(t *testing.T) {
-	RegisterTestingT(t)
+	g := NewGomegaWithT(t)
 	buf := &strings.Builder{}
 	modelNoChange.writeMarshalText(buf)
-	Ω(buf.String()).Should(Equal(e12nc), buf.String())
+	g.Expect(buf.String()).Should(Equal(e12nc), buf.String())
 
 	buf.Reset()
 	modelLowerWithLookupTable.writeMarshalText(buf)
-	Ω(buf.String()).Should(Equal(e12lc), buf.String())
+	g.Expect(buf.String()).Should(Equal(e12lc), buf.String())
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -586,14 +586,14 @@ func (i *Sweet) UnmarshalJSON(text []byte) error {
 `
 
 func TestWriteUnmarshalText(t *testing.T) {
-	RegisterTestingT(t)
+	g := NewGomegaWithT(t)
 	buf := &strings.Builder{}
 	modelNoChange.writeUnmarshalText(buf)
-	Ω(buf.String()).Should(Equal(e14), buf.String())
+	g.Expect(buf.String()).Should(Equal(e14), buf.String())
 
 	buf.Reset()
 	modelLowerWithLookupTable.writeUnmarshalText(buf)
-	Ω(buf.String()).Should(Equal(e14), buf.String())
+	g.Expect(buf.String()).Should(Equal(e14), buf.String())
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -697,14 +697,14 @@ func (i Sweet) Value() (driver.Value, error) {
 `
 
 func TestWriteScanValue(t *testing.T) {
-	RegisterTestingT(t)
+	g := NewGomegaWithT(t)
 	buf := &strings.Builder{}
 	modelNoChange.writeScanValue(buf)
-	Ω(buf.String()).Should(Equal(e15nc), buf.String())
+	g.Expect(buf.String()).Should(Equal(e15nc), buf.String())
 
 	buf.Reset()
 	modelLowerWithLookupTable.writeScanValue(buf)
-	Ω(buf.String()).Should(Equal(e15lc), buf.String())
+	g.Expect(buf.String()).Should(Equal(e15lc), buf.String())
 }
 
 //-------------------------------------------------------------------------------------------------

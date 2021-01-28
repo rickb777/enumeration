@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration v2.0.1
+// github.com/rickb777/enumeration/v2 v2.0.2
 
 package example
 
@@ -83,8 +83,8 @@ func (i Base) IsValid() bool {
 // Parse parses a string to find the corresponding Base, accepting one of the string
 // values or a number.
 // The case of s does not matter.
-func (v *Base) Parse(in string) error {
-	return v.parse(in, baseMarshalTextRep)
+func (v *Base) Parse(s string) error {
+	return v.parse(s, baseMarshalTextRep)
 }
 
 func (v *Base) parse(in string, rep enum.Representation) error {
@@ -98,8 +98,7 @@ func (v *Base) parse(in string, rep enum.Representation) error {
 		}
 	}
 
-	s := in
-	s = strings.ToLower(s)
+	s := strings.ToLower(in)
 
 	if v.parseIdentifier(s) {
 		return nil

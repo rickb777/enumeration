@@ -145,8 +145,8 @@ func TestMarshalUsingTag(t *testing.T) {
 	g.Expect(err).NotTo(HaveOccurred())
 	x, err := xml.Marshal(v)
 	g.Expect(err).NotTo(HaveOccurred())
-	g.Expect(string(s)).Should(Equal(`{"B":"g","D":"Tuesday","X":"PO","M":"November","P":"koala bear"}`))
-	g.Expect(string(x)).Should(Equal(`<Group><B>g</B><D>Tuesday</D><X>PO</X><M>November</M><P>koala bear</P></Group>`), string(x))
+	g.Expect(string(s)).Should(Equal(`{"B":"g","D":"Tuesday","X":"PO","M":"November","P":"Phascolarctos Cinereus"}`))
+	g.Expect(string(x)).Should(Equal(`<Group><B>g</B><D>Tuesday</D><X>PO</X><M>November</M><P>Phascolarctos Cinereus</P></Group>`), string(x))
 }
 
 func TestUnmarshalJSON1(t *testing.T) {
@@ -218,7 +218,7 @@ func TestPetScan(t *testing.T) {
 	g := NewGomegaWithT(t)
 	petStoreRep = enum.Ordinal
 	cases := []interface{}{
-		int64(4), int64(4), float64(4), "Koala Bear", "koala bear", []byte("Koala Bear"),
+		int64(4), int64(4), float64(4), "Koala Bear", "koala bear", []byte("Koala Bear"), "Phascolarctos Cinereus",
 	}
 	for i, s := range cases {
 		if i > 0 {
@@ -276,7 +276,7 @@ func TestValueUsingTag(t *testing.T) {
 	g.Expect(Tuesday.Value()).To(Equal("Tuesday"))
 	g.Expect(POST.Value()).To(Equal("PO"))
 	g.Expect(November.Value()).To(Equal("November"))
-	g.Expect(Koala_Bear.Value()).To(Equal("koala bear"))
+	g.Expect(Koala_Bear.Value()).To(Equal("Phascolarctos Cinereus"))
 }
 
 func TestValueUsingIdentifier(t *testing.T) {

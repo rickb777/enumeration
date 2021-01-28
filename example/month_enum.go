@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration v2.0.1
+// github.com/rickb777/enumeration/v2 v2.0.2
 
 package example
 
@@ -105,8 +105,8 @@ func (i Month) IsValid() bool {
 
 // Parse parses a string to find the corresponding Month, accepting one of the string
 // values or a number.
-func (v *Month) Parse(in string) error {
-	return v.parse(in, monthMarshalTextRep)
+func (v *Month) Parse(s string) error {
+	return v.parse(s, monthMarshalTextRep)
 }
 
 func (v *Month) parse(in string, rep enum.Representation) error {

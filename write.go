@@ -11,7 +11,7 @@ import (
 //-------------------------------------------------------------------------------------------------
 
 const head = `// generated code - do not edit
-// github.com/rickb777/enumeration <<.Version>>
+// github.com/rickb777/enumeration/v2 <<.Version>>
 
 package <<.Pkg>>
 
@@ -40,17 +40,15 @@ var <<.LcType>>EnumIndex = [...]uint16{<<.Indexes>>}
 func (m model) TransformedValues() string {
 	buf := &strings.Builder{}
 	for _, s := range m.Values {
-		for _, f := range m.XF {
-			s = f.Fn(s)
-		}
-		fmt.Fprintf(buf, s)
+		s = m.XF.Apply(s)
+		buf.WriteString(s)
 	}
 	return buf.String()
 }
 
 func (m model) Indexes() string {
 	buf := &strings.Builder{}
-	fmt.Fprintf(buf, "0")
+	buf.WriteString("0")
 	n := 0
 	for _, s := range m.Values {
 		n += len(s)
@@ -120,6 +118,9 @@ func init() {
 	}
 
 	for k, v := range <<.LookupTable>> {
+<<- if .XF.Exist>>
+		v = << transform "v" >>
+<<- end>>
 		<<.LookupTable>>Inverse[v] = k
 	}
 
@@ -252,8 +253,8 @@ const parseMethod = `
 // <<.Info>>
 <<- end>>
 <<- end>>
-func (v *<<.MainType>>) Parse(in string) error {
-	return v.parse(in, <<.LcType>>MarshalTextRep)
+func (v *<<.MainType>>) Parse(s string) error {
+	return v.parse(s, <<.LcType>>MarshalTextRep)
 }
 
 func (v *<<.MainType>>) parse(in string, rep enum.Representation) error {
@@ -267,19 +268,15 @@ func (v *<<.MainType>>) parse(in string, rep enum.Representation) error {
 		}
 	}
 
-	s := in
-<<- range .XF>><<if ne .Str "">>
-	s = <<.Str>>
-<<- end>>
-<<- end>>
+	s := << transform "in" >>
 <<- if .LookupTable>>
 
 	if rep == enum.Identifier {
-		if v.parseIdentifier(s) || v.parseTag(in) {
+		if v.parseIdentifier(s) || v.parseTag(s) {
 			return nil
 		}
 	} else {
-		if v.parseTag(in) || v.parseIdentifier(s) {
+		if v.parseTag(s) || v.parseIdentifier(s) {
 			return nil
 		}
 	}
@@ -532,7 +529,7 @@ func (m model) write(w io.Writer) {
 }
 
 func (m model) execTemplate(w io.Writer, tpl string) {
-	tmpl, err := template.New("t").Delims("<<", ">>").Parse(tpl)
+	tmpl, err := template.New("t").Funcs(m.FnMap()).Delims("<<", ">>").Parse(tpl)
 	checkErr(err)
 	checkErr(tmpl.Execute(w, m))
 }

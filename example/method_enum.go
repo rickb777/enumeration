@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration v2.0.1
+// github.com/rickb777/enumeration/v2 v2.0.2
 
 package example
 
@@ -110,8 +110,8 @@ func (i Method) IsValid() bool {
 
 // Parse parses a string to find the corresponding Method, accepting one of the string
 // values or a number.
-func (v *Method) Parse(in string) error {
-	return v.parse(in, methodMarshalTextRep)
+func (v *Method) Parse(s string) error {
+	return v.parse(s, methodMarshalTextRep)
 }
 
 func (v *Method) parse(in string, rep enum.Representation) error {
@@ -128,11 +128,11 @@ func (v *Method) parse(in string, rep enum.Representation) error {
 	s := in
 
 	if rep == enum.Identifier {
-		if v.parseIdentifier(s) || v.parseTag(in) {
+		if v.parseIdentifier(s) || v.parseTag(s) {
 			return nil
 		}
 	} else {
-		if v.parseTag(in) || v.parseIdentifier(s) {
+		if v.parseTag(s) || v.parseIdentifier(s) {
 			return nil
 		}
 	}

@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration v2.0.1
+// github.com/rickb777/enumeration/v2 v2.0.2
 
 package example
 
@@ -38,9 +38,30 @@ func (i Pet) String() string {
 	return petEnumStrings[petEnumIndex[o]:petEnumIndex[o+1]]
 }
 
-// Tag returns the string representation of a Pet. This is an alias for String.
+var petStringsInverse = map[string]Pet{}
+
+func init() {
+	if len(petStrings) != 5 {
+		panic(fmt.Sprintf("petStrings has %d items but should have 5", len(petStrings)))
+	}
+
+	for k, v := range petStrings {
+		v = strings.ReplaceAll(strings.ToLower(v), "_", " ")
+		petStringsInverse[v] = k
+	}
+
+	if len(petStrings) != len(petStringsInverse) {
+		panic(fmt.Sprintf("petStrings has %d items but they are not distinct", len(petStrings)))
+	}
+}
+
+// Tag returns the string representation of a Pet.
 func (i Pet) Tag() string {
-	return i.String()
+	s, ok := petStrings[i]
+	if ok {
+		return s
+	}
+	return fmt.Sprintf("%02d", i)
 }
 
 // Ordinal returns the ordinal number of a Pet.
@@ -89,8 +110,9 @@ func (i Pet) IsValid() bool {
 // Parse parses a string to find the corresponding Pet, accepting one of the string
 // values or a number.
 // The case of s does not matter.
-func (v *Pet) Parse(in string) error {
-	return v.parse(in, petMarshalTextRep)
+// All underscores are replaced with space.
+func (v *Pet) Parse(s string) error {
+	return v.parse(s, petMarshalTextRep)
 }
 
 func (v *Pet) parse(in string, rep enum.Representation) error {
@@ -104,12 +126,16 @@ func (v *Pet) parse(in string, rep enum.Representation) error {
 		}
 	}
 
-	s := in
-	s = strings.ToLower(s)
-	s = strings.ReplaceAll(s, "_", " ")
+	s := strings.ReplaceAll(strings.ToLower(in), "_", " ")
 
-	if v.parseIdentifier(s) {
-		return nil
+	if rep == enum.Identifier {
+		if v.parseIdentifier(s) || v.parseTag(s) {
+			return nil
+		}
+	} else {
+		if v.parseTag(s) || v.parseIdentifier(s) {
+			return nil
+		}
 	}
 
 	return errors.New(in + ": unrecognised pet")
@@ -135,6 +161,12 @@ func (v *Pet) parseOrdinal(s string) (ok bool) {
 	return false
 }
 
+// parseTag attempts to match an entry in petStringsInverse
+func (v *Pet) parseTag(s string) (ok bool) {
+	*v, ok = petStringsInverse[s]
+	return ok
+}
+
 // parseIdentifier attempts to match an identifier.
 func (v *Pet) parseIdentifier(s string) (ok bool) {
 	var i0 uint16 = 0
@@ -153,6 +185,7 @@ func (v *Pet) parseIdentifier(s string) (ok bool) {
 // AsPet parses a string to find the corresponding Pet, accepting either one of the string
 // values or an ordinal number.
 // The case of s does not matter.
+// All underscores are replaced with space.
 func AsPet(s string) (Pet, error) {
 	var i = new(Pet)
 	err := i.Parse(s)

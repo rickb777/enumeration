@@ -1,18 +1,18 @@
-#!/bin/bash -ex
+#!/bin/bash -e
+cd "$(dirname $0)"
 unset GOPATH
-go mod download
-go test -v .
-go install .
-gofmt -l -w -s *.go
 
-cd example
-gofmt -l -w base.go day.go month.go
+function v
+{
+  echo "$@"
+  "$@"
+}
 
-enumeration -v -f -type Base -lc
-enumeration -v -f -type Day
-enumeration -v -f -type Month
-enumeration -v -f -type Pet -unsnake -lc
-enumeration -v -f -type Method -using methodStrings
+v go mod download
+v go test -v .
+v go install .
+v gofmt -l -w -s *.go
 
-cd ..
-go test ./...
+v ./example/generate.sh
+
+v go test ./...
