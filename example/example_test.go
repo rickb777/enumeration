@@ -162,10 +162,10 @@ func TestUnmarshalJSON1(t *testing.T) {
 		{input: `{"B":"g","D":"Tuesday","X":"PO","M":"November","P":"Koala Bear"}`, rep: enum.Tag},
 
 		{input: `{"B":347.2,"D":3,"X":3,"M":11,"P":4}`, rep: enum.Number},
-		{input: `{"B":"g","D":"Tuesday","X":"PO","M":"November","P":"Koala Bear"}`, rep: enum.Number},
+		{input: `{"B":"G","D":"Tuesday","X":"PO","M":"november","P":"Koala Bear"}`, rep: enum.Number},
 
 		{input: `{"B":2,"D":2,"X":3,"M":10,"P":4}`, rep: enum.Ordinal},
-		{input: `{"B":"g","D":"Tuesday","X":"PO","M":"November","P":"Koala Bear"}`, rep: enum.Ordinal},
+		{input: `{"B":"G","D":"Tuesday","X":"PO","M":"NOVEMBER","P":"Koala Bear"}`, rep: enum.Ordinal},
 	}
 	for _, c := range cases {
 		baseMarshalTextRep = c.rep
@@ -201,7 +201,7 @@ func TestMonthScan(t *testing.T) {
 	g := NewGomegaWithT(t)
 	monthStoreRep = enum.Ordinal
 	cases := []interface{}{
-		int64(10), int64(11), float64(11), "November", []byte("November"),
+		int64(10), int64(11), float64(11), "november", []byte("NOVEMBER"),
 	}
 	for i, s := range cases {
 		if i > 0 {

@@ -40,7 +40,7 @@ var <<.LcType>>EnumIndex = [...]uint16{<<.Indexes>>}
 func (m model) TransformedValues() string {
 	buf := &strings.Builder{}
 	for _, s := range m.Values {
-		s = m.XF.Apply(s)
+		s = m.OXF.Apply(s)
 		buf.WriteString(s)
 	}
 	return buf.String()
@@ -118,8 +118,8 @@ func init() {
 	}
 
 	for k, v := range <<.LookupTable>> {
-<<- if .XF.Exist>>
-		v = << transform "v" >>
+<<- if .OXF.Exists>>
+		v = << otransform "v" >>
 <<- end>>
 		<<.LookupTable>>Inverse[v] = k
 	}
@@ -248,11 +248,7 @@ func (m model) writeIsValidMethod(w io.Writer) {
 
 const parseMethod = `
 // Parse parses a string to find the corresponding <<.MainType>>, accepting one of the string
-// values or a number.
-<<- range .XF>><<if ne .Info "">>
-// <<.Info>>
-<<- end>>
-<<- end>>
+// values or a number.<<.IXF.Describe>>
 func (v *<<.MainType>>) Parse(s string) error {
 	return v.parse(s, <<.LcType>>MarshalTextRep)
 }
@@ -268,7 +264,7 @@ func (v *<<.MainType>>) parse(in string, rep enum.Representation) error {
 		}
 	}
 
-	s := << transform "in" >>
+	s := << itransform "in" >>
 <<- if .LookupTable>>
 
 	if rep == enum.Identifier {
@@ -325,9 +321,18 @@ func (v *<<.MainType>>) parseTag(s string) (ok bool) {
 // parseIdentifier attempts to match an identifier.
 func (v *<<.MainType>>) parseIdentifier(s string) (ok bool) {
 	var i0 uint16 = 0
+<<- if .IXF.Exists >>
+	str := <<.LcType>>EnumStrings
+	str = << itransform "str" >>
+<<- end >>
+
 	for j := 1; j < len(<<.LcType>>EnumIndex); j++ {
 		i1 := <<.LcType>>EnumIndex[j]
+<<- if .IXF.Exists >>
+		p := str[i0:i1]
+<<- else >>
 		p := <<.LcType>>EnumStrings[i0:i1]
+<<- end >>
 		if s == p {
 			*v = All<<.Plural>>[j-1]
 			return true
@@ -346,11 +351,7 @@ func (m model) writeParseMethod(w io.Writer) {
 
 const asMethod = `
 // As<<.MainType>> parses a string to find the corresponding <<.MainType>>, accepting either one of the string
-// values or an ordinal number.
-<<- range .XF>><<if ne .Info "">>
-// <<.Info>>
-<<- end>>
-<<- end>>
+// values or an ordinal number.<<.IXF.Describe>>
 func As<<.MainType>>(s string) (<<.MainType>>, error) {
 	var i = new(<<.MainType>>)
 	err := i.Parse(s)

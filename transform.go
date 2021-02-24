@@ -5,71 +5,81 @@ import (
 	"strings"
 )
 
-type Transformers []Transformer
-
-func (xf Transformers) Apply(s string) string {
-	for _, f := range xf {
-		s = f.Fn(s)
-	}
-	return s
-}
-
-func (xf Transformers) FormatString() string {
-	if len(xf) == 0 {
-		return "%s"
-	}
-
-	s := xf[0].Str("@@@@@")
-	for _, f := range xf[1:] {
-		s = fmt.Sprintf(f.Str(s))
-	}
-	s = strings.Replace(s, "@@@@@", "%s", 1)
-	return s
-}
-
-func (xf Transformers) TransformFunc() func(string) string {
-	format := xf.FormatString()
-	return func(s string) string {
-		return fmt.Sprintf(format, s)
-	}
-}
-
-func (xf Transformers) Exist() bool {
-	return len(xf) > 0
-}
-
-//-------------------------------------------------------------------------------------------------
+type Monad func(string) string
 
 type Transformer struct {
-	Fn   func(string) string // this applies the monadic function
-	Str  func(string) string // this describes the monadic function
-	Info string
+	Fn   Monad  // this applies the monadic function
+	Str  Monad  // this describes the monadic function
+	Info string // this documents the function
+	Next *Transformer
 }
 
-var noChange = Transformer{
-	Fn:   noop,
-	Str:  func(string) string { return "" },
-	Info: "", // must be blank
+func (t *Transformer) Exists() bool {
+	return t != nil
 }
 
-var toUpper = Transformer{
-	Fn:   strings.ToUpper,
-	Str:  describe("strings.ToUpper(%s)"),
-	Info: "The case of s does not matter.",
+func (t *Transformer) Apply(s string) string {
+	if t == nil {
+		return s
+	}
+
+	return t.Next.Apply(t.Fn(s))
 }
 
-var toLower = Transformer{
-	Fn:   strings.ToLower,
-	Str:  describe("strings.ToLower(%s)"),
-	Info: "The case of s does not matter.",
+func (t *Transformer) Format(s string) string {
+	if t == nil {
+		return s
+	}
+
+	return t.Next.Format(t.Str(s))
 }
 
-var xUnsnake = Transformer{
-	Fn: func(s string) string {
-		return strings.ReplaceAll(s, "_", " ")
-	},
-	Str:  describe(`strings.ReplaceAll(%s, "_", " ")`),
-	Info: "All underscores are replaced with space.",
+func (t *Transformer) Describe() string {
+	if t == nil {
+		return ""
+	}
+
+	i := fmt.Sprintf("\n// %s", t.Info)
+	return i + t.Next.Describe()
+}
+
+func (t *Transformer) Then(u *Transformer) *Transformer {
+	t.Next = u
+	return t
+}
+
+func noChange() *Transformer {
+	return &Transformer{
+		Fn:   noop,
+		Str:  func(string) string { return "" },
+		Info: "", // must be blank
+	}
+}
+
+func toUpper() *Transformer {
+	return &Transformer{
+		Fn:   strings.ToUpper,
+		Str:  describe("strings.ToUpper(%s)"),
+		Info: "The case of s does not matter.",
+	}
+}
+
+func toLower() *Transformer {
+	return &Transformer{
+		Fn:   strings.ToLower,
+		Str:  describe("strings.ToLower(%s)"),
+		Info: "The case of s does not matter.",
+	}
+}
+
+func xUnsnake() *Transformer {
+	return &Transformer{
+		Fn: func(s string) string {
+			return strings.ReplaceAll(s, "_", " ")
+		},
+		Str:  describe(`strings.ReplaceAll(%s, "_", " ")`),
+		Info: "All underscores are replaced with space.",
+	}
 }
 
 func noop(s string) string {

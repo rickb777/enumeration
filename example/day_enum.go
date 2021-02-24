@@ -139,6 +139,7 @@ func (v *Day) parseOrdinal(s string) (ok bool) {
 // parseIdentifier attempts to match an identifier.
 func (v *Day) parseIdentifier(s string) (ok bool) {
 	var i0 uint16 = 0
+
 	for j := 1; j < len(dayEnumIndex); j++ {
 		i1 := dayEnumIndex[j]
 		p := dayEnumStrings[i0:i1]

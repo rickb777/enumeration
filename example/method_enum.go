@@ -169,6 +169,7 @@ func (v *Method) parseTag(s string) (ok bool) {
 // parseIdentifier attempts to match an identifier.
 func (v *Method) parseIdentifier(s string) (ok bool) {
 	var i0 uint16 = 0
+
 	for j := 1; j < len(methodEnumIndex); j++ {
 		i1 := methodEnumIndex[j]
 		p := methodEnumStrings[i0:i1]

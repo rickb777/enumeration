@@ -46,7 +46,7 @@ func init() {
 	}
 
 	for k, v := range petStrings {
-		v = strings.ReplaceAll(strings.ToLower(v), "_", " ")
+		v = strings.ToLower(strings.ReplaceAll(v, "_", " "))
 		petStringsInverse[v] = k
 	}
 
@@ -109,8 +109,8 @@ func (i Pet) IsValid() bool {
 
 // Parse parses a string to find the corresponding Pet, accepting one of the string
 // values or a number.
-// The case of s does not matter.
 // All underscores are replaced with space.
+// The case of s does not matter.
 func (v *Pet) Parse(s string) error {
 	return v.parse(s, petMarshalTextRep)
 }
@@ -126,7 +126,7 @@ func (v *Pet) parse(in string, rep enum.Representation) error {
 		}
 	}
 
-	s := strings.ReplaceAll(strings.ToLower(in), "_", " ")
+	s := strings.ToLower(strings.ReplaceAll(in, "_", " "))
 
 	if rep == enum.Identifier {
 		if v.parseIdentifier(s) || v.parseTag(s) {
@@ -170,9 +170,12 @@ func (v *Pet) parseTag(s string) (ok bool) {
 // parseIdentifier attempts to match an identifier.
 func (v *Pet) parseIdentifier(s string) (ok bool) {
 	var i0 uint16 = 0
+	str := petEnumStrings
+	str = strings.ToLower(strings.ReplaceAll(str, "_", " "))
+
 	for j := 1; j < len(petEnumIndex); j++ {
 		i1 := petEnumIndex[j]
-		p := petEnumStrings[i0:i1]
+		p := str[i0:i1]
 		if s == p {
 			*v = AllPets[j-1]
 			return true
@@ -184,8 +187,8 @@ func (v *Pet) parseIdentifier(s string) (ok bool) {
 
 // AsPet parses a string to find the corresponding Pet, accepting either one of the string
 // values or an ordinal number.
-// The case of s does not matter.
 // All underscores are replaced with space.
+// The case of s does not matter.
 func AsPet(s string) (Pet, error) {
 	var i = new(Pet)
 	err := i.Parse(s)

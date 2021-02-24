@@ -68,7 +68,7 @@ func scanValues(s *bufio.Scanner, mainType string) (result []string) {
 	return
 }
 
-func convert(w io.Writer, in io.Reader, input, mainType, plural, pkg string, xf ...Transformer) error {
+func convert(w io.Writer, in io.Reader, input, mainType, plural, pkg string, iXF, oXF *Transformer) error {
 	foundMainType := false
 	baseType := "int"
 	s := bufio.NewScanner(in)
@@ -93,7 +93,8 @@ func convert(w io.Writer, in io.Reader, input, mainType, plural, pkg string, xf 
 					Pkg:         pkg,
 					Version:     version,
 					Values:      values,
-					XF:          xf,
+					IXF:         iXF,
+					OXF:         oXF,
 					LookupTable: *usingTable,
 				}
 				m.write(w)
@@ -109,14 +110,16 @@ type model struct {
 	MainType, LcType, BaseType string
 	Plural, Pkg, Version       string
 	Values                     []string
-	XF                         Transformers
+	IXF                        *Transformer // input transformers
+	OXF                        *Transformer // output transformers
 	S1, S2                     string
 	LookupTable                string
 }
 
 func (m model) FnMap() template.FuncMap {
 	fns := make(template.FuncMap)
-	fns["transform"] = m.XF.TransformFunc()
+	fns["itransform"] = m.IXF.Format
+	fns["otransform"] = m.OXF.Format
 	return fns
 }
 

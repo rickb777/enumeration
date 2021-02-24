@@ -105,6 +105,7 @@ func (i Month) IsValid() bool {
 
 // Parse parses a string to find the corresponding Month, accepting one of the string
 // values or a number.
+// The case of s does not matter.
 func (v *Month) Parse(s string) error {
 	return v.parse(s, monthMarshalTextRep)
 }
@@ -120,7 +121,7 @@ func (v *Month) parse(in string, rep enum.Representation) error {
 		}
 	}
 
-	s := in
+	s := strings.ToLower(in)
 
 	if v.parseIdentifier(s) {
 		return nil
@@ -152,9 +153,12 @@ func (v *Month) parseOrdinal(s string) (ok bool) {
 // parseIdentifier attempts to match an identifier.
 func (v *Month) parseIdentifier(s string) (ok bool) {
 	var i0 uint16 = 0
+	str := monthEnumStrings
+	str = strings.ToLower(str)
+
 	for j := 1; j < len(monthEnumIndex); j++ {
 		i1 := monthEnumIndex[j]
-		p := monthEnumStrings[i0:i1]
+		p := str[i0:i1]
 		if s == p {
 			*v = AllMonths[j-1]
 			return true
@@ -166,6 +170,7 @@ func (v *Month) parseIdentifier(s string) (ok bool) {
 
 // AsMonth parses a string to find the corresponding Month, accepting either one of the string
 // values or an ordinal number.
+// The case of s does not matter.
 func AsMonth(s string) (Month, error) {
 	var i = new(Month)
 	err := i.Parse(s)

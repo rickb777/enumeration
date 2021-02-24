@@ -130,9 +130,12 @@ func (v *Base) parseOrdinal(s string) (ok bool) {
 // parseIdentifier attempts to match an identifier.
 func (v *Base) parseIdentifier(s string) (ok bool) {
 	var i0 uint16 = 0
+	str := baseEnumStrings
+	str = strings.ToLower(str)
+
 	for j := 1; j < len(baseEnumIndex); j++ {
 		i1 := baseEnumIndex[j]
-		p := baseEnumStrings[i0:i1]
+		p := str[i0:i1]
 		if s == p {
 			*v = AllBases[j-1]
 			return true

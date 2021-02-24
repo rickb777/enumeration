@@ -18,8 +18,9 @@ var usingTable = flag.String("using", "", "Uses your own map[Type]string instead
 //var force = flag.Bool("f", false, "Force output generation, even if up to date.")
 var pPkg = flag.String("package", "", "Name of the output package (optional). Defaults to the output directory).")
 var force = flag.Bool("f", false, "Force writing the output file even if up to date (not used when piping stdin or stdout).")
-var lowercase = flag.Bool("lc", false, "Convert strings to lowercase.")
-var uppercase = flag.Bool("uc", false, "Convert strings to uppercase.")
+var lowercase = flag.Bool("lc", false, "Convert strings to lowercase and ignore case when parsing")
+var uppercase = flag.Bool("uc", false, "Convert strings to uppercase and ignore case when parsing.")
+var ignorecase = flag.Bool("ic", false, "Ignore case when parsing but keep the mixed case when outputting.")
 var unsnake = flag.Bool("unsnake", false, "Convert underscores in identifiers to spaces.")
 var verbose = flag.Bool("v", false, "Verbose progress messages.")
 var dbg = flag.Bool("z", false, "Debug messages.")
@@ -89,17 +90,23 @@ func generate(mainType, plural string) {
 	}
 	debug("pkg=%s\n", pkg)
 
-	var transforms []Transformer
+	var iXF, oXF *Transformer
 	if *lowercase {
-		transforms = append(transforms, toLower)
+		iXF = toLower()
+		oXF = toLower()
 	} else if *uppercase {
-		transforms = append(transforms, toUpper)
-	}
-	if *unsnake {
-		transforms = append(transforms, xUnsnake)
+		iXF = toUpper()
+		oXF = toUpper()
+	} else if *ignorecase {
+		iXF = toLower()
 	}
 
-	err = convert(out, in, *input1, mainType, plural, pkg, transforms...)
+	if *unsnake {
+		iXF = xUnsnake().Then(iXF)
+		oXF = xUnsnake().Then(oXF)
+	}
+
+	err = convert(out, in, *input1, mainType, plural, pkg, iXF, oXF)
 	if err != nil {
 		fail(err)
 	}

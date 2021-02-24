@@ -319,6 +319,7 @@ func (v *Sweet) parseOrdinal(s string) (ok bool) {
 // parseIdentifier attempts to match an identifier.
 func (v *Sweet) parseIdentifier(s string) (ok bool) {
 	var i0 uint16 = 0
+
 	for j := 1; j < len(sweetEnumIndex); j++ {
 		i1 := sweetEnumIndex[j]
 		p := sweetEnumStrings[i0:i1]
@@ -395,9 +396,12 @@ func (v *Sweet) parseTag(s string) (ok bool) {
 // parseIdentifier attempts to match an identifier.
 func (v *Sweet) parseIdentifier(s string) (ok bool) {
 	var i0 uint16 = 0
+	str := sweetEnumStrings
+	str = strings.ToLower(str)
+
 	for j := 1; j < len(sweetEnumIndex); j++ {
 		i1 := sweetEnumIndex[j]
-		p := sweetEnumStrings[i0:i1]
+		p := str[i0:i1]
 		if s == p {
 			*v = AllSweets[j-1]
 			return true
@@ -717,7 +721,7 @@ var modelNoChange = model{
 	Pkg:      "confectionary",
 	Version:  version,
 	Values:   []string{"Mars", "Bounty", "Snickers", "Kitkat"},
-	XF:       nil,
+	OXF:      nil,
 }
 
 var modelLowerWithLookupTable = model{
@@ -728,6 +732,7 @@ var modelLowerWithLookupTable = model{
 	Pkg:         "confectionary",
 	Version:     version,
 	Values:      []string{"Mars", "Bounty", "Snickers", "Kitkat"},
-	XF:          []Transformer{toLower},
+	IXF:         toLower(),
+	OXF:         toLower(),
 	LookupTable: "sweetNames",
 }

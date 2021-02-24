@@ -91,7 +91,8 @@ func TestConvertHappy1(t *testing.T) {
 	RegisterTestingT(t)
 	w := &bytes.Buffer{}
 	s := bytes.NewBufferString(enum3)
-	err := convert(w, s, "filename.go", "Sweet", "Sweets", "confectionary", noChange)
+	err := convert(w, s, "filename.go", "Sweet", "Sweets", "confectionary",
+		noChange(), noChange())
 	Ω(err).Should(BeNil())
 	str := w.String()
 	Ω(str).Should(ContainSubstring(`const sweetEnumStrings = "MarsBountySnickersKitkat"`), str)
@@ -110,7 +111,8 @@ func TestConvertHappy2(t *testing.T) {
 	RegisterTestingT(t)
 	w := &bytes.Buffer{}
 	s := bytes.NewBufferString(enum4)
-	err := convert(w, s, "filename.go", "Sweet", "Sweets", "confectionary", noChange)
+	err := convert(w, s, "filename.go", "Sweet", "Sweets", "confectionary",
+		noChange(), noChange())
 	Ω(err).Should(BeNil())
 	str := w.String()
 	Ω(str).Should(ContainSubstring(`const sweetEnumStrings = "MarsBountySnickersKitkat"`), str)
@@ -137,6 +139,7 @@ func TestConvertError(t *testing.T) {
 	RegisterTestingT(t)
 	w := &bytes.Buffer{}
 	s := bytes.NewBufferString(enum5)
-	err := convert(w, s, "filename.go", "Sweet", "Sweets", "confectionary", noChange)
+	err := convert(w, s, "filename.go", "Sweet", "Sweets", "confectionary",
+		noChange(), noChange())
 	Ω(err.Error()).Should(Equal("Failed to find Sweet in filename.go"))
 }
