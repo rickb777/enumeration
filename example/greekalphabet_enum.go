@@ -12,26 +12,26 @@ import (
 	"strings"
 )
 
-const greekalphabetEnumStrings = "ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ"
+const greekalphabetEnumStrings = "ΑλφαΒήταΓάμμαΔέλταΕψιλονΖήταΗταΘήταΙώταΚάππαΛάμβδαΜυΝυΞιΟμικρονΠιΡώΣίγμαΤαυΥψιλονΦιΧιΨιΩμέγα"
 
-var greekalphabetEnumIndex = [...]uint16{0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 44, 46, 48}
+var greekalphabetEnumIndex = [...]uint16{0, 8, 16, 26, 36, 48, 56, 62, 70, 78, 88, 100, 104, 108, 112, 126, 130, 134, 144, 150, 162, 166, 170, 174, 184}
 
 // AllGreekAlphabets lists all 24 values in order.
 var AllGreekAlphabets = []GreekAlphabet{
-	Α, Β, Γ, Δ,
-	Ε, Ζ, Η, Θ, Ι,
-	Κ, Λ, Μ, Ν, Ξ,
-	Ο, Π, Ρ, Σ, Τ,
-	Υ, Φ, Χ, Ψ, Ω,
+	Αλφα, Βήτα, Γάμμα, Δέλτα,
+	Εψιλον, Ζήτα, Ητα, Θήτα, Ιώτα,
+	Κάππα, Λάμβδα, Μυ, Νυ, Ξι,
+	Ομικρον, Πι, Ρώ, Σίγμα, Ταυ,
+	Υψιλον, Φι, Χι, Ψι, Ωμέγα,
 }
 
 // AllGreekAlphabetEnums lists all 24 values in order.
 var AllGreekAlphabetEnums = enum.IntEnums{
-	Α, Β, Γ, Δ,
-	Ε, Ζ, Η, Θ, Ι,
-	Κ, Λ, Μ, Ν, Ξ,
-	Ο, Π, Ρ, Σ, Τ,
-	Υ, Φ, Χ, Ψ, Ω,
+	Αλφα, Βήτα, Γάμμα, Δέλτα,
+	Εψιλον, Ζήτα, Ητα, Θήτα, Ιώτα,
+	Κάππα, Λάμβδα, Μυ, Νυ, Ξι,
+	Ομικρον, Πι, Ρώ, Σίγμα, Ταυ,
+	Υψιλον, Φι, Χι, Ψι, Ωμέγα,
 }
 
 // String returns the literal string representation of a GreekAlphabet, which is
@@ -72,53 +72,53 @@ func (i GreekAlphabet) Tag() string {
 // Ordinal returns the ordinal number of a GreekAlphabet.
 func (i GreekAlphabet) Ordinal() int {
 	switch i {
-	case Α:
+	case Αλφα:
 		return 0
-	case Β:
+	case Βήτα:
 		return 1
-	case Γ:
+	case Γάμμα:
 		return 2
-	case Δ:
+	case Δέλτα:
 		return 3
-	case Ε:
+	case Εψιλον:
 		return 4
-	case Ζ:
+	case Ζήτα:
 		return 5
-	case Η:
+	case Ητα:
 		return 6
-	case Θ:
+	case Θήτα:
 		return 7
-	case Ι:
+	case Ιώτα:
 		return 8
-	case Κ:
+	case Κάππα:
 		return 9
-	case Λ:
+	case Λάμβδα:
 		return 10
-	case Μ:
+	case Μυ:
 		return 11
-	case Ν:
+	case Νυ:
 		return 12
-	case Ξ:
+	case Ξι:
 		return 13
-	case Ο:
+	case Ομικρον:
 		return 14
-	case Π:
+	case Πι:
 		return 15
-	case Ρ:
+	case Ρώ:
 		return 16
-	case Σ:
+	case Σίγμα:
 		return 17
-	case Τ:
+	case Ταυ:
 		return 18
-	case Υ:
+	case Υψιλον:
 		return 19
-	case Φ:
+	case Φι:
 		return 20
-	case Χ:
+	case Χι:
 		return 21
-	case Ψ:
+	case Ψι:
 		return 22
-	case Ω:
+	case Ωμέγα:
 		return 23
 	}
 	return -1
@@ -137,17 +137,17 @@ func GreekAlphabetOf(i int) GreekAlphabet {
 		return AllGreekAlphabets[i]
 	}
 	// an invalid result
-	return Α + Β + Γ + Δ + Ε + Ζ + Η + Θ + Ι + Κ + Λ + Μ + Ν + Ξ + Ο + Π + Ρ + Σ + Τ + Υ + Φ + Χ + Ψ + Ω + 1
+	return Αλφα + Βήτα + Γάμμα + Δέλτα + Εψιλον + Ζήτα + Ητα + Θήτα + Ιώτα + Κάππα + Λάμβδα + Μυ + Νυ + Ξι + Ομικρον + Πι + Ρώ + Σίγμα + Ταυ + Υψιλον + Φι + Χι + Ψι + Ωμέγα + 1
 }
 
 // IsValid determines whether a GreekAlphabet is one of the defined constants.
 func (i GreekAlphabet) IsValid() bool {
 	switch i {
-	case Α, Β, Γ, Δ,
-		Ε, Ζ, Η, Θ, Ι,
-		Κ, Λ, Μ, Ν, Ξ,
-		Ο, Π, Ρ, Σ, Τ,
-		Υ, Φ, Χ, Ψ, Ω:
+	case Αλφα, Βήτα, Γάμμα, Δέλτα,
+		Εψιλον, Ζήτα, Ητα, Θήτα, Ιώτα,
+		Κάππα, Λάμβδα, Μυ, Νυ, Ξι,
+		Ομικρον, Πι, Ρώ, Σίγμα, Ταυ,
+		Υψιλον, Φι, Χι, Ψι, Ωμέγα:
 		return true
 	}
 	return false

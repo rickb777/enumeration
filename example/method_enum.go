@@ -12,7 +12,10 @@ import (
 	"strings"
 )
 
-const methodEnumStrings = "HEADGETPUTPOSTPATCHDELETE"
+const (
+	methodEnumStrings = "HEADGETPUTPOSTPATCHDELETE"
+	methodEnumInputs  = "headgetputpostpatchdelete"
+)
 
 var methodEnumIndex = [...]uint16{0, 4, 7, 10, 14, 19, 25}
 
@@ -46,7 +49,7 @@ func init() {
 	}
 
 	for k, v := range methodStrings {
-		methodStringsInverse[v] = k
+		methodStringsInverse[strings.ToLower(v)] = k
 	}
 
 	if len(methodStrings) != len(methodStringsInverse) {
@@ -110,6 +113,7 @@ func (i Method) IsValid() bool {
 
 // Parse parses a string to find the corresponding Method, accepting one of the string
 // values or a number.
+// The input case does not matter.
 func (v *Method) Parse(s string) error {
 	return v.parse(s, methodMarshalTextRep)
 }
@@ -125,7 +129,7 @@ func (v *Method) parse(in string, rep enum.Representation) error {
 		}
 	}
 
-	s := in
+	s := strings.ToLower(in)
 
 	if rep == enum.Identifier {
 		if v.parseIdentifier(s) || v.parseTag(s) {
@@ -172,7 +176,7 @@ func (v *Method) parseIdentifier(s string) (ok bool) {
 
 	for j := 1; j < len(methodEnumIndex); j++ {
 		i1 := methodEnumIndex[j]
-		p := methodEnumStrings[i0:i1]
+		p := methodEnumInputs[i0:i1]
 		if s == p {
 			*v = AllMethods[j-1]
 			return true
@@ -184,6 +188,7 @@ func (v *Method) parseIdentifier(s string) (ok bool) {
 
 // AsMethod parses a string to find the corresponding Method, accepting either one of the string
 // values or an ordinal number.
+// The input case does not matter.
 func AsMethod(s string) (Method, error) {
 	var i = new(Method)
 	err := i.Parse(s)
