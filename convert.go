@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"github.com/rickb777/enumeration/v2/transform"
 	"go/types"
 	"io"
 	"strings"
@@ -68,7 +69,7 @@ func scanValues(s *bufio.Scanner, mainType string) (result []string) {
 	return
 }
 
-func convert(w io.Writer, in io.Reader, input, mainType, plural, pkg string, iXF, oXF *Transformer) error {
+func convert(w io.Writer, in io.Reader, input, mainType, plural, pkg string, xCase transform.Case, ignoreCase, unsnake bool) error {
 	foundMainType := false
 	baseType := "int"
 	s := bufio.NewScanner(in)
@@ -93,8 +94,9 @@ func convert(w io.Writer, in io.Reader, input, mainType, plural, pkg string, iXF
 					Pkg:         pkg,
 					Version:     version,
 					Values:      values,
-					IXF:         iXF,
-					OXF:         oXF,
+					IgnoreCase:  ignoreCase,
+					Unsnake:     unsnake,
+					Case:        xCase,
 					LookupTable: *usingTable,
 				}
 				m.write(w)
@@ -110,16 +112,49 @@ type model struct {
 	MainType, LcType, BaseType string
 	Plural, Pkg, Version       string
 	Values                     []string
-	IXF                        *Transformer // input transformers
-	OXF                        *Transformer // output transformers
+	IgnoreCase                 bool
+	Unsnake                    bool
+	Case                       transform.Case
 	S1, S2                     string
 	LookupTable                string
 }
 
+func (m model) Asymmetric() bool {
+	return m.IgnoreCase
+}
+
+func (m model) InputCase() transform.Case {
+	c := m.Case
+	if m.IgnoreCase && c == transform.Stet {
+		c = transform.Lower
+	}
+	return c
+}
+
+func (m model) InputTransform(s string) string {
+	if m.Unsnake {
+		s = strings.ReplaceAll(s, "_", " ")
+	}
+	return m.InputCase().Transform(s)
+}
+
+func (m model) OutputTransform(s string) string {
+	if m.Unsnake {
+		s = strings.ReplaceAll(s, "_", " ")
+	}
+	return m.Case.Transform(s)
+}
+
+func (m model) Expression(s string) string {
+	if m.Unsnake {
+		s = fmt.Sprintf(`strings.ReplaceAll(%s, "_", " ")`, s)
+	}
+	return m.InputCase().Expression(s)
+}
+
 func (m model) FnMap() template.FuncMap {
 	fns := make(template.FuncMap)
-	fns["itransform"] = m.IXF.Format
-	fns["otransform"] = m.OXF.Format
+	fns["transform"] = m.Expression
 	return fns
 }
 

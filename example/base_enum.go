@@ -82,7 +82,6 @@ func (i Base) IsValid() bool {
 
 // Parse parses a string to find the corresponding Base, accepting one of the string
 // values or a number.
-// The case of s does not matter.
 func (v *Base) Parse(s string) error {
 	return v.parse(s, baseMarshalTextRep)
 }
@@ -130,12 +129,10 @@ func (v *Base) parseOrdinal(s string) (ok bool) {
 // parseIdentifier attempts to match an identifier.
 func (v *Base) parseIdentifier(s string) (ok bool) {
 	var i0 uint16 = 0
-	str := baseEnumStrings
-	str = strings.ToLower(str)
 
 	for j := 1; j < len(baseEnumIndex); j++ {
 		i1 := baseEnumIndex[j]
-		p := str[i0:i1]
+		p := baseEnumStrings[i0:i1]
 		if s == p {
 			*v = AllBases[j-1]
 			return true
@@ -147,7 +144,6 @@ func (v *Base) parseIdentifier(s string) (ok bool) {
 
 // AsBase parses a string to find the corresponding Base, accepting either one of the string
 // values or an ordinal number.
-// The case of s does not matter.
 func AsBase(s string) (Base, error) {
 	var i = new(Base)
 	err := i.Parse(s)

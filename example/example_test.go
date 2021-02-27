@@ -218,7 +218,7 @@ func TestPetScan(t *testing.T) {
 	g := NewGomegaWithT(t)
 	petStoreRep = enum.Ordinal
 	cases := []interface{}{
-		int64(4), int64(4), float64(4), "Koala Bear", "koala bear", []byte("Koala Bear"), "Phascolarctos Cinereus",
+		int64(4), int64(4), float64(4), "Koala Bear", "koala bear", "koala_bear", []byte("Koala Bear"), "Phascolarctos Cinereus",
 	}
 	for i, s := range cases {
 		if i > 0 {

@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/rickb777/enumeration/v2/transform"
 	"io"
 	"os"
 	"strings"
@@ -90,23 +91,9 @@ func generate(mainType, plural string) {
 	}
 	debug("pkg=%s\n", pkg)
 
-	var iXF, oXF *Transformer
-	if *lowercase {
-		iXF = toLower()
-		oXF = toLower()
-	} else if *uppercase {
-		iXF = toUpper()
-		oXF = toUpper()
-	} else if *ignorecase {
-		iXF = toLower()
-	}
+	xCase := transform.Of(*lowercase, *uppercase)
 
-	if *unsnake {
-		iXF = xUnsnake().Then(iXF)
-		oXF = xUnsnake().Then(oXF)
-	}
-
-	err = convert(out, in, *input1, mainType, plural, pkg, iXF, oXF)
+	err = convert(out, in, *input1, mainType, plural, pkg, xCase, *ignorecase, *unsnake)
 	if err != nil {
 		fail(err)
 	}
