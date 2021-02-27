@@ -47,7 +47,7 @@ var <<.LcType>>EnumIndex = [...]uint16{<<.Indexes>>}
 func (m model) TransformedInputValues() string {
 	buf := &strings.Builder{}
 	for _, s := range m.Values {
-		s = m.InputTransform(s)
+		s = m.inputTransform(s)
 		buf.WriteString(s)
 	}
 	return buf.String()
@@ -56,7 +56,7 @@ func (m model) TransformedInputValues() string {
 func (m model) TransformedOutputValues() string {
 	buf := &strings.Builder{}
 	for _, s := range m.Values {
-		s = m.OutputTransform(s)
+		s = m.outputTransform(s)
 		buf.WriteString(s)
 	}
 	return buf.String()

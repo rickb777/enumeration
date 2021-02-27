@@ -90,14 +90,24 @@ const (
 
 func TestConvertHappy1(t *testing.T) {
 	RegisterTestingT(t)
-	w := &bytes.Buffer{}
 	s := bytes.NewBufferString(enum3)
-	err := convert(w, s, "filename.go", "Sweet", "Sweets", "confectionary", transform.Stet, false, false)
+	m, err := convert(s, "filename.go", "Sweet", "Sweets", "confectionary", transform.Stet, true, true)
 	Ω(err).Should(BeNil())
-	str := w.String()
-	Ω(str).Should(ContainSubstring(`const sweetEnumStrings = "MarsBountySnickersKitkat"`), str)
-	Ω(str).Should(ContainSubstring(`var sweetEnumIndex = [...]uint16{0, 4, 10, 18, 24}`), str)
-	Ω(str).Should(ContainSubstring("var AllSweets = []Sweet{\n\tMars, Bounty, Snickers, Kitkat,\n}"), str)
+	Ω(m).Should(Equal(model{
+		MainType:    "Sweet",
+		LcType:      "sweet",
+		BaseType:    "int",
+		Plural:      "Sweets",
+		Pkg:         "confectionary",
+		Version:     version,
+		Values:      []string{"Mars", "Bounty", "Snickers", "Kitkat"},
+		IgnoreCase:  true,
+		Unsnake:     true,
+		Case:        0,
+		S1:          "",
+		S2:          "",
+		LookupTable: "",
+	}))
 }
 
 const enum4 = `
@@ -109,14 +119,22 @@ const (
 
 func TestConvertHappy2(t *testing.T) {
 	RegisterTestingT(t)
-	w := &bytes.Buffer{}
 	s := bytes.NewBufferString(enum4)
-	err := convert(w, s, "filename.go", "Sweet", "Sweets", "confectionary", transform.Stet, false, false)
+	m, err := convert(s, "filename.go", "Sweet", "Sweets", "confectionary", transform.Upper, false, false)
 	Ω(err).Should(BeNil())
-	str := w.String()
-	Ω(str).Should(ContainSubstring(`const sweetEnumStrings = "MarsBountySnickersKitkat"`), str)
-	Ω(str).Should(ContainSubstring(`var sweetEnumIndex = [...]uint16{0, 4, 10, 18, 24}`), str)
-	Ω(str).Should(ContainSubstring("var AllSweets = []Sweet{\n\tMars, Bounty, Snickers, Kitkat,\n}"), str)
+	Ω(m).Should(Equal(model{
+		MainType:    "Sweet",
+		LcType:      "sweet",
+		BaseType:    "int",
+		Plural:      "Sweets",
+		Pkg:         "confectionary",
+		Version:     version,
+		Values:      []string{"Mars", "Bounty", "Snickers", "Kitkat"},
+		Case:        transform.Upper,
+		S1:          "",
+		S2:          "",
+		LookupTable: "",
+	}))
 }
 
 const enum5 = `
@@ -136,8 +154,7 @@ const (
 
 func TestConvertError(t *testing.T) {
 	RegisterTestingT(t)
-	w := &bytes.Buffer{}
 	s := bytes.NewBufferString(enum5)
-	err := convert(w, s, "filename.go", "Sweet", "Sweets", "confectionary", transform.Stet, false, false)
+	_, err := convert(s, "filename.go", "Sweet", "Sweets", "confectionary", transform.Stet, false, false)
 	Ω(err.Error()).Should(Equal("Failed to find Sweet in filename.go"))
 }

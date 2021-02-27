@@ -93,10 +93,11 @@ func generate(mainType, plural string) {
 
 	xCase := transform.Of(*lowercase, *uppercase)
 
-	err = convert(out, in, *input1, mainType, plural, pkg, xCase, *ignorecase, *unsnake)
+	m, err := convert(in, *input1, mainType, plural, pkg, xCase, *ignorecase, *unsnake)
 	if err != nil {
 		fail(err)
 	}
+	m.write(out)
 	info("Generated %s.\n", *output1)
 }
 
