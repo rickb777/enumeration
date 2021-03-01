@@ -6,6 +6,7 @@ import (
 	"github.com/rickb777/enumeration/v2/transform"
 	"io"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -16,8 +17,7 @@ var pMainType = flag.String("type", "", "Name of the enumeration type (required)
 var pPlural = flag.String("plural", "", "Plural name of the enumeration type (optional).")
 var usingTable = flag.String("using", "", "Uses your own map[Type]string instead of generating one.")
 
-//var force = flag.Bool("f", false, "Force output generation, even if up to date.")
-var pPkg = flag.String("package", "", "Name of the output package (optional). Defaults to the output directory).")
+var pPkg = flag.String("package", "", "Name of the output package (optional). Defaults to the output directory.")
 var force = flag.Bool("f", false, "Force writing the output file even if up to date (not used when piping stdin or stdout).")
 var lowercase = flag.Bool("lc", false, "Convert strings to lowercase and ignore case when parsing")
 var uppercase = flag.Bool("uc", false, "Convert strings to uppercase and ignore case when parsing.")
@@ -33,16 +33,11 @@ func choosePackage(outputFile string) string {
 		fail(err)
 	}
 
-	pkg := removeBeforeC(wd, '/')
+	pkg := filepath.Base(filepath.FromSlash(wd))
 
-	if strings.IndexByte(outputFile, '/') > 0 {
-		dir, _ := divideC(outputFile, '/')
-		if strings.IndexByte(dir, '/') > 0 {
-			dir = removeBeforeC(dir, '/')
-		}
-		if dir != "." {
-			pkg = dir
-		}
+	dir := filepath.Base(filepath.Dir(outputFile))
+	if dir != "." {
+		pkg = dir
 	}
 
 	return pkg
