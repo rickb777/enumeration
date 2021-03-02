@@ -1,105 +1,181 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"github.com/rickb777/enumeration/v2/transform"
+	"go/scanner"
+	"go/token"
 	"io"
+	"io/ioutil"
 	"strings"
+	"unicode"
 )
 
-func removeComments(line string) string {
-	return removeAfterS(line, "//")
+var fset *token.FileSet
+
+func isExported(s string) bool {
+	for i, r := range s {
+		if i > 0 {
+			return false
+		}
+		return unicode.IsUpper(r)
+	}
+	return false
 }
 
-func removeMatches(words []string, unwanted string) []string {
-	cp := make([]string, 0, len(words))
-	for _, w := range words {
-		if w != unwanted {
-			cp = append(cp, w)
+func addIdentifier(ss []string, id string) []string {
+	if isExported(id) {
+		ss = append(ss, id)
+	}
+	return ss
+}
+
+func scan(s *scanner.Scanner) (token.Pos, token.Token, string) {
+	pos, tok, lit := s.Scan()
+	if lit == "" {
+		debug("%-18s %s\n", fset.Position(pos), tok)
+	} else {
+		debug("%-18s %-8s %q\n", fset.Position(pos), tok, lit)
+	}
+	return pos, tok, lit
+}
+
+func parseConstBlock(mainType string, s *scanner.Scanner, m *model) error {
+	foundType := false
+	var ss []string
+	for {
+		_, tok, lit := scan(s)
+		switch tok {
+		case token.IDENT:
+			ss = addIdentifier(ss, lit)
+
+			_, tok, lit = scan(s)
+			switch tok {
+			case token.IDENT:
+				if lit == mainType {
+					foundType = true
+					m.Values = append(m.Values, ss...)
+				} else {
+					foundType = false
+				}
+				ss = nil
+
+			case token.COMMA:
+				for tok == token.COMMA {
+					_, tok, lit = scan(s)
+					switch tok {
+					case token.IDENT:
+						ss = addIdentifier(ss, lit)
+						_, tok, lit = scan(s)
+					default:
+						discardToEndOfLine(s, tok)
+					}
+				}
+
+				if tok == token.IDENT && lit == mainType {
+					foundType = true
+					m.Values = append(m.Values, ss...)
+				} else {
+					foundType = false
+				}
+				ss = nil
+
+			default:
+				discardToEndOfLine(s, tok)
+			}
+
+		case token.RPAREN, token.EOF:
+			if foundType {
+				m.Values = append(m.Values, ss...)
+			}
+			return nil
+
+		default:
+			discardToEndOfLine(s, tok)
 		}
 	}
-	return cp
 }
 
-func removeBlanks(words []string) []string {
-	return removeMatches(words, "")
-}
-
-func removePlaceholders(words []string) []string {
-	return removeMatches(words, "_")
-}
-
-func removeCommentsAndSplitWords(line string) []string {
-	content := strings.TrimSpace(removeComments(line))
-	return removeBlanks(strings.Split(content, " "))
-}
-
-func scanValues(s *bufio.Scanner, mainType string) (result []string) {
-	debug("scanValues\n")
-	found := false
-	for s.Scan() {
-		words := removeCommentsAndSplitWords(s.Text())
-		debug("%#v\n", words)
-
-		if len(words) == 1 && words[0] == ")" {
-			if found {
-				return
-			}
-		}
-
-		eq := listIndexOf(words, "=")
-		if eq >= 2 && len(words) >= 3 && words[eq-1] == mainType {
-			found = true
-			for i := 0; i < eq-1; i++ {
-				names := removePlaceholders(removeBlanks(strings.Split(words[i], ",")))
-				debug("started with %s\n", names)
-				result = append(result, names...)
-			}
-		} else if found && eq < 0 && len(words) >= 1 {
-			if words[0] != "_" {
-				debug("added %s\n", words[0])
-				result = append(result, words[0])
-			}
-		}
+func discardToEndOfLine(s *scanner.Scanner, tok token.Token) {
+	for tok != token.SEMICOLON && tok != token.EOF {
+		_, tok, _ = scan(s)
 	}
+}
 
-	return
+func parseConst(mainType string, s *scanner.Scanner, m *model) error {
+	var tok token.Token
+	var lit1, lit2 string
+	_, tok, lit1 = scan(s)
+	switch tok {
+	case token.IDENT:
+		_, tok, lit2 = scan(s)
+		switch tok {
+		case token.IDENT:
+			if lit2 == mainType {
+				m.Values = addIdentifier(m.Values, lit1)
+			}
+			discardToEndOfLine(s, tok)
+		}
+	case token.LPAREN:
+		return parseConstBlock(mainType, s, m)
+	}
+	return nil
 }
 
 func convert(in io.Reader, input, mainType, plural, pkg string, xCase transform.Case, ignoreCase, unsnake bool) (model, error) {
 	foundMainType := false
-	baseType := "int"
-	s := bufio.NewScanner(in)
+	src, err := ioutil.ReadAll(in)
+	if err != nil {
+		return model{}, err
+	}
 
-	for s.Scan() {
-		words := removeCommentsAndSplitWords(s.Text())
-		debug("%#v\n", words)
+	s := new(scanner.Scanner)
+	fset = token.NewFileSet()                          // positions are relative to fset
+	file := fset.AddFile(input, fset.Base(), len(src)) // register input "file"
+	s.Init(file, src, nil /* no error handler */, 0)
 
-		if len(words) == 3 && words[0] == "type" && words[1] == mainType {
-			foundMainType = true
-			baseType = words[2]
-			debug("type %s %s\n", mainType, baseType)
+	m := &model{
+		MainType:    mainType,
+		LcType:      strings.ToLower(mainType),
+		BaseType:    "int",
+		Plural:      plural,
+		Pkg:         pkg,
+		Version:     version,
+		IgnoreCase:  ignoreCase,
+		Unsnake:     unsnake,
+		Case:        xCase,
+		LookupTable: *usingTable,
+	}
 
-		} else if foundMainType && len(words) == 2 && words[0] == "const" && words[1] == "(" {
-			values := scanValues(s, mainType)
-			if values != nil {
-				m := model{
-					MainType:    mainType,
-					LcType:      strings.ToLower(mainType),
-					BaseType:    baseType,
-					Plural:      plural,
-					Pkg:         pkg,
-					Version:     version,
-					Values:      values,
-					IgnoreCase:  ignoreCase,
-					Unsnake:     unsnake,
-					Case:        xCase,
-					LookupTable: *usingTable,
+	var tok token.Token
+	var lit string
+
+	for tok != token.EOF {
+		_, tok, lit = scan(s)
+		switch tok {
+		case token.TYPE:
+			_, tok, lit = scan(s)
+			if tok == token.IDENT && lit == mainType {
+				foundMainType = true
+
+				_, tok, lit = scan(s)
+				if tok == token.IDENT {
+					m.BaseType = lit
+					debug("type %s %s\n", mainType, m.BaseType)
 				}
-				return m, nil
 			}
+
+		case token.CONST:
+			_ = parseConst(mainType, s, m)
 		}
+	}
+
+	if s.ErrorCount > 0 {
+		return model{}, fmt.Errorf("Syntax error in %s", input)
+	}
+
+	if foundMainType && len(m.Values) > 0 {
+		return *m, nil
 	}
 
 	return model{}, fmt.Errorf("Failed to find %s in %s", mainType, input)

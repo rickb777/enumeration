@@ -7,6 +7,7 @@ import (
 	"go/token"
 	"io/ioutil"
 	"os"
+	"strings"
 	"testing"
 )
 
@@ -55,6 +56,36 @@ func TestMainApp(t *testing.T) {
 				break
 			}
 			fmt.Printf("%s\t%s\t%q\n", fset.Position(pos), tok, lit)
+		}
+	}
+}
+
+func TestScannerTryOut(t *testing.T) {
+	g := gomega.NewWithT(t)
+
+	if testing.Verbose() {
+		for _, n := range []string{"example/base.go", "example/day.go", "example/month.go"} {
+			f, err := os.Open(n)
+			g.Expect(err).NotTo(gomega.HaveOccurred())
+			defer f.Close()
+
+			fmt.Printf("-- %s\n", n)
+			src, err := ioutil.ReadAll(f)
+			g.Expect(err).NotTo(gomega.HaveOccurred())
+
+			var s scanner.Scanner
+			fset := token.NewFileSet()                      // positions are relative to fset
+			file := fset.AddFile("", fset.Base(), len(src)) // register input "file"
+			s.Init(file, src, nil /* no error handler */, 0)
+
+			for {
+				pos, tok, lit := s.Scan()
+				if tok == token.EOF {
+					break
+				}
+				fmt.Printf("%s\t%s\t%q\n", fset.Position(pos), tok, lit)
+			}
+			fmt.Printf("%s\n", strings.Repeat("-", 80))
 		}
 	}
 }
