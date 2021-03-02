@@ -9,7 +9,7 @@ function v
 }
 
 v go mod download
-v go test -v .
+v go test .
 v go install .
 v gofmt -l -w -s *.go
 
