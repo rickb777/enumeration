@@ -111,9 +111,16 @@ func (i Method) IsValid() bool {
 	return false
 }
 
-// Parse parses a string to find the corresponding Method, accepting one of the string
-// values or a number.
+// Parse parses a string to find the corresponding Method, accepting one of the string values or
+// a number. The input representation is determined by methodMarshalTextRep. It is used by AsMethod.
 // The input case does not matter.
+//
+// Usage Example
+//
+//    v := new(Method)
+//    err := v.Parse(s)
+//    ...  etc
+//
 func (v *Method) Parse(s string) error {
 	return v.parse(s, methodMarshalTextRep)
 }
@@ -186,8 +193,8 @@ func (v *Method) parseIdentifier(s string) (ok bool) {
 	return false
 }
 
-// AsMethod parses a string to find the corresponding Method, accepting either one of the string
-// values or an ordinal number.
+// AsMethod parses a string to find the corresponding Method, accepting either one of the string values or
+// a number. The input representation is determined by methodMarshalTextRep. It wraps Parse.
 // The input case does not matter.
 func AsMethod(s string) (Method, error) {
 	var i = new(Method)

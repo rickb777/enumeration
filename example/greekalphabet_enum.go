@@ -153,8 +153,15 @@ func (i GreekAlphabet) IsValid() bool {
 	return false
 }
 
-// Parse parses a string to find the corresponding GreekAlphabet, accepting one of the string
-// values or a number.
+// Parse parses a string to find the corresponding GreekAlphabet, accepting one of the string values or
+// a number. The input representation is determined by greekalphabetMarshalTextRep. It is used by AsGreekAlphabet.
+//
+// Usage Example
+//
+//    v := new(GreekAlphabet)
+//    err := v.Parse(s)
+//    ...  etc
+//
 func (v *GreekAlphabet) Parse(s string) error {
 	return v.parse(s, greekalphabetMarshalTextRep)
 }
@@ -227,8 +234,8 @@ func (v *GreekAlphabet) parseIdentifier(s string) (ok bool) {
 	return false
 }
 
-// AsGreekAlphabet parses a string to find the corresponding GreekAlphabet, accepting either one of the string
-// values or an ordinal number.
+// AsGreekAlphabet parses a string to find the corresponding GreekAlphabet, accepting either one of the string values or
+// a number. The input representation is determined by greekalphabetMarshalTextRep. It wraps Parse.
 func AsGreekAlphabet(s string) (GreekAlphabet, error) {
 	var i = new(GreekAlphabet)
 	err := i.Parse(s)

@@ -106,8 +106,15 @@ func (i Pet) IsValid() bool {
 	return false
 }
 
-// Parse parses a string to find the corresponding Pet, accepting one of the string
-// values or a number.
+// Parse parses a string to find the corresponding Pet, accepting one of the string values or
+// a number. The input representation is determined by petMarshalTextRep. It is used by AsPet.
+//
+// Usage Example
+//
+//    v := new(Pet)
+//    err := v.Parse(s)
+//    ...  etc
+//
 func (v *Pet) Parse(s string) error {
 	return v.parse(s, petMarshalTextRep)
 }
@@ -180,8 +187,8 @@ func (v *Pet) parseIdentifier(s string) (ok bool) {
 	return false
 }
 
-// AsPet parses a string to find the corresponding Pet, accepting either one of the string
-// values or an ordinal number.
+// AsPet parses a string to find the corresponding Pet, accepting either one of the string values or
+// a number. The input representation is determined by petMarshalTextRep. It wraps Parse.
 func AsPet(s string) (Pet, error) {
 	var i = new(Pet)
 	err := i.Parse(s)

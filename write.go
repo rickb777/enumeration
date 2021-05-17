@@ -260,11 +260,18 @@ func (m model) writeIsValidMethod(w io.Writer) {
 //-------------------------------------------------------------------------------------------------
 
 const parseMethod = `
-// Parse parses a string to find the corresponding <<.MainType>>, accepting one of the string
-// values or a number.
+// Parse parses a string to find the corresponding <<.MainType>>, accepting one of the string values or
+// a number. The input representation is determined by <<.LcType>>MarshalTextRep. It is used by As<<.MainType>>.
 <<- if .IgnoreCase>>
 // The input case does not matter.
 <<- end>>
+//
+// Usage Example
+//
+//    v := new(<<.MainType>>)
+//    err := v.Parse(s)
+//    ...  etc
+//
 func (v *<<.MainType>>) Parse(s string) error {
 	return v.parse(s, <<.LcType>>MarshalTextRep)
 }
@@ -362,8 +369,8 @@ func (m model) writeParseMethod(w io.Writer) {
 //-------------------------------------------------------------------------------------------------
 
 const asMethod = `
-// As<<.MainType>> parses a string to find the corresponding <<.MainType>>, accepting either one of the string
-// values or an ordinal number.
+// As<<.MainType>> parses a string to find the corresponding <<.MainType>>, accepting either one of the string values or
+// a number. The input representation is determined by <<.LcType>>MarshalTextRep. It wraps Parse.
 <<- if .IgnoreCase>>
 // The input case does not matter.
 <<- end>>

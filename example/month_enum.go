@@ -106,9 +106,16 @@ func (i Month) IsValid() bool {
 	return false
 }
 
-// Parse parses a string to find the corresponding Month, accepting one of the string
-// values or a number.
+// Parse parses a string to find the corresponding Month, accepting one of the string values or
+// a number. The input representation is determined by monthMarshalTextRep. It is used by AsMonth.
 // The input case does not matter.
+//
+// Usage Example
+//
+//    v := new(Month)
+//    err := v.Parse(s)
+//    ...  etc
+//
 func (v *Month) Parse(s string) error {
 	return v.parse(s, monthMarshalTextRep)
 }
@@ -169,8 +176,8 @@ func (v *Month) parseIdentifier(s string) (ok bool) {
 	return false
 }
 
-// AsMonth parses a string to find the corresponding Month, accepting either one of the string
-// values or an ordinal number.
+// AsMonth parses a string to find the corresponding Month, accepting either one of the string values or
+// a number. The input representation is determined by monthMarshalTextRep. It wraps Parse.
 // The input case does not matter.
 func AsMonth(s string) (Month, error) {
 	var i = new(Month)

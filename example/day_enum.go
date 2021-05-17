@@ -90,8 +90,15 @@ func (i Day) IsValid() bool {
 	return false
 }
 
-// Parse parses a string to find the corresponding Day, accepting one of the string
-// values or a number.
+// Parse parses a string to find the corresponding Day, accepting one of the string values or
+// a number. The input representation is determined by dayMarshalTextRep. It is used by AsDay.
+//
+// Usage Example
+//
+//    v := new(Day)
+//    err := v.Parse(s)
+//    ...  etc
+//
 func (v *Day) Parse(s string) error {
 	return v.parse(s, dayMarshalTextRep)
 }
@@ -152,8 +159,8 @@ func (v *Day) parseIdentifier(s string) (ok bool) {
 	return false
 }
 
-// AsDay parses a string to find the corresponding Day, accepting either one of the string
-// values or an ordinal number.
+// AsDay parses a string to find the corresponding Day, accepting either one of the string values or
+// a number. The input representation is determined by dayMarshalTextRep. It wraps Parse.
 func AsDay(s string) (Day, error) {
 	var i = new(Day)
 	err := i.Parse(s)

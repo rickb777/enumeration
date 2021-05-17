@@ -278,8 +278,15 @@ func TestWriteIsValid(t *testing.T) {
 //-------------------------------------------------------------------------------------------------
 
 const e10nc = `
-// Parse parses a string to find the corresponding Sweet, accepting one of the string
-// values or a number.
+// Parse parses a string to find the corresponding Sweet, accepting one of the string values or
+// a number. The input representation is determined by sweetMarshalTextRep. It is used by AsSweet.
+//
+// Usage Example
+//
+//    v := new(Sweet)
+//    err := v.Parse(s)
+//    ...  etc
+//
 func (v *Sweet) Parse(s string) error {
 	return v.parse(s, sweetMarshalTextRep)
 }
@@ -342,8 +349,15 @@ func (v *Sweet) parseIdentifier(s string) (ok bool) {
 `
 
 const e10lc = `
-// Parse parses a string to find the corresponding Sweet, accepting one of the string
-// values or a number.
+// Parse parses a string to find the corresponding Sweet, accepting one of the string values or
+// a number. The input representation is determined by sweetMarshalTextRep. It is used by AsSweet.
+//
+// Usage Example
+//
+//    v := new(Sweet)
+//    err := v.Parse(s)
+//    ...  etc
+//
 func (v *Sweet) Parse(s string) error {
 	return v.parse(s, sweetMarshalTextRep)
 }
@@ -418,9 +432,16 @@ func (v *Sweet) parseIdentifier(s string) (ok bool) {
 `
 
 const e10ic = `
-// Parse parses a string to find the corresponding Sweet, accepting one of the string
-// values or a number.
+// Parse parses a string to find the corresponding Sweet, accepting one of the string values or
+// a number. The input representation is determined by sweetMarshalTextRep. It is used by AsSweet.
 // The input case does not matter.
+//
+// Usage Example
+//
+//    v := new(Sweet)
+//    err := v.Parse(s)
+//    ...  etc
+//
 func (v *Sweet) Parse(s string) error {
 	return v.parse(s, sweetMarshalTextRep)
 }
@@ -499,8 +520,8 @@ func TestWriteParseMethod(t *testing.T) {
 //-------------------------------------------------------------------------------------------------
 
 const e11nc = `
-// AsSweet parses a string to find the corresponding Sweet, accepting either one of the string
-// values or an ordinal number.
+// AsSweet parses a string to find the corresponding Sweet, accepting either one of the string values or
+// a number. The input representation is determined by sweetMarshalTextRep. It wraps Parse.
 func AsSweet(s string) (Sweet, error) {
 	var i = new(Sweet)
 	err := i.Parse(s)
@@ -509,8 +530,8 @@ func AsSweet(s string) (Sweet, error) {
 `
 
 const e11lc = `
-// AsSweet parses a string to find the corresponding Sweet, accepting either one of the string
-// values or an ordinal number.
+// AsSweet parses a string to find the corresponding Sweet, accepting either one of the string values or
+// a number. The input representation is determined by sweetMarshalTextRep. It wraps Parse.
 func AsSweet(s string) (Sweet, error) {
 	var i = new(Sweet)
 	err := i.Parse(s)
@@ -519,8 +540,8 @@ func AsSweet(s string) (Sweet, error) {
 `
 
 const e11ic = `
-// AsSweet parses a string to find the corresponding Sweet, accepting either one of the string
-// values or an ordinal number.
+// AsSweet parses a string to find the corresponding Sweet, accepting either one of the string values or
+// a number. The input representation is determined by sweetMarshalTextRep. It wraps Parse.
 // The input case does not matter.
 func AsSweet(s string) (Sweet, error) {
 	var i = new(Sweet)

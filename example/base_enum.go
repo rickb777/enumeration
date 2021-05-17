@@ -80,8 +80,15 @@ func (i Base) IsValid() bool {
 	return false
 }
 
-// Parse parses a string to find the corresponding Base, accepting one of the string
-// values or a number.
+// Parse parses a string to find the corresponding Base, accepting one of the string values or
+// a number. The input representation is determined by baseMarshalTextRep. It is used by AsBase.
+//
+// Usage Example
+//
+//    v := new(Base)
+//    err := v.Parse(s)
+//    ...  etc
+//
 func (v *Base) Parse(s string) error {
 	return v.parse(s, baseMarshalTextRep)
 }
@@ -142,8 +149,8 @@ func (v *Base) parseIdentifier(s string) (ok bool) {
 	return false
 }
 
-// AsBase parses a string to find the corresponding Base, accepting either one of the string
-// values or an ordinal number.
+// AsBase parses a string to find the corresponding Base, accepting either one of the string values or
+// a number. The input representation is determined by baseMarshalTextRep. It wraps Parse.
 func AsBase(s string) (Base, error) {
 	var i = new(Base)
 	err := i.Parse(s)
