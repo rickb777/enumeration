@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v2 v2.4.1
+// github.com/rickb777/enumeration/v2 v2.5.0
 
 package example
 
@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/rickb777/enumeration/v2/enum"
+	"os"
 	"strconv"
 	"strings"
 )
@@ -47,16 +48,26 @@ func (i GreekAlphabet) String() string {
 var greekStringsInverse = map[string]GreekAlphabet{}
 
 func init() {
-	if len(greekStrings) != 24 {
-		panic(fmt.Sprintf("greekStrings has %d items but should have 24", len(greekStrings)))
+	for _, id := range AllGreekAlphabets {
+		v, exists := greekStrings[id]
+		if !exists {
+			fmt.Fprintf(os.Stderr, "Warning: GreekAlphabet: %s is missing from greekStrings\n", id)
+		} else {
+			k := v
+			if _, exists := greekStringsInverse[k]; exists {
+				fmt.Fprintf(os.Stderr, "Warning: GreekAlphabet: %q is duplicated in greekStrings\n", k)
+			}
+			greekStringsInverse[k] = id
+		}
 	}
 
-	for k, v := range greekStrings {
-		greekStringsInverse[v] = k
+	if len(greekStrings) != 24 {
+		panic(fmt.Sprintf("GreekAlphabet: greekStrings has %d items but should have 24", len(greekStrings)))
 	}
 
 	if len(greekStrings) != len(greekStringsInverse) {
-		panic(fmt.Sprintf("greekStrings has %d items but they are not distinct", len(greekStrings)))
+		panic(fmt.Sprintf("GreekAlphabet: greekStrings has %d items but there are only %d distinct items",
+			len(greekStrings), len(greekStringsInverse)))
 	}
 }
 

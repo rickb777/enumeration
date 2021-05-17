@@ -137,16 +137,26 @@ const e5lc = `
 var sweetNamesInverse = map[string]Sweet{}
 
 func init() {
-	if len(sweetNames) != 5 {
-		panic(fmt.Sprintf("sweetNames has %d items but should have 5", len(sweetNames)))
+	for _, id := range AllSweets {
+		v, exists := sweetNames[id]
+		if !exists {
+			fmt.Fprintf(os.Stderr, "Warning: Sweet: %s is missing from sweetNames\n", id)
+		} else {
+			k := strings.ToLower(strings.ReplaceAll(v, "_", " "))
+			if _, exists := sweetNamesInverse[k]; exists {
+				fmt.Fprintf(os.Stderr, "Warning: Sweet: %q is duplicated in sweetNames\n", k)
+			}
+			sweetNamesInverse[k] = id
+		}
 	}
 
-	for k, v := range sweetNames {
-		sweetNamesInverse[strings.ToLower(strings.ReplaceAll(v, "_", " "))] = k
+	if len(sweetNames) != 5 {
+		panic(fmt.Sprintf("Sweet: sweetNames has %d items but should have 5", len(sweetNames)))
 	}
 
 	if len(sweetNames) != len(sweetNamesInverse) {
-		panic(fmt.Sprintf("sweetNames has %d items but they are not distinct", len(sweetNames)))
+		panic(fmt.Sprintf("Sweet: sweetNames has %d items but there are only %d distinct items",
+			len(sweetNames), len(sweetNamesInverse)))
 	}
 }
 

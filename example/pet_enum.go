@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v2 v2.4.1
+// github.com/rickb777/enumeration/v2 v2.5.0
 
 package example
 
@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/rickb777/enumeration/v2/enum"
+	"os"
 	"strconv"
 	"strings"
 )
@@ -41,16 +42,26 @@ func (i Pet) String() string {
 var petStringsInverse = map[string]Pet{}
 
 func init() {
-	if len(petStrings) != 5 {
-		panic(fmt.Sprintf("petStrings has %d items but should have 5", len(petStrings)))
+	for _, id := range AllPets {
+		v, exists := petStrings[id]
+		if !exists {
+			fmt.Fprintf(os.Stderr, "Warning: Pet: %s is missing from petStrings\n", id)
+		} else {
+			k := strings.ToLower(strings.ReplaceAll(v, "_", " "))
+			if _, exists := petStringsInverse[k]; exists {
+				fmt.Fprintf(os.Stderr, "Warning: Pet: %q is duplicated in petStrings\n", k)
+			}
+			petStringsInverse[k] = id
+		}
 	}
 
-	for k, v := range petStrings {
-		petStringsInverse[strings.ToLower(strings.ReplaceAll(v, "_", " "))] = k
+	if len(petStrings) != 5 {
+		panic(fmt.Sprintf("Pet: petStrings has %d items but should have 5", len(petStrings)))
 	}
 
 	if len(petStrings) != len(petStringsInverse) {
-		panic(fmt.Sprintf("petStrings has %d items but they are not distinct", len(petStrings)))
+		panic(fmt.Sprintf("Pet: petStrings has %d items but there are only %d distinct items",
+			len(petStrings), len(petStringsInverse)))
 	}
 }
 

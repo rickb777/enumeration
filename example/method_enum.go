@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v2 v2.4.1
+// github.com/rickb777/enumeration/v2 v2.5.0
 
 package example
 
@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/rickb777/enumeration/v2/enum"
+	"os"
 	"strconv"
 	"strings"
 )
@@ -44,16 +45,26 @@ func (i Method) String() string {
 var methodStringsInverse = map[string]Method{}
 
 func init() {
-	if len(methodStrings) != 6 {
-		panic(fmt.Sprintf("methodStrings has %d items but should have 6", len(methodStrings)))
+	for _, id := range AllMethods {
+		v, exists := methodStrings[id]
+		if !exists {
+			fmt.Fprintf(os.Stderr, "Warning: Method: %s is missing from methodStrings\n", id)
+		} else {
+			k := strings.ToLower(v)
+			if _, exists := methodStringsInverse[k]; exists {
+				fmt.Fprintf(os.Stderr, "Warning: Method: %q is duplicated in methodStrings\n", k)
+			}
+			methodStringsInverse[k] = id
+		}
 	}
 
-	for k, v := range methodStrings {
-		methodStringsInverse[strings.ToLower(v)] = k
+	if len(methodStrings) != 6 {
+		panic(fmt.Sprintf("Method: methodStrings has %d items but should have 6", len(methodStrings)))
 	}
 
 	if len(methodStrings) != len(methodStringsInverse) {
-		panic(fmt.Sprintf("methodStrings has %d items but they are not distinct", len(methodStrings)))
+		panic(fmt.Sprintf("Method: methodStrings has %d items but there are only %d distinct items",
+			len(methodStrings), len(methodStringsInverse)))
 	}
 }
 

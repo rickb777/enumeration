@@ -20,7 +20,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/rickb777/enumeration/v2/enum"
-	"strconv"
+<< if .LookupTable >>	"os"
+<< end >>	"strconv"
 	"strings"
 )
 `
@@ -129,16 +130,26 @@ const tagMethod = `<<if .LookupTable>>
 var <<.LookupTable>>Inverse = map[string]<<.MainType>>{}
 
 func init() {
-	if len(<<.LookupTable>>) != <<len .Values>> {
-		panic(fmt.Sprintf("<<.LookupTable>> has %d items but should have <<len .Values>>", len(<<.LookupTable>>)))
+	for _, id := range All<<.Plural>> {
+		v, exists := <<.LookupTable>>[id]
+		if !exists {
+			fmt.Fprintf(os.Stderr, "Warning: <<.MainType>>: %s is missing from <<.LookupTable>>\n", id)
+		} else {
+			k := << transform "v" >>
+			if _, exists := <<.LookupTable>>Inverse[k]; exists {
+				fmt.Fprintf(os.Stderr, "Warning: <<.MainType>>: %q is duplicated in <<.LookupTable>>\n", k)
+			}
+			<<.LookupTable>>Inverse[k] = id
+		}
 	}
 
-	for k, v := range <<.LookupTable>> {
-		<<.LookupTable>>Inverse[<< transform "v" >>] = k
+	if len(<<.LookupTable>>) != <<len .Values>> {
+		panic(fmt.Sprintf("<<.MainType>>: <<.LookupTable>> has %d items but should have <<len .Values>>", len(<<.LookupTable>>)))
 	}
 
 	if len(<<.LookupTable>>) != len(<<.LookupTable>>Inverse) {
-		panic(fmt.Sprintf("<<.LookupTable>> has %d items but they are not distinct", len(<<.LookupTable>>)))
+		panic(fmt.Sprintf("<<.MainType>>: <<.LookupTable>> has %d items but there are only %d distinct items",
+			len(<<.LookupTable>>), len(<<.LookupTable>>Inverse)))
 	}
 }
 
