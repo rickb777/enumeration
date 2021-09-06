@@ -1,12 +1,12 @@
 language: go
 
 go:
-  - 1.13
+  - '1.16'
 
 install:
   - go get -t -v ./...
   - go get github.com/mattn/goveralls
 
 script:
-  - ./try.sh
+  - ./build+test.sh
 
