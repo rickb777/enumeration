@@ -82,12 +82,7 @@ func DayOf(i int) Day {
 
 // IsValid determines whether a Day is one of the defined constants.
 func (i Day) IsValid() bool {
-	switch i {
-	case Sunday, Monday, Tuesday, Wednesday,
-		Thursday, Friday, Saturday:
-		return true
-	}
-	return false
+	return i.Ordinal() >= 0
 }
 
 // Parse parses a string to find the corresponding Day, accepting one of the string values or

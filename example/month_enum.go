@@ -97,13 +97,7 @@ func MonthOf(i int) Month {
 
 // IsValid determines whether a Month is one of the defined constants.
 func (i Month) IsValid() bool {
-	switch i {
-	case January, February, March, April,
-		May, June, July, August, September,
-		October, November, December:
-		return true
-	}
-	return false
+	return i.Ordinal() >= 0
 }
 
 // Parse parses a string to find the corresponding Month, accepting one of the string values or

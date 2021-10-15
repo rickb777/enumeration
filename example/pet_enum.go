@@ -65,13 +65,14 @@ func init() {
 	}
 }
 
-// Tag returns the string representation of a Pet.
+// Tag returns the string representation of a Pet. For invalid values,
+// this returns i.String() (see IsValid).
 func (i Pet) Tag() string {
 	s, ok := petStrings[i]
 	if ok {
 		return s
 	}
-	return fmt.Sprintf("%02d", i)
+	return i.String()
 }
 
 // Ordinal returns the ordinal number of a Pet.
@@ -109,12 +110,7 @@ func PetOf(i int) Pet {
 
 // IsValid determines whether a Pet is one of the defined constants.
 func (i Pet) IsValid() bool {
-	switch i {
-	case Cat, Dog, Mouse, Elephant,
-		Koala_Bear:
-		return true
-	}
-	return false
+	return i.Ordinal() >= 0
 }
 
 // Parse parses a string to find the corresponding Pet, accepting one of the string values or

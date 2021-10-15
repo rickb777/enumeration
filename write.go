@@ -153,13 +153,14 @@ func init() {
 	}
 }
 
-// Tag returns the string representation of a <<.MainType>>.
+// Tag returns the string representation of a <<.MainType>>. For invalid values,
+// this returns i.String() (see IsValid).
 func (i <<.MainType>>) Tag() string {
 	s, ok := <<.LookupTable>>[i]
 	if ok {
 		return s
 	}
-	return fmt.Sprintf("%02d", i)
+	return i.String()
 }
 <<- else>>
 // Tag returns the string representation of a <<.MainType>>. This is an alias for String.
@@ -235,11 +236,7 @@ func (m model) writeOfMethod(w io.Writer) {
 const isValidMethod = `
 // IsValid determines whether a <<.MainType>> is one of the defined constants.
 func (i <<.MainType>>) IsValid() bool {
-	switch i {
-	case <<.ValuesWithWrapping 2>>:
-		return true
-	}
-	return false
+	return i.Ordinal() >= 0
 }
 `
 

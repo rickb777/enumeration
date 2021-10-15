@@ -160,13 +160,14 @@ func init() {
 	}
 }
 
-// Tag returns the string representation of a Sweet.
+// Tag returns the string representation of a Sweet. For invalid values,
+// this returns i.String() (see IsValid).
 func (i Sweet) Tag() string {
 	s, ok := sweetNames[i]
 	if ok {
 		return s
 	}
-	return fmt.Sprintf("%02d", i)
+	return i.String()
 }
 `
 
@@ -266,12 +267,7 @@ func TestWriteOfMethod(t *testing.T) {
 const e9 = `
 // IsValid determines whether a Sweet is one of the defined constants.
 func (i Sweet) IsValid() bool {
-	switch i {
-	case Mars, Bounty, Snickers, Kitkat,
-		Ferrero_Rocher:
-		return true
-	}
-	return false
+	return i.Ordinal() >= 0
 }
 `
 

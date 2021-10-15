@@ -71,13 +71,14 @@ func init() {
 	}
 }
 
-// Tag returns the string representation of a GreekAlphabet.
+// Tag returns the string representation of a GreekAlphabet. For invalid values,
+// this returns i.String() (see IsValid).
 func (i GreekAlphabet) Tag() string {
 	s, ok := greekStrings[i]
 	if ok {
 		return s
 	}
-	return fmt.Sprintf("%02d", i)
+	return i.String()
 }
 
 // Ordinal returns the ordinal number of a GreekAlphabet.
@@ -153,15 +154,7 @@ func GreekAlphabetOf(i int) GreekAlphabet {
 
 // IsValid determines whether a GreekAlphabet is one of the defined constants.
 func (i GreekAlphabet) IsValid() bool {
-	switch i {
-	case Αλφα, Βήτα, Γάμμα, Δέλτα,
-		Εψιλον, Ζήτα, Ητα, Θήτα, Ιώτα,
-		Κάππα, Λάμβδα, Μυ, Νυ, Ξι,
-		Ομικρον, Πι, Ρώ, Σίγμα, Ταυ,
-		Υψιλον, Φι, Χι, Ψι, Ωμέγα:
-		return true
-	}
-	return false
+	return i.Ordinal() >= 0
 }
 
 // Parse parses a string to find the corresponding GreekAlphabet, accepting one of the string values or

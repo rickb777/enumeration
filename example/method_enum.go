@@ -68,13 +68,14 @@ func init() {
 	}
 }
 
-// Tag returns the string representation of a Method.
+// Tag returns the string representation of a Method. For invalid values,
+// this returns i.String() (see IsValid).
 func (i Method) Tag() string {
 	s, ok := methodStrings[i]
 	if ok {
 		return s
 	}
-	return fmt.Sprintf("%02d", i)
+	return i.String()
 }
 
 // Ordinal returns the ordinal number of a Method.
@@ -114,12 +115,7 @@ func MethodOf(i int) Method {
 
 // IsValid determines whether a Method is one of the defined constants.
 func (i Method) IsValid() bool {
-	switch i {
-	case HEAD, GET, PUT, POST,
-		PATCH, DELETE:
-		return true
-	}
-	return false
+	return i.Ordinal() >= 0
 }
 
 // Parse parses a string to find the corresponding Method, accepting one of the string values or

@@ -73,11 +73,7 @@ func BaseOf(i int) Base {
 
 // IsValid determines whether a Base is one of the defined constants.
 func (i Base) IsValid() bool {
-	switch i {
-	case A, C, G, T:
-		return true
-	}
-	return false
+	return i.Ordinal() >= 0
 }
 
 // Parse parses a string to find the corresponding Base, accepting one of the string values or
