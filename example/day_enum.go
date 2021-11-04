@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v2 v2.6.0
+// github.com/rickb777/enumeration/v2 v2.7.0
 
 package example
 
@@ -160,6 +160,15 @@ func AsDay(s string) (Day, error) {
 	var i = new(Day)
 	err := i.Parse(s)
 	return *i, err
+}
+
+// MustParseDay is similar to AsDay except that it panics on error.
+func MustParseDay(s string) Day {
+	i, err := AsDay(s)
+	if err != nil {
+		panic(err)
+	}
+	return i
 }
 
 // dayMarshalTextRep controls representation used for XML and other text encodings.

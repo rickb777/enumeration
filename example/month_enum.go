@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v2 v2.6.0
+// github.com/rickb777/enumeration/v2 v2.7.0
 
 package example
 
@@ -177,6 +177,16 @@ func AsMonth(s string) (Month, error) {
 	var i = new(Month)
 	err := i.Parse(s)
 	return *i, err
+}
+
+// MustParseMonth is similar to AsMonth except that it panics on error.
+// The input case does not matter.
+func MustParseMonth(s string) Month {
+	i, err := AsMonth(s)
+	if err != nil {
+		panic(err)
+	}
+	return i
 }
 
 // monthMarshalTextRep controls representation used for XML and other text encodings.

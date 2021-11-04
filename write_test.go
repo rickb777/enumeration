@@ -572,7 +572,42 @@ func TestWriteAsMethod(t *testing.T) {
 
 //-------------------------------------------------------------------------------------------------
 
-const e12nc = `
+const e12lc = `
+// MustParseSweet is similar to AsSweet except that it panics on error.
+func MustParseSweet(s string) Sweet {
+	i, err := AsSweet(s)
+	if err != nil {
+		panic(err)
+	}
+	return i
+}
+`
+
+const e12ic = `
+// MustParseSweet is similar to AsSweet except that it panics on error.
+// The input case does not matter.
+func MustParseSweet(s string) Sweet {
+	i, err := AsSweet(s)
+	if err != nil {
+		panic(err)
+	}
+	return i
+}
+`
+
+func TestWriteMustParseMethod(t *testing.T) {
+	buf := &strings.Builder{}
+	modelNoChange.writeMustParseMethod(buf)
+	compare(t, buf.String(), e12lc)
+
+	buf.Reset()
+	modelIgnoreCase.writeMustParseMethod(buf)
+	compare(t, buf.String(), e12ic)
+}
+
+//-------------------------------------------------------------------------------------------------
+
+const e13nc = `
 // sweetMarshalTextRep controls representation used for XML and other text encodings.
 // By default, it is enum.Identifier and quoted strings are used.
 var sweetMarshalTextRep = enum.Identifier
@@ -621,7 +656,7 @@ func (i Sweet) quotedString(s string) []byte {
 }
 `
 
-const e12lc = `
+const e13lc = `
 // sweetMarshalTextRep controls representation used for XML and other text encodings.
 // By default, it is enum.Identifier and quoted strings are used.
 var sweetMarshalTextRep = enum.Identifier
@@ -673,11 +708,11 @@ func (i Sweet) quotedString(s string) []byte {
 func TestWriteMarshalText(t *testing.T) {
 	buf := &strings.Builder{}
 	modelNoChange.writeMarshalText(buf)
-	compare(t, buf.String(), e12nc)
+	compare(t, buf.String(), e13nc)
 
 	buf.Reset()
 	modelLowerWithLookupTable.writeMarshalText(buf)
-	compare(t, buf.String(), e12lc)
+	compare(t, buf.String(), e13lc)
 }
 
 //-------------------------------------------------------------------------------------------------

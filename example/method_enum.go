@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v2 v2.6.0
+// github.com/rickb777/enumeration/v2 v2.7.0
 
 package example
 
@@ -207,6 +207,16 @@ func AsMethod(s string) (Method, error) {
 	var i = new(Method)
 	err := i.Parse(s)
 	return *i, err
+}
+
+// MustParseMethod is similar to AsMethod except that it panics on error.
+// The input case does not matter.
+func MustParseMethod(s string) Method {
+	i, err := AsMethod(s)
+	if err != nil {
+		panic(err)
+	}
+	return i
 }
 
 // methodMarshalTextRep controls representation used for XML and other text encodings.

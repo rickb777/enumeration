@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v2 v2.6.0
+// github.com/rickb777/enumeration/v2 v2.7.0
 
 package example
 
@@ -785,6 +785,16 @@ func AsCountry(s string) (Country, error) {
 	var i = new(Country)
 	err := i.Parse(s)
 	return *i, err
+}
+
+// MustParseCountry is similar to AsCountry except that it panics on error.
+// The input case does not matter.
+func MustParseCountry(s string) Country {
+	i, err := AsCountry(s)
+	if err != nil {
+		panic(err)
+	}
+	return i
 }
 
 // countryMarshalTextRep controls representation used for XML and other text encodings.

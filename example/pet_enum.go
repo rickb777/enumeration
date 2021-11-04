@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v2 v2.6.0
+// github.com/rickb777/enumeration/v2 v2.7.0
 
 package example
 
@@ -200,6 +200,15 @@ func AsPet(s string) (Pet, error) {
 	var i = new(Pet)
 	err := i.Parse(s)
 	return *i, err
+}
+
+// MustParsePet is similar to AsPet except that it panics on error.
+func MustParsePet(s string) Pet {
+	i, err := AsPet(s)
+	if err != nil {
+		panic(err)
+	}
+	return i
 }
 
 // petMarshalTextRep controls representation used for XML and other text encodings.

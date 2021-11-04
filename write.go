@@ -395,6 +395,26 @@ func (m model) writeAsMethod(w io.Writer) {
 
 //-------------------------------------------------------------------------------------------------
 
+const mustParseMethod = `
+// MustParse<<.MainType>> is similar to As<<.MainType>> except that it panics on error.
+<<- if .IgnoreCase>>
+// The input case does not matter.
+<<- end>>
+func MustParse<<.MainType>>(s string) <<.MainType>> {
+	i, err := As<<.MainType>>(s)
+	if err != nil {
+		panic(err)
+	}
+	return i
+}
+`
+
+func (m model) writeMustParseMethod(w io.Writer) {
+	m.execTemplate(w, mustParseMethod)
+}
+
+//-------------------------------------------------------------------------------------------------
+
 const marshalText = `
 // <<.LcType>>MarshalTextRep controls representation used for XML and other text encodings.
 // By default, it is enum.Identifier and quoted strings are used.
@@ -550,6 +570,7 @@ func (m model) write(w io.Writer) {
 	m.writeIsValidMethod(w)
 	m.writeParseMethod(w)
 	m.writeAsMethod(w)
+	m.writeMustParseMethod(w)
 	m.writeMarshalText(w)
 	m.writeUnmarshalText(w)
 	m.writeScanValue(w)

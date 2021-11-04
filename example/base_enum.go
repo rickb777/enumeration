@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v2 v2.6.0
+// github.com/rickb777/enumeration/v2 v2.7.0
 
 package example
 
@@ -151,6 +151,15 @@ func AsBase(s string) (Base, error) {
 	var i = new(Base)
 	err := i.Parse(s)
 	return *i, err
+}
+
+// MustParseBase is similar to AsBase except that it panics on error.
+func MustParseBase(s string) Base {
+	i, err := AsBase(s)
+	if err != nil {
+		panic(err)
+	}
+	return i
 }
 
 // baseMarshalTextRep controls representation used for XML and other text encodings.
