@@ -1,8 +1,10 @@
-package main
+package parse
 
 import (
 	"fmt"
-	"github.com/rickb777/enumeration/v2/transform"
+	"github.com/rickb777/enumeration/v2/internal/model"
+	"github.com/rickb777/enumeration/v2/internal/transform"
+	"github.com/rickb777/enumeration/v2/internal/util"
 	"go/scanner"
 	"go/token"
 	"io"
@@ -11,6 +13,7 @@ import (
 	"unicode"
 )
 
+var UsingTable string
 var fset *token.FileSet
 
 func isExported(s string) bool {
@@ -23,22 +26,6 @@ func isExported(s string) bool {
 	return false
 }
 
-func shortenIdentifier(id string) string {
-	if prefix != "" && strings.HasPrefix(id, prefix) {
-		id = id[len(prefix):]
-		if strings.HasPrefix(id, "_") {
-			id = id[1:]
-		}
-	}
-	if suffix != "" && strings.HasSuffix(id, suffix) {
-		id = id[:len(id)-len(suffix)]
-		if strings.HasSuffix(id, "_") {
-			id = id[:len(id)-1]
-		}
-	}
-	return id
-}
-
 func addIdentifier(ss []string, id string) []string {
 	if isExported(id) {
 		ss = append(ss, id)
@@ -49,14 +36,14 @@ func addIdentifier(ss []string, id string) []string {
 func scan(s *scanner.Scanner) (token.Pos, token.Token, string) {
 	pos, tok, lit := s.Scan()
 	if lit == "" {
-		debug("%-18s %s\n", fset.Position(pos), tok)
+		util.Debug("%-18s %s\n", fset.Position(pos), tok)
 	} else {
-		debug("%-18s %-8s %q\n", fset.Position(pos), tok, lit)
+		util.Debug("%-18s %-8s %q\n", fset.Position(pos), tok, lit)
 	}
 	return pos, tok, lit
 }
 
-func parseConstBlock(mainType string, s *scanner.Scanner, m *model) error {
+func parseConstBlock(mainType string, s *scanner.Scanner, m *model.Model) error {
 	foundType := false
 	var ss []string
 	for {
@@ -118,7 +105,7 @@ func discardToEndOfLine(s *scanner.Scanner, tok token.Token) {
 	}
 }
 
-func parseConst(mainType string, s *scanner.Scanner, m *model) error {
+func parseConst(mainType string, s *scanner.Scanner, m *model.Model) error {
 	var tok token.Token
 	var lit1, lit2 string
 	_, tok, lit1 = scan(s)
@@ -138,11 +125,11 @@ func parseConst(mainType string, s *scanner.Scanner, m *model) error {
 	return nil
 }
 
-func convert(in io.Reader, input, mainType, plural, pkg string, xCase transform.Case, ignoreCase, unsnake bool) (model, error) {
+func Convert(in io.Reader, input, mainType, plural, pkg string, xCase transform.Case, ignoreCase, unsnake bool) (model.Model, error) {
 	foundMainType := false
 	src, err := ioutil.ReadAll(in)
 	if err != nil {
-		return model{}, err
+		return model.Model{}, err
 	}
 
 	s := new(scanner.Scanner)
@@ -150,17 +137,17 @@ func convert(in io.Reader, input, mainType, plural, pkg string, xCase transform.
 	file := fset.AddFile(input, fset.Base(), len(src)) // register input "file"
 	s.Init(file, src, nil /* no error handler */, 0)
 
-	m := &model{
+	m := &model.Model{
 		MainType:    mainType,
 		LcType:      strings.ToLower(mainType),
 		BaseType:    "int",
 		Plural:      plural,
 		Pkg:         pkg,
-		Version:     version,
+		Version:     util.Version,
 		IgnoreCase:  ignoreCase,
 		Unsnake:     unsnake,
 		Case:        xCase,
-		LookupTable: usingTable,
+		LookupTable: UsingTable,
 	}
 
 	var tok token.Token
@@ -177,7 +164,7 @@ func convert(in io.Reader, input, mainType, plural, pkg string, xCase transform.
 				_, tok, lit = scan(s)
 				if tok == token.IDENT {
 					m.BaseType = lit
-					debug("type %s %s\n", mainType, m.BaseType)
+					util.Debug("type %s %s\n", mainType, m.BaseType)
 				}
 			}
 
@@ -187,11 +174,11 @@ func convert(in io.Reader, input, mainType, plural, pkg string, xCase transform.
 	}
 
 	if s.ErrorCount > 0 {
-		return model{}, fmt.Errorf("Syntax error in %s", input)
+		return model.Model{}, fmt.Errorf("Syntax error in %s", input)
 	}
 
 	if !foundMainType || len(m.Values) == 0 {
-		return model{}, fmt.Errorf("Failed to find %s in %s", mainType, input)
+		return model.Model{}, fmt.Errorf("Failed to find %s in %s", mainType, input)
 	}
 
 	return *m, nil

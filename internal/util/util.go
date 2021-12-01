@@ -1,4 +1,4 @@
-package main
+package util
 
 import (
 	"fmt"
@@ -6,23 +6,24 @@ import (
 	"strings"
 )
 
-var stdout = os.Stdout
+var Verbose, Dbg bool
+var Stdout = os.Stdout
 
-func fail(args ...interface{}) {
+func Fail(args ...interface{}) {
 	fmt.Fprint(os.Stderr, "Error: ")
 	fmt.Fprintln(os.Stderr, args...)
 	os.Exit(1)
 }
 
-func info(msg string, args ...interface{}) {
-	if verbose {
-		fmt.Fprintf(stdout, msg, args...)
+func Info(msg string, args ...interface{}) {
+	if Verbose {
+		fmt.Fprintf(Stdout, msg, args...)
 	}
 }
 
-func debug(msg string, args ...interface{}) {
-	if dbg {
-		fmt.Fprintf(stdout, msg, args...)
+func Debug(msg string, args ...interface{}) {
+	if Dbg {
+		fmt.Fprintf(Stdout, msg, args...)
 	}
 }
 

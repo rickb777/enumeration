@@ -1,4 +1,4 @@
-package main
+package model
 
 import (
 	"fmt"
@@ -26,7 +26,7 @@ import (
 )
 `
 
-func (m model) writeHead(w io.Writer) {
+func (m Model) writeHead(w io.Writer) {
 	m.execTemplate(w, head)
 }
 
@@ -45,7 +45,7 @@ const <<.LcType>>EnumStrings = "<<.TransformedOutputValues>>"
 var <<.LcType>>EnumIndex = [...]uint16{<<.Indexes>>}
 `
 
-func (m model) TransformedInputValues() string {
+func (m Model) TransformedInputValues() string {
 	buf := &strings.Builder{}
 	for _, s := range m.Values {
 		s = m.inputTransform(s)
@@ -54,7 +54,7 @@ func (m model) TransformedInputValues() string {
 	return buf.String()
 }
 
-func (m model) TransformedOutputValues() string {
+func (m Model) TransformedOutputValues() string {
 	buf := &strings.Builder{}
 	for _, s := range m.Values {
 		s = m.outputTransform(s)
@@ -63,7 +63,7 @@ func (m model) TransformedOutputValues() string {
 	return buf.String()
 }
 
-func (m model) Indexes() string {
+func (m Model) Indexes() string {
 	buf := &strings.Builder{}
 	buf.WriteString("0")
 	n := 0
@@ -74,7 +74,7 @@ func (m model) Indexes() string {
 	return buf.String()
 }
 
-func (m model) writeJoinedStringAndIndexes(w io.Writer) {
+func (m Model) writeJoinedStringAndIndexes(w io.Writer) {
 	m.execTemplate(w, joinedStringAndIndexes)
 }
 
@@ -92,7 +92,7 @@ var All<<.MainType>>Enums = <<.AllItemsSlice>>{
 }
 `
 
-func (m model) AllItemsSlice() string {
+func (m Model) AllItemsSlice() string {
 	switch m.BaseKind() {
 	case types.Int:
 		return "enum.IntEnums"
@@ -102,7 +102,7 @@ func (m model) AllItemsSlice() string {
 	panic("undefined")
 }
 
-func (m model) writeAllItems(w io.Writer) {
+func (m Model) writeAllItems(w io.Writer) {
 	m.execTemplate(w, allItems)
 }
 
@@ -120,7 +120,7 @@ func (i <<.MainType>>) String() string {
 }
 `
 
-func (m model) writeStringMethod(w io.Writer) {
+func (m Model) writeStringMethod(w io.Writer) {
 	m.execTemplate(w, stringMethod)
 }
 
@@ -170,7 +170,7 @@ func (i <<.MainType>>) Tag() string {
 <<- end>>
 `
 
-func (m model) writeTagMethod(w io.Writer) {
+func (m Model) writeTagMethod(w io.Writer) {
 	m.execTemplate(w, tagMethod)
 }
 
@@ -189,7 +189,7 @@ func (i <<.MainType>>) Ordinal() int {
 }
 `
 
-func (m model) writeOrdinalMethod(w io.Writer) {
+func (m Model) writeOrdinalMethod(w io.Writer) {
 	m.execTemplate(w, ordinalMethod)
 }
 
@@ -209,7 +209,7 @@ func (i <<.MainType>>) Int() int {
 <<- end>>
 `
 
-func (m model) writeBaseMethod(w io.Writer) {
+func (m Model) writeBaseMethod(w io.Writer) {
 	m.execTemplate(w, baseMethod)
 }
 
@@ -227,7 +227,7 @@ func <<.MainType>>Of(i int) <<.MainType>> {
 }
 `
 
-func (m model) writeOfMethod(w io.Writer) {
+func (m Model) writeOfMethod(w io.Writer) {
 	m.execTemplate(w, ofMethod)
 }
 
@@ -240,7 +240,7 @@ func (i <<.MainType>>) IsValid() bool {
 }
 `
 
-func (m model) ValuesWithWrapping(nTabs int) string {
+func (m Model) ValuesWithWrapping(nTabs int) string {
 	tabs := "\t\t"[:nTabs]
 	buf := &strings.Builder{}
 	nl := 5
@@ -261,7 +261,7 @@ func (m model) ValuesWithWrapping(nTabs int) string {
 	return buf.String()
 }
 
-func (m model) writeIsValidMethod(w io.Writer) {
+func (m Model) writeIsValidMethod(w io.Writer) {
 	m.execTemplate(w, isValidMethod)
 }
 
@@ -370,7 +370,7 @@ func (v *<<.MainType>>) parseIdentifier(s string) (ok bool) {
 }
 `
 
-func (m model) writeParseMethod(w io.Writer) {
+func (m Model) writeParseMethod(w io.Writer) {
 	m.execTemplate(w, parseMethod)
 }
 
@@ -389,7 +389,7 @@ func As<<.MainType>>(s string) (<<.MainType>>, error) {
 }
 `
 
-func (m model) writeAsMethod(w io.Writer) {
+func (m Model) writeAsMethod(w io.Writer) {
 	m.execTemplate(w, asMethod)
 }
 
@@ -409,7 +409,7 @@ func MustParse<<.MainType>>(s string) <<.MainType>> {
 }
 `
 
-func (m model) writeMustParseMethod(w io.Writer) {
+func (m Model) writeMustParseMethod(w io.Writer) {
 	m.execTemplate(w, mustParseMethod)
 }
 
@@ -468,7 +468,7 @@ func (i <<.MainType>>) quotedString(s string) []byte {
 }
 `
 
-func (m model) writeMarshalText(w io.Writer) {
+func (m Model) writeMarshalText(w io.Writer) {
 	m.execTemplate(w, marshalText)
 }
 
@@ -493,7 +493,7 @@ func (i *<<.MainType>>) UnmarshalJSON(text []byte) error {
 }
 `
 
-func (m model) writeUnmarshalText(w io.Writer) {
+func (m Model) writeUnmarshalText(w io.Writer) {
 	m.execTemplate(w, unmarshalText)
 }
 
@@ -552,13 +552,13 @@ func (i <<.MainType>>) Value() (driver.Value, error) {
 }
 `
 
-func (m model) writeScanValue(w io.Writer) {
+func (m Model) writeScanValue(w io.Writer) {
 	m.execTemplate(w, scanValue)
 }
 
 //-------------------------------------------------------------------------------------------------
 
-func (m model) write(w io.Writer) {
+func (m Model) Write(w io.Writer) {
 	m.writeHead(w)
 	m.writeJoinedStringAndIndexes(w)
 	m.writeAllItems(w)
@@ -580,7 +580,7 @@ func (m model) write(w io.Writer) {
 	}
 }
 
-func (m model) execTemplate(w io.Writer, tpl string) {
+func (m Model) execTemplate(w io.Writer, tpl string) {
 	tmpl, err := template.New("t").Funcs(m.FnMap()).Delims("<<", ">>").Parse(tpl)
 	checkErr(err)
 	checkErr(tmpl.Execute(w, m))

@@ -1,16 +1,17 @@
-package main
+package model
 
 import (
 	"fmt"
-	"github.com/rickb777/enumeration/v2/transform"
+	"github.com/rickb777/enumeration/v2/internal/transform"
 	"go/types"
 	"strings"
 	"text/template"
 )
 
-type model struct {
+type Model struct {
 	MainType, LcType, BaseType string
 	Plural, Pkg, Version       string
+	Prefix, Suffix             string
 	Values                     []string
 	IgnoreCase                 bool
 	Unsnake                    bool
@@ -19,19 +20,35 @@ type model struct {
 	LookupTable                string
 }
 
-func (m model) ShortenedValues() []string {
+func shortenIdentifier(id, prefix, suffix string) string {
+	if prefix != "" && strings.HasPrefix(id, prefix) {
+		id = id[len(prefix):]
+		if strings.HasPrefix(id, "_") {
+			id = id[1:]
+		}
+	}
+	if suffix != "" && strings.HasSuffix(id, suffix) {
+		id = id[:len(id)-len(suffix)]
+		if strings.HasSuffix(id, "_") {
+			id = id[:len(id)-1]
+		}
+	}
+	return id
+}
+
+func (m Model) ShortenedValues() []string {
 	ss := make([]string, len(m.Values))
 	for i, v := range m.Values {
-		ss[i] = shortenIdentifier(v)
+		ss[i] = shortenIdentifier(v, m.Prefix, m.Suffix)
 	}
 	return ss
 }
 
-func (m model) Asymmetric() bool {
+func (m Model) Asymmetric() bool {
 	return m.IgnoreCase
 }
 
-func (m model) InputCase() transform.Case {
+func (m Model) InputCase() transform.Case {
 	c := m.Case
 	if m.IgnoreCase && c == transform.Stet {
 		c = transform.Lower
@@ -39,38 +56,38 @@ func (m model) InputCase() transform.Case {
 	return c
 }
 
-func (m model) inputTransform(s string) string {
+func (m Model) inputTransform(s string) string {
 	if m.Unsnake {
 		s = strings.ReplaceAll(s, "_", " ")
 	}
 	return m.InputCase().Transform(s)
 }
 
-func (m model) outputTransform(s string) string {
+func (m Model) outputTransform(s string) string {
 	if m.Unsnake {
 		s = strings.ReplaceAll(s, "_", " ")
 	}
 	return m.Case.Transform(s)
 }
 
-func (m model) expression(s string) string {
+func (m Model) expression(s string) string {
 	if m.Unsnake {
 		s = fmt.Sprintf(`strings.ReplaceAll(%s, "_", " ")`, s)
 	}
 	return m.InputCase().Expression(s)
 }
 
-func (m model) FnMap() template.FuncMap {
+func (m Model) FnMap() template.FuncMap {
 	fns := make(template.FuncMap)
 	fns["transform"] = m.expression
 	return fns
 }
 
-func (m model) IsFloat() bool {
+func (m Model) IsFloat() bool {
 	return m.BaseKind() == types.Float64
 }
 
-func (m model) BaseKind() types.BasicKind {
+func (m Model) BaseKind() types.BasicKind {
 	var kind types.BasicKind
 	switch m.BaseType {
 	case "int", "uint",
@@ -85,7 +102,7 @@ func (m model) BaseKind() types.BasicKind {
 	return kind
 }
 
-func (m model) Placeholder() string {
+func (m Model) Placeholder() string {
 	switch m.BaseKind() {
 	case types.Int:
 		return "%d"
@@ -95,6 +112,6 @@ func (m model) Placeholder() string {
 	return "%s"
 }
 
-func (m model) ValuesJoined(from int, separator string) string {
+func (m Model) ValuesJoined(from int, separator string) string {
 	return strings.Join(m.Values[from:], separator)
 }

@@ -1,7 +1,8 @@
-package main
+package model
 
 import (
-	"github.com/rickb777/enumeration/v2/transform"
+	"github.com/rickb777/enumeration/v2/internal/transform"
+	"github.com/rickb777/enumeration/v2/internal/util"
 	"strings"
 	"testing"
 )
@@ -26,7 +27,7 @@ import (
 func TestWriteHead(t *testing.T) {
 	buf := &strings.Builder{}
 	modelNoChange.writeHead(buf)
-	compare(t, buf.String(), e0+version+e1)
+	compare(t, buf.String(), e0+util.Version+e1)
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -896,35 +897,35 @@ func compare(t *testing.T, actual, expected string) {
 
 //-------------------------------------------------------------------------------------------------
 
-var modelNoChange = model{
+var modelNoChange = Model{
 	MainType: "Sweet",
 	LcType:   "sweet",
 	BaseType: "int",
 	Plural:   "Sweets",
 	Pkg:      "confectionary",
-	Version:  version,
+	Version:  util.Version,
 	Values:   []string{"Mars", "Bounty", "Snickers", "Kitkat", "Ferrero_Rocher"},
 	Unsnake:  true,
 }
 
-var modelIgnoreCase = model{
+var modelIgnoreCase = Model{
 	MainType:   "Sweet",
 	LcType:     "sweet",
 	BaseType:   "int",
 	Plural:     "Sweets",
 	Pkg:        "confectionary",
-	Version:    version,
+	Version:    util.Version,
 	Values:     []string{"Mars", "Bounty", "Snickers", "Kitkat", "Ferrero_Rocher"},
 	IgnoreCase: true,
 }
 
-var modelLowerWithLookupTable = model{
+var modelLowerWithLookupTable = Model{
 	MainType:    "Sweet",
 	LcType:      "sweet",
 	BaseType:    "float64",
 	Plural:      "Sweets",
 	Pkg:         "confectionary",
-	Version:     version,
+	Version:     util.Version,
 	Values:      []string{"Mars", "Bounty", "Snickers", "Kitkat", "Ferrero_Rocher"},
 	IgnoreCase:  false,
 	Unsnake:     true,
