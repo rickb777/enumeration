@@ -19,6 +19,14 @@ type model struct {
 	LookupTable                string
 }
 
+func (m model) ShortenedValues() []string {
+	ss := make([]string, len(m.Values))
+	for i, v := range m.Values {
+		ss[i] = shortenIdentifier(v)
+	}
+	return ss
+}
+
 func (m model) Asymmetric() bool {
 	return m.IgnoreCase
 }

@@ -23,6 +23,22 @@ func isExported(s string) bool {
 	return false
 }
 
+func shortenIdentifier(id string) string {
+	if prefix != "" && strings.HasPrefix(id, prefix) {
+		id = id[len(prefix):]
+		if strings.HasPrefix(id, "_") {
+			id = id[1:]
+		}
+	}
+	if suffix != "" && strings.HasSuffix(id, suffix) {
+		id = id[:len(id)-len(suffix)]
+		if strings.HasSuffix(id, "_") {
+			id = id[:len(id)-1]
+		}
+	}
+	return id
+}
+
 func addIdentifier(ss []string, id string) []string {
 	if isExported(id) {
 		ss = append(ss, id)
@@ -144,7 +160,7 @@ func convert(in io.Reader, input, mainType, plural, pkg string, xCase transform.
 		IgnoreCase:  ignoreCase,
 		Unsnake:     unsnake,
 		Case:        xCase,
-		LookupTable: *usingTable,
+		LookupTable: usingTable,
 	}
 
 	var tok token.Token
@@ -174,9 +190,9 @@ func convert(in io.Reader, input, mainType, plural, pkg string, xCase transform.
 		return model{}, fmt.Errorf("Syntax error in %s", input)
 	}
 
-	if foundMainType && len(m.Values) > 0 {
-		return *m, nil
+	if !foundMainType || len(m.Values) == 0 {
+		return model{}, fmt.Errorf("Failed to find %s in %s", mainType, input)
 	}
 
-	return model{}, fmt.Errorf("Failed to find %s in %s", mainType, input)
+	return *m, nil
 }

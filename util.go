@@ -15,13 +15,13 @@ func fail(args ...interface{}) {
 }
 
 func info(msg string, args ...interface{}) {
-	if *verbose {
+	if verbose {
 		fmt.Fprintf(stdout, msg, args...)
 	}
 }
 
 func debug(msg string, args ...interface{}) {
-	if *dbg {
+	if dbg {
 		fmt.Fprintf(stdout, msg, args...)
 	}
 }

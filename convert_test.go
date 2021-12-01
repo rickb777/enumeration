@@ -23,7 +23,7 @@ const (
 
 func TestScanValuesHappy(t *testing.T) {
 	RegisterTestingT(t)
-	*dbg = testing.Verbose()
+	dbg = testing.Verbose()
 	s := bytes.NewBufferString(enum1)
 	m, err := convert(s, "filename.go", "Sweet", "Sweets", "confectionary", transform.Stet, true, true)
 	Ω(err).Should(BeNil())
@@ -72,7 +72,7 @@ const (
 
 func TestConvertHappy1(t *testing.T) {
 	RegisterTestingT(t)
-	*dbg = testing.Verbose()
+	dbg = testing.Verbose()
 	s := bytes.NewBufferString(enum3)
 	m, err := convert(s, "filename.go", "Sweet", "Sweets", "confectionary", transform.Stet, true, true)
 	Ω(err).Should(BeNil())
@@ -102,7 +102,7 @@ const (
 
 func TestConvertHappy2(t *testing.T) {
 	RegisterTestingT(t)
-	*dbg = testing.Verbose()
+	dbg = testing.Verbose()
 	s := bytes.NewBufferString(enum4)
 	m, err := convert(s, "filename.go", "Sweet", "Sweets", "confectionary", transform.Upper, false, false)
 	Ω(err).Should(BeNil())
@@ -132,7 +132,7 @@ const Kitkat   Sweet = 4
 
 func TestConvertHappy3(t *testing.T) {
 	RegisterTestingT(t)
-	*dbg = testing.Verbose()
+	dbg = testing.Verbose()
 	s := bytes.NewBufferString(enum5)
 	m, err := convert(s, "filename.go", "Sweet", "Sweets", "confectionary", transform.Upper, false, false)
 	Ω(err).Should(BeNil())
