@@ -1,8 +1,14 @@
 package example
 
+// This example shows non-ASCII characters in use. There is also a cross-mapping
+// table specified via the '-using' option. So the parser recognises inputs from both
+// sets of strings.
+
 // See also
 // https://unicode.org/charts/PDF/U0370.pdf
 // https://en.wikipedia.org/wiki/Greek_alphabet
+
+//go:generate enumeration -v -type GreekAlphabet -using greekStrings
 
 type GreekAlphabet int
 

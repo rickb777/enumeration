@@ -1,8 +1,10 @@
 package example
 
-// This example shows an enumeration for which the lookup table is implemented here, instead
-// of relying on the automatically-generated one. This allows arbitrary strings to represent
-// their corresponding values.
+// This example has a cross-mapping table specified via the '-using' option. So the parser
+// recognises inputs from both sets of strings. The '-ic' option means the parser ignores
+// the case of its inputs.
+
+//go:generate enumeration -v -type Method -ic -using methodStrings
 
 type Method uint
 

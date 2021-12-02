@@ -1,6 +1,10 @@
 package example
 
-//go:generate enumeration -v -type Country -unsnake -ic -using iso3166Tags
+// This example shows use of the '-plural' option to set the name of plural
+// collections. Because of '-ic', the parser ignores case. The '-using' option
+// provides cross-mapping between the country names and their ISO-3166 tags.
+
+//go:generate enumeration -v -type Country -plural Countries -ic -using iso3166Tags
 
 type Country int
 

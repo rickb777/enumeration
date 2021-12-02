@@ -7,12 +7,5 @@ function v
   "$@"
 }
 
-v gofmt -l -w $(ls *.go | fgrep -v _)
-
-v enumeration -v -f -type Base -lc
-v enumeration -v -f -type Country -plural Countries -ic -using iso3166Tags
-v enumeration -v -f -type Day
-v enumeration -v -f -type Month -ic
-v enumeration -v -f -type Pet -unsnake -lc -using petStrings
-v enumeration -v -f -type Method -ic -using methodStrings
-v enumeration -v -f -type GreekAlphabet -using greekStrings
+v rm -f *_enum.go
+v go generate .

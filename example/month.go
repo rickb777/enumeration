@@ -1,5 +1,7 @@
 package example
 
+//go:generate enumeration -v -type Month -ic
+
 type Month uint
 
 const (
