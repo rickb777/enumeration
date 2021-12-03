@@ -14,7 +14,7 @@ Sometimes, the code generation gets in the way because you can't compile without
 code and you can't generate the code without compiling.
 
 **That's where this tool steps in**. It has a basic Go source code parser that finds idiomatic
-interfaces, as shown below. It runs on any source code that's "clean enough", even if the
+enumerations, as shown below. It runs on any source code that's "clean enough", even if the
 source code is still incomplete. Provided your `type` is ok and your `const` is complete, you'll be fine.
 
 It will not handle C-style comments though, so these must not be present. The normal double-slash is OK.
@@ -22,7 +22,7 @@ It will not handle C-style comments though, so these must not be present. The no
 ## First, Install
 
 ```
-go get github.com/rickb777/enumeration
+go get github.com/rickb777/enumeration/v2
 ```
 You should see that the `enumeration` binary is now in the bin folder on your GOPATH. Make sure this is
 on your PATH so it can be run.
@@ -107,6 +107,21 @@ var shortDayNames = map[Day]string{
 }
 ```
 
+Just occasionally, you might have several enumerations in the same package and you need to avoid their identifiers clashing. This is easy to control using the `-prefix` and `-suffix` options. Here's an example using a suffix; prefixes are similar and you can have both if you want.
+
+```Go
+//go:generate enumeration -lc -type SalesChannel -suffix Sales
+
+type SalesChannel int
+
+const (
+    _              SalesChannel = iota
+    OnlineSales                 // represented as "online"
+    InstoreSales                // represented as "instore"
+    TelephoneSales              // represented as "telephone"
+)
+```
+
 ## Next, Run The Tool
 
 For example:
@@ -122,6 +137,12 @@ Options are:
 
  * `-plural <name>`
     - the plural equivalent for the name of the primary Go type. This is optional and the default is to use the type name and append letter 's', as is common for many English nouns. For example, with `-type Party`, you might usefully specify `-plural Parties`.
+
+ * `-prefix <prefix>`
+   - a prefix at the start of every identifier in the enumeration that is not included in the String representation.
+
+ * `-suffix <suffix>`
+   - a suffix at the end of every identifier in the enumeration that is not included in the String representation.
 
  * `-i <name>` or `-input <name>`
     - the name of the input Go source file containing the `type` and `const` declarations.
@@ -142,7 +163,7 @@ Options are:
     - convert underscores in identifiers to spaces (e.g. `Hello_world` becomes "Hello world")
 
  * `-using <map-name>`
-    - bring your own lookup table: you declare a `var <map-name> = map[Type]string{ ... }` that gives the required string representations. This gives you full control, if you need it.
+    - bring your own lookup table: you declare a `var <map-name> = map[Type]string{ ... }` that gives the required string representations. This gives you full control, if you need it. The `Tag()` method returns these strings, whilst the `String()` method returns the identifier as a string.
 
  * `-f`
     - force output generation; if this is not set, the output file is only produced when it is is absent or when it is older than the input file.
@@ -169,11 +190,14 @@ the `Day` type above. You will get:
  * `func (d Day) String() string`
     - Converts Day values to strings and satisfies the well-known `Stringer` interface. The strings are the human-readable names, as written in the list of constants.
 
+ * `func (d Day) Tag() string`
+    - Returns the same as `String()` by default, but if you provide tags via `-using` it returns the corresponding tag instead.
+
  * `func (d Day) Ordinal() int`
     - Converts Day values into their ordinal numbers, i.e. the indexes indicating the order in which you declared the constants, starting from zero. These may happen to be the same as the values you chose, but need not be.
 
-* `func DayOf(o int) Day`
-   - Converts an ordinal to a Day value, if it can. The name of this function depends on the name of your type (`DayOf` in this example). The related type conversion `Day(i)` should be used when converting a value instead of an ordinal.
+ * `func DayOf(o int) Day`
+    - Converts an ordinal to a Day value, if it can. The name of this function depends on the name of your type (`DayOf` in this example). The related type conversion `Day(i)` should be used when converting a value instead of an ordinal.
 
  * `func (d Day) IsValid() bool`
     - Tests whether a given value is one of the defined `Day` constants. Type conversion allows possibly out-of range values to be created; these can be tested with this method. 
@@ -185,8 +209,7 @@ the `Day` type above. You will get:
     - Converts Day values into their float values, i.e. just the value of the constant float. This is merely a type conversion to `float64`, but conveniently matches the `enum.FloatEnum` interface, allowing polymorphism. This method is only present when the base type is `float32` or `float64`.
 
  * `func (d *Day) Parse(s string) error`
-    - Converts a string representation to a Day value, if it can, then assigns it to `d`. If `s` holds an integer, it
-     is treated as an ordinal and will result in the corresponding 
+    - Converts a string representation to a Day value, if it can, then assigns it to `d`. If `s` holds an integer, it is treated as an ordinal or number and will result in the corresponding value (unexported fields control this in detail - you can initialise these as you need).
 
  * `func AsDay(s string) (Day, error)`
     - Converts a string representation to a Day value, if it can. The name of this function depends on the name of your type (`AsDay` in this example).
@@ -197,16 +220,17 @@ the `Day` type above. You will get:
  * `var AllDayEnums = enum.IntEnums{ ... }`
     - Provides all the `Day` values in a single slice, held using an interface for polymorphism. The slice type would instead be `enum.FloatEnums` if the base type is `float32` or `float64`.
 
- * `var DayMarshalJSONUsingString = false`
-    - Controls whether marshalling to JSON represents the values as a number (default), or as a string.
+ * `var dayMarshalTextRep = enum.Identifier`
+    - Controls whether marshalling to JSON represents the values as the identifier (default), or as the tag, the number or the ordinal.
+
+ * `var dayStoreRep = enum.Identifier`
+    - Controls whether writes to a database will use the identifier (default), or as the tag, the number or the ordinal.
 
  * `encoding.TextMarshaler`, `encoding.TextUnmarshaler`, `json.Marshaler`, `json.Unmarshaler`
-    - Provides methods to satisfy these interfaces so that your enumeration can be easily used by JSON, XML and other codecs in the standard Go library.
+    - Provides methods to satisfy these interfaces so that your enumeration can be easily used by JSON, XML and other codecs in the standard Go library. Writes depend on `dayMarshalTextRep`.
 
  * `sql.Scanner`, `driver.Valuer`
-    - Provides methods to satisfy these two interfaces so that your enumeration can be easily used by SQL drivers in 
-      the standard Go library. Note that `driver.Valuer` is provided as a template for you to copy if you need it;
-      otherwise the SQL driver will automatically make use of the numeric values of enumerations.
+    - Provides methods to satisfy these two interfaces so that your enumeration can be easily used by SQL drivers in the standard Go library. Note that `driver.Valuer` is provided as a template for you to copy if you need it; otherwise the SQL driver will automatically make use of the numeric values of enumerations. Writes depend on `dayStoreRep`.
 
 ## Other Use Options
 
