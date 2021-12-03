@@ -8,7 +8,6 @@ import (
 	"go/scanner"
 	"go/token"
 	"io"
-	"io/ioutil"
 	"strings"
 	"unicode"
 )
@@ -43,7 +42,7 @@ func scan(s *scanner.Scanner) (token.Pos, token.Token, string) {
 	return pos, tok, lit
 }
 
-func parseConstBlock(mainType string, s *scanner.Scanner, m *model.Model) error {
+func parseConstBlock(mainType string, s *scanner.Scanner, values []string) []string {
 	foundType := false
 	var ss []string
 	for {
@@ -57,7 +56,7 @@ func parseConstBlock(mainType string, s *scanner.Scanner, m *model.Model) error 
 			case token.IDENT:
 				if lit == mainType {
 					foundType = true
-					m.Values = append(m.Values, ss...)
+					values = append(values, ss...)
 				} else {
 					foundType = false
 				}
@@ -77,7 +76,7 @@ func parseConstBlock(mainType string, s *scanner.Scanner, m *model.Model) error 
 
 				if tok == token.IDENT && lit == mainType {
 					foundType = true
-					m.Values = append(m.Values, ss...)
+					values = append(values, ss...)
 				} else {
 					foundType = false
 				}
@@ -89,9 +88,9 @@ func parseConstBlock(mainType string, s *scanner.Scanner, m *model.Model) error 
 
 		case token.RPAREN, token.EOF:
 			if foundType {
-				m.Values = append(m.Values, ss...)
+				values = append(values, ss...)
 			}
-			return nil
+			return values
 
 		default:
 			discardToEndOfLine(s, tok)
@@ -105,7 +104,7 @@ func discardToEndOfLine(s *scanner.Scanner, tok token.Token) {
 	}
 }
 
-func parseConst(mainType string, s *scanner.Scanner, m *model.Model) error {
+func parseConst(mainType string, s *scanner.Scanner, values []string) []string {
 	var tok token.Token
 	var lit1, lit2 string
 	_, tok, lit1 = scan(s)
@@ -115,41 +114,42 @@ func parseConst(mainType string, s *scanner.Scanner, m *model.Model) error {
 		switch tok {
 		case token.IDENT:
 			if lit2 == mainType {
-				m.Values = addIdentifier(m.Values, lit1)
+				values = addIdentifier(values, lit1)
 			}
 			discardToEndOfLine(s, tok)
 		}
 	case token.LPAREN:
-		return parseConstBlock(mainType, s, m)
+		return parseConstBlock(mainType, s, values)
 	}
-	return nil
+	return values
 }
 
-func Convert(in io.Reader, input, mainType, plural, pkg string, xCase transform.Case, ignoreCase, unsnake bool) (model.Model, error) {
-	foundMainType := false
-	src, err := ioutil.ReadAll(in)
-	if err != nil {
-		return model.Model{}, err
-	}
-
+func newFileScanner(input string, src []byte) *scanner.Scanner {
 	s := new(scanner.Scanner)
 	fset = token.NewFileSet()                          // positions are relative to fset
 	file := fset.AddFile(input, fset.Base(), len(src)) // register input "file"
 	s.Init(file, src, nil /* no error handler */, 0)
+	return s
+}
 
-	m := &model.Model{
-		MainType:    mainType,
-		LcType:      strings.ToLower(mainType),
+func Convert(in io.Reader, input string, xCase transform.Case, config model.Config) (model.Model, error) {
+	src, err := io.ReadAll(in)
+	if err != nil {
+		return model.Model{}, err
+	}
+
+	m := model.Model{
+		Config:      config,
+		LcType:      strings.ToLower(config.MainType),
 		BaseType:    "int",
-		Plural:      plural,
-		Pkg:         pkg,
 		Version:     util.Version,
-		IgnoreCase:  ignoreCase,
-		Unsnake:     unsnake,
 		Case:        xCase,
 		LookupTable: UsingTable,
 	}
 
+	s := newFileScanner(input, src)
+
+	var foundMainType = false
 	var tok token.Token
 	var lit string
 
@@ -158,18 +158,18 @@ func Convert(in io.Reader, input, mainType, plural, pkg string, xCase transform.
 		switch tok {
 		case token.TYPE:
 			_, tok, lit = scan(s)
-			if tok == token.IDENT && lit == mainType {
+			if tok == token.IDENT && lit == config.MainType {
 				foundMainType = true
 
 				_, tok, lit = scan(s)
 				if tok == token.IDENT {
 					m.BaseType = lit
-					util.Debug("type %s %s\n", mainType, m.BaseType)
+					util.Debug("type %s %s\n", config.MainType, m.BaseType)
 				}
 			}
 
 		case token.CONST:
-			_ = parseConst(mainType, s, m)
+			m.Values = parseConst(config.MainType, s, m.Values)
 		}
 	}
 
@@ -178,8 +178,12 @@ func Convert(in io.Reader, input, mainType, plural, pkg string, xCase transform.
 	}
 
 	if !foundMainType || len(m.Values) == 0 {
-		return model.Model{}, fmt.Errorf("Failed to find %s in %s", mainType, input)
+		return model.Model{}, fmt.Errorf("Failed to find %s in %s", config.MainType, input)
 	}
 
-	return *m, nil
+	if e2 := m.CheckBadPrefixSuffix(); e2 != nil {
+		return model.Model{}, e2
+	}
+
+	return m, nil
 }

@@ -27,18 +27,27 @@ func TestScanValuesHappy(t *testing.T) {
 	RegisterTestingT(t)
 	util.Dbg = testing.Verbose()
 	s := bytes.NewBufferString(enum1)
-	m, err := Convert(s, "filename.go", "Sweet", "Sweets", "confectionary", transform.Stet, true, true)
+	m, err := Convert(s, "filename.go", transform.Stet,
+		model.Config{
+			MainType:   "Sweet",
+			Plural:     "Sweets",
+			Pkg:        "confectionary",
+			IgnoreCase: true,
+			Unsnake:    true,
+		})
 	Ω(err).Should(BeNil())
 	Ω(m).Should(Equal(model.Model{
-		MainType:    "Sweet",
+		Config: model.Config{
+			MainType:   "Sweet",
+			Plural:     "Sweets",
+			Pkg:        "confectionary",
+			IgnoreCase: true,
+			Unsnake:    true,
+		},
 		LcType:      "sweet",
 		BaseType:    "int",
-		Plural:      "Sweets",
-		Pkg:         "confectionary",
 		Version:     util.Version,
 		Values:      []string{"Mars", "Bounty", "Snickers", "Kitkat"},
-		IgnoreCase:  true,
-		Unsnake:     true,
 		Case:        0,
 		S1:          "",
 		S2:          "",
@@ -76,18 +85,27 @@ func TestConvertHappy1(t *testing.T) {
 	RegisterTestingT(t)
 	util.Dbg = testing.Verbose()
 	s := bytes.NewBufferString(enum3)
-	m, err := Convert(s, "filename.go", "Sweet", "Sweets", "confectionary", transform.Stet, true, true)
+	m, err := Convert(s, "filename.go", transform.Stet,
+		model.Config{
+			MainType:   "Sweet",
+			Plural:     "Sweets",
+			Pkg:        "confectionary",
+			IgnoreCase: true,
+			Unsnake:    true,
+		})
 	Ω(err).Should(BeNil())
 	Ω(m).Should(Equal(model.Model{
-		MainType:    "Sweet",
+		Config: model.Config{
+			MainType:   "Sweet",
+			Plural:     "Sweets",
+			Pkg:        "confectionary",
+			IgnoreCase: true,
+			Unsnake:    true,
+		},
 		LcType:      "sweet",
 		BaseType:    "int",
-		Plural:      "Sweets",
-		Pkg:         "confectionary",
 		Version:     util.Version,
 		Values:      []string{"Mars", "Bounty", "Snickers", "Kitkat"},
-		IgnoreCase:  true,
-		Unsnake:     true,
 		Case:        0,
 		S1:          "",
 		S2:          "",
@@ -106,14 +124,23 @@ func TestConvertHappy2(t *testing.T) {
 	RegisterTestingT(t)
 	util.Dbg = testing.Verbose()
 	s := bytes.NewBufferString(enum4)
-	m, err := Convert(s, "filename.go", "Sweet", "Sweets", "confectionary", transform.Upper, false, false)
+	m, err := Convert(s, "filename.go", transform.Upper,
+		model.Config{
+			MainType:   "Sweet",
+			Plural:     "Sweets",
+			Pkg:        "confectionary",
+			IgnoreCase: false,
+			Unsnake:    false,
+		})
 	Ω(err).Should(BeNil())
 	Ω(m).Should(Equal(model.Model{
-		MainType:    "Sweet",
+		Config: model.Config{
+			MainType: "Sweet",
+			Plural:   "Sweets",
+			Pkg:      "confectionary",
+		},
 		LcType:      "sweet",
 		BaseType:    "int",
-		Plural:      "Sweets",
-		Pkg:         "confectionary",
 		Version:     util.Version,
 		Values:      []string{"Mars", "Bounty", "Snickers", "Kitkat"},
 		Case:        transform.Upper,
@@ -136,14 +163,21 @@ func TestConvertHappy3(t *testing.T) {
 	RegisterTestingT(t)
 	util.Dbg = testing.Verbose()
 	s := bytes.NewBufferString(enum5)
-	m, err := Convert(s, "filename.go", "Sweet", "Sweets", "confectionary", transform.Upper, false, false)
+	m, err := Convert(s, "filename.go", transform.Upper,
+		model.Config{
+			MainType: "Sweet",
+			Plural:   "Sweets",
+			Pkg:      "confectionary",
+		})
 	Ω(err).Should(BeNil())
 	Ω(m).Should(Equal(model.Model{
-		MainType:    "Sweet",
+		Config: model.Config{
+			MainType: "Sweet",
+			Plural:   "Sweets",
+			Pkg:      "confectionary",
+		},
 		LcType:      "sweet",
 		BaseType:    "int",
-		Plural:      "Sweets",
-		Pkg:         "confectionary",
 		Version:     util.Version,
 		Values:      []string{"Mars", "Bounty", "Snickers", "Kitkat"},
 		Case:        transform.Upper,
@@ -171,6 +205,11 @@ const (
 func TestConvertError(t *testing.T) {
 	RegisterTestingT(t)
 	s := bytes.NewBufferString(enum6)
-	_, err := Convert(s, "filename.go", "Sweet", "Sweets", "confectionary", transform.Stet, false, false)
+	_, err := Convert(s, "filename.go", transform.Stet,
+		model.Config{
+			MainType: "Sweet",
+			Plural:   "Sweets",
+			Pkg:      "confectionary",
+		})
 	Ω(err.Error()).Should(Equal("Failed to find Sweet in filename.go"))
 }

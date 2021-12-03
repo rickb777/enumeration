@@ -12,9 +12,9 @@ import (
 	"strings"
 )
 
-const saleschannelEnumStrings = "onlinesalesinstoresalestelephonesales"
+const saleschannelEnumStrings = "onlineinstoretelephone"
 
-var saleschannelEnumIndex = [...]uint16{0, 11, 23, 37}
+var saleschannelEnumIndex = [...]uint16{0, 6, 13, 22}
 
 // AllSalesChannels lists all 3 values in order.
 var AllSalesChannels = []SalesChannel{

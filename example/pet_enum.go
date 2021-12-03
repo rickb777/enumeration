@@ -19,14 +19,14 @@ var petEnumIndex = [...]uint16{0, 3, 6, 11, 19, 29}
 
 // AllPets lists all 5 values in order.
 var AllPets = []Pet{
-	Cat, Dog, Mouse, Elephant,
-	Koala_Bear,
+	MyCat, MyDog, MyMouse, MyElephant,
+	MyKoala_Bear,
 }
 
 // AllPetEnums lists all 5 values in order.
 var AllPetEnums = enum.IntEnums{
-	Cat, Dog, Mouse, Elephant,
-	Koala_Bear,
+	MyCat, MyDog, MyMouse, MyElephant,
+	MyKoala_Bear,
 }
 
 // String returns the literal string representation of a Pet, which is
@@ -78,15 +78,15 @@ func (i Pet) Tag() string {
 // Ordinal returns the ordinal number of a Pet.
 func (i Pet) Ordinal() int {
 	switch i {
-	case Cat:
+	case MyCat:
 		return 0
-	case Dog:
+	case MyDog:
 		return 1
-	case Mouse:
+	case MyMouse:
 		return 2
-	case Elephant:
+	case MyElephant:
 		return 3
-	case Koala_Bear:
+	case MyKoala_Bear:
 		return 4
 	}
 	return -1
@@ -105,7 +105,7 @@ func PetOf(i int) Pet {
 		return AllPets[i]
 	}
 	// an invalid result
-	return Cat + Dog + Mouse + Elephant + Koala_Bear + 1
+	return MyCat + MyDog + MyMouse + MyElephant + MyKoala_Bear + 1
 }
 
 // IsValid determines whether a Pet is one of the defined constants.

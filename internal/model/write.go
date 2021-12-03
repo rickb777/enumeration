@@ -47,7 +47,7 @@ var <<.LcType>>EnumIndex = [...]uint16{<<.Indexes>>}
 
 func (m Model) TransformedInputValues() string {
 	buf := &strings.Builder{}
-	for _, s := range m.Values {
+	for _, s := range m.Shortened {
 		s = m.inputTransform(s)
 		buf.WriteString(s)
 	}
@@ -56,7 +56,7 @@ func (m Model) TransformedInputValues() string {
 
 func (m Model) TransformedOutputValues() string {
 	buf := &strings.Builder{}
-	for _, s := range m.Values {
+	for _, s := range m.Shortened {
 		s = m.outputTransform(s)
 		buf.WriteString(s)
 	}
@@ -67,7 +67,7 @@ func (m Model) Indexes() string {
 	buf := &strings.Builder{}
 	buf.WriteString("0")
 	n := 0
-	for _, s := range m.Values {
+	for _, s := range m.Shortened {
 		n += len(s)
 		fmt.Fprintf(buf, ", %d", n)
 	}
@@ -75,6 +75,9 @@ func (m Model) Indexes() string {
 }
 
 func (m Model) writeJoinedStringAndIndexes(w io.Writer) {
+	if len(m.Shortened) < len(m.Values) {
+		m.Shortened = m.shortenIdentifiers()
+	}
 	m.execTemplate(w, joinedStringAndIndexes)
 }
 
@@ -559,6 +562,8 @@ func (m Model) writeScanValue(w io.Writer) {
 //-------------------------------------------------------------------------------------------------
 
 func (m Model) Write(w io.Writer) {
+	m.Shortened = m.shortenIdentifiers()
+
 	m.writeHead(w)
 	m.writeJoinedStringAndIndexes(w)
 	m.writeAllItems(w)

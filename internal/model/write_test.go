@@ -39,9 +39,9 @@ var sweetEnumIndex = [...]uint16{0, 4, 10, 18, 24, 38}
 `
 
 const e2lc = `
-const sweetEnumStrings = "marsbountysnickerskitkatferrero rocher"
+const sweetEnumStrings = "marsbountysnickerskitkat"
 
-var sweetEnumIndex = [...]uint16{0, 4, 10, 18, 24, 38}
+var sweetEnumIndex = [...]uint16{0, 4, 10, 18, 24}
 `
 
 const e2ic = `
@@ -151,8 +151,8 @@ func init() {
 		}
 	}
 
-	if len(sweetNames) != 5 {
-		panic(fmt.Sprintf("Sweet: sweetNames has %d items but should have 5", len(sweetNames)))
+	if len(sweetNames) != 4 {
+		panic(fmt.Sprintf("Sweet: sweetNames has %d items but should have 4", len(sweetNames)))
 	}
 
 	if len(sweetNames) != len(sweetNamesInverse) {
@@ -184,7 +184,7 @@ func TestWriteTagMethod(t *testing.T) {
 
 //-------------------------------------------------------------------------------------------------
 
-const e6 = `
+const e6nc = `
 // Ordinal returns the ordinal number of a Sweet.
 func (i Sweet) Ordinal() int {
 	switch i {
@@ -203,14 +203,31 @@ func (i Sweet) Ordinal() int {
 }
 `
 
+const e6lc = `
+// Ordinal returns the ordinal number of a Sweet.
+func (i Sweet) Ordinal() int {
+	switch i {
+	case MarsBar:
+		return 0
+	case BountyBar:
+		return 1
+	case SnickersBar:
+		return 2
+	case KitkatBar:
+		return 3
+	}
+	return -1
+}
+`
+
 func TestWriteOrdinalMethod(t *testing.T) {
 	buf := &strings.Builder{}
 	modelNoChange.writeOrdinalMethod(buf)
-	compare(t, buf.String(), e6)
+	compare(t, buf.String(), e6nc)
 
 	buf.Reset()
 	modelLowerWithLookupTable.writeOrdinalMethod(buf)
-	compare(t, buf.String(), e6)
+	compare(t, buf.String(), e6lc)
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -242,7 +259,7 @@ func TestWriteBaseMethod(t *testing.T) {
 
 //-------------------------------------------------------------------------------------------------
 
-const e8 = `
+const e8nc = `
 // SweetOf returns a Sweet based on an ordinal number. This is the inverse of Ordinal.
 // If the ordinal is out of range, an invalid Sweet is returned.
 func SweetOf(i int) Sweet {
@@ -254,14 +271,26 @@ func SweetOf(i int) Sweet {
 }
 `
 
+const e8lc = `
+// SweetOf returns a Sweet based on an ordinal number. This is the inverse of Ordinal.
+// If the ordinal is out of range, an invalid Sweet is returned.
+func SweetOf(i int) Sweet {
+	if 0 <= i && i < len(AllSweets) {
+		return AllSweets[i]
+	}
+	// an invalid result
+	return MarsBar + BountyBar + SnickersBar + KitkatBar + 1
+}
+`
+
 func TestWriteOfMethod(t *testing.T) {
 	buf := &strings.Builder{}
 	modelNoChange.writeOfMethod(buf)
-	compare(t, buf.String(), e8)
+	compare(t, buf.String(), e8nc)
 
 	buf.Reset()
 	modelLowerWithLookupTable.writeOfMethod(buf)
-	compare(t, buf.String(), e8)
+	compare(t, buf.String(), e8lc)
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -898,37 +927,44 @@ func compare(t *testing.T, actual, expected string) {
 //-------------------------------------------------------------------------------------------------
 
 var modelNoChange = Model{
-	MainType: "Sweet",
+	Config: Config{
+		MainType: "Sweet",
+		Plural:   "Sweets",
+		Pkg:      "confectionary",
+		Unsnake:  true,
+	},
 	LcType:   "sweet",
 	BaseType: "int",
-	Plural:   "Sweets",
-	Pkg:      "confectionary",
 	Version:  util.Version,
 	Values:   []string{"Mars", "Bounty", "Snickers", "Kitkat", "Ferrero_Rocher"},
-	Unsnake:  true,
 }
 
 var modelIgnoreCase = Model{
-	MainType:   "Sweet",
-	LcType:     "sweet",
-	BaseType:   "int",
-	Plural:     "Sweets",
-	Pkg:        "confectionary",
-	Version:    util.Version,
-	Values:     []string{"Mars", "Bounty", "Snickers", "Kitkat", "Ferrero_Rocher"},
-	IgnoreCase: true,
+	Config: Config{
+		MainType:   "Sweet",
+		Plural:     "Sweets",
+		Pkg:        "confectionary",
+		IgnoreCase: true,
+	},
+	LcType:   "sweet",
+	BaseType: "int",
+	Version:  util.Version,
+	Values:   []string{"Mars", "Bounty", "Snickers", "Kitkat", "Ferrero_Rocher"},
 }
 
 var modelLowerWithLookupTable = Model{
-	MainType:    "Sweet",
+	Config: Config{
+		MainType:   "Sweet",
+		Plural:     "Sweets",
+		Pkg:        "confectionary",
+		IgnoreCase: false,
+		Unsnake:    true,
+		Suffix:     "Bar",
+	},
 	LcType:      "sweet",
 	BaseType:    "float64",
-	Plural:      "Sweets",
-	Pkg:         "confectionary",
 	Version:     util.Version,
-	Values:      []string{"Mars", "Bounty", "Snickers", "Kitkat", "Ferrero_Rocher"},
-	IgnoreCase:  false,
-	Unsnake:     true,
+	Values:      []string{"MarsBar", "BountyBar", "SnickersBar", "KitkatBar"},
 	Case:        transform.Lower,
 	LookupTable: "sweetNames",
 }

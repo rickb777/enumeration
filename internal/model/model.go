@@ -8,40 +8,97 @@ import (
 	"text/template"
 )
 
+// Config contains the model parameters obtained from command line options
+// (either directly or computed).
+type Config struct {
+	MainType       string
+	Plural, Pkg    string
+	Prefix, Suffix string
+	IgnoreCase     bool
+	Unsnake        bool
+}
+
+// Model holds the information available during template evaluation.
 type Model struct {
-	MainType, LcType, BaseType string
-	Plural, Pkg, Version       string
-	Prefix, Suffix             string
-	Values                     []string
-	IgnoreCase                 bool
-	Unsnake                    bool
-	Case                       transform.Case
-	S1, S2                     string
-	LookupTable                string
+	Config
+	LcType, BaseType string
+	Version          string
+	Values           []string
+	Shortened        []string
+	Case             transform.Case
+	S1, S2           string
+	LookupTable      string
 }
 
 func shortenIdentifier(id, prefix, suffix string) string {
-	if prefix != "" && strings.HasPrefix(id, prefix) {
-		id = id[len(prefix):]
-		if strings.HasPrefix(id, "_") {
-			id = id[1:]
-		}
+	short := id
+	if prefix != "" && strings.HasPrefix(short, prefix) {
+		short = short[len(prefix):]
 	}
-	if suffix != "" && strings.HasSuffix(id, suffix) {
-		id = id[:len(id)-len(suffix)]
-		if strings.HasSuffix(id, "_") {
-			id = id[:len(id)-1]
-		}
+	if suffix != "" && strings.HasSuffix(short, suffix) {
+		short = short[:len(short)-len(suffix)]
 	}
-	return id
+	if short == "" {
+		panic(id + ": cannot strip prefix/suffix when the identifier matches exactly")
+	}
+	return short
 }
 
-func (m Model) ShortenedValues() []string {
-	ss := make([]string, len(m.Values))
-	for i, v := range m.Values {
-		ss[i] = shortenIdentifier(v, m.Prefix, m.Suffix)
+func (m Model) shortenIdentifiers() []string {
+	short := make([]string, len(m.Values))
+	for i, id := range m.Values {
+		short[i] = shortenIdentifier(id, m.Prefix, m.Suffix)
 	}
-	return ss
+	return short
+}
+
+func (m Model) CheckBadPrefixSuffix() error {
+	if m.Prefix == "" && m.Suffix == "" {
+		return nil
+	}
+
+	for _, id := range m.Values {
+		s := shortenIdentifier(id, m.Prefix, m.Suffix)
+		if s == "" {
+			return fmt.Errorf(id + ": cannot strip prefix/suffix when the identifier matches exactly")
+		}
+	}
+
+	if m.Prefix != "" {
+		any := false
+		for _, id := range m.Values {
+			if strings.HasPrefix(id, m.Prefix) {
+				any = true
+				break
+			}
+		}
+		if any {
+			for _, id := range m.Values {
+				if !strings.HasPrefix(id, m.Prefix) {
+					return fmt.Errorf("%s: all identifiers must have the prefix %s (or none)", id, m.Prefix)
+				}
+			}
+		}
+	}
+
+	if m.Suffix != "" {
+		any := false
+		for _, id := range m.Values {
+			if strings.HasSuffix(id, m.Suffix) {
+				any = true
+				break
+			}
+		}
+		if any {
+			for _, id := range m.Values {
+				if !strings.HasSuffix(id, m.Suffix) {
+					return fmt.Errorf("%s: all identifiers must have the suffix %s (or none)", id, m.Suffix)
+				}
+			}
+		}
+	}
+
+	return nil
 }
 
 func (m Model) Asymmetric() bool {

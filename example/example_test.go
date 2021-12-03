@@ -14,6 +14,7 @@ func TestString(t *testing.T) {
 	g := gomega.NewWithT(t)
 	g.Expect(Sunday.String()).Should(gomega.Equal("Sunday"))
 	g.Expect(Monday.String()).Should(gomega.Equal("Monday"))
+	g.Expect(MyDog.String()).Should(gomega.Equal("dog"))
 }
 
 func TestOrdinal(t *testing.T) {
@@ -35,7 +36,7 @@ func TestValue(t *testing.T) {
 	g.Expect(Θήτα.Int()).Should(gomega.Equal(8))
 	g.Expect(POST.Int()).Should(gomega.Equal(3))
 	g.Expect(November.Int()).Should(gomega.Equal(11))
-	g.Expect(Koala_Bear.Int()).Should(gomega.Equal(4))
+	g.Expect(MyKoala_Bear.Int()).Should(gomega.Equal(4))
 }
 
 func TestAllDays(t *testing.T) {
@@ -85,7 +86,7 @@ func TestMarshalUsingNumber(t *testing.T) {
 	monthMarshalTextRep = enum.Number
 	petMarshalTextRep = enum.Number
 
-	v := Group{G, Tuesday, Θήτα, POST, November, Koala_Bear}
+	v := Group{G, Tuesday, Θήτα, POST, November, MyKoala_Bear}
 	s, err := json.Marshal(v)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 	x, err := xml.Marshal(v)
@@ -104,7 +105,7 @@ func TestMarshalUsingOrdinal(t *testing.T) {
 	monthMarshalTextRep = enum.Ordinal
 	petMarshalTextRep = enum.Ordinal
 
-	v := Group{G, Tuesday, Θήτα, POST, November, Koala_Bear}
+	v := Group{G, Tuesday, Θήτα, POST, November, MyKoala_Bear}
 	s, err := json.Marshal(v)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 	x, err := xml.Marshal(v)
@@ -125,7 +126,7 @@ func TestMarshalUsingIdentifier(t *testing.T) {
 
 	g.Expect(G.MarshalJSON()).Should(gomega.Equal([]byte{'"', 'g', '"'}))
 
-	v := Group{G, Tuesday, Θήτα, POST, November, Koala_Bear}
+	v := Group{G, Tuesday, Θήτα, POST, November, MyKoala_Bear}
 	s, err := json.Marshal(v)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 	x, err := xml.Marshal(v)
@@ -146,13 +147,13 @@ func TestMarshalUsingTag(t *testing.T) {
 
 	g.Expect(G.MarshalJSON()).Should(gomega.Equal([]byte{'"', 'g', '"'}))
 
-	v := Group{G, Tuesday, Θήτα, POST, November, Koala_Bear}
+	v := Group{G, Tuesday, Θήτα, POST, November, MyElephant}
 	s, err := json.Marshal(v)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 	x, err := xml.Marshal(v)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
-	g.Expect(string(s)).Should(gomega.Equal(`{"B":"g","D":"Tuesday","G":"theta","X":"PO","M":"November","P":"Phascolarctos Cinereus"}`))
-	g.Expect(string(x)).Should(gomega.Equal(`<Group><B>g</B><D>Tuesday</D><G>theta</G><X>PO</X><M>November</M><P>Phascolarctos Cinereus</P></Group>`), string(x))
+	g.Expect(string(s)).Should(gomega.Equal(`{"B":"g","D":"Tuesday","G":"theta","X":"PO","M":"November","P":"Loxodonta Africana"}`))
+	g.Expect(string(x)).Should(gomega.Equal(`<Group><B>g</B><D>Tuesday</D><G>theta</G><X>PO</X><M>November</M><P>Loxodonta Africana</P></Group>`), string(x))
 }
 
 func TestUnmarshalJSON1(t *testing.T) {
@@ -184,7 +185,7 @@ func TestUnmarshalJSON1(t *testing.T) {
 		var v Group
 		err := json.Unmarshal([]byte(c.input), &v)
 		g.Expect(err).NotTo(gomega.HaveOccurred(), "%d %s %d", i, c.input, c.rep)
-		g.Expect(v).Should(gomega.Equal(Group{G, Tuesday, Θήτα, POST, November, Koala_Bear}), "%d %s %d", i, c.input, c.rep)
+		g.Expect(v).Should(gomega.Equal(Group{G, Tuesday, Θήτα, POST, November, MyKoala_Bear}), "%d %s %d", i, c.input, c.rep)
 	}
 }
 
@@ -235,7 +236,7 @@ func TestPetScan(t *testing.T) {
 		var m = new(Pet)
 		err := m.Scan(s)
 		g.Expect(err).NotTo(gomega.HaveOccurred())
-		g.Expect(*m).Should(gomega.Equal(Koala_Bear))
+		g.Expect(*m).Should(gomega.Equal(MyKoala_Bear))
 	}
 }
 
@@ -254,7 +255,7 @@ func TestValueUsingNumber(t *testing.T) {
 	g.Expect(Θήτα.Value()).To(gomega.Equal(int64(8)))
 	g.Expect(POST.Value()).To(gomega.Equal(int64(3)))
 	g.Expect(November.Value()).To(gomega.Equal(int64(11)))
-	g.Expect(Koala_Bear.Value()).To(gomega.Equal(int64(4)))
+	g.Expect(MyKoala_Bear.Value()).To(gomega.Equal(int64(4)))
 }
 
 func TestValueUsingOrdinal(t *testing.T) {
@@ -272,7 +273,7 @@ func TestValueUsingOrdinal(t *testing.T) {
 	g.Expect(Θήτα.Value()).To(gomega.Equal(int64(7)))
 	g.Expect(POST.Value()).To(gomega.Equal(int64(3)))
 	g.Expect(November.Value()).To(gomega.Equal(int64(10)))
-	g.Expect(Koala_Bear.Value()).To(gomega.Equal(int64(4)))
+	g.Expect(MyKoala_Bear.Value()).To(gomega.Equal(int64(4)))
 }
 
 func TestValueUsingTag(t *testing.T) {
@@ -288,7 +289,7 @@ func TestValueUsingTag(t *testing.T) {
 	g.Expect(Tuesday.Value()).To(gomega.Equal("Tuesday"))
 	g.Expect(POST.Value()).To(gomega.Equal("PO"))
 	g.Expect(November.Value()).To(gomega.Equal("November"))
-	g.Expect(Koala_Bear.Value()).To(gomega.Equal("Phascolarctos Cinereus"))
+	g.Expect(MyKoala_Bear.Value()).To(gomega.Equal("Phascolarctos Cinereus"))
 }
 
 func TestValueUsingIdentifier(t *testing.T) {
@@ -304,12 +305,12 @@ func TestValueUsingIdentifier(t *testing.T) {
 	g.Expect(Tuesday.Value()).To(gomega.Equal("Tuesday"))
 	g.Expect(POST.Value()).To(gomega.Equal("POST"))
 	g.Expect(November.Value()).To(gomega.Equal("November"))
-	g.Expect(Koala_Bear.Value()).To(gomega.Equal("koala bear"))
+	g.Expect(MyKoala_Bear.Value()).To(gomega.Equal("koala bear"))
 }
 
 func TestGobEncodeAndDecode(t *testing.T) {
 	g := gomega.NewWithT(t)
-	v1 := Group{B: G, D: Tuesday, G: Θήτα, X: POST, M: November, P: Koala_Bear}
+	v1 := Group{B: G, D: Tuesday, G: Θήτα, X: POST, M: November, P: MyKoala_Bear}
 	gob.Register(v1)
 
 	// gob-encode
