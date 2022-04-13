@@ -14,13 +14,6 @@ import (
 var UsingTable string
 var fset *token.FileSet
 
-func addIdentifier(ss []string, id string) []string {
-	if token.IsExported(id) {
-		ss = append(ss, id)
-	}
-	return ss
-}
-
 func scan(s *scanner.Scanner) (token.Pos, token.Token, string) {
 	pos, tok, lit := s.Scan()
 	if lit == "" {
@@ -31,10 +24,16 @@ func scan(s *scanner.Scanner) (token.Pos, token.Token, string) {
 	return pos, tok, lit
 }
 
-func discardToEndOfLine(s *scanner.Scanner, tok token.Token) {
+func discardToEndOfLine(s *scanner.Scanner, tok token.Token, lit string) (rest string) {
 	for tok != token.SEMICOLON && tok != token.EOF {
-		_, tok, _ = scan(s)
+		if lit != "" {
+			rest += lit
+		} else {
+			rest += tok.String()
+		}
+		_, tok, lit = scan(s)
 	}
+	return rest
 }
 
 func newFileScanner(input string, src []byte) *scanner.Scanner {
@@ -65,6 +64,7 @@ func Convert(in io.Reader, input string, xCase transform.Case, config model.Conf
 	var foundMainType = false
 	var tok token.Token
 	var lit string
+	var constItems []constItem
 
 	for tok != token.EOF {
 		_, tok, lit = scan(s)
@@ -82,7 +82,7 @@ func Convert(in io.Reader, input string, xCase transform.Case, config model.Conf
 			}
 
 		case token.CONST:
-			m.Values = parseConst(config.MainType, s, m.Values)
+			constItems = parseConst(config.MainType, s, constItems)
 
 		case token.VAR:
 			if len(m.Tags) == 0 {
@@ -90,6 +90,8 @@ func Convert(in io.Reader, input string, xCase transform.Case, config model.Conf
 			}
 		}
 	}
+
+	m.Values, m.DefaultValue = filterExported(config.MainType, constItems)
 
 	if s.ErrorCount > 0 {
 		return model.Model{}, fmt.Errorf("Syntax error in %s", input)

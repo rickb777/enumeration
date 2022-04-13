@@ -1,5 +1,6 @@
 {
   "type": "string",
+  "default": "felis catus",
   "enum": [
     "felis catus",
     "canis lupus",

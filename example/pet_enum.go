@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v2 v2.9.0
+// github.com/rickb777/enumeration/v2 v2.10.0
 
 package example
 
@@ -216,7 +216,7 @@ func MustParsePet(s string) Pet {
 // When enum.Identifier, quoted strings are used. When enum.Tag the quoted strings will use
 // the associated tag map values. When enum.Ordinal, an integer will be used based on the
 // Ordinal method. When enum.Number, the number underlying the value will be used.
-var petMarshalTextRep = enum.Identifier
+var petMarshalTextRep = enum.Tag
 
 // MarshalText converts values to a form suitable for transmission via JSON, XML etc.
 // The representation is chosen according to petMarshalTextRep.

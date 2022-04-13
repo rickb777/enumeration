@@ -902,37 +902,33 @@ func TestToJSON(t *testing.T) {
 	m.Unsnake = false
 
 	expectJSON(t, m.toJSON(), jsonEnum{
-		Type:        "string",
-		Description: "",
-		Default:     "",
-		Enum:        []string{"Mars", "Bounty", "Snickers", "Kitkat", "Ferrero_Rocher"},
+		Type:    "string",
+		Default: "",
+		Enum:    []string{"Mars", "Bounty", "Snickers", "Kitkat", "Ferrero_Rocher"},
 	})
 
 	m.Unsnake = true
 
 	expectJSON(t, m.toJSON(), jsonEnum{
-		Type:        "string",
-		Description: "",
-		Default:     "",
-		Enum:        []string{"Mars", "Bounty", "Snickers", "Kitkat", "Ferrero Rocher"},
+		Type:    "string",
+		Default: "",
+		Enum:    []string{"Mars", "Bounty", "Snickers", "Kitkat", "Ferrero Rocher"},
 	})
 
 	m.Case = transform.Lower
 
 	expectJSON(t, m.toJSON(), jsonEnum{
-		Type:        "string",
-		Description: "",
-		Default:     "",
-		Enum:        []string{"mars", "bounty", "snickers", "kitkat", "ferrero rocher"},
+		Type:    "string",
+		Default: "",
+		Enum:    []string{"mars", "bounty", "snickers", "kitkat", "ferrero rocher"},
 	})
 
 	m.LookupTable = "sweetNames"
 
 	expectJSON(t, m.toJSON(), jsonEnum{
-		Type:        "string",
-		Description: "",
-		Default:     "",
-		Enum:        []string{"mars", "bounty", "snickers", "kitkat", "ferrero rocher"},
+		Type:    "string",
+		Default: "",
+		Enum:    []string{"mars", "bounty", "snickers", "kitkat", "ferrero rocher"},
 	})
 }
 
@@ -940,7 +936,6 @@ func expectJSON(t *testing.T, actual, expected jsonEnum) {
 	t.Helper()
 	Ω(actual.Type).Should(Equal(expected.Type))
 	Ω(actual.Default).Should(Equal(expected.Default))
-	Ω(actual.Description).Should(Equal(expected.Description))
 	Ω(actual.Enum).Should(ConsistOf(expected.Enum))
 }
 

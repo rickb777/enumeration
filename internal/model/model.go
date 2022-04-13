@@ -26,6 +26,7 @@ type Model struct {
 	LcType, BaseType string
 	Version          string
 	Values           []string
+	DefaultValue     string
 	Tags             map[string]string
 	Case             transform.Case
 	S1, S2           string
@@ -178,27 +179,41 @@ func (m Model) ValuesJoined(from int, separator string) string {
 //-------------------------------------------------------------------------------------------------
 
 type jsonEnum struct {
-	Type        string   `json:"type,omitempty"`
-	Description string   `json:"description,omitempty"`
-	Default     string   `json:"default,omitempty"`
-	Enum        []string `json:"enum"`
+	Type string `json:"type,omitempty"`
+	//Description string   `json:"description,omitempty"` TODO
+	Default string   `json:"default,omitempty"`
+	Enum    []string `json:"enum"`
 }
 
 func (m Model) toJSON() jsonEnum {
 	j := jsonEnum{
-		Type:        "string",
-		Description: "",
-		Default:     "",
-		Enum:        make([]string, len(m.Values)),
+		Type: "string",
+		Enum: make([]string, len(m.Values)),
 	}
-	for i, id := range m.Values {
-		if len(m.Tags) > 0 {
-			v := m.outputTransform(m.Tags[id])
-			j.Enum[i] = v
-		} else {
+
+	switch m.MarshalTextRep {
+	case enum.Identifier:
+		for i, id := range m.Values {
 			s := shortenIdentifier(id, m.Prefix, m.Suffix)
 			v := m.outputTransform(s)
 			j.Enum[i] = v
+		}
+		if m.DefaultValue != "" {
+			s := shortenIdentifier(m.DefaultValue, m.Prefix, m.Suffix)
+			v := m.outputTransform(s)
+			j.Default = v
+		}
+
+	case enum.Tag:
+		if len(m.Tags) > 0 {
+			for i, id := range m.Values {
+				v := m.outputTransform(m.Tags[id])
+				j.Enum[i] = v
+			}
+		}
+		if m.DefaultValue != "" {
+			v := m.outputTransform(m.Tags[m.DefaultValue])
+			j.Default = v
 		}
 	}
 	return j

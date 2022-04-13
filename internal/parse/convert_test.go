@@ -13,7 +13,8 @@ const enum1 = `
 /* inline comments are allowed */
 type Sweet int // <-- buried here
 const (
-	Mars Sweet = iota
+	_ Sweet = iota
+	Mars
 	Bounty    // coconuts and more
 	Snickers  // I need this
 
@@ -44,14 +45,15 @@ func TestScanValuesHappy(t *testing.T) {
 			IgnoreCase: true,
 			Unsnake:    true,
 		},
-		LcType:      "sweet",
-		BaseType:    "int",
-		Version:     util.Version,
-		Values:      []string{"Mars", "Bounty", "Snickers", "Kitkat"},
-		Case:        0,
-		S1:          "",
-		S2:          "",
-		LookupTable: "",
+		LcType:       "sweet",
+		BaseType:     "int",
+		Version:      util.Version,
+		Values:       []string{"Mars", "Bounty", "Snickers", "Kitkat"},
+		DefaultValue: "",
+		Case:         0,
+		S1:           "",
+		S2:           "",
+		LookupTable:  "",
 	}))
 }
 
@@ -73,9 +75,13 @@ const (
 )
 var y = 1
 const (
-	Mars Sweet = iota
+	_ Sweet = iota
+	ignored
+	Mars
+	ignored2
 	Bounty
 	Snickers
+	ignored4
 	Kitkat
 	numberOfSweets = int(Kitkat) // this is not exported
 )
@@ -87,7 +93,7 @@ var sweetStrings = map[Sweet]string{
 }
 `
 
-func TestConvertHappy1(t *testing.T) {
+func TestConvertHappy3(t *testing.T) {
 	RegisterTestingT(t)
 	UsingTable = "sweetStrings"
 	defer func() { UsingTable = "" }()
@@ -111,15 +117,16 @@ func TestConvertHappy1(t *testing.T) {
 			IgnoreCase: true,
 			Unsnake:    true,
 		},
-		LcType:      "sweet",
-		BaseType:    "int",
-		Version:     util.Version,
-		Values:      []string{"Mars", "Bounty", "Snickers", "Kitkat"},
-		Tags:        map[string]string{"Mars": "peanut", "Bounty": "coconut", "Snickers": "toffee", "Kitkat": "biscuit"},
-		Case:        0,
-		S1:          "",
-		S2:          "",
-		LookupTable: "sweetStrings",
+		LcType:       "sweet",
+		BaseType:     "int",
+		Version:      util.Version,
+		Values:       []string{"Mars", "Bounty", "Snickers", "Kitkat"},
+		DefaultValue: "",
+		Tags:         map[string]string{"Mars": "peanut", "Bounty": "coconut", "Snickers": "toffee", "Kitkat": "biscuit"},
+		Case:         0,
+		S1:           "",
+		S2:           "",
+		LookupTable:  "sweetStrings",
 	}))
 }
 
@@ -130,7 +137,7 @@ const (
 )
 `
 
-func TestConvertHappy2(t *testing.T) {
+func TestConvertHappy4(t *testing.T) {
 	RegisterTestingT(t)
 	util.Dbg = testing.Verbose()
 	s := bytes.NewBufferString(enum4)
@@ -149,30 +156,73 @@ func TestConvertHappy2(t *testing.T) {
 			Plural:   "Sweets",
 			Pkg:      "confectionary",
 		},
-		LcType:      "sweet",
-		BaseType:    "int",
-		Version:     util.Version,
-		Values:      []string{"Mars", "Bounty", "Snickers", "Kitkat"},
-		Case:        transform.Upper,
-		S1:          "",
-		S2:          "",
-		LookupTable: "",
+		LcType:       "sweet",
+		BaseType:     "int",
+		Version:      util.Version,
+		Values:       []string{"Mars", "Bounty", "Snickers", "Kitkat"},
+		DefaultValue: "",
+		Case:         transform.Upper,
+		S1:           "",
+		S2:           "",
+		LookupTable:  "",
 	}))
 }
 
 const enum5 = `
 type Sweet int
-
-const Mars     Sweet = 1
-const Bounty   Sweet = 2
-const Snickers Sweet = 3
-const Kitkat   Sweet = 4
+const (
+	Mars Sweet = iota + 1
+	Bounty
+	Snickers
+	Kitkat
+)
 `
 
-func TestConvertHappy3(t *testing.T) {
+func TestConvertHappy5(t *testing.T) {
 	RegisterTestingT(t)
 	util.Dbg = testing.Verbose()
 	s := bytes.NewBufferString(enum5)
+	m, err := Convert(s, "filename.go", transform.Upper,
+		model.Config{
+			MainType:   "Sweet",
+			Plural:     "Sweets",
+			Pkg:        "confectionary",
+			IgnoreCase: false,
+			Unsnake:    false,
+		})
+	Ω(err).Should(BeNil())
+	Ω(m).Should(Equal(model.Model{
+		Config: model.Config{
+			MainType: "Sweet",
+			Plural:   "Sweets",
+			Pkg:      "confectionary",
+		},
+		LcType:       "sweet",
+		BaseType:     "int",
+		Version:      util.Version,
+		Values:       []string{"Mars", "Bounty", "Snickers", "Kitkat"},
+		DefaultValue: "",
+		Case:         transform.Upper,
+		S1:           "",
+		S2:           "",
+		LookupTable:  "",
+	}))
+}
+
+const enum6 = `
+type Sweet int
+
+const Mars     Sweet = 1
+const Bounty   Sweet = 2
+const Other    int   = 3
+const Snickers Sweet = 4
+const Kitkat   Sweet = 5
+`
+
+func TestConvertHappy6(t *testing.T) {
+	RegisterTestingT(t)
+	util.Dbg = testing.Verbose()
+	s := bytes.NewBufferString(enum6)
 	m, err := Convert(s, "filename.go", transform.Upper,
 		model.Config{
 			MainType: "Sweet",
@@ -186,19 +236,61 @@ func TestConvertHappy3(t *testing.T) {
 			Plural:   "Sweets",
 			Pkg:      "confectionary",
 		},
-		LcType:      "sweet",
-		BaseType:    "int",
-		Version:     util.Version,
-		Values:      []string{"Mars", "Bounty", "Snickers", "Kitkat"},
-		Case:        transform.Upper,
-		S1:          "",
-		S2:          "",
-		LookupTable: "",
+		LcType:       "sweet",
+		BaseType:     "int",
+		Version:      util.Version,
+		Values:       []string{"Mars", "Bounty", "Snickers", "Kitkat"},
+		DefaultValue: "",
+		Case:         transform.Upper,
+		S1:           "",
+		S2:           "",
+		LookupTable:  "",
 	}))
 }
 
-const enum6 = `
+const enum7 = `
+type Sweet int
+
+const Mars     Sweet = 0 // zero -> default
+const Bounty   Sweet = 1
+const Other    int   = 5
+const Snickers Sweet = 2
+const Kitkat   Sweet = 3
+const Ignore           6
+`
+
+func TestConvertHappy7(t *testing.T) {
+	RegisterTestingT(t)
+	util.Dbg = testing.Verbose()
+	s := bytes.NewBufferString(enum7)
+	m, err := Convert(s, "filename.go", transform.Upper,
+		model.Config{
+			MainType: "Sweet",
+			Plural:   "Sweets",
+			Pkg:      "confectionary",
+		})
+	Ω(err).Should(BeNil())
+	Ω(m).Should(Equal(model.Model{
+		Config: model.Config{
+			MainType: "Sweet",
+			Plural:   "Sweets",
+			Pkg:      "confectionary",
+		},
+		LcType:       "sweet",
+		BaseType:     "int",
+		Version:      util.Version,
+		Values:       []string{"Mars", "Bounty", "Snickers", "Kitkat"},
+		DefaultValue: "Mars",
+		Case:         transform.Upper,
+		S1:           "",
+		S2:           "",
+		LookupTable:  "",
+	}))
+}
+
+const enumE1 = `
 type IgnoreMe int
+// type Sweet is missing
 const (
 	Mars Sweet = iota
 	Bounty
@@ -212,9 +304,9 @@ const (
 )
 `
 
-func TestConvertError(t *testing.T) {
+func TestConvertError1(t *testing.T) {
 	RegisterTestingT(t)
-	s := bytes.NewBufferString(enum6)
+	s := bytes.NewBufferString(enumE1)
 	_, err := Convert(s, "filename.go", transform.Stet,
 		model.Config{
 			MainType: "Sweet",

@@ -10,13 +10,13 @@ import (
 func parseVar(mainType string, s *scanner.Scanner, tags map[string]string) map[string]string {
 	_, tok, lit := scan(s)
 	if lit != UsingTable {
-		discardToEndOfLine(s, tok)
+		discardToEndOfLine(s, tok, lit)
 		return nil
 	}
 
 	switch tok {
 	default:
-		discardToEndOfLine(s, tok)
+		discardToEndOfLine(s, tok, lit)
 		return nil
 	case token.IDENT: // continue
 	}
@@ -24,14 +24,14 @@ func parseVar(mainType string, s *scanner.Scanner, tags map[string]string) map[s
 	_, tok, lit = scan(s)
 	switch tok {
 	default:
-		discardToEndOfLine(s, tok)
+		discardToEndOfLine(s, tok, lit)
 		return nil
 	case token.ASSIGN: // continue
 	}
 
 	_, tok, lit = scan(s)
 	if lit != "map" {
-		discardToEndOfLine(s, tok)
+		discardToEndOfLine(s, tok, lit)
 		return nil
 	}
 	//if lit2 == mainType {
@@ -41,7 +41,7 @@ func parseVar(mainType string, s *scanner.Scanner, tags map[string]string) map[s
 	_, tok, lit = scan(s)
 	switch tok {
 	default:
-		discardToEndOfLine(s, tok)
+		discardToEndOfLine(s, tok, lit)
 		return nil
 	case token.LBRACK: // continue
 	}
@@ -49,11 +49,11 @@ func parseVar(mainType string, s *scanner.Scanner, tags map[string]string) map[s
 	_, tok, lit = scan(s)
 	switch tok {
 	default:
-		discardToEndOfLine(s, tok)
+		discardToEndOfLine(s, tok, lit)
 		return nil
 	case token.IDENT: // continue
 		if lit != mainType {
-			discardToEndOfLine(s, tok)
+			discardToEndOfLine(s, tok, lit)
 			return nil
 		}
 	}
@@ -61,7 +61,7 @@ func parseVar(mainType string, s *scanner.Scanner, tags map[string]string) map[s
 	_, tok, lit = scan(s)
 	switch tok {
 	default:
-		discardToEndOfLine(s, tok)
+		discardToEndOfLine(s, tok, lit)
 		return nil
 	case token.RBRACK: // continue
 	}
@@ -69,11 +69,11 @@ func parseVar(mainType string, s *scanner.Scanner, tags map[string]string) map[s
 	_, tok, lit = scan(s)
 	switch tok {
 	default:
-		discardToEndOfLine(s, tok)
+		discardToEndOfLine(s, tok, lit)
 		return nil
 	case token.IDENT:
 		if lit != "string" {
-			discardToEndOfLine(s, tok)
+			discardToEndOfLine(s, tok, lit)
 			return nil
 		}
 	}
@@ -81,7 +81,7 @@ func parseVar(mainType string, s *scanner.Scanner, tags map[string]string) map[s
 	_, tok, lit = scan(s)
 	switch tok {
 	default:
-		discardToEndOfLine(s, tok)
+		discardToEndOfLine(s, tok, lit)
 		return nil
 	case token.LBRACE: // continue
 	}
@@ -99,7 +99,7 @@ func parseTags(s *scanner.Scanner, tags map[string]string) (map[string]string, b
 	_, tok, lit := scan(s)
 	switch tok {
 	default:
-		discardToEndOfLine(s, tok)
+		discardToEndOfLine(s, tok, lit)
 		return nil, false
 	case token.IDENT:
 		key = lit
@@ -110,7 +110,7 @@ func parseTags(s *scanner.Scanner, tags map[string]string) (map[string]string, b
 	_, tok, lit = scan(s)
 	switch tok {
 	default:
-		discardToEndOfLine(s, tok)
+		discardToEndOfLine(s, tok, lit)
 		return nil, false
 	case token.COLON: // continue
 	}
@@ -118,7 +118,7 @@ func parseTags(s *scanner.Scanner, tags map[string]string) (map[string]string, b
 	_, tok, lit = scan(s)
 	switch tok {
 	default:
-		discardToEndOfLine(s, tok)
+		discardToEndOfLine(s, tok, lit)
 		return nil, false
 	case token.STRING:
 		unquoted := lit[1 : len(lit)-1]
@@ -128,7 +128,7 @@ func parseTags(s *scanner.Scanner, tags map[string]string) (map[string]string, b
 	_, tok, lit = scan(s)
 	switch tok {
 	default:
-		discardToEndOfLine(s, tok)
+		discardToEndOfLine(s, tok, lit)
 		return nil, false
 	case token.COMMA: // continue
 	}

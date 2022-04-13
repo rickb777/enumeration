@@ -74,6 +74,12 @@ func generate() {
 	var err error
 	config.MarshalTextRep, err = enum.AsRepresentation(marshalTextRep)
 	util.Must(err, "(-marshaltext)")
+	if writeJSON {
+		switch config.MarshalTextRep {
+		case enum.Ordinal, enum.Number:
+			util.Fail("when using -json, -marshaltext must be Identifier or Tag.")
+		}
+	}
 
 	var in io.Reader = os.Stdin
 	if inputGo != "-" {
