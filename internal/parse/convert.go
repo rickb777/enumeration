@@ -105,10 +105,14 @@ func Convert(in io.Reader, input string, xCase transform.Case, config model.Conf
 		if len(m.Tags) < len(m.Values) {
 			return model.Model{}, fmt.Errorf("Too few values in %s for %s (%s)", UsingTable, config.MainType, input)
 		}
+		var blanks []string
 		for key, tag := range m.Tags {
 			if tag == "" {
-				return model.Model{}, fmt.Errorf("Blank tag for %s %s in %s (%s)", config.MainType, key, UsingTable, input)
+				blanks = append(blanks, key)
 			}
+		}
+		if len(blanks) > 1 {
+			return model.Model{}, fmt.Errorf("Blank tag for %s %v in %s (%s)", config.MainType, blanks, UsingTable, input)
 		}
 	}
 
