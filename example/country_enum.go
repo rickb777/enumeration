@@ -174,7 +174,8 @@ func (i Country) Tag() string {
 	return i.String()
 }
 
-// Ordinal returns the ordinal number of a Country.
+// Ordinal returns the ordinal number of a Country. This is an integer counting
+// from zero. It is *not* the same as the const number assigned to the value.
 func (i Country) Ordinal() int {
 	switch i {
 	case Afghanistan:
@@ -798,8 +799,10 @@ func MustParseCountry(s string) Country {
 }
 
 // countryMarshalTextRep controls representation used for XML and other text encodings.
-// By default, it is enum.Identifier and quoted strings are used.
-var countryMarshalTextRep = enum.Identifier
+// When enum.Identifier, quoted strings are used. When enum.Tag the quoted strings will use
+// the associated tag map values. When enum.Ordinal, an integer will be used based on the
+// Ordinal method. When enum.Number, the number underlying the value will be used.
+var countryMarshalTextRep = enum.Tag
 
 // MarshalText converts values to a form suitable for transmission via JSON, XML etc.
 // The representation is chosen according to countryMarshalTextRep.

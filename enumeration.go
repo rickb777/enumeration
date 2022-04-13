@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/rickb777/enumeration/v2/enum"
 	"github.com/rickb777/enumeration/v2/internal/model"
 	"github.com/rickb777/enumeration/v2/internal/parse"
 	"github.com/rickb777/enumeration/v2/internal/transform"
@@ -14,18 +15,19 @@ import (
 )
 
 var config model.Config
-var input1, output1 string
-var force, lowercase, uppercase, showVersion bool
+var inputGo, outputGo, outputJSON, marshalTextRep string
+var force, lowercase, uppercase, showVersion, writeJSON bool
 
 func defineFlags() {
 	flag.StringVar(&config.MainType, "type", "", "Name of the enumeration type (required).")
 	flag.StringVar(&config.Prefix, "prefix", "", "Optional prefix to be stripped from the identifiers.")
 	flag.StringVar(&config.Suffix, "suffix", "", "Optional suffix to be stripped from the identifiers.")
-	flag.StringVar(&input1, "i", "", "Name of the input file. May be '-' for stdin. Default is enumeration type in lower case.")
-	flag.StringVar(&output1, "o", "", "Name of the output file. May be '-' for stdout. Default is enumeration type in lower case plus '_enum'.")
+	flag.StringVar(&inputGo, "i", "", "Name of the input file. May be '-' for stdin. Default is enumeration type in lower case.")
+	flag.StringVar(&outputGo, "o", "", "Name of the output file. May be '-' for stdout. Default is enumeration type in lower case plus '_enum'.")
 	flag.StringVar(&config.Plural, "plural", "", "Plural name of the enumeration type (optional).")
 	flag.StringVar(&parse.UsingTable, "using", "", "Uses your own map[Type]string instead of generating one.")
 	flag.StringVar(&config.Pkg, "package", "", "Name of the output package (optional). Defaults to the output directory.")
+	flag.StringVar(&marshalTextRep, "marshaltext", "Identifier", "Marshal values using Identifier (default), Tag, Number or Ordinal")
 
 	flag.BoolVar(&force, "f", false, "Force writing the output file even if up to date (not used when piping stdin or stdout).")
 	flag.BoolVar(&lowercase, "lc", false, "Convert strings to lowercase and ignore case when parsing")
@@ -35,6 +37,7 @@ func defineFlags() {
 	flag.BoolVar(&util.Verbose, "v", false, "Verbose progress messages.")
 	flag.BoolVar(&util.Dbg, "z", false, "Debug messages.")
 	flag.BoolVar(&showVersion, "version", false, "Print version number.")
+	flag.BoolVar(&writeJSON, "json", false, "Also write JSON API file.")
 }
 
 func choosePackage(outputFile string) string {
@@ -53,12 +56,12 @@ func choosePackage(outputFile string) string {
 }
 
 func notUpToDate() bool {
-	if input1 != "-" && output1 != "-" {
-		xi, err := os.Stat(input1)
+	if inputGo != "-" && outputGo != "-" {
+		xi, err := os.Stat(inputGo)
 		if err == nil {
-			xo, err := os.Stat(output1)
+			xo, err := os.Stat(outputGo)
 			if err == nil && xo.ModTime().After(xi.ModTime()) {
-				util.Info("Skipped %s.\n", output1)
+				util.Info("Skipped %s.\n", outputGo)
 				return false
 			}
 		}
@@ -67,41 +70,50 @@ func notUpToDate() bool {
 }
 
 func generate() {
-	util.Debug("ReadFile %s\n", input1)
+	util.Debug("ReadFile %s\n", inputGo)
 	var err error
+	config.MarshalTextRep, err = enum.AsRepresentation(marshalTextRep)
+	util.Must(err, "(-marshaltext)")
 
 	var in io.Reader = os.Stdin
-	if input1 != "-" {
-		in, err = os.Open(input1)
-		if err != nil {
-			util.Fail(err)
-		}
+	if inputGo != "-" {
+		inf, err := os.Open(inputGo)
+		util.Must(err)
+		defer inf.Close()
+		in = inf
 	}
 
 	var out io.Writer = os.Stdout
-	if output1 == "-" {
+	if outputGo == "-" {
 		if config.Pkg == "" {
 			util.Fail("-pkg is required when piping the output.")
 		}
+		writeJSON = false // cannot do both Go and JSON
 	} else {
-		out, err = os.Create(output1)
-		if err != nil {
-			util.Fail(err)
-		}
-		config.Pkg = choosePackage(output1)
+		outf, err := os.Create(outputGo)
+		util.Must(err)
+		defer outf.Close()
+		out = outf
+		config.Pkg = choosePackage(outputGo)
 		util.Stdout = os.Stdout // ok because it's not going to be interleaved now
 	}
 	util.Debug("pkg=%s\n", config.Pkg)
 
 	xCase := transform.Of(lowercase, uppercase)
 
-	m, err := parse.Convert(in, input1, xCase, config)
-	if err != nil {
-		util.Fail(err)
-	}
+	m, err := parse.Convert(in, inputGo, xCase, config)
+	util.Must(err)
 
-	m.Write(out)
-	util.Info("Generated %s.\n", output1)
+	m.WriteGo(out)
+	util.Info("Generated %s.\n", outputGo)
+
+	if writeJSON {
+		j, e2 := os.Create(outputJSON)
+		util.Must(e2)
+		defer j.Close()
+		m.WriteJSON(j)
+		util.Info("Generated %s.\n", outputJSON)
+	}
 }
 
 func main() {
@@ -121,22 +133,25 @@ func main() {
 		config.Plural = config.MainType + "s"
 	}
 
-	if input1 == "" {
-		input1 = strings.ToLower(config.MainType) + ".go"
+	if inputGo == "" {
+		inputGo = strings.ToLower(config.MainType) + ".go"
 	}
 
-	if output1 == "" {
-		output1 = strings.ToLower(config.MainType) + "_enum.go"
-	}
-
-	if output1 == "-" {
+	if outputGo == "" {
+		outputGo = strings.ToLower(config.MainType) + "_enum.go"
+	} else if outputGo == "-" {
 		util.Stdout = os.Stderr // avoiding interleaving with the output of generated code
+	}
+
+	if outputJSON == "" {
+		outputJSON = strings.ToLower(config.MainType) + "_enum.json"
 	}
 
 	util.Debug("type=%s\n", config.MainType)
 	util.Debug("plural=%s\n", config.Plural)
-	util.Debug("input=%s\n", input1)
-	util.Debug("output=%s\n", output1)
+	util.Debug("inputGo=%s\n", inputGo)
+	util.Debug("outputGo=%s\n", outputGo)
+	util.Debug("outputJSON=%s\n", outputJSON)
 
 	if force || notUpToDate() {
 		generate()

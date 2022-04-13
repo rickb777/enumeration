@@ -41,7 +41,8 @@ func (i Base) Tag() string {
 	return i.String()
 }
 
-// Ordinal returns the ordinal number of a Base.
+// Ordinal returns the ordinal number of a Base. This is an integer counting
+// from zero. It is *not* the same as the const number assigned to the value.
 func (i Base) Ordinal() int {
 	switch i {
 	case A:
@@ -163,7 +164,9 @@ func MustParseBase(s string) Base {
 }
 
 // baseMarshalTextRep controls representation used for XML and other text encodings.
-// By default, it is enum.Identifier and quoted strings are used.
+// When enum.Identifier, quoted strings are used. When enum.Tag the quoted strings will use
+// the associated tag map values. When enum.Ordinal, an integer will be used based on the
+// Ordinal method. When enum.Number, the number underlying the value will be used.
 var baseMarshalTextRep = enum.Identifier
 
 // MarshalText converts values to a form suitable for transmission via JSON, XML etc.

@@ -2,6 +2,7 @@ package model
 
 import (
 	"fmt"
+	"github.com/rickb777/enumeration/v2/enum"
 	"github.com/rickb777/enumeration/v2/internal/transform"
 	"go/types"
 	"strings"
@@ -14,6 +15,7 @@ type Config struct {
 	MainType       string
 	Plural, Pkg    string
 	Prefix, Suffix string
+	MarshalTextRep enum.Representation
 	IgnoreCase     bool
 	Unsnake        bool
 }
@@ -24,7 +26,7 @@ type Model struct {
 	LcType, BaseType string
 	Version          string
 	Values           []string
-	Shortened        []string
+	Tags             map[string]string
 	Case             transform.Case
 	S1, S2           string
 	LookupTable      string
@@ -44,7 +46,7 @@ func shortenIdentifier(id, prefix, suffix string) string {
 	return short
 }
 
-func (m Model) shortenIdentifiers() []string {
+func (m Model) Shortened() []string {
 	short := make([]string, len(m.Values))
 	for i, id := range m.Values {
 		short[i] = shortenIdentifier(id, m.Prefix, m.Suffix)
@@ -171,4 +173,33 @@ func (m Model) Placeholder() string {
 
 func (m Model) ValuesJoined(from int, separator string) string {
 	return strings.Join(m.Values[from:], separator)
+}
+
+//-------------------------------------------------------------------------------------------------
+
+type jsonEnum struct {
+	Type        string   `json:"type,omitempty"`
+	Description string   `json:"description,omitempty"`
+	Default     string   `json:"default,omitempty"`
+	Enum        []string `json:"enum"`
+}
+
+func (m Model) toJSON() jsonEnum {
+	j := jsonEnum{
+		Type:        "string",
+		Description: "",
+		Default:     "",
+		Enum:        make([]string, len(m.Values)),
+	}
+	for i, id := range m.Values {
+		if len(m.Tags) > 0 {
+			v := m.outputTransform(m.Tags[id])
+			j.Enum[i] = v
+		} else {
+			s := shortenIdentifier(id, m.Prefix, m.Suffix)
+			v := m.outputTransform(s)
+			j.Enum[i] = v
+		}
+	}
+	return j
 }

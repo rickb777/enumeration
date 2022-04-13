@@ -1,6 +1,7 @@
 package model
 
 import (
+	"encoding/json"
 	"fmt"
 	"go/types"
 	"io"
@@ -45,29 +46,35 @@ const <<.LcType>>EnumStrings = "<<.TransformedOutputValues>>"
 var <<.LcType>>EnumIndex = [...]uint16{<<.Indexes>>}
 `
 
-func (m Model) TransformedInputValues() string {
-	buf := &strings.Builder{}
-	for _, s := range m.Shortened {
-		s = m.inputTransform(s)
-		buf.WriteString(s)
+func (m Model) TransformedInputValuesSlice() []string {
+	vs := make([]string, len(m.Values))
+	for i, s := range m.Shortened() {
+		vs[i] = m.inputTransform(s)
 	}
-	return buf.String()
+	return vs
+}
+
+func (m Model) TransformedInputValues() string {
+	return strings.Join(m.TransformedInputValuesSlice(), "")
+}
+
+func (m Model) TransformedOutputValuesSlice() []string {
+	vs := make([]string, len(m.Values))
+	for i, s := range m.Shortened() {
+		vs[i] = m.outputTransform(s)
+	}
+	return vs
 }
 
 func (m Model) TransformedOutputValues() string {
-	buf := &strings.Builder{}
-	for _, s := range m.Shortened {
-		s = m.outputTransform(s)
-		buf.WriteString(s)
-	}
-	return buf.String()
+	return strings.Join(m.TransformedOutputValuesSlice(), "")
 }
 
 func (m Model) Indexes() string {
 	buf := &strings.Builder{}
 	buf.WriteString("0")
 	n := 0
-	for _, s := range m.Shortened {
+	for _, s := range m.Shortened() {
 		n += len(s)
 		fmt.Fprintf(buf, ", %d", n)
 	}
@@ -75,9 +82,6 @@ func (m Model) Indexes() string {
 }
 
 func (m Model) writeJoinedStringAndIndexes(w io.Writer) {
-	if len(m.Shortened) < len(m.Values) {
-		m.Shortened = m.shortenIdentifiers()
-	}
 	m.execTemplate(w, joinedStringAndIndexes)
 }
 
@@ -180,7 +184,8 @@ func (m Model) writeTagMethod(w io.Writer) {
 //-------------------------------------------------------------------------------------------------
 
 const ordinalMethod = `
-// Ordinal returns the ordinal number of a <<.MainType>>.
+// Ordinal returns the ordinal number of a <<.MainType>>. This is an integer counting
+// from zero. It is *not* the same as the const number assigned to the value.
 func (i <<.MainType>>) Ordinal() int {
 	switch i {
 	<<- range $i, $v := .Values>>
@@ -420,8 +425,10 @@ func (m Model) writeMustParseMethod(w io.Writer) {
 
 const marshalText = `
 // <<.LcType>>MarshalTextRep controls representation used for XML and other text encodings.
-// By default, it is enum.Identifier and quoted strings are used.
-var <<.LcType>>MarshalTextRep = enum.Identifier
+// When enum.Identifier, quoted strings are used. When enum.Tag the quoted strings will use
+// the associated tag map values. When enum.Ordinal, an integer will be used based on the
+// Ordinal method. When enum.Number, the number underlying the value will be used.
+var <<.LcType>>MarshalTextRep = enum.<<.MarshalTextRep>>
 
 // MarshalText converts values to a form suitable for transmission via JSON, XML etc.
 // The representation is chosen according to <<.LcType>>MarshalTextRep.
@@ -561,9 +568,7 @@ func (m Model) writeScanValue(w io.Writer) {
 
 //-------------------------------------------------------------------------------------------------
 
-func (m Model) Write(w io.Writer) {
-	m.Shortened = m.shortenIdentifiers()
-
+func (m Model) WriteGo(w io.Writer) {
 	m.writeHead(w)
 	m.writeJoinedStringAndIndexes(w)
 	m.writeAllItems(w)
@@ -584,6 +589,16 @@ func (m Model) Write(w io.Writer) {
 		checkErr(c.Close())
 	}
 }
+
+//-------------------------------------------------------------------------------------------------
+
+func (m Model) WriteJSON(w io.Writer) {
+	enc := json.NewEncoder(w)
+	enc.SetIndent("", "  ")
+	enc.Encode(m.toJSON())
+}
+
+//-------------------------------------------------------------------------------------------------
 
 func (m Model) execTemplate(w io.Writer, tpl string) {
 	tmpl, err := template.New("t").Funcs(m.FnMap()).Delims("<<", ">>").Parse(tpl)

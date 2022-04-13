@@ -1,0 +1,13 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="write_test.go" type="GoTestRunConfiguration" factoryName="Go Test" nameIsGenerated="true">
+    <module name="enumeration" />
+    <working_directory value="$PROJECT_DIR$/internal/model" />
+    <root_directory value="$PROJECT_DIR$" />
+    <kind value="FILE" />
+    <package value="github.com/rickb777/enumeration/v2" />
+    <directory value="$PROJECT_DIR$" />
+    <filePath value="$PROJECT_DIR$/internal/model/write_test.go" />
+    <framework value="gotest" />
+    <method v="2" />
+  </configuration>
+</component>

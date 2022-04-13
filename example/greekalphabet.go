@@ -8,7 +8,7 @@ package example
 // https://unicode.org/charts/PDF/U0370.pdf
 // https://en.wikipedia.org/wiki/Greek_alphabet
 
-//go:generate enumeration -v -type GreekAlphabet -using greekStrings
+//go:generate enumeration -v -type GreekAlphabet -using greekStrings -marshaltext tag
 
 type GreekAlphabet int
 

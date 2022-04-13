@@ -48,7 +48,8 @@ func (i Month) Tag() string {
 	return i.String()
 }
 
-// Ordinal returns the ordinal number of a Month.
+// Ordinal returns the ordinal number of a Month. This is an integer counting
+// from zero. It is *not* the same as the const number assigned to the value.
 func (i Month) Ordinal() int {
 	switch i {
 	case January:
@@ -190,7 +191,9 @@ func MustParseMonth(s string) Month {
 }
 
 // monthMarshalTextRep controls representation used for XML and other text encodings.
-// By default, it is enum.Identifier and quoted strings are used.
+// When enum.Identifier, quoted strings are used. When enum.Tag the quoted strings will use
+// the associated tag map values. When enum.Ordinal, an integer will be used based on the
+// Ordinal method. When enum.Number, the number underlying the value will be used.
 var monthMarshalTextRep = enum.Identifier
 
 // MarshalText converts values to a form suitable for transmission via JSON, XML etc.

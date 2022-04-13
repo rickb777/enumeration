@@ -1,6 +1,7 @@
 package model
 
 import (
+	. "github.com/onsi/gomega"
 	"github.com/rickb777/enumeration/v2/internal/transform"
 	"github.com/rickb777/enumeration/v2/internal/util"
 	"strings"
@@ -185,7 +186,8 @@ func TestWriteTagMethod(t *testing.T) {
 //-------------------------------------------------------------------------------------------------
 
 const e6nc = `
-// Ordinal returns the ordinal number of a Sweet.
+// Ordinal returns the ordinal number of a Sweet. This is an integer counting
+// from zero. It is *not* the same as the const number assigned to the value.
 func (i Sweet) Ordinal() int {
 	switch i {
 	case Mars:
@@ -204,7 +206,8 @@ func (i Sweet) Ordinal() int {
 `
 
 const e6lc = `
-// Ordinal returns the ordinal number of a Sweet.
+// Ordinal returns the ordinal number of a Sweet. This is an integer counting
+// from zero. It is *not* the same as the const number assigned to the value.
 func (i Sweet) Ordinal() int {
 	switch i {
 	case MarsBar:
@@ -639,7 +642,9 @@ func TestWriteMustParseMethod(t *testing.T) {
 
 const e13nc = `
 // sweetMarshalTextRep controls representation used for XML and other text encodings.
-// By default, it is enum.Identifier and quoted strings are used.
+// When enum.Identifier, quoted strings are used. When enum.Tag the quoted strings will use
+// the associated tag map values. When enum.Ordinal, an integer will be used based on the
+// Ordinal method. When enum.Number, the number underlying the value will be used.
 var sweetMarshalTextRep = enum.Identifier
 
 // MarshalText converts values to a form suitable for transmission via JSON, XML etc.
@@ -688,7 +693,9 @@ func (i Sweet) quotedString(s string) []byte {
 
 const e13lc = `
 // sweetMarshalTextRep controls representation used for XML and other text encodings.
-// By default, it is enum.Identifier and quoted strings are used.
+// When enum.Identifier, quoted strings are used. When enum.Tag the quoted strings will use
+// the associated tag map values. When enum.Ordinal, an integer will be used based on the
+// Ordinal method. When enum.Number, the number underlying the value will be used.
 var sweetMarshalTextRep = enum.Identifier
 
 // MarshalText converts values to a form suitable for transmission via JSON, XML etc.
@@ -884,6 +891,57 @@ func TestWriteScanValue(t *testing.T) {
 	buf.Reset()
 	modelLowerWithLookupTable.writeScanValue(buf)
 	compare(t, buf.String(), e15lc)
+}
+
+//-------------------------------------------------------------------------------------------------
+
+func TestToJSON(t *testing.T) {
+	RegisterTestingT(t)
+
+	m := modelNoChange
+	m.Unsnake = false
+
+	expectJSON(t, m.toJSON(), jsonEnum{
+		Type:        "string",
+		Description: "",
+		Default:     "",
+		Enum:        []string{"Mars", "Bounty", "Snickers", "Kitkat", "Ferrero_Rocher"},
+	})
+
+	m.Unsnake = true
+
+	expectJSON(t, m.toJSON(), jsonEnum{
+		Type:        "string",
+		Description: "",
+		Default:     "",
+		Enum:        []string{"Mars", "Bounty", "Snickers", "Kitkat", "Ferrero Rocher"},
+	})
+
+	m.Case = transform.Lower
+
+	expectJSON(t, m.toJSON(), jsonEnum{
+		Type:        "string",
+		Description: "",
+		Default:     "",
+		Enum:        []string{"mars", "bounty", "snickers", "kitkat", "ferrero rocher"},
+	})
+
+	m.LookupTable = "sweetNames"
+
+	expectJSON(t, m.toJSON(), jsonEnum{
+		Type:        "string",
+		Description: "",
+		Default:     "",
+		Enum:        []string{"mars", "bounty", "snickers", "kitkat", "ferrero rocher"},
+	})
+}
+
+func expectJSON(t *testing.T, actual, expected jsonEnum) {
+	t.Helper()
+	Ω(actual.Type).Should(Equal(expected.Type))
+	Ω(actual.Default).Should(Equal(expected.Default))
+	Ω(actual.Description).Should(Equal(expected.Description))
+	Ω(actual.Enum).Should(ConsistOf(expected.Enum))
 }
 
 //-------------------------------------------------------------------------------------------------

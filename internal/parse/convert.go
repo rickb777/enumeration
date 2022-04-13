@@ -9,24 +9,13 @@ import (
 	"go/token"
 	"io"
 	"strings"
-	"unicode"
 )
 
 var UsingTable string
 var fset *token.FileSet
 
-func isExported(s string) bool {
-	for i, r := range s {
-		if i > 0 {
-			return false
-		}
-		return unicode.IsUpper(r)
-	}
-	return false
-}
-
 func addIdentifier(ss []string, id string) []string {
-	if isExported(id) {
+	if token.IsExported(id) {
 		ss = append(ss, id)
 	}
 	return ss
@@ -42,86 +31,10 @@ func scan(s *scanner.Scanner) (token.Pos, token.Token, string) {
 	return pos, tok, lit
 }
 
-func parseConstBlock(mainType string, s *scanner.Scanner, values []string) []string {
-	foundType := false
-	var ss []string
-	for {
-		_, tok, lit := scan(s)
-		switch tok {
-		case token.IDENT:
-			ss = addIdentifier(ss, lit)
-
-			_, tok, lit = scan(s)
-			switch tok {
-			case token.IDENT:
-				if lit == mainType {
-					foundType = true
-					values = append(values, ss...)
-				} else {
-					foundType = false
-				}
-				ss = nil
-
-			case token.COMMA:
-				for tok == token.COMMA {
-					_, tok, lit = scan(s)
-					switch tok {
-					case token.IDENT:
-						ss = addIdentifier(ss, lit)
-						_, tok, lit = scan(s)
-					default:
-						discardToEndOfLine(s, tok)
-					}
-				}
-
-				if tok == token.IDENT && lit == mainType {
-					foundType = true
-					values = append(values, ss...)
-				} else {
-					foundType = false
-				}
-				ss = nil
-
-			default:
-				discardToEndOfLine(s, tok)
-			}
-
-		case token.RPAREN, token.EOF:
-			if foundType {
-				values = append(values, ss...)
-			}
-			return values
-
-		default:
-			discardToEndOfLine(s, tok)
-		}
-	}
-}
-
 func discardToEndOfLine(s *scanner.Scanner, tok token.Token) {
 	for tok != token.SEMICOLON && tok != token.EOF {
 		_, tok, _ = scan(s)
 	}
-}
-
-func parseConst(mainType string, s *scanner.Scanner, values []string) []string {
-	var tok token.Token
-	var lit1, lit2 string
-	_, tok, lit1 = scan(s)
-	switch tok {
-	case token.IDENT:
-		_, tok, lit2 = scan(s)
-		switch tok {
-		case token.IDENT:
-			if lit2 == mainType {
-				values = addIdentifier(values, lit1)
-			}
-			discardToEndOfLine(s, tok)
-		}
-	case token.LPAREN:
-		return parseConstBlock(mainType, s, values)
-	}
-	return values
 }
 
 func newFileScanner(input string, src []byte) *scanner.Scanner {
@@ -170,6 +83,11 @@ func Convert(in io.Reader, input string, xCase transform.Case, config model.Conf
 
 		case token.CONST:
 			m.Values = parseConst(config.MainType, s, m.Values)
+
+		case token.VAR:
+			if len(m.Tags) == 0 {
+				m.Tags = parseVar(config.MainType, s, make(map[string]string))
+			}
 		}
 	}
 
@@ -179,6 +97,17 @@ func Convert(in io.Reader, input string, xCase transform.Case, config model.Conf
 
 	if !foundMainType || len(m.Values) == 0 {
 		return model.Model{}, fmt.Errorf("Failed to find %s in %s", config.MainType, input)
+	}
+
+	if len(m.Tags) > 0 {
+		if len(m.Tags) < len(m.Values) {
+			return model.Model{}, fmt.Errorf("Too few values in %s for %s (%s)", UsingTable, config.MainType, input)
+		}
+		for key, tag := range m.Tags {
+			if tag == "" {
+				return model.Model{}, fmt.Errorf("Blank tag for %s %s in %s (%s)", config.MainType, key, UsingTable, input)
+			}
+		}
 	}
 
 	if e2 := m.CheckBadPrefixSuffix(); e2 != nil {

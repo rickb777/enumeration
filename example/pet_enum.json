@@ -1,0 +1,10 @@
+{
+  "type": "string",
+  "enum": [
+    "felis catus",
+    "canis lupus",
+    "mus musculus",
+    "loxodonta africana",
+    "phascolarctos cinereus"
+  ]
+}

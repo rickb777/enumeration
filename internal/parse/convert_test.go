@@ -79,10 +79,19 @@ const (
 	Kitkat
 	numberOfSweets = int(Kitkat) // this is not exported
 )
+var sweetStrings = map[Sweet]string{
+	Mars:     "peanut",
+	Bounty:   "coconut",
+	Snickers: "toffee",
+	Kitkat:   "biscuit",
+}
 `
 
 func TestConvertHappy1(t *testing.T) {
 	RegisterTestingT(t)
+	UsingTable = "sweetStrings"
+	defer func() { UsingTable = "" }()
+
 	util.Dbg = testing.Verbose()
 	s := bytes.NewBufferString(enum3)
 	m, err := Convert(s, "filename.go", transform.Stet,
@@ -106,10 +115,11 @@ func TestConvertHappy1(t *testing.T) {
 		BaseType:    "int",
 		Version:     util.Version,
 		Values:      []string{"Mars", "Bounty", "Snickers", "Kitkat"},
+		Tags:        map[string]string{"Mars": "peanut", "Bounty": "coconut", "Snickers": "toffee", "Kitkat": "biscuit"},
 		Case:        0,
 		S1:          "",
 		S2:          "",
-		LookupTable: "",
+		LookupTable: "sweetStrings",
 	}))
 }
 
