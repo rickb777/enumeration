@@ -256,13 +256,54 @@ const Bounty   Sweet = 1
 const Other    int   = 5
 const Snickers Sweet = 2
 const Kitkat   Sweet = 3
-const Ignore           6
+const Ignore         = 6
 `
 
 func TestConvertHappy7(t *testing.T) {
 	RegisterTestingT(t)
 	util.Dbg = testing.Verbose()
 	s := bytes.NewBufferString(enum7)
+	m, err := Convert(s, "filename.go", transform.Upper,
+		model.Config{
+			MainType: "Sweet",
+			Plural:   "Sweets",
+			Pkg:      "confectionary",
+		})
+	Ω(err).Should(BeNil())
+	Ω(m).Should(Equal(model.Model{
+		Config: model.Config{
+			MainType: "Sweet",
+			Plural:   "Sweets",
+			Pkg:      "confectionary",
+		},
+		LcType:       "sweet",
+		BaseType:     "int",
+		Version:      util.Version,
+		Values:       []string{"Mars", "Bounty", "Snickers", "Kitkat"},
+		DefaultValue: "Mars",
+		Case:         transform.Upper,
+		S1:           "",
+		S2:           "",
+		LookupTable:  "",
+	}))
+}
+
+const enum8 = `
+type Sweet int
+
+const (
+	Mars     Sweet = 0 // zero -> default
+	Bounty   Sweet = 1
+	Snickers Sweet = 2
+	Kitkat   Sweet = 3
+	Ignore         = "nothing"
+)
+`
+
+func TestConvertHappy8(t *testing.T) {
+	RegisterTestingT(t)
+	util.Dbg = testing.Verbose()
+	s := bytes.NewBufferString(enum8)
 	m, err := Convert(s, "filename.go", transform.Upper,
 		model.Config{
 			MainType: "Sweet",

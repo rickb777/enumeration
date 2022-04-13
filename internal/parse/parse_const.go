@@ -33,7 +33,8 @@ func parseConstBlock(mainType string, s *scanner.Scanner, values []constItem) []
 				_, tok, _ = scan(s)
 				if tok == token.ASSIGN {
 					_, tok, lit3 = scan(s)
-					if tok == token.IDENT {
+					switch tok {
+					case token.IDENT, token.INT, token.FLOAT:
 						rest := discardToEndOfLine(s, tok, lit3)
 						values = appendConstItems(values, ids, lit2, rest)
 						if lit3 == "iota" {
@@ -42,8 +43,8 @@ func parseConstBlock(mainType string, s *scanner.Scanner, values []constItem) []
 							iotaType = ""
 						}
 					}
+					ids = nil
 				}
-				ids = nil
 
 			case token.COMMA:
 				for tok == token.COMMA {

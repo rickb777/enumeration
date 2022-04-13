@@ -97,8 +97,12 @@ func Convert(in io.Reader, input string, xCase transform.Case, config model.Conf
 		return model.Model{}, fmt.Errorf("Syntax error in %s", input)
 	}
 
-	if !foundMainType || len(m.Values) == 0 {
+	if !foundMainType {
 		return model.Model{}, fmt.Errorf("Failed to find %s in %s", config.MainType, input)
+	}
+
+	if len(m.Values) == 0 {
+		return model.Model{}, fmt.Errorf("Failed to find any values for %s in %s", config.MainType, input)
 	}
 
 	if len(m.Tags) > 0 {
