@@ -12,6 +12,7 @@ import (
 )
 
 var UsingTable string
+var AliasTable string
 var fset *token.FileSet
 
 func scan(s *scanner.Scanner) (token.Pos, token.Token, string) {
@@ -51,12 +52,13 @@ func Convert(in io.Reader, input string, xCase transform.Case, config model.Conf
 	}
 
 	m := model.Model{
-		Config:      config,
-		LcType:      strings.ToLower(config.MainType),
-		BaseType:    "int",
-		Version:     util.Version,
-		Case:        xCase,
-		LookupTable: UsingTable,
+		Config:     config,
+		LcType:     strings.ToLower(config.MainType),
+		BaseType:   "int",
+		Version:    util.Version,
+		Case:       xCase,
+		TagTable:   UsingTable,
+		AliasTable: AliasTable,
 	}
 
 	s := newFileScanner(input, src)

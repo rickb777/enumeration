@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v2 v2.10.1
+// github.com/rickb777/enumeration/v2 v2.11.0
 
 package example
 
@@ -94,7 +94,7 @@ func (i Pet) Ordinal() int {
 }
 
 // Int returns the int value, which is not necessarily the same as the ordinal.
-// It serves to facilitate polymorphism (see enum.IntEnum).
+// This facilitates polymorphism (see enum.IntEnum).
 func (i Pet) Int() int {
 	return int(i)
 }
@@ -192,7 +192,8 @@ func (v *Pet) parseIdentifier(s string) (ok bool) {
 		}
 		i0 = i1
 	}
-	return false
+	*v, ok = petAliases[s]
+	return ok
 }
 
 // AsPet parses a string to find the corresponding Pet, accepting either one of the string values or

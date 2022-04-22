@@ -53,7 +53,7 @@ func TestScanValuesHappy(t *testing.T) {
 		Case:         0,
 		S1:           "",
 		S2:           "",
-		LookupTable:  "",
+		TagTable:     "",
 	}))
 }
 
@@ -126,7 +126,7 @@ func TestConvertHappy3(t *testing.T) {
 		Case:         0,
 		S1:           "",
 		S2:           "",
-		LookupTable:  "sweetStrings",
+		TagTable:     "sweetStrings",
 	}))
 }
 
@@ -164,7 +164,7 @@ func TestConvertHappy4(t *testing.T) {
 		Case:         transform.Upper,
 		S1:           "",
 		S2:           "",
-		LookupTable:  "",
+		TagTable:     "",
 	}))
 }
 
@@ -205,7 +205,7 @@ func TestConvertHappy5(t *testing.T) {
 		Case:         transform.Upper,
 		S1:           "",
 		S2:           "",
-		LookupTable:  "",
+		TagTable:     "",
 	}))
 }
 
@@ -244,7 +244,7 @@ func TestConvertHappy6(t *testing.T) {
 		Case:         transform.Upper,
 		S1:           "",
 		S2:           "",
-		LookupTable:  "",
+		TagTable:     "",
 	}))
 }
 
@@ -284,7 +284,7 @@ func TestConvertHappy7(t *testing.T) {
 		Case:         transform.Upper,
 		S1:           "",
 		S2:           "",
-		LookupTable:  "",
+		TagTable:     "",
 	}))
 }
 
@@ -325,7 +325,7 @@ func TestConvertHappy8(t *testing.T) {
 		Case:         transform.Upper,
 		S1:           "",
 		S2:           "",
-		LookupTable:  "",
+		TagTable:     "",
 	}))
 }
 

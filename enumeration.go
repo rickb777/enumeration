@@ -16,7 +16,7 @@ import (
 
 var config model.Config
 var inputGo, outputGo, outputJSON, marshalTextRep string
-var force, lowercase, uppercase, showVersion, writeJSON bool
+var force, lowercase, uppercase, showVersion bool
 
 func defineFlags() {
 	flag.StringVar(&config.MainType, "type", "", "Name of the enumeration type (required).")
@@ -26,6 +26,7 @@ func defineFlags() {
 	flag.StringVar(&outputGo, "o", "", "Name of the output file. May be '-' for stdout. Default is enumeration type in lower case plus '_enum'.")
 	flag.StringVar(&config.Plural, "plural", "", "Plural name of the enumeration type (optional).")
 	flag.StringVar(&parse.UsingTable, "using", "", "Uses your own map[Type]string instead of generating one.")
+	flag.StringVar(&parse.AliasTable, "alias", "", "Uses your own map[string]Type as aliases during parsing.")
 	flag.StringVar(&config.Pkg, "package", "", "Name of the output package (optional). Defaults to the output directory.")
 	flag.StringVar(&marshalTextRep, "marshaltext", "Identifier", "Marshal values using Identifier (default), Tag, Number or Ordinal")
 
@@ -37,7 +38,6 @@ func defineFlags() {
 	flag.BoolVar(&util.Verbose, "v", false, "Verbose progress messages.")
 	flag.BoolVar(&util.Dbg, "z", false, "Debug messages.")
 	flag.BoolVar(&showVersion, "version", false, "Print version number.")
-	flag.BoolVar(&writeJSON, "json", false, "Also write JSON API file.")
 }
 
 func choosePackage(outputFile string) string {
@@ -74,17 +74,11 @@ func generate() {
 	var err error
 	config.MarshalTextRep, err = enum.AsRepresentation(marshalTextRep)
 	util.Must(err, "(-marshaltext)")
-	if writeJSON {
-		switch config.MarshalTextRep {
-		case enum.Ordinal, enum.Number:
-			util.Fail("when using -json, -marshaltext must be Identifier or Tag.")
-		}
-	}
 
 	var in io.Reader = os.Stdin
 	if inputGo != "-" {
-		inf, err := os.Open(inputGo)
-		util.Must(err)
+		inf, e2 := os.Open(inputGo)
+		util.Must(e2)
 		defer inf.Close()
 		in = inf
 	}
@@ -94,10 +88,9 @@ func generate() {
 		if config.Pkg == "" {
 			util.Fail("-pkg is required when piping the output.")
 		}
-		writeJSON = false // cannot do both Go and JSON
 	} else {
-		outf, err := os.Create(outputGo)
-		util.Must(err)
+		outf, e2 := os.Create(outputGo)
+		util.Must(e2)
 		defer outf.Close()
 		out = outf
 		config.Pkg = choosePackage(outputGo)
@@ -112,14 +105,6 @@ func generate() {
 
 	m.WriteGo(out)
 	util.Info("Generated %s.\n", outputGo)
-
-	if writeJSON {
-		j, e2 := os.Create(outputJSON)
-		util.Must(e2)
-		defer j.Close()
-		m.WriteJSON(j)
-		util.Info("Generated %s.\n", outputJSON)
-	}
 }
 
 func main() {

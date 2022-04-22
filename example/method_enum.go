@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v2 v2.10.1
+// github.com/rickb777/enumeration/v2 v2.11.0
 
 package example
 
@@ -99,7 +99,7 @@ func (i Method) Ordinal() int {
 }
 
 // Int returns the int value, which is not necessarily the same as the ordinal.
-// It serves to facilitate polymorphism (see enum.IntEnum).
+// This facilitates polymorphism (see enum.IntEnum).
 func (i Method) Int() int {
 	return int(i)
 }

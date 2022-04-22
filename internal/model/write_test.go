@@ -237,7 +237,7 @@ func TestWriteOrdinalMethod(t *testing.T) {
 
 const e7nc = `
 // Int returns the int value, which is not necessarily the same as the ordinal.
-// It serves to facilitate polymorphism (see enum.IntEnum).
+// This facilitates polymorphism (see enum.IntEnum).
 func (i Sweet) Int() int {
 	return int(i)
 }
@@ -466,7 +466,8 @@ func (v *Sweet) parseIdentifier(s string) (ok bool) {
 		}
 		i0 = i1
 	}
-	return false
+	*v, ok = sweetAlias[s]
+	return ok
 }
 `
 
@@ -923,7 +924,7 @@ func TestToJSON(t *testing.T) {
 		Enum:    []string{"mars", "bounty", "snickers", "kitkat", "ferrero rocher"},
 	})
 
-	m.LookupTable = "sweetNames"
+	m.TagTable = "sweetNames"
 
 	expectJSON(t, m.toJSON(), jsonEnum{
 		Type:    "string",
@@ -1014,10 +1015,11 @@ var modelLowerWithLookupTable = Model{
 		Unsnake:    true,
 		Suffix:     "Bar",
 	},
-	LcType:      "sweet",
-	BaseType:    "float64",
-	Version:     util.Version,
-	Values:      []string{"MarsBar", "BountyBar", "SnickersBar", "KitkatBar"},
-	Case:        transform.Lower,
-	LookupTable: "sweetNames",
+	LcType:     "sweet",
+	BaseType:   "float64",
+	Version:    util.Version,
+	Values:     []string{"MarsBar", "BountyBar", "SnickersBar", "KitkatBar"},
+	Case:       transform.Lower,
+	TagTable:   "sweetNames",
+	AliasTable: "sweetAlias",
 }

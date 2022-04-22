@@ -12,10 +12,11 @@ package example
 //  * Because of '-unsnake', underscores are replaced with spaces so "MyKoala_Bear" is
 //     treated as "koala bear".
 
-//go:generate enumeration -v -type Pet -prefix My -unsnake -lc -using petStrings -json -marshaltext tag
+//go:generate enumeration -v -type Pet -prefix My -unsnake -lc -using petStrings -marshaltext tag -alias petAliases
 
 type Pet uint16
 
+// These all have prefix "My", which is stripped from the String representation.
 const (
 	MyCat Pet = iota
 	MyDog
@@ -24,10 +25,23 @@ const (
 	MyKoala_Bear
 )
 
+// petStrings is used for the Tag method.
 var petStrings = map[Pet]string{
 	MyCat:        "Felis Catus",
 	MyDog:        "Canis Lupus",
 	MyMouse:      "Mus Musculus",
 	MyElephant:   "Loxodonta Africana",
 	MyKoala_Bear: "Phascolarctos Cinereus",
+}
+
+// petAliases provide more strings that are recognised during parsing.
+// Although the map keys must be unique, the values do not need to be.
+// Note that -lc means the keys here mus also be lowercase.
+var petAliases = map[string]Pet{
+	"sid":      MyCat,
+	"diego":    MyCat,
+	"pooch":    MyDog,
+	"whiskers": MyMouse,
+	"faithful": MyElephant,
+	"cuddly":   MyKoala_Bear,
 }

@@ -30,7 +30,8 @@ type Model struct {
 	Tags             map[string]string
 	Case             transform.Case
 	S1, S2           string
-	LookupTable      string
+	TagTable         string
+	AliasTable       string
 }
 
 func shortenIdentifier(id, prefix, suffix string) string {

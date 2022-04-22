@@ -1,7 +1,6 @@
 package model
 
 import (
-	"encoding/json"
 	"fmt"
 	"go/types"
 	"io"
@@ -21,7 +20,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/rickb777/enumeration/v2/enum"
-<< if .LookupTable >>	"os"
+<< if .TagTable >>	"os"
 << end >>	"strconv"
 	"strings"
 )
@@ -133,37 +132,37 @@ func (m Model) writeStringMethod(w io.Writer) {
 
 //-------------------------------------------------------------------------------------------------
 
-const tagMethod = `<<if .LookupTable>>
-var <<.LookupTable>>Inverse = map[string]<<.MainType>>{}
+const tagMethod = `<<if .TagTable>>
+var <<.TagTable>>Inverse = map[string]<<.MainType>>{}
 
 func init() {
 	for _, id := range All<<.Plural>> {
-		v, exists := <<.LookupTable>>[id]
+		v, exists := <<.TagTable>>[id]
 		if !exists {
-			fmt.Fprintf(os.Stderr, "Warning: <<.MainType>>: %s is missing from <<.LookupTable>>\n", id)
+			fmt.Fprintf(os.Stderr, "Warning: <<.MainType>>: %s is missing from <<.TagTable>>\n", id)
 		} else {
 			k := << transform "v" >>
-			if _, exists := <<.LookupTable>>Inverse[k]; exists {
-				fmt.Fprintf(os.Stderr, "Warning: <<.MainType>>: %q is duplicated in <<.LookupTable>>\n", k)
+			if _, exists := <<.TagTable>>Inverse[k]; exists {
+				fmt.Fprintf(os.Stderr, "Warning: <<.MainType>>: %q is duplicated in <<.TagTable>>\n", k)
 			}
-			<<.LookupTable>>Inverse[k] = id
+			<<.TagTable>>Inverse[k] = id
 		}
 	}
 
-	if len(<<.LookupTable>>) != <<len .Values>> {
-		panic(fmt.Sprintf("<<.MainType>>: <<.LookupTable>> has %d items but should have <<len .Values>>", len(<<.LookupTable>>)))
+	if len(<<.TagTable>>) != <<len .Values>> {
+		panic(fmt.Sprintf("<<.MainType>>: <<.TagTable>> has %d items but should have <<len .Values>>", len(<<.TagTable>>)))
 	}
 
-	if len(<<.LookupTable>>) != len(<<.LookupTable>>Inverse) {
-		panic(fmt.Sprintf("<<.MainType>>: <<.LookupTable>> has %d items but there are only %d distinct items",
-			len(<<.LookupTable>>), len(<<.LookupTable>>Inverse)))
+	if len(<<.TagTable>>) != len(<<.TagTable>>Inverse) {
+		panic(fmt.Sprintf("<<.MainType>>: <<.TagTable>> has %d items but there are only %d distinct items",
+			len(<<.TagTable>>), len(<<.TagTable>>Inverse)))
 	}
 }
 
 // Tag returns the string representation of a <<.MainType>>. For invalid values,
 // this returns i.String() (see IsValid).
 func (i <<.MainType>>) Tag() string {
-	s, ok := <<.LookupTable>>[i]
+	s, ok := <<.TagTable>>[i]
 	if ok {
 		return s
 	}
@@ -210,7 +209,7 @@ func (i <<.MainType>>) Float() float64 {
 }
 <<- else>>
 // Int returns the int value, which is not necessarily the same as the ordinal.
-// It serves to facilitate polymorphism (see enum.IntEnum).
+// This facilitates polymorphism (see enum.IntEnum).
 func (i <<.MainType>>) Int() int {
 	return int(i)
 }
@@ -304,7 +303,7 @@ func (v *<<.MainType>>) parse(in string, rep enum.Representation) error {
 	}
 
 	s := << transform "in" >>
-<<- if .LookupTable>>
+<<- if .TagTable>>
 
 	if rep == enum.Identifier {
 		if v.parseIdentifier(s) || v.parseTag(s) {
@@ -348,11 +347,11 @@ func (v *<<.MainType>>) parseOrdinal(s string) (ok bool) {
 	}
 	return false
 }
-<<- if .LookupTable>>
+<<- if .TagTable>>
 
-// parseTag attempts to match an entry in <<.LookupTable>>Inverse
+// parseTag attempts to match an entry in <<.TagTable>>Inverse
 func (v *<<.MainType>>) parseTag(s string) (ok bool) {
-	*v, ok = <<.LookupTable>>Inverse[s]
+	*v, ok = <<.TagTable>>Inverse[s]
 	return ok
 }
 <<- end>>
@@ -374,7 +373,12 @@ func (v *<<.MainType>>) parseIdentifier(s string) (ok bool) {
 		}
 		i0 = i1
 	}
+<<- if .AliasTable>>
+	*v, ok = <<.AliasTable>>[s]
+	return ok
+<<- else>>
 	return false
+<<- end>>
 }
 `
 
@@ -588,14 +592,6 @@ func (m Model) WriteGo(w io.Writer) {
 	if c, ok := w.(io.Closer); ok {
 		checkErr(c.Close())
 	}
-}
-
-//-------------------------------------------------------------------------------------------------
-
-func (m Model) WriteJSON(w io.Writer) {
-	enc := json.NewEncoder(w)
-	enc.SetIndent("", "  ")
-	enc.Encode(m.toJSON())
 }
 
 //-------------------------------------------------------------------------------------------------

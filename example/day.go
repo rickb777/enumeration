@@ -3,7 +3,7 @@ package example
 // This simple example also shows that more than one 'const' block can be used
 // provided that the integer values are all distinct.
 
-//go:generate enumeration -v -type Day -json
+//go:generate enumeration -v -type Day
 
 type Day uint
 
@@ -16,7 +16,8 @@ const (
 )
 
 // It is allowable to break the constant blocks (although it's a bit
-// unnecessary here), but the numeric values *must* all be distinct.
+// unnecessary here). However, the numeric values *must* all be distinct,
+// otherwise the generated enum will not compile.
 const (
 	Thursday Day = iota + 5
 	Friday

@@ -79,12 +79,7 @@ type Group struct {
 func TestMarshalUsingNumber(t *testing.T) {
 	g := gomega.NewWithT(t)
 
-	baseMarshalTextRep = enum.Number
-	dayMarshalTextRep = enum.Number
-	greekalphabetMarshalTextRep = enum.Number
-	methodMarshalTextRep = enum.Number
-	monthMarshalTextRep = enum.Number
-	petMarshalTextRep = enum.Number
+	setMarshalReps(enum.Number)
 
 	v := Group{G, Tuesday, Θήτα, POST, November, MyKoala_Bear}
 	s, err := json.Marshal(v)
@@ -98,12 +93,7 @@ func TestMarshalUsingNumber(t *testing.T) {
 func TestMarshalUsingOrdinal(t *testing.T) {
 	g := gomega.NewWithT(t)
 
-	baseMarshalTextRep = enum.Ordinal
-	dayMarshalTextRep = enum.Ordinal
-	greekalphabetMarshalTextRep = enum.Ordinal
-	methodMarshalTextRep = enum.Ordinal
-	monthMarshalTextRep = enum.Ordinal
-	petMarshalTextRep = enum.Ordinal
+	setMarshalReps(enum.Ordinal)
 
 	v := Group{G, Tuesday, Θήτα, POST, November, MyKoala_Bear}
 	s, err := json.Marshal(v)
@@ -117,12 +107,7 @@ func TestMarshalUsingOrdinal(t *testing.T) {
 func TestMarshalUsingIdentifier(t *testing.T) {
 	g := gomega.NewWithT(t)
 
-	baseMarshalTextRep = enum.Identifier
-	dayMarshalTextRep = enum.Identifier
-	greekalphabetMarshalTextRep = enum.Identifier
-	methodMarshalTextRep = enum.Identifier
-	monthMarshalTextRep = enum.Identifier
-	petMarshalTextRep = enum.Identifier
+	setMarshalReps(enum.Identifier)
 
 	g.Expect(G.MarshalJSON()).Should(gomega.Equal([]byte{'"', 'g', '"'}))
 
@@ -138,12 +123,7 @@ func TestMarshalUsingIdentifier(t *testing.T) {
 func TestMarshalUsingTag(t *testing.T) {
 	g := gomega.NewWithT(t)
 
-	baseMarshalTextRep = enum.Tag
-	dayMarshalTextRep = enum.Tag
-	greekalphabetMarshalTextRep = enum.Tag
-	methodMarshalTextRep = enum.Tag
-	monthMarshalTextRep = enum.Tag
-	petMarshalTextRep = enum.Tag
+	setMarshalReps(enum.Tag)
 
 	g.Expect(G.MarshalJSON()).Should(gomega.Equal([]byte{'"', 'g', '"'}))
 
@@ -173,14 +153,10 @@ func TestUnmarshalJSON1(t *testing.T) {
 
 		{input: `{"B":2,"D":2,"G":7,"X":3,"M":10,"P":4}`, rep: enum.Ordinal},
 		{input: `{"B":"G","D":"Tuesday","G":"Θήτα","X":"POST","M":"NOVEMBER","P":"Koala Bear"}`, rep: enum.Ordinal},
+		{input: `{"B":"G","D":"Tuesday","G":"Θήτα","X":"POST","M":"NOVEMBER","P":"Cuddly"}`, rep: enum.Identifier},
 	}
 	for i, c := range cases {
-		baseMarshalTextRep = c.rep
-		dayMarshalTextRep = c.rep
-		greekalphabetMarshalTextRep = c.rep
-		methodMarshalTextRep = c.rep
-		monthMarshalTextRep = c.rep
-		petMarshalTextRep = c.rep
+		setMarshalReps(c.rep)
 
 		var v Group
 		err := json.Unmarshal([]byte(c.input), &v)
@@ -243,12 +219,7 @@ func TestPetScan(t *testing.T) {
 func TestValueUsingNumber(t *testing.T) {
 	g := gomega.NewWithT(t)
 
-	baseStoreRep = enum.Number
-	dayStoreRep = enum.Number
-	greekalphabetStoreRep = enum.Number
-	methodStoreRep = enum.Number
-	monthStoreRep = enum.Number
-	petStoreRep = enum.Number
+	setStoreRep(enum.Number)
 
 	g.Expect(G.Value()).To(gomega.Equal(float64(347.20001220703125)))
 	g.Expect(Tuesday.Value()).To(gomega.Equal(int64(3)))
@@ -261,12 +232,7 @@ func TestValueUsingNumber(t *testing.T) {
 func TestValueUsingOrdinal(t *testing.T) {
 	g := gomega.NewWithT(t)
 
-	baseStoreRep = enum.Ordinal
-	dayStoreRep = enum.Ordinal
-	greekalphabetStoreRep = enum.Ordinal
-	methodStoreRep = enum.Ordinal
-	monthStoreRep = enum.Ordinal
-	petStoreRep = enum.Ordinal
+	setStoreRep(enum.Ordinal)
 
 	g.Expect(G.Value()).To(gomega.Equal(int64(2)))
 	g.Expect(Tuesday.Value()).To(gomega.Equal(int64(2)))
@@ -279,11 +245,7 @@ func TestValueUsingOrdinal(t *testing.T) {
 func TestValueUsingTag(t *testing.T) {
 	g := gomega.NewWithT(t)
 
-	baseStoreRep = enum.Tag
-	dayStoreRep = enum.Tag
-	methodStoreRep = enum.Tag
-	monthStoreRep = enum.Tag
-	petStoreRep = enum.Tag
+	setStoreRep(enum.Tag)
 
 	g.Expect(G.Value()).To(gomega.Equal("g"))
 	g.Expect(Tuesday.Value()).To(gomega.Equal("Tuesday"))
@@ -295,11 +257,7 @@ func TestValueUsingTag(t *testing.T) {
 func TestValueUsingIdentifier(t *testing.T) {
 	g := gomega.NewWithT(t)
 
-	baseStoreRep = enum.Identifier
-	dayStoreRep = enum.Identifier
-	methodStoreRep = enum.Identifier
-	monthStoreRep = enum.Identifier
-	petStoreRep = enum.Identifier
+	setStoreRep(enum.Identifier)
 
 	g.Expect(G.Value()).To(gomega.Equal("g"))
 	g.Expect(Tuesday.Value()).To(gomega.Equal("Tuesday"))
@@ -325,4 +283,22 @@ func TestGobEncodeAndDecode(t *testing.T) {
 	err = dec.Decode(&v2)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 	g.Expect(v2).Should(gomega.Equal(v1))
+}
+
+func setMarshalReps(rep enum.Representation) {
+	baseMarshalTextRep = rep
+	dayMarshalTextRep = rep
+	greekalphabetMarshalTextRep = rep
+	methodMarshalTextRep = rep
+	monthMarshalTextRep = rep
+	petMarshalTextRep = rep
+}
+
+func setStoreRep(rep enum.Representation) {
+	baseStoreRep = rep
+	dayStoreRep = rep
+	greekalphabetStoreRep = rep
+	methodStoreRep = rep
+	monthStoreRep = rep
+	petStoreRep = rep
 }
