@@ -42,36 +42,36 @@ func (i Method) String() string {
 	return methodEnumStrings[methodEnumIndex[o]:methodEnumIndex[o+1]]
 }
 
-var methodStringsInverse = map[string]Method{}
+var methodTagsInverse = map[string]Method{}
 
 func init() {
 	for _, id := range AllMethods {
-		v, exists := methodStrings[id]
+		v, exists := methodTags[id]
 		if !exists {
-			fmt.Fprintf(os.Stderr, "Warning: Method: %s is missing from methodStrings\n", id)
+			fmt.Fprintf(os.Stderr, "Warning: Method: %s is missing from methodTags\n", id)
 		} else {
 			k := strings.ToLower(v)
-			if _, exists := methodStringsInverse[k]; exists {
-				fmt.Fprintf(os.Stderr, "Warning: Method: %q is duplicated in methodStrings\n", k)
+			if _, exists := methodTagsInverse[k]; exists {
+				fmt.Fprintf(os.Stderr, "Warning: Method: %q is duplicated in methodTags\n", k)
 			}
-			methodStringsInverse[k] = id
+			methodTagsInverse[k] = id
 		}
 	}
 
-	if len(methodStrings) != 6 {
-		panic(fmt.Sprintf("Method: methodStrings has %d items but should have 6", len(methodStrings)))
+	if len(methodTags) != 6 {
+		panic(fmt.Sprintf("Method: methodTags has %d items but should have 6", len(methodTags)))
 	}
 
-	if len(methodStrings) != len(methodStringsInverse) {
-		panic(fmt.Sprintf("Method: methodStrings has %d items but there are only %d distinct items",
-			len(methodStrings), len(methodStringsInverse)))
+	if len(methodTags) != len(methodTagsInverse) {
+		panic(fmt.Sprintf("Method: methodTags has %d items but there are only %d distinct items",
+			len(methodTags), len(methodTagsInverse)))
 	}
 }
 
 // Tag returns the string representation of a Method. For invalid values,
 // this returns i.String() (see IsValid).
 func (i Method) Tag() string {
-	s, ok := methodStrings[i]
+	s, ok := methodTags[i]
 	if ok {
 		return s
 	}
@@ -179,9 +179,9 @@ func (v *Method) parseOrdinal(s string) (ok bool) {
 	return false
 }
 
-// parseTag attempts to match an entry in methodStringsInverse
+// parseTag attempts to match an entry in methodTagsInverse
 func (v *Method) parseTag(s string) (ok bool) {
-	*v, ok = methodStringsInverse[s]
+	*v, ok = methodTagsInverse[s]
 	return ok
 }
 

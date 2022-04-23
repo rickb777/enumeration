@@ -39,36 +39,36 @@ func (i Pet) String() string {
 	return petEnumStrings[petEnumIndex[o]:petEnumIndex[o+1]]
 }
 
-var petStringsInverse = map[string]Pet{}
+var petTagsInverse = map[string]Pet{}
 
 func init() {
 	for _, id := range AllPets {
-		v, exists := petStrings[id]
+		v, exists := petTags[id]
 		if !exists {
-			fmt.Fprintf(os.Stderr, "Warning: Pet: %s is missing from petStrings\n", id)
+			fmt.Fprintf(os.Stderr, "Warning: Pet: %s is missing from petTags\n", id)
 		} else {
 			k := strings.ToLower(strings.ReplaceAll(v, "_", " "))
-			if _, exists := petStringsInverse[k]; exists {
-				fmt.Fprintf(os.Stderr, "Warning: Pet: %q is duplicated in petStrings\n", k)
+			if _, exists := petTagsInverse[k]; exists {
+				fmt.Fprintf(os.Stderr, "Warning: Pet: %q is duplicated in petTags\n", k)
 			}
-			petStringsInverse[k] = id
+			petTagsInverse[k] = id
 		}
 	}
 
-	if len(petStrings) != 5 {
-		panic(fmt.Sprintf("Pet: petStrings has %d items but should have 5", len(petStrings)))
+	if len(petTags) != 5 {
+		panic(fmt.Sprintf("Pet: petTags has %d items but should have 5", len(petTags)))
 	}
 
-	if len(petStrings) != len(petStringsInverse) {
-		panic(fmt.Sprintf("Pet: petStrings has %d items but there are only %d distinct items",
-			len(petStrings), len(petStringsInverse)))
+	if len(petTags) != len(petTagsInverse) {
+		panic(fmt.Sprintf("Pet: petTags has %d items but there are only %d distinct items",
+			len(petTags), len(petTagsInverse)))
 	}
 }
 
 // Tag returns the string representation of a Pet. For invalid values,
 // this returns i.String() (see IsValid).
 func (i Pet) Tag() string {
-	s, ok := petStrings[i]
+	s, ok := petTags[i]
 	if ok {
 		return s
 	}
@@ -173,9 +173,9 @@ func (v *Pet) parseOrdinal(s string) (ok bool) {
 	return false
 }
 
-// parseTag attempts to match an entry in petStringsInverse
+// parseTag attempts to match an entry in petTagsInverse
 func (v *Pet) parseTag(s string) (ok bool) {
-	*v, ok = petStringsInverse[s]
+	*v, ok = petTagsInverse[s]
 	return ok
 }
 

@@ -45,36 +45,36 @@ func (i GreekAlphabet) String() string {
 	return greekalphabetEnumStrings[greekalphabetEnumIndex[o]:greekalphabetEnumIndex[o+1]]
 }
 
-var greekStringsInverse = map[string]GreekAlphabet{}
+var greekTagsInverse = map[string]GreekAlphabet{}
 
 func init() {
 	for _, id := range AllGreekAlphabets {
-		v, exists := greekStrings[id]
+		v, exists := greekTags[id]
 		if !exists {
-			fmt.Fprintf(os.Stderr, "Warning: GreekAlphabet: %s is missing from greekStrings\n", id)
+			fmt.Fprintf(os.Stderr, "Warning: GreekAlphabet: %s is missing from greekTags\n", id)
 		} else {
 			k := v
-			if _, exists := greekStringsInverse[k]; exists {
-				fmt.Fprintf(os.Stderr, "Warning: GreekAlphabet: %q is duplicated in greekStrings\n", k)
+			if _, exists := greekTagsInverse[k]; exists {
+				fmt.Fprintf(os.Stderr, "Warning: GreekAlphabet: %q is duplicated in greekTags\n", k)
 			}
-			greekStringsInverse[k] = id
+			greekTagsInverse[k] = id
 		}
 	}
 
-	if len(greekStrings) != 24 {
-		panic(fmt.Sprintf("GreekAlphabet: greekStrings has %d items but should have 24", len(greekStrings)))
+	if len(greekTags) != 24 {
+		panic(fmt.Sprintf("GreekAlphabet: greekTags has %d items but should have 24", len(greekTags)))
 	}
 
-	if len(greekStrings) != len(greekStringsInverse) {
-		panic(fmt.Sprintf("GreekAlphabet: greekStrings has %d items but there are only %d distinct items",
-			len(greekStrings), len(greekStringsInverse)))
+	if len(greekTags) != len(greekTagsInverse) {
+		panic(fmt.Sprintf("GreekAlphabet: greekTags has %d items but there are only %d distinct items",
+			len(greekTags), len(greekTagsInverse)))
 	}
 }
 
 // Tag returns the string representation of a GreekAlphabet. For invalid values,
 // this returns i.String() (see IsValid).
 func (i GreekAlphabet) Tag() string {
-	s, ok := greekStrings[i]
+	s, ok := greekTags[i]
 	if ok {
 		return s
 	}
@@ -217,9 +217,9 @@ func (v *GreekAlphabet) parseOrdinal(s string) (ok bool) {
 	return false
 }
 
-// parseTag attempts to match an entry in greekStringsInverse
+// parseTag attempts to match an entry in greekTagsInverse
 func (v *GreekAlphabet) parseTag(s string) (ok bool) {
-	*v, ok = greekStringsInverse[s]
+	*v, ok = greekTagsInverse[s]
 	return ok
 }
 

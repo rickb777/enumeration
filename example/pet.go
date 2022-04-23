@@ -12,7 +12,7 @@ package example
 //  * Because of '-unsnake', underscores are replaced with spaces so "MyKoala_Bear" is
 //     treated as "koala bear".
 
-//go:generate enumeration -v -type Pet -prefix My -unsnake -lc -using petStrings -marshaltext tag -alias petAliases
+//go:generate enumeration -v -type Pet -prefix My -unsnake -lc -using petTags -marshaltext tag -alias petAliases
 
 type Pet uint16
 
@@ -25,8 +25,8 @@ const (
 	MyKoala_Bear
 )
 
-// petStrings is used for the Tag method.
-var petStrings = map[Pet]string{
+// petTags is used for the Tag method.
+var petTags = map[Pet]string{
 	MyCat:        "Felis Catus",
 	MyDog:        "Canis Lupus",
 	MyMouse:      "Mus Musculus",

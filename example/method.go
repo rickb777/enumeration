@@ -4,7 +4,7 @@ package example
 // recognises inputs from both sets of strings. The '-ic' option means the parser ignores
 // the case of its inputs.
 
-//go:generate enumeration -v -type Method -ic -using methodStrings
+//go:generate enumeration -v -type Method -ic -using methodTags
 
 type Method uint
 
@@ -17,7 +17,7 @@ const (
 	DELETE
 )
 
-var methodStrings = map[Method]string{
+var methodTags = map[Method]string{
 	HEAD:   "HE",
 	GET:    "GE",
 	PUT:    "PU",
