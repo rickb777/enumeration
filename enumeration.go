@@ -20,8 +20,8 @@ var force, lowercase, uppercase, showVersion bool
 
 func defineFlags() {
 	flag.StringVar(&config.MainType, "type", "", "Name of the enumeration type (required).")
-	flag.StringVar(&config.Prefix, "prefix", "", "Optional prefix to be stripped from the identifiers.")
-	flag.StringVar(&config.Suffix, "suffix", "", "Optional suffix to be stripped from the identifiers.")
+	flag.StringVar(&model.Prefix, "prefix", "", "Optional prefix to be stripped from the identifiers.")
+	flag.StringVar(&model.Suffix, "suffix", "", "Optional suffix to be stripped from the identifiers.")
 	flag.StringVar(&inputGo, "i", "", "Name of the input file. May be '-' for stdin. Default is enumeration type in lower case.")
 	flag.StringVar(&outputGo, "o", "", "Name of the output file. May be '-' for stdout. Default is enumeration type in lower case plus '_enum'.")
 	flag.StringVar(&config.Plural, "plural", "", "Plural name of the enumeration type (optional).")

@@ -47,8 +47,8 @@ var <<.LcType>>EnumIndex = [...]uint16{<<.Indexes>>}
 
 func (m Model) TransformedInputValuesSlice() []string {
 	vs := make([]string, len(m.Values))
-	for i, s := range m.Shortened() {
-		vs[i] = m.inputTransform(s)
+	for i, v := range m.Values {
+		vs[i] = m.inputTransform(v.Shortened)
 	}
 	return vs
 }
@@ -59,8 +59,8 @@ func (m Model) TransformedInputValues() string {
 
 func (m Model) TransformedOutputValuesSlice() []string {
 	vs := make([]string, len(m.Values))
-	for i, s := range m.Shortened() {
-		vs[i] = m.outputTransform(s)
+	for i, v := range m.Values {
+		vs[i] = m.outputTransform(v.Shortened)
 	}
 	return vs
 }
@@ -73,8 +73,8 @@ func (m Model) Indexes() string {
 	buf := &strings.Builder{}
 	buf.WriteString("0")
 	n := 0
-	for _, s := range m.Shortened() {
-		n += len(s)
+	for _, v := range m.Values {
+		n += len(v.Shortened)
 		fmt.Fprintf(buf, ", %d", n)
 	}
 	return buf.String()
@@ -188,7 +188,7 @@ const ordinalMethod = `
 func (i <<.MainType>>) Ordinal() int {
 	switch i {
 	<<- range $i, $v := .Values>>
-	case <<$v>>:
+	case <<$v.Identifier>>:
 		return <<$i>>
 	<<- end>>
 	}
@@ -251,7 +251,7 @@ func (m Model) ValuesWithWrapping(nTabs int) string {
 	tabs := "\t\t"[:nTabs]
 	buf := &strings.Builder{}
 	nl := 5
-	for i, s := range m.Values {
+	for i, v := range m.Values {
 		if i > 0 {
 			buf.WriteString(",")
 		}
@@ -263,7 +263,7 @@ func (m Model) ValuesWithWrapping(nTabs int) string {
 		} else if i > 0 {
 			buf.WriteString(" ")
 		}
-		buf.WriteString(s)
+		buf.WriteString(v.Identifier)
 	}
 	return buf.String()
 }

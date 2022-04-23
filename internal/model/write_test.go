@@ -1,9 +1,9 @@
 package model
 
 import (
-	. "github.com/onsi/gomega"
 	"github.com/rickb777/enumeration/v2/internal/transform"
 	"github.com/rickb777/enumeration/v2/internal/util"
+	"io"
 	"strings"
 	"testing"
 )
@@ -26,9 +26,7 @@ import (
 `
 
 func TestWriteHead(t *testing.T) {
-	buf := &strings.Builder{}
-	modelNoChange.writeHead(buf)
-	compare(t, buf.String(), e0+util.Version+e1)
+	testStage(t, modelNoChange().writeHead, e0+util.Version+e1)
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -55,17 +53,9 @@ var sweetEnumIndex = [...]uint16{0, 4, 10, 18, 24, 38}
 `
 
 func TestWriteJoinedStringAndIndexes(t *testing.T) {
-	buf := &strings.Builder{}
-	modelNoChange.writeJoinedStringAndIndexes(buf)
-	compare(t, buf.String(), e2nc)
-
-	buf.Reset()
-	modelLowerWithLookupTable.writeJoinedStringAndIndexes(buf)
-	compare(t, buf.String(), e2lc)
-
-	buf.Reset()
-	modelIgnoreCase.writeJoinedStringAndIndexes(buf)
-	compare(t, buf.String(), e2ic)
+	testStage(t, modelNoChange().writeJoinedStringAndIndexes, e2nc)
+	testStage(t, modelLowerWithLookupTable().writeJoinedStringAndIndexes, e2lc)
+	testStage(t, modelIgnoreCase().writeJoinedStringAndIndexes, e2ic)
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -85,9 +75,7 @@ var AllSweetEnums = enum.IntEnums{
 `
 
 func TestWriteAllItems(t *testing.T) {
-	buf := &strings.Builder{}
-	modelNoChange.writeAllItems(buf)
-	compare(t, buf.String(), e3)
+	testStage(t, modelNoChange().writeAllItems, e3)
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -117,13 +105,8 @@ func (i Sweet) String() string {
 `
 
 func TestWriteLiteralMethod(t *testing.T) {
-	buf := &strings.Builder{}
-	modelNoChange.writeStringMethod(buf)
-	compare(t, buf.String(), e4nc)
-
-	buf.Reset()
-	modelLowerWithLookupTable.writeStringMethod(buf)
-	compare(t, buf.String(), e4lc)
+	testStage(t, modelNoChange().writeStringMethod, e4nc)
+	testStage(t, modelLowerWithLookupTable().writeStringMethod, e4lc)
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -174,13 +157,8 @@ func (i Sweet) Tag() string {
 `
 
 func TestWriteTagMethod(t *testing.T) {
-	buf := &strings.Builder{}
-	modelNoChange.writeTagMethod(buf)
-	compare(t, buf.String(), e5nc)
-
-	buf.Reset()
-	modelLowerWithLookupTable.writeTagMethod(buf)
-	compare(t, buf.String(), e5lc)
+	testStage(t, modelNoChange().writeTagMethod, e5nc)
+	testStage(t, modelLowerWithLookupTable().writeTagMethod, e5lc)
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -224,13 +202,8 @@ func (i Sweet) Ordinal() int {
 `
 
 func TestWriteOrdinalMethod(t *testing.T) {
-	buf := &strings.Builder{}
-	modelNoChange.writeOrdinalMethod(buf)
-	compare(t, buf.String(), e6nc)
-
-	buf.Reset()
-	modelLowerWithLookupTable.writeOrdinalMethod(buf)
-	compare(t, buf.String(), e6lc)
+	testStage(t, modelNoChange().writeOrdinalMethod, e6nc)
+	testStage(t, modelLowerWithLookupTable().writeOrdinalMethod, e6lc)
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -251,13 +224,8 @@ func (i Sweet) Float() float64 {
 `
 
 func TestWriteBaseMethod(t *testing.T) {
-	buf := &strings.Builder{}
-	modelNoChange.writeBaseMethod(buf)
-	compare(t, buf.String(), e7nc)
-
-	buf.Reset()
-	modelLowerWithLookupTable.writeBaseMethod(buf)
-	compare(t, buf.String(), e7lc)
+	testStage(t, modelNoChange().writeBaseMethod, e7nc)
+	testStage(t, modelLowerWithLookupTable().writeBaseMethod, e7lc)
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -287,13 +255,8 @@ func SweetOf(i int) Sweet {
 `
 
 func TestWriteOfMethod(t *testing.T) {
-	buf := &strings.Builder{}
-	modelNoChange.writeOfMethod(buf)
-	compare(t, buf.String(), e8nc)
-
-	buf.Reset()
-	modelLowerWithLookupTable.writeOfMethod(buf)
-	compare(t, buf.String(), e8lc)
+	testStage(t, modelNoChange().writeOfMethod, e8nc)
+	testStage(t, modelLowerWithLookupTable().writeOfMethod, e8lc)
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -305,13 +268,8 @@ func (i Sweet) IsValid() bool {
 `
 
 func TestWriteIsValid(t *testing.T) {
-	buf := &strings.Builder{}
-	modelNoChange.writeIsValidMethod(buf)
-	compare(t, buf.String(), e9)
-
-	buf.Reset()
-	modelLowerWithLookupTable.writeIsValidMethod(buf)
-	compare(t, buf.String(), e9)
+	testStage(t, modelNoChange().writeIsValidMethod, e9)
+	testStage(t, modelLowerWithLookupTable().writeIsValidMethod, e9)
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -544,17 +502,9 @@ func (v *Sweet) parseIdentifier(s string) (ok bool) {
 `
 
 func TestWriteParseMethod(t *testing.T) {
-	buf := &strings.Builder{}
-	modelNoChange.writeParseMethod(buf)
-	compare(t, buf.String(), e10nc)
-
-	buf.Reset()
-	modelLowerWithLookupTable.writeParseMethod(buf)
-	compare(t, buf.String(), e10lc)
-
-	buf.Reset()
-	modelIgnoreCase.writeParseMethod(buf)
-	compare(t, buf.String(), e10ic)
+	testStage(t, modelNoChange().writeParseMethod, e10nc)
+	testStage(t, modelLowerWithLookupTable().writeParseMethod, e10lc)
+	testStage(t, modelIgnoreCase().writeParseMethod, e10ic)
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -591,17 +541,9 @@ func AsSweet(s string) (Sweet, error) {
 `
 
 func TestWriteAsMethod(t *testing.T) {
-	buf := &strings.Builder{}
-	modelNoChange.writeAsMethod(buf)
-	compare(t, buf.String(), e11nc)
-
-	buf.Reset()
-	modelLowerWithLookupTable.writeAsMethod(buf)
-	compare(t, buf.String(), e11lc)
-
-	buf.Reset()
-	modelIgnoreCase.writeAsMethod(buf)
-	compare(t, buf.String(), e11ic)
+	testStage(t, modelNoChange().writeAsMethod, e11nc)
+	testStage(t, modelLowerWithLookupTable().writeAsMethod, e11lc)
+	testStage(t, modelIgnoreCase().writeAsMethod, e11ic)
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -630,13 +572,8 @@ func MustParseSweet(s string) Sweet {
 `
 
 func TestWriteMustParseMethod(t *testing.T) {
-	buf := &strings.Builder{}
-	modelNoChange.writeMustParseMethod(buf)
-	compare(t, buf.String(), e12lc)
-
-	buf.Reset()
-	modelIgnoreCase.writeMustParseMethod(buf)
-	compare(t, buf.String(), e12ic)
+	testStage(t, modelNoChange().writeMustParseMethod, e12lc)
+	testStage(t, modelIgnoreCase().writeMustParseMethod, e12ic)
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -744,13 +681,8 @@ func (i Sweet) quotedString(s string) []byte {
 `
 
 func TestWriteMarshalText(t *testing.T) {
-	buf := &strings.Builder{}
-	modelNoChange.writeMarshalText(buf)
-	compare(t, buf.String(), e13nc)
-
-	buf.Reset()
-	modelLowerWithLookupTable.writeMarshalText(buf)
-	compare(t, buf.String(), e13lc)
+	testStage(t, modelNoChange().writeMarshalText, e13nc)
+	testStage(t, modelLowerWithLookupTable().writeMarshalText, e13lc)
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -775,13 +707,8 @@ func (i *Sweet) UnmarshalJSON(text []byte) error {
 `
 
 func TestWriteUnmarshalText(t *testing.T) {
-	buf := &strings.Builder{}
-	modelNoChange.writeUnmarshalText(buf)
-	compare(t, buf.String(), e14)
-
-	buf.Reset()
-	modelLowerWithLookupTable.writeUnmarshalText(buf)
-	compare(t, buf.String(), e14)
+	testStage(t, modelNoChange().writeUnmarshalText, e14)
+	testStage(t, modelLowerWithLookupTable().writeUnmarshalText, e14)
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -885,62 +812,18 @@ func (i Sweet) Value() (driver.Value, error) {
 `
 
 func TestWriteScanValue(t *testing.T) {
-	buf := &strings.Builder{}
-	modelNoChange.writeScanValue(buf)
-	compare(t, buf.String(), e15nc)
-
-	buf.Reset()
-	modelLowerWithLookupTable.writeScanValue(buf)
-	compare(t, buf.String(), e15lc)
+	testStage(t, modelNoChange().writeScanValue, e15nc)
+	testStage(t, modelLowerWithLookupTable().writeScanValue, e15lc)
 }
 
 //-------------------------------------------------------------------------------------------------
 
-func TestToJSON(t *testing.T) {
-	RegisterTestingT(t)
-
-	m := modelNoChange
-	m.Unsnake = false
-
-	expectJSON(t, m.toJSON(), jsonEnum{
-		Type:    "string",
-		Default: "",
-		Enum:    []string{"Mars", "Bounty", "Snickers", "Kitkat", "Ferrero_Rocher"},
-	})
-
-	m.Unsnake = true
-
-	expectJSON(t, m.toJSON(), jsonEnum{
-		Type:    "string",
-		Default: "",
-		Enum:    []string{"Mars", "Bounty", "Snickers", "Kitkat", "Ferrero Rocher"},
-	})
-
-	m.Case = transform.Lower
-
-	expectJSON(t, m.toJSON(), jsonEnum{
-		Type:    "string",
-		Default: "",
-		Enum:    []string{"mars", "bounty", "snickers", "kitkat", "ferrero rocher"},
-	})
-
-	m.TagTable = "sweetNames"
-
-	expectJSON(t, m.toJSON(), jsonEnum{
-		Type:    "string",
-		Default: "",
-		Enum:    []string{"mars", "bounty", "snickers", "kitkat", "ferrero rocher"},
-	})
-}
-
-func expectJSON(t *testing.T, actual, expected jsonEnum) {
+func testStage(t *testing.T, fn func(io.Writer), expected string) {
 	t.Helper()
-	Ω(actual.Type).Should(Equal(expected.Type))
-	Ω(actual.Default).Should(Equal(expected.Default))
-	Ω(actual.Enum).Should(ConsistOf(expected.Enum))
+	buf := &strings.Builder{}
+	fn(buf)
+	compare(t, buf.String(), expected)
 }
-
-//-------------------------------------------------------------------------------------------------
 
 func compare(t *testing.T, actual, expected string) {
 	t.Helper()
@@ -980,46 +863,57 @@ func compare(t *testing.T, actual, expected string) {
 
 //-------------------------------------------------------------------------------------------------
 
-var modelNoChange = Model{
-	Config: Config{
-		MainType: "Sweet",
-		Plural:   "Sweets",
-		Pkg:      "confectionary",
-		Unsnake:  true,
-	},
-	LcType:   "sweet",
-	BaseType: "int",
-	Version:  util.Version,
-	Values:   []string{"Mars", "Bounty", "Snickers", "Kitkat", "Ferrero_Rocher"},
+func modelNoChange() Model {
+	Prefix = ""
+	Suffix = ""
+	return Model{
+		Config: Config{
+			MainType: "Sweet",
+			Plural:   "Sweets",
+			Pkg:      "confectionary",
+			Unsnake:  true,
+		},
+		LcType:   "sweet",
+		BaseType: "int",
+		Version:  util.Version,
+		Values:   ValuesOf("Mars", "Bounty", "Snickers", "Kitkat", "Ferrero_Rocher"),
+	}
 }
 
-var modelIgnoreCase = Model{
-	Config: Config{
-		MainType:   "Sweet",
-		Plural:     "Sweets",
-		Pkg:        "confectionary",
-		IgnoreCase: true,
-	},
-	LcType:   "sweet",
-	BaseType: "int",
-	Version:  util.Version,
-	Values:   []string{"Mars", "Bounty", "Snickers", "Kitkat", "Ferrero_Rocher"},
+func modelIgnoreCase() Model {
+	Prefix = ""
+	Suffix = ""
+	return Model{
+		Config: Config{
+			MainType:   "Sweet",
+			Plural:     "Sweets",
+			Pkg:        "confectionary",
+			IgnoreCase: true,
+		},
+		LcType:   "sweet",
+		BaseType: "int",
+		Version:  util.Version,
+		Values:   ValuesOf("Mars", "Bounty", "Snickers", "Kitkat", "Ferrero_Rocher"),
+	}
 }
 
-var modelLowerWithLookupTable = Model{
-	Config: Config{
-		MainType:   "Sweet",
-		Plural:     "Sweets",
-		Pkg:        "confectionary",
-		IgnoreCase: false,
-		Unsnake:    true,
-		Suffix:     "Bar",
-	},
-	LcType:     "sweet",
-	BaseType:   "float64",
-	Version:    util.Version,
-	Values:     []string{"MarsBar", "BountyBar", "SnickersBar", "KitkatBar"},
-	Case:       transform.Lower,
-	TagTable:   "sweetNames",
-	AliasTable: "sweetAlias",
+func modelLowerWithLookupTable() Model {
+	Prefix = ""
+	Suffix = "Bar"
+	return Model{
+		Config: Config{
+			MainType:   "Sweet",
+			Plural:     "Sweets",
+			Pkg:        "confectionary",
+			IgnoreCase: false,
+			Unsnake:    true,
+		},
+		LcType:     "sweet",
+		BaseType:   "float64",
+		Version:    util.Version,
+		Values:     ValuesOf("MarsBar", "BountyBar", "SnickersBar", "KitkatBar"),
+		Case:       transform.Lower,
+		TagTable:   "sweetNames",
+		AliasTable: "sweetAlias",
+	}
 }

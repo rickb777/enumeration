@@ -2,6 +2,7 @@ package parse
 
 import (
 	"bytes"
+	. "github.com/benmoss/matchers"
 	. "github.com/onsi/gomega"
 	"github.com/rickb777/enumeration/v2/internal/model"
 	"github.com/rickb777/enumeration/v2/internal/transform"
@@ -37,7 +38,7 @@ func TestScanValuesHappy(t *testing.T) {
 			Unsnake:    true,
 		})
 	Ω(err).Should(BeNil())
-	Ω(m).Should(Equal(model.Model{
+	Ω(m).Should(DeepEqual(model.Model{
 		Config: model.Config{
 			MainType:   "Sweet",
 			Plural:     "Sweets",
@@ -48,7 +49,7 @@ func TestScanValuesHappy(t *testing.T) {
 		LcType:       "sweet",
 		BaseType:     "int",
 		Version:      util.Version,
-		Values:       []string{"Mars", "Bounty", "Snickers", "Kitkat"},
+		Values:       model.ValuesOf("Mars", "Bounty", "Snickers", "Kitkat"),
 		DefaultValue: "",
 		Case:         0,
 		S1:           "",
@@ -76,13 +77,13 @@ const (
 var y = 1
 const (
 	_ Sweet = iota
-	ignored
-	Mars
-	ignored2
-	Bounty
-	Snickers
-	ignored4
-	Kitkat
+	ignored  //
+	Mars     // json:"mmm"
+	ignored2 //
+	Bounty   // json:"bbb"
+	Snickers // json:"sss"
+	ignored4 //
+	Kitkat   // json:"kkk"
 	numberOfSweets = int(Kitkat) // this is not exported
 )
 var sweetStrings = map[Sweet]string{
@@ -109,7 +110,7 @@ func TestConvertHappy3(t *testing.T) {
 			Unsnake:    true,
 		})
 	Ω(err).Should(BeNil())
-	Ω(m).Should(Equal(model.Model{
+	Ω(m).Should(DeepEqual(model.Model{
 		Config: model.Config{
 			MainType:   "Sweet",
 			Plural:     "Sweets",
@@ -120,9 +121,8 @@ func TestConvertHappy3(t *testing.T) {
 		LcType:       "sweet",
 		BaseType:     "int",
 		Version:      util.Version,
-		Values:       []string{"Mars", "Bounty", "Snickers", "Kitkat"},
+		Values:       model.ValuesOf("Mars", "Bounty", "Snickers", "Kitkat"),
 		DefaultValue: "",
-		Tags:         map[string]string{"Mars": "peanut", "Bounty": "coconut", "Snickers": "toffee", "Kitkat": "biscuit"},
 		Case:         0,
 		S1:           "",
 		S2:           "",
@@ -150,7 +150,7 @@ func TestConvertHappy4(t *testing.T) {
 			Unsnake:    false,
 		})
 	Ω(err).Should(BeNil())
-	Ω(m).Should(Equal(model.Model{
+	Ω(m).Should(DeepEqual(model.Model{
 		Config: model.Config{
 			MainType: "Sweet",
 			Plural:   "Sweets",
@@ -159,7 +159,7 @@ func TestConvertHappy4(t *testing.T) {
 		LcType:       "sweet",
 		BaseType:     "int",
 		Version:      util.Version,
-		Values:       []string{"Mars", "Bounty", "Snickers", "Kitkat"},
+		Values:       model.ValuesOf("Mars", "Bounty", "Snickers", "Kitkat"),
 		DefaultValue: "",
 		Case:         transform.Upper,
 		S1:           "",
@@ -191,7 +191,7 @@ func TestConvertHappy5(t *testing.T) {
 			Unsnake:    false,
 		})
 	Ω(err).Should(BeNil())
-	Ω(m).Should(Equal(model.Model{
+	Ω(m).Should(DeepEqual(model.Model{
 		Config: model.Config{
 			MainType: "Sweet",
 			Plural:   "Sweets",
@@ -200,7 +200,7 @@ func TestConvertHappy5(t *testing.T) {
 		LcType:       "sweet",
 		BaseType:     "int",
 		Version:      util.Version,
-		Values:       []string{"Mars", "Bounty", "Snickers", "Kitkat"},
+		Values:       model.ValuesOf("Mars", "Bounty", "Snickers", "Kitkat"),
 		DefaultValue: "",
 		Case:         transform.Upper,
 		S1:           "",
@@ -230,7 +230,7 @@ func TestConvertHappy6(t *testing.T) {
 			Pkg:      "confectionary",
 		})
 	Ω(err).Should(BeNil())
-	Ω(m).Should(Equal(model.Model{
+	Ω(m).Should(DeepEqual(model.Model{
 		Config: model.Config{
 			MainType: "Sweet",
 			Plural:   "Sweets",
@@ -239,7 +239,7 @@ func TestConvertHappy6(t *testing.T) {
 		LcType:       "sweet",
 		BaseType:     "int",
 		Version:      util.Version,
-		Values:       []string{"Mars", "Bounty", "Snickers", "Kitkat"},
+		Values:       model.ValuesOf("Mars", "Bounty", "Snickers", "Kitkat"),
 		DefaultValue: "",
 		Case:         transform.Upper,
 		S1:           "",
@@ -270,7 +270,7 @@ func TestConvertHappy7(t *testing.T) {
 			Pkg:      "confectionary",
 		})
 	Ω(err).Should(BeNil())
-	Ω(m).Should(Equal(model.Model{
+	Ω(m).Should(DeepEqual(model.Model{
 		Config: model.Config{
 			MainType: "Sweet",
 			Plural:   "Sweets",
@@ -279,7 +279,7 @@ func TestConvertHappy7(t *testing.T) {
 		LcType:       "sweet",
 		BaseType:     "int",
 		Version:      util.Version,
-		Values:       []string{"Mars", "Bounty", "Snickers", "Kitkat"},
+		Values:       model.ValuesOf("Mars", "Bounty", "Snickers", "Kitkat"),
 		DefaultValue: "Mars",
 		Case:         transform.Upper,
 		S1:           "",
@@ -311,7 +311,7 @@ func TestConvertHappy8(t *testing.T) {
 			Pkg:      "confectionary",
 		})
 	Ω(err).Should(BeNil())
-	Ω(m).Should(Equal(model.Model{
+	Ω(m).Should(DeepEqual(model.Model{
 		Config: model.Config{
 			MainType: "Sweet",
 			Plural:   "Sweets",
@@ -320,7 +320,7 @@ func TestConvertHappy8(t *testing.T) {
 		LcType:       "sweet",
 		BaseType:     "int",
 		Version:      util.Version,
-		Values:       []string{"Mars", "Bounty", "Snickers", "Kitkat"},
+		Values:       model.ValuesOf("Mars", "Bounty", "Snickers", "Kitkat"),
 		DefaultValue: "Mars",
 		Case:         transform.Upper,
 		S1:           "",

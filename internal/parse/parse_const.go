@@ -1,6 +1,7 @@
 package parse
 
 import (
+	"github.com/rickb777/enumeration/v2/internal/model"
 	"go/scanner"
 	"go/token"
 )
@@ -17,7 +18,7 @@ func appendConstItems(values []constItem, ids []string, typ string, number strin
 }
 
 func parseConstBlock(mainType string, s *scanner.Scanner, values []constItem) []constItem {
-	var iotaType string
+	var iotaType, restOfLine string
 	var tok token.Token
 	var lit1, lit2, lit3, lit4 string
 	var ids []string
@@ -35,8 +36,8 @@ func parseConstBlock(mainType string, s *scanner.Scanner, values []constItem) []
 					_, tok, lit3 = scan(s)
 					switch tok {
 					case token.IDENT, token.INT, token.FLOAT:
-						rest := discardToEndOfLine(s, tok, lit3)
-						values = appendConstItems(values, ids, lit2, rest)
+						tok, restOfLine, _ = readToEndOfLine(s, tok, lit3)
+						values = appendConstItems(values, ids, lit2, restOfLine)
 						if lit3 == "iota" {
 							iotaType = lit2
 						} else {
@@ -54,7 +55,7 @@ func parseConstBlock(mainType string, s *scanner.Scanner, values []constItem) []
 						ids = append(ids, lit2)
 						_, tok, lit3 = scan(s)
 					default:
-						discardToEndOfLine(s, tok, lit2)
+						readToEndOfLine(s, tok, lit2)
 					}
 				}
 
@@ -68,7 +69,7 @@ func parseConstBlock(mainType string, s *scanner.Scanner, values []constItem) []
 				ids = nil
 
 			default:
-				discardToEndOfLine(s, tok, lit2)
+				readToEndOfLine(s, tok, lit2)
 			}
 
 		case token.RPAREN, token.EOF:
@@ -78,7 +79,7 @@ func parseConstBlock(mainType string, s *scanner.Scanner, values []constItem) []
 			return values
 
 		default:
-			discardToEndOfLine(s, tok, lit1)
+			readToEndOfLine(s, tok, lit1)
 		}
 	}
 }
@@ -99,7 +100,7 @@ func parseConst(mainType string, s *scanner.Scanner, values []constItem) []const
 					values = append(values, constItem{id: lit1, typ: lit2, number: lit3})
 				}
 			}
-			discardToEndOfLine(s, tok, "")
+			readToEndOfLine(s, tok, "")
 		}
 	case token.LPAREN:
 		return parseConstBlock(mainType, s, values)
@@ -107,15 +108,15 @@ func parseConst(mainType string, s *scanner.Scanner, values []constItem) []const
 	return values
 }
 
-func filterExported(mainType string, ids []constItem) (exported []string, defaultValue string) {
+func filterExported(mainType string, ids []constItem) (exported model.Values, defaultValue string) {
 	var currentType string
 	var hasIota bool
-	exported = make([]string, 0, len(ids))
+	exported = make(model.Values, 0, len(ids))
 
 	for _, v := range ids {
 		if v.typ == mainType {
 			if token.IsExported(v.id) {
-				exported = append(exported, v.id)
+				exported = exported.Append(v.id)
 				switch v.number {
 				case "0", "iota":
 					defaultValue = v.id
@@ -130,7 +131,7 @@ func filterExported(mainType string, ids []constItem) (exported []string, defaul
 
 		} else if v.typ == "" && currentType == mainType {
 			if token.IsExported(v.id) {
-				exported = append(exported, v.id)
+				exported = exported.Append(v.id)
 			}
 		}
 

@@ -9,32 +9,51 @@ import (
 	"text/template"
 )
 
+var Prefix, Suffix string
+
 // Config contains the model parameters obtained from command line options
 // (either directly or computed).
 type Config struct {
 	MainType       string
 	Plural, Pkg    string
-	Prefix, Suffix string
 	MarshalTextRep enum.Representation
 	IgnoreCase     bool
 	Unsnake        bool
 }
 
-// Model holds the information available during template evaluation.
-type Model struct {
-	Config
-	LcType, BaseType string
-	Version          string
-	Values           []string
-	DefaultValue     string
-	Tags             map[string]string
-	Case             transform.Case
-	S1, S2           string
-	TagTable         string
-	AliasTable       string
+type Value struct {
+	Identifier string
+	Shortened  string
+	JSON, SQL  string
+}
+
+type Values []Value
+
+func ValuesOf(ss ...string) Values {
+	vs := make(Values, len(ss))
+	for i, s := range ss {
+		vs[i] = Value{
+			Identifier: s,
+			Shortened:  shortenIdentifier(s, Prefix, Suffix),
+		}
+	}
+	return vs
+}
+
+func (vs Values) Append(ss ...string) Values {
+	for _, s := range ss {
+		vs = append(vs, Value{
+			Identifier: s,
+			Shortened:  shortenIdentifier(s, Prefix, Suffix),
+		})
+	}
+	return vs
 }
 
 func shortenIdentifier(id, prefix, suffix string) string {
+	if prefix == "" && suffix == "" {
+		return id
+	}
 	short := id
 	if prefix != "" && strings.HasPrefix(short, prefix) {
 		short = short[len(prefix):]
@@ -48,55 +67,78 @@ func shortenIdentifier(id, prefix, suffix string) string {
 	return short
 }
 
-func (m Model) Shortened() []string {
-	short := make([]string, len(m.Values))
-	for i, id := range m.Values {
-		short[i] = shortenIdentifier(id, m.Prefix, m.Suffix)
+func (vs Values) Identifiers() []string {
+	ids := make([]string, len(vs))
+	for i, v := range vs {
+		ids[i] = v.Identifier
+	}
+	return ids
+}
+
+func (vs Values) Shortened() []string {
+	short := make([]string, len(vs))
+	for i, v := range vs {
+		short[i] = v.Shortened
 	}
 	return short
 }
 
+//-------------------------------------------------------------------------------------------------
+
+// Model holds the information available during template evaluation.
+type Model struct {
+	Config
+	LcType, BaseType string
+	Version          string
+	Values           Values
+	DefaultValue     string
+	Case             transform.Case
+	S1, S2           string
+	TagTable         string
+	AliasTable       string
+}
+
 func (m Model) CheckBadPrefixSuffix() error {
-	if m.Prefix == "" && m.Suffix == "" {
+	if Prefix == "" && Suffix == "" {
 		return nil
 	}
 
-	for _, id := range m.Values {
-		s := shortenIdentifier(id, m.Prefix, m.Suffix)
+	for _, v := range m.Values {
+		s := shortenIdentifier(v.Identifier, Prefix, Suffix)
 		if s == "" {
-			return fmt.Errorf(id + ": cannot strip prefix/suffix when the identifier matches exactly")
+			return fmt.Errorf(v.Identifier + ": cannot strip prefix/suffix when the identifier matches exactly")
 		}
 	}
 
-	if m.Prefix != "" {
+	if Prefix != "" {
 		any := false
-		for _, id := range m.Values {
-			if strings.HasPrefix(id, m.Prefix) {
+		for _, v := range m.Values {
+			if strings.HasPrefix(v.Identifier, Prefix) {
 				any = true
 				break
 			}
 		}
 		if any {
-			for _, id := range m.Values {
-				if !strings.HasPrefix(id, m.Prefix) {
-					return fmt.Errorf("%s: all identifiers must have the prefix %s (or none)", id, m.Prefix)
+			for _, v := range m.Values {
+				if !strings.HasPrefix(v.Identifier, Prefix) {
+					return fmt.Errorf("%s: all identifiers must have the prefix %s (or none)", v, Prefix)
 				}
 			}
 		}
 	}
 
-	if m.Suffix != "" {
+	if Suffix != "" {
 		any := false
-		for _, id := range m.Values {
-			if strings.HasSuffix(id, m.Suffix) {
+		for _, v := range m.Values {
+			if strings.HasSuffix(v.Identifier, Suffix) {
 				any = true
 				break
 			}
 		}
 		if any {
-			for _, id := range m.Values {
-				if !strings.HasSuffix(id, m.Suffix) {
-					return fmt.Errorf("%s: all identifiers must have the suffix %s (or none)", id, m.Suffix)
+			for _, v := range m.Values {
+				if !strings.HasSuffix(v.Identifier, Suffix) {
+					return fmt.Errorf("%s: all identifiers must have the suffix %s (or none)", v, Suffix)
 				}
 			}
 		}
@@ -174,48 +216,5 @@ func (m Model) Placeholder() string {
 }
 
 func (m Model) ValuesJoined(from int, separator string) string {
-	return strings.Join(m.Values[from:], separator)
-}
-
-//-------------------------------------------------------------------------------------------------
-
-type jsonEnum struct {
-	Type string `json:"type,omitempty"`
-	//Description string   `json:"description,omitempty"` TODO
-	Default string   `json:"default,omitempty"`
-	Enum    []string `json:"enum"`
-}
-
-func (m Model) toJSON() jsonEnum {
-	j := jsonEnum{
-		Type: "string",
-		Enum: make([]string, len(m.Values)),
-	}
-
-	switch m.MarshalTextRep {
-	case enum.Identifier:
-		for i, id := range m.Values {
-			s := shortenIdentifier(id, m.Prefix, m.Suffix)
-			v := m.outputTransform(s)
-			j.Enum[i] = v
-		}
-		if m.DefaultValue != "" {
-			s := shortenIdentifier(m.DefaultValue, m.Prefix, m.Suffix)
-			v := m.outputTransform(s)
-			j.Default = v
-		}
-
-	case enum.Tag:
-		if len(m.Tags) > 0 {
-			for i, id := range m.Values {
-				v := m.outputTransform(m.Tags[id])
-				j.Enum[i] = v
-			}
-		}
-		if m.DefaultValue != "" {
-			v := m.outputTransform(m.Tags[m.DefaultValue])
-			j.Default = v
-		}
-	}
-	return j
+	return strings.Join(m.Values[from:].Identifiers(), separator)
 }

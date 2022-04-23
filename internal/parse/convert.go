@@ -8,6 +8,7 @@ import (
 	"go/scanner"
 	"go/token"
 	"io"
+	"reflect"
 	"strings"
 )
 
@@ -25,7 +26,8 @@ func scan(s *scanner.Scanner) (token.Pos, token.Token, string) {
 	return pos, tok, lit
 }
 
-func discardToEndOfLine(s *scanner.Scanner, tok token.Token, lit string) (rest string) {
+func readToEndOfLine(s *scanner.Scanner, tok token.Token, lit string) (token.Token, string, reflect.StructTag) {
+	var rest string
 	for tok != token.SEMICOLON && tok != token.EOF {
 		if lit != "" {
 			rest += lit
@@ -34,7 +36,19 @@ func discardToEndOfLine(s *scanner.Scanner, tok token.Token, lit string) (rest s
 		}
 		_, tok, lit = scan(s)
 	}
-	return rest
+
+	switch tok {
+	case token.SEMICOLON, token.EOF:
+		return tok, rest, ""
+	}
+
+	_, tok, lit = scan(s)
+	if tok == token.COMMENT {
+		commentTag := reflect.StructTag(strings.TrimSpace(lit))
+		return 0, rest, commentTag
+	}
+
+	return tok, rest, ""
 }
 
 func newFileScanner(input string, src []byte) *scanner.Scanner {
@@ -85,11 +99,6 @@ func Convert(in io.Reader, input string, xCase transform.Case, config model.Conf
 
 		case token.CONST:
 			constItems = parseConst(config.MainType, s, constItems)
-
-		case token.VAR:
-			if len(m.Tags) == 0 {
-				m.Tags = parseVar(config.MainType, s, make(map[string]string))
-			}
 		}
 	}
 
@@ -105,21 +114,6 @@ func Convert(in io.Reader, input string, xCase transform.Case, config model.Conf
 
 	if len(m.Values) == 0 {
 		return model.Model{}, fmt.Errorf("Failed to find any values for %s in %s", config.MainType, input)
-	}
-
-	if len(m.Tags) > 0 {
-		if len(m.Tags) < len(m.Values) {
-			return model.Model{}, fmt.Errorf("Too few values in %s for %s (%s)", UsingTable, config.MainType, input)
-		}
-		var blanks []string
-		for key, tag := range m.Tags {
-			if tag == "" {
-				blanks = append(blanks, key)
-			}
-		}
-		if len(blanks) > 1 {
-			return model.Model{}, fmt.Errorf("Blank tag for %s %v in %s (%s)", config.MainType, blanks, UsingTable, input)
-		}
 	}
 
 	if e2 := m.CheckBadPrefixSuffix(); e2 != nil {

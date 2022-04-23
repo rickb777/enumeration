@@ -15,4 +15,6 @@ v gofmt -l -w -s *.go
 
 v ./example/generate.sh
 
+v go clean -testcache
+
 v go test ./...
