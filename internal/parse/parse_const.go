@@ -54,19 +54,14 @@ func parseConstSpec(s *scanner, items []constItem) []constItem {
 		case token.IDENT:
 			typeName := s.Lit
 			switch s.Scan() {
-			case token.COMMA:
-				// repeat
-
 			case token.ASSIGN:
 				restOfLine, tag := readToEndOfLine(s)
-				items = appendConstItems(items, ids, typeName, restOfLine, tag)
-				return items
+				return appendConstItems(items, ids, typeName, restOfLine, tag)
 			}
 
 		case token.ASSIGN:
 			restOfLine, tag := readToEndOfLine(s)
-			items = appendConstItems(items, ids, "", restOfLine, tag)
-			return items
+			return appendConstItems(items, ids, "", restOfLine, tag)
 		}
 	}
 
@@ -77,16 +72,15 @@ func parseIdentifierList(s *scanner) []string {
 	var ids []string
 	for s.Tok == token.IDENT {
 		ids = append(ids, s.Lit)
-		switch s.Scan() {
-		case token.COMMA:
-			s.Scan() // and repeat
-		default:
-			s.Unscan()
+
+		if s.Peek() != token.COMMA {
 			return ids
 		}
+
+		s.Scan() // the comma
+		s.Scan() // the next ident?
 	}
 
-	s.Unscan()
 	return ids
 }
 
@@ -130,7 +124,7 @@ func readToEndOfLine(s *scanner) (string, reflect.StructTag) {
 	}
 
 	var rest string
-	for s.Tok != token.SEMICOLON && s.Tok != token.COMMENT && s.Tok != token.EOF {
+	for s.Tok != token.SEMICOLON && s.Tok != token.EOF {
 		if rest != "" {
 			rest += " "
 		}
@@ -140,15 +134,6 @@ func readToEndOfLine(s *scanner) (string, reflect.StructTag) {
 			rest += s.Tok.String()
 		}
 		s.Scan()
-	}
-
-	if s.Tok == token.SEMICOLON {
-		s.Scan()
-	}
-
-	if s.Tok != token.COMMENT {
-		s.Unscan()
-		return rest, ""
 	}
 
 	comment := strings.TrimSpace(s.Lit)
