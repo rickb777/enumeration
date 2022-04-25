@@ -5,6 +5,7 @@ import (
 	"github.com/rickb777/enumeration/v2/enum"
 	"github.com/rickb777/enumeration/v2/internal/transform"
 	"go/types"
+	"reflect"
 	"strings"
 	"text/template"
 )
@@ -40,13 +41,13 @@ func ValuesOf(ss ...string) Values {
 	return vs
 }
 
-func (vs Values) Append(ss ...string) Values {
-	for _, s := range ss {
-		vs = append(vs, Value{
-			Identifier: s,
-			Shortened:  shortenIdentifier(s, Prefix, Suffix),
-		})
-	}
+func (vs Values) Append(s string, tag reflect.StructTag) Values {
+	vs = append(vs, Value{
+		Identifier: s,
+		Shortened:  shortenIdentifier(s, Prefix, Suffix),
+		JSON:       tag.Get("json"),
+		SQL:        tag.Get("sql"),
+	})
 	return vs
 }
 
@@ -91,7 +92,6 @@ type Model struct {
 	LcType, BaseType string
 	Version          string
 	Values           Values
-	DefaultValue     string
 	Case             transform.Case
 	S1, S2           string
 	TagTable         string

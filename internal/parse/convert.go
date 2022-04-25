@@ -5,65 +5,64 @@ import (
 	"github.com/rickb777/enumeration/v2/internal/model"
 	"github.com/rickb777/enumeration/v2/internal/transform"
 	"github.com/rickb777/enumeration/v2/internal/util"
-	"go/scanner"
 	"go/token"
 	"io"
-	"reflect"
+	"regexp"
 	"strings"
 )
 
 var UsingTable string
 var AliasTable string
+var MainType string
 var fset *token.FileSet
 
-func scan(s *scanner.Scanner) (token.Pos, token.Token, string) {
-	pos, tok, lit := s.Scan()
-	if lit == "" {
-		util.Debug("%-18s %s\n", fset.Position(pos), tok)
-	} else {
-		util.Debug("%-18s %-8s %q\n", fset.Position(pos), tok, lit)
-	}
-	return pos, tok, lit
-}
+var tagRE = regexp.MustCompile(`[a-z]:"`)
 
-func readToEndOfLine(s *scanner.Scanner, tok token.Token, lit string) (token.Token, string, reflect.StructTag) {
-	var rest string
-	for tok != token.SEMICOLON && tok != token.EOF {
-		if lit != "" {
-			rest += lit
-		} else {
-			rest += tok.String()
+func filterExportedItems(mainType string, ids []constItem) (exported model.Values, defaultValue string) {
+	var currentType string
+	exported = make(model.Values, 0, len(ids))
+
+	for _, v := range ids {
+		if v.typ == mainType {
+			if token.IsExported(v.id) {
+				exported = exported.Append(v.id, v.tag)
+				switch v.expression {
+				case "0", "iota":
+					defaultValue = v.id
+				}
+			}
+
+		} else if v.typ == "" && v.expression == "" && currentType == mainType {
+			if token.IsExported(v.id) {
+				exported = exported.Append(v.id, v.tag)
+			}
 		}
-		_, tok, lit = scan(s)
+
+		if v.typ != "" {
+			currentType = v.typ
+		}
 	}
 
-	switch tok {
-	case token.SEMICOLON, token.EOF:
-		return tok, rest, ""
-	}
-
-	_, tok, lit = scan(s)
-	if tok == token.COMMENT {
-		commentTag := reflect.StructTag(strings.TrimSpace(lit))
-		return 0, rest, commentTag
-	}
-
-	return tok, rest, ""
+	return exported, defaultValue
 }
 
-func newFileScanner(input string, src []byte) *scanner.Scanner {
-	s := new(scanner.Scanner)
-	fset = token.NewFileSet()                          // positions are relative to fset
-	file := fset.AddFile(input, fset.Base(), len(src)) // register input "file"
-	s.Init(file, src, nil /* no error handler */, 0)
-	return s
-}
+// https://go.dev/doc/go1.17_spec#Type_declarations (without type parameters)
+// TypeDecl = "type" ( TypeSpec | "(" { TypeSpec ";" } ")" ) .
+// TypeSpec = AliasDecl | TypeDef .
+//
+// TypeDef  = identifier Type .
+//
+// Type     = TypeName | TypeLit | "(" Type ")" .
+// TypeName = identifier | QualifiedIdent .
+// TypeLit  = ArrayType | StructType | PointerType | FunctionType | InterfaceType | SliceType | MapType | ChannelType .
 
 func Convert(in io.Reader, input string, xCase transform.Case, config model.Config) (model.Model, error) {
 	src, err := io.ReadAll(in)
 	if err != nil {
 		return model.Model{}, err
 	}
+
+	MainType = config.MainType
 
 	m := model.Model{
 		Config:     config,
@@ -78,33 +77,30 @@ func Convert(in io.Reader, input string, xCase transform.Case, config model.Conf
 	s := newFileScanner(input, src)
 
 	var foundMainType = false
-	var tok token.Token
-	var lit string
 	var constItems []constItem
 
-	for tok != token.EOF {
-		_, tok, lit = scan(s)
-		switch tok {
+	for s.Scan() != token.EOF {
+		switch s.Tok {
 		case token.TYPE:
-			_, tok, lit = scan(s)
-			if tok == token.IDENT && lit == config.MainType {
+			s.Scan()
+			if s.Tok == token.IDENT && s.Lit == MainType {
 				foundMainType = true
 
-				_, tok, lit = scan(s)
-				if tok == token.IDENT {
-					m.BaseType = lit
-					util.Debug("type %s %s\n", config.MainType, m.BaseType)
+				s.Scan()
+				if s.Tok == token.IDENT {
+					m.BaseType = s.Lit
+					util.Debug("type %s %s\n", MainType, m.BaseType)
 				}
 			}
 
 		case token.CONST:
-			constItems = parseConst(config.MainType, s, constItems)
+			constItems = parseConst(s, constItems)
 		}
 	}
 
-	m.Values, m.DefaultValue = filterExported(config.MainType, constItems)
+	m.Values, _ = filterExportedItems(config.MainType, constItems)
 
-	if s.ErrorCount > 0 {
+	if s.gs.ErrorCount > 0 {
 		return model.Model{}, fmt.Errorf("Syntax error in %s", input)
 	}
 

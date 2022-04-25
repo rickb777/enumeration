@@ -1,145 +1,165 @@
 package parse
 
 import (
-	"github.com/rickb777/enumeration/v2/internal/model"
-	"go/scanner"
 	"go/token"
+	"reflect"
+	"strings"
 )
 
 type constItem struct {
-	id, typ, number string
+	id, typ, expression string
+	tag                 reflect.StructTag
 }
 
-func appendConstItems(values []constItem, ids []string, typ string, number string) []constItem {
-	for _, id := range ids {
-		values = append(values, constItem{id: id, typ: typ, number: number})
+func appendConstItems(items []constItem, ids []string, typ string, number string, tag reflect.StructTag) []constItem {
+	if len(ids) == 1 {
+		// include the tag
+		return append(items, constItem{id: ids[0], typ: typ, expression: number, tag: tag})
 	}
-	return values
+
+	// don't include the tag
+	for _, id := range ids {
+		items = append(items, constItem{id: id, typ: typ, expression: number})
+	}
+	return items
 }
 
-func parseConstBlock(mainType string, s *scanner.Scanner, values []constItem) []constItem {
-	var iotaType, restOfLine string
-	var tok token.Token
-	var lit1, lit2, lit3, lit4 string
-	var ids []string
+//-------------------------------------------------------------------------------------------------
+// https://go.dev/doc/go1.17_spec#Constant_declarations
+// ConstDecl      = "const" ( ConstSpec | "(" { ConstSpec ";" } ")" ) .
+// ConstSpec      = IdentifierList [ [ Type ] "=" ExpressionList ] .
+//
+// IdentifierList = identifier { "," identifier } .
+// ExpressionList = Expression { "," Expression } .
 
-	for {
-		_, tok, lit1 = scan(s)
-		switch tok {
+func parseConst(s *scanner, items []constItem) []constItem {
+	for s.Tok != token.EOF {
+		switch s.Scan() {
 		case token.IDENT:
-			ids = append(ids, lit1)
-			_, tok, lit2 = scan(s)
-			switch tok {
-			case token.IDENT:
-				_, tok, _ = scan(s)
-				if tok == token.ASSIGN {
-					_, tok, lit3 = scan(s)
-					switch tok {
-					case token.IDENT, token.INT, token.FLOAT:
-						tok, restOfLine, _ = readToEndOfLine(s, tok, lit3)
-						values = appendConstItems(values, ids, lit2, restOfLine)
-						if lit3 == "iota" {
-							iotaType = lit2
-						} else {
-							iotaType = ""
-						}
-					}
-					ids = nil
-				}
+			items = parseConstSpec(s, items)
 
+		case token.LPAREN:
+			return parseConstBlock(s, items)
+		}
+	}
+	return items
+}
+
+func parseConstSpec(s *scanner, items []constItem) []constItem {
+	ids := parseIdentifierList(s)
+
+	// parse the Type and the ExpressionList
+	for s.Scan() != token.EOF {
+		switch s.Tok {
+		case token.IDENT:
+			typeName := s.Lit
+			switch s.Scan() {
 			case token.COMMA:
-				for tok == token.COMMA {
-					_, tok, lit2 = scan(s)
-					switch tok {
-					case token.IDENT:
-						ids = append(ids, lit2)
-						_, tok, lit3 = scan(s)
-					default:
-						readToEndOfLine(s, tok, lit2)
-					}
+				// repeat
+
+			case token.ASSIGN:
+				restOfLine, tag := readToEndOfLine(s)
+				items = appendConstItems(items, ids, typeName, restOfLine, tag)
+				return items
+			}
+
+		case token.ASSIGN:
+			restOfLine, tag := readToEndOfLine(s)
+			items = appendConstItems(items, ids, "", restOfLine, tag)
+			return items
+		}
+	}
+
+	return items
+}
+
+func parseIdentifierList(s *scanner) []string {
+	var ids []string
+	for s.Tok == token.IDENT {
+		ids = append(ids, s.Lit)
+		switch s.Scan() {
+		case token.COMMA:
+			s.Scan() // and repeat
+		default:
+			s.Unscan()
+			return ids
+		}
+	}
+
+	s.Unscan()
+	return ids
+}
+
+func parseConstBlock(s *scanner, items []constItem) []constItem {
+	for s.Scan() != token.EOF {
+		switch s.Tok {
+		case token.IDENT:
+			ids := parseIdentifierList(s)
+
+			switch s.Scan() {
+			case token.IDENT:
+				typeName := s.Lit
+				if s.Scan() == token.ASSIGN {
+					restOfLine, tag := readToEndOfLine(s)
+					items = appendConstItems(items, ids, typeName, restOfLine, tag)
+					ids = nil
+				} else {
+					readToEndOfLine(s) // discard likely compilation error
 				}
 
-				if tok == token.IDENT {
-					_, tok, _ = scan(s)
-					if tok == token.ASSIGN {
-						_, tok, lit4 = scan(s)
-						values = appendConstItems(values, ids, lit3, lit4)
-					}
-				}
+			case token.SEMICOLON:
+				restOfLine, tag := readToEndOfLine(s)
+				items = appendConstItems(items, ids, "", restOfLine, tag)
 				ids = nil
-
-			default:
-				readToEndOfLine(s, tok, lit2)
 			}
 
 		case token.RPAREN, token.EOF:
-			if len(ids) > 0 && iotaType != "" {
-				values = appendConstItems(values, ids, iotaType, "")
-			}
-			return values
+			return items
 
-		default:
-			readToEndOfLine(s, tok, lit1)
+			//default:
+			//	_, _ = readToEndOfLine(s)
 		}
 	}
+
+	return items
 }
 
-func parseConst(mainType string, s *scanner.Scanner, values []constItem) []constItem {
-	var tok token.Token
-	var lit1, lit2, lit3 string
-	_, tok, lit1 = scan(s)
-	switch tok {
-	case token.IDENT:
-		_, tok, lit2 = scan(s)
-		switch tok {
-		case token.IDENT:
-			if lit2 == mainType {
-				_, tok, _ = scan(s)
-				if tok == token.ASSIGN {
-					_, tok, lit3 = scan(s)
-					values = append(values, constItem{id: lit1, typ: lit2, number: lit3})
-				}
-			}
-			readToEndOfLine(s, tok, "")
-		}
-	case token.LPAREN:
-		return parseConstBlock(mainType, s, values)
-	}
-	return values
-}
-
-func filterExported(mainType string, ids []constItem) (exported model.Values, defaultValue string) {
-	var currentType string
-	var hasIota bool
-	exported = make(model.Values, 0, len(ids))
-
-	for _, v := range ids {
-		if v.typ == mainType {
-			if token.IsExported(v.id) {
-				exported = exported.Append(v.id)
-				switch v.number {
-				case "0", "iota":
-					defaultValue = v.id
-				}
-			}
-
-			if v.number == "iota" {
-				hasIota = true
-			} else if v.typ != "" {
-				hasIota = false
-			}
-
-		} else if v.typ == "" && currentType == mainType {
-			if token.IsExported(v.id) {
-				exported = exported.Append(v.id)
-			}
-		}
-
-		if hasIota && v.typ != "" {
-			currentType = v.typ
-			hasIota = false
-		}
+func readToEndOfLine(s *scanner) (string, reflect.StructTag) {
+	if s.Tok == token.ASSIGN {
+		s.Scan()
 	}
 
-	return exported, defaultValue
+	var rest string
+	for s.Tok != token.SEMICOLON && s.Tok != token.COMMENT && s.Tok != token.EOF {
+		if rest != "" {
+			rest += " "
+		}
+		if s.Lit != "" {
+			rest += s.Lit
+		} else {
+			rest += s.Tok.String()
+		}
+		s.Scan()
+	}
+
+	if s.Tok == token.SEMICOLON {
+		s.Scan()
+	}
+
+	if s.Tok != token.COMMENT {
+		s.Unscan()
+		return rest, ""
+	}
+
+	comment := strings.TrimSpace(s.Lit)
+	if strings.HasPrefix(comment, "//") {
+		comment = strings.TrimSpace(comment[2:])
+	}
+
+	var commentTag reflect.StructTag
+	if tagRE.MatchString(comment) {
+		commentTag = reflect.StructTag(comment)
+	}
+
+	return rest, commentTag
 }

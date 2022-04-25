@@ -10,7 +10,47 @@ import (
 	"testing"
 )
 
-const enum1 = `
+const enumBlock1 = `
+type Sweet int
+const (
+	Mars Sweet = iota + 1
+	Bounty
+	Snickers
+	Kitkat
+)
+`
+
+func TestConvertBlock1(t *testing.T) {
+	RegisterTestingT(t)
+	util.Dbg = testing.Verbose()
+	s := bytes.NewBufferString(enumBlock1)
+	m, err := Convert(s, "filename.go", transform.Upper,
+		model.Config{
+			MainType:   "Sweet",
+			Plural:     "Sweets",
+			Pkg:        "confectionary",
+			IgnoreCase: false,
+			Unsnake:    false,
+		})
+	Ω(err).Should(BeNil())
+	Ω(m).Should(DeepEqual(model.Model{
+		Config: model.Config{
+			MainType: "Sweet",
+			Plural:   "Sweets",
+			Pkg:      "confectionary",
+		},
+		LcType:   "sweet",
+		BaseType: "int",
+		Version:  util.Version,
+		Values:   model.ValuesOf("Mars", "Bounty", "Snickers", "Kitkat"),
+		Case:     transform.Upper,
+		S1:       "",
+		S2:       "",
+		TagTable: "",
+	}))
+}
+
+const enumBlock2 = `
 /* inline comments are allowed */
 type Sweet int // <-- buried here
 const (
@@ -25,10 +65,10 @@ const (
 // as are blank lines
 `
 
-func TestScanValuesHappy(t *testing.T) {
+func TestConvertBlock2(t *testing.T) {
 	RegisterTestingT(t)
 	util.Dbg = testing.Verbose()
-	s := bytes.NewBufferString(enum1)
+	s := bytes.NewBufferString(enumBlock2)
 	m, err := Convert(s, "filename.go", transform.Stet,
 		model.Config{
 			MainType:   "Sweet",
@@ -46,19 +86,58 @@ func TestScanValuesHappy(t *testing.T) {
 			IgnoreCase: true,
 			Unsnake:    true,
 		},
-		LcType:       "sweet",
-		BaseType:     "int",
-		Version:      util.Version,
-		Values:       model.ValuesOf("Mars", "Bounty", "Snickers", "Kitkat"),
-		DefaultValue: "",
-		Case:         0,
-		S1:           "",
-		S2:           "",
-		TagTable:     "",
+		LcType:   "sweet",
+		BaseType: "int",
+		Version:  util.Version,
+		Values:   model.ValuesOf("Mars", "Bounty", "Snickers", "Kitkat"),
+		Case:     0,
+		S1:       "",
+		S2:       "",
+		TagTable: "",
 	}))
 }
 
-const enum3 = `
+const enumBlock3 = `
+type Sweet int
+
+const (
+	Mars     Sweet = 0 // zero -> default
+	Bounty   Sweet = 1
+	Snickers Sweet = 2
+	Kitkat   Sweet = 3
+	Ignore         = "nothing"
+)
+`
+
+func TestConvertBlock3(t *testing.T) {
+	RegisterTestingT(t)
+	util.Dbg = testing.Verbose()
+	s := bytes.NewBufferString(enumBlock3)
+	m, err := Convert(s, "filename.go", transform.Upper,
+		model.Config{
+			MainType: "Sweet",
+			Plural:   "Sweets",
+			Pkg:      "confectionary",
+		})
+	Ω(err).Should(BeNil())
+	Ω(m).Should(DeepEqual(model.Model{
+		Config: model.Config{
+			MainType: "Sweet",
+			Plural:   "Sweets",
+			Pkg:      "confectionary",
+		},
+		LcType:   "sweet",
+		BaseType: "int",
+		Version:  util.Version,
+		Values:   model.ValuesOf("Mars", "Bounty", "Snickers", "Kitkat"),
+		Case:     transform.Upper,
+		S1:       "",
+		S2:       "",
+		TagTable: "",
+	}))
+}
+
+const enumBlock4 = `
 type IgnoreMe int
 var s = "123"
 type Sweet int // <-- buried here
@@ -94,13 +173,13 @@ var sweetStrings = map[Sweet]string{
 }
 `
 
-func TestConvertHappy3(t *testing.T) {
+func TestConvertBlock4(t *testing.T) {
 	RegisterTestingT(t)
 	UsingTable = "sweetStrings"
 	defer func() { UsingTable = "" }()
 
 	util.Dbg = testing.Verbose()
-	s := bytes.NewBufferString(enum3)
+	s := bytes.NewBufferString(enumBlock4)
 	m, err := Convert(s, "filename.go", transform.Stet,
 		model.Config{
 			MainType:   "Sweet",
@@ -110,6 +189,13 @@ func TestConvertHappy3(t *testing.T) {
 			Unsnake:    true,
 		})
 	Ω(err).Should(BeNil())
+
+	values := model.ValuesOf("Mars", "Bounty", "Snickers", "Kitkat")
+	values[0].JSON = "mmm"
+	values[1].JSON = "bbb"
+	values[2].JSON = "sss"
+	values[3].JSON = "kkk"
+
 	Ω(m).Should(DeepEqual(model.Model{
 		Config: model.Config{
 			MainType:   "Sweet",
@@ -118,29 +204,30 @@ func TestConvertHappy3(t *testing.T) {
 			IgnoreCase: true,
 			Unsnake:    true,
 		},
-		LcType:       "sweet",
-		BaseType:     "int",
-		Version:      util.Version,
-		Values:       model.ValuesOf("Mars", "Bounty", "Snickers", "Kitkat"),
-		DefaultValue: "",
-		Case:         0,
-		S1:           "",
-		S2:           "",
-		TagTable:     "sweetStrings",
+		LcType:   "sweet",
+		BaseType: "int",
+		Version:  util.Version,
+		Values:   values,
+		Case:     0,
+		S1:       "",
+		S2:       "",
+		TagTable: "sweetStrings",
 	}))
 }
 
-const enum4 = `
+//-------------------------------------------------------------------------------------------------
+
+const enumBlockMultiple = `
 type Sweet int
 const (
 	Mars, Bounty, Snickers, Kitkat Sweet = 1, 2, 3, 4
 )
 `
 
-func TestConvertHappy4(t *testing.T) {
+func TestConvertBlockMultiple(t *testing.T) {
 	RegisterTestingT(t)
 	util.Dbg = testing.Verbose()
-	s := bytes.NewBufferString(enum4)
+	s := bytes.NewBufferString(enumBlockMultiple)
 	m, err := Convert(s, "filename.go", transform.Upper,
 		model.Config{
 			MainType:   "Sweet",
@@ -156,60 +243,20 @@ func TestConvertHappy4(t *testing.T) {
 			Plural:   "Sweets",
 			Pkg:      "confectionary",
 		},
-		LcType:       "sweet",
-		BaseType:     "int",
-		Version:      util.Version,
-		Values:       model.ValuesOf("Mars", "Bounty", "Snickers", "Kitkat"),
-		DefaultValue: "",
-		Case:         transform.Upper,
-		S1:           "",
-		S2:           "",
-		TagTable:     "",
+		LcType:   "sweet",
+		BaseType: "int",
+		Version:  util.Version,
+		Values:   model.ValuesOf("Mars", "Bounty", "Snickers", "Kitkat"),
+		Case:     transform.Upper,
+		S1:       "",
+		S2:       "",
+		TagTable: "",
 	}))
 }
 
-const enum5 = `
-type Sweet int
-const (
-	Mars Sweet = iota + 1
-	Bounty
-	Snickers
-	Kitkat
-)
-`
+//-------------------------------------------------------------------------------------------------
 
-func TestConvertHappy5(t *testing.T) {
-	RegisterTestingT(t)
-	util.Dbg = testing.Verbose()
-	s := bytes.NewBufferString(enum5)
-	m, err := Convert(s, "filename.go", transform.Upper,
-		model.Config{
-			MainType:   "Sweet",
-			Plural:     "Sweets",
-			Pkg:        "confectionary",
-			IgnoreCase: false,
-			Unsnake:    false,
-		})
-	Ω(err).Should(BeNil())
-	Ω(m).Should(DeepEqual(model.Model{
-		Config: model.Config{
-			MainType: "Sweet",
-			Plural:   "Sweets",
-			Pkg:      "confectionary",
-		},
-		LcType:       "sweet",
-		BaseType:     "int",
-		Version:      util.Version,
-		Values:       model.ValuesOf("Mars", "Bounty", "Snickers", "Kitkat"),
-		DefaultValue: "",
-		Case:         transform.Upper,
-		S1:           "",
-		S2:           "",
-		TagTable:     "",
-	}))
-}
-
-const enum6 = `
+const enumSeparate1 = `
 type Sweet int
 
 const Mars     Sweet = 1
@@ -219,10 +266,10 @@ const Snickers Sweet = 4
 const Kitkat   Sweet = 5
 `
 
-func TestConvertHappy6(t *testing.T) {
+func TestConvertSeparate1(t *testing.T) {
 	RegisterTestingT(t)
 	util.Dbg = testing.Verbose()
-	s := bytes.NewBufferString(enum6)
+	s := bytes.NewBufferString(enumSeparate1)
 	m, err := Convert(s, "filename.go", transform.Upper,
 		model.Config{
 			MainType: "Sweet",
@@ -236,33 +283,32 @@ func TestConvertHappy6(t *testing.T) {
 			Plural:   "Sweets",
 			Pkg:      "confectionary",
 		},
-		LcType:       "sweet",
-		BaseType:     "int",
-		Version:      util.Version,
-		Values:       model.ValuesOf("Mars", "Bounty", "Snickers", "Kitkat"),
-		DefaultValue: "",
-		Case:         transform.Upper,
-		S1:           "",
-		S2:           "",
-		TagTable:     "",
+		LcType:   "sweet",
+		BaseType: "int",
+		Version:  util.Version,
+		Values:   model.ValuesOf("Mars", "Bounty", "Snickers", "Kitkat"),
+		Case:     transform.Upper,
+		S1:       "",
+		S2:       "",
+		TagTable: "",
 	}))
 }
 
-const enum7 = `
+const enumSeparate2 = `
 type Sweet int
 
-const Mars     Sweet = 0 // zero -> default
-const Bounty   Sweet = 1
-const Other    int   = 5
-const Snickers Sweet = 2
-const Kitkat   Sweet = 3
-const Ignore         = 6
+const Mars     Sweet = 0 // json:"toffee" zero -> default
+const Bounty   Sweet = 1 // json:"coconut"
+const Other    int   = 5 // json:"hazlenut"
+const Snickers Sweet = 2 // json:"peanut"
+const Kitkat   Sweet = 3 // json:"biscuit"
+const Ignore         = 6 // json:"orange"
 `
 
-func TestConvertHappy7(t *testing.T) {
+func TestConvertSeparate2(t *testing.T) {
 	RegisterTestingT(t)
 	util.Dbg = testing.Verbose()
-	s := bytes.NewBufferString(enum7)
+	s := bytes.NewBufferString(enumSeparate2)
 	m, err := Convert(s, "filename.go", transform.Upper,
 		model.Config{
 			MainType: "Sweet",
@@ -270,40 +316,39 @@ func TestConvertHappy7(t *testing.T) {
 			Pkg:      "confectionary",
 		})
 	Ω(err).Should(BeNil())
+
+	var expected model.Values
+	expected = expected.Append("Mars", `json:"toffee"`)
+	expected = expected.Append("Bounty", `json:"coconut"`)
+	expected = expected.Append("Snickers", `json:"peanut"`)
+	expected = expected.Append("Kitkat", `json:"biscuit"`)
+
 	Ω(m).Should(DeepEqual(model.Model{
 		Config: model.Config{
 			MainType: "Sweet",
 			Plural:   "Sweets",
 			Pkg:      "confectionary",
 		},
-		LcType:       "sweet",
-		BaseType:     "int",
-		Version:      util.Version,
-		Values:       model.ValuesOf("Mars", "Bounty", "Snickers", "Kitkat"),
-		DefaultValue: "Mars",
-		Case:         transform.Upper,
-		S1:           "",
-		S2:           "",
-		TagTable:     "",
+		LcType:   "sweet",
+		BaseType: "int",
+		Version:  util.Version,
+		Values:   expected,
+		Case:     transform.Upper,
+		S1:       "",
+		S2:       "",
+		TagTable: "",
 	}))
 }
 
-const enum8 = `
+const enumSeparateMultiple = `
 type Sweet int
-
-const (
-	Mars     Sweet = 0 // zero -> default
-	Bounty   Sweet = 1
-	Snickers Sweet = 2
-	Kitkat   Sweet = 3
-	Ignore         = "nothing"
-)
+const Mars, Bounty, Snickers, Kitkat Sweet = 1, 2, 3, 4
 `
 
-func TestConvertHappy8(t *testing.T) {
+func TestConvertSeparateMultiple(t *testing.T) {
 	RegisterTestingT(t)
 	util.Dbg = testing.Verbose()
-	s := bytes.NewBufferString(enum8)
+	s := bytes.NewBufferString(enumSeparateMultiple)
 	m, err := Convert(s, "filename.go", transform.Upper,
 		model.Config{
 			MainType: "Sweet",
@@ -317,19 +362,20 @@ func TestConvertHappy8(t *testing.T) {
 			Plural:   "Sweets",
 			Pkg:      "confectionary",
 		},
-		LcType:       "sweet",
-		BaseType:     "int",
-		Version:      util.Version,
-		Values:       model.ValuesOf("Mars", "Bounty", "Snickers", "Kitkat"),
-		DefaultValue: "Mars",
-		Case:         transform.Upper,
-		S1:           "",
-		S2:           "",
-		TagTable:     "",
+		LcType:   "sweet",
+		BaseType: "int",
+		Version:  util.Version,
+		Values:   model.ValuesOf("Mars", "Bounty", "Snickers", "Kitkat"),
+		Case:     transform.Upper,
+		S1:       "",
+		S2:       "",
+		TagTable: "",
 	}))
 }
 
-const enumE1 = `
+//-------------------------------------------------------------------------------------------------
+
+const enumError1 = `
 type IgnoreMe int
 // type Sweet is missing
 const (
@@ -347,7 +393,7 @@ const (
 
 func TestConvertError1(t *testing.T) {
 	RegisterTestingT(t)
-	s := bytes.NewBufferString(enumE1)
+	s := bytes.NewBufferString(enumError1)
 	_, err := Convert(s, "filename.go", transform.Stet,
 		model.Config{
 			MainType: "Sweet",
