@@ -13,10 +13,6 @@ import (
 	"strings"
 )
 
-const petEnumStrings = "catdogmouseelephantkoala bear"
-
-var petEnumIndex = [...]uint16{0, 3, 6, 11, 19, 29}
-
 // AllPets lists all 5 values in order.
 var AllPets = []Pet{
 	MyCat, MyDog, MyMouse, MyElephant,
@@ -29,14 +25,37 @@ var AllPetEnums = enum.IntEnums{
 	MyKoala_Bear,
 }
 
-// String returns the literal string representation of a Pet, which is
-// the same as the const identifier.
-func (i Pet) String() string {
+const (
+	petEnumStrings = "catdogmouseelephantkoala bear"
+)
+
+var (
+	petEnumIndex = [...]uint16{0, 3, 6, 11, 19, 29}
+)
+
+func (i Pet) toString(concats string, indexes []uint16) string {
 	o := i.Ordinal()
 	if o < 0 || o >= len(AllPets) {
 		return fmt.Sprintf("Pet(%d)", i)
 	}
-	return petEnumStrings[petEnumIndex[o]:petEnumIndex[o+1]]
+	return concats[indexes[o]:indexes[o+1]]
+}
+
+// parseString attempts to match an identifier.
+func (v *Pet) parseString(s string, concats string, indexes []uint16) (ok bool) {
+	var i0 uint16 = 0
+
+	for j := 1; j < len(indexes); j++ {
+		i1 := indexes[j]
+		p := concats[i0:i1]
+		if s == p {
+			*v = AllPets[j-1]
+			return true
+		}
+		i0 = i1
+	}
+	*v, ok = petAliases[s]
+	return ok
 }
 
 var petTagsInverse = map[string]Pet{}
@@ -73,6 +92,12 @@ func (i Pet) Tag() string {
 		return s
 	}
 	return i.String()
+}
+
+// String returns the literal string representation of a Pet, which is
+// the same as the const identifier.
+func (i Pet) String() string {
+	return i.toString(petEnumStrings, petEnumIndex[:])
 }
 
 // Ordinal returns the ordinal number of a Pet. This is an integer counting
@@ -141,11 +166,11 @@ func (v *Pet) parse(in string, rep enum.Representation) error {
 	s := strings.ToLower(strings.ReplaceAll(in, "_", " "))
 
 	if rep == enum.Identifier {
-		if v.parseIdentifier(s) || v.parseTag(s) {
+		if v.parseString(s, petEnumStrings, petEnumIndex[:]) || v.parseTag(s) {
 			return nil
 		}
 	} else {
-		if v.parseTag(s) || v.parseIdentifier(s) {
+		if v.parseTag(s) || v.parseString(s, petEnumStrings, petEnumIndex[:]) {
 			return nil
 		}
 	}
@@ -176,23 +201,6 @@ func (v *Pet) parseOrdinal(s string) (ok bool) {
 // parseTag attempts to match an entry in petTagsInverse
 func (v *Pet) parseTag(s string) (ok bool) {
 	*v, ok = petTagsInverse[s]
-	return ok
-}
-
-// parseIdentifier attempts to match an identifier.
-func (v *Pet) parseIdentifier(s string) (ok bool) {
-	var i0 uint16 = 0
-
-	for j := 1; j < len(petEnumIndex); j++ {
-		i1 := petEnumIndex[j]
-		p := petEnumStrings[i0:i1]
-		if s == p {
-			*v = AllPets[j-1]
-			return true
-		}
-		i0 = i1
-	}
-	*v, ok = petAliases[s]
 	return ok
 }
 
@@ -276,6 +284,10 @@ func (i *Pet) UnmarshalJSON(text []byte) error {
 		return nil
 	}
 	s = strings.Trim(s, "\"")
+	return i.unmarshalJSON(s)
+}
+
+func (i *Pet) unmarshalJSON(s string) error {
 	return i.Parse(s)
 }
 

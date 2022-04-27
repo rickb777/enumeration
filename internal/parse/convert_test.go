@@ -44,9 +44,7 @@ func TestConvertBlock1(t *testing.T) {
 		Version:  util.Version,
 		Values:   model.ValuesOf("Mars", "Bounty", "Snickers", "Kitkat"),
 		Case:     transform.Upper,
-		S1:       "",
-		S2:       "",
-		TagTable: "",
+		Extra:    make(map[string]string),
 	}))
 }
 
@@ -90,10 +88,7 @@ func TestConvertBlock2(t *testing.T) {
 		BaseType: "int",
 		Version:  util.Version,
 		Values:   model.ValuesOf("Mars", "Bounty", "Snickers", "Kitkat"),
-		Case:     0,
-		S1:       "",
-		S2:       "",
-		TagTable: "",
+		Extra:    make(map[string]string),
 	}))
 }
 
@@ -131,9 +126,7 @@ func TestConvertBlock3(t *testing.T) {
 		Version:  util.Version,
 		Values:   model.ValuesOf("Mars", "Bounty", "Snickers", "Kitkat"),
 		Case:     transform.Upper,
-		S1:       "",
-		S2:       "",
-		TagTable: "",
+		Extra:    make(map[string]string),
 	}))
 }
 
@@ -208,10 +201,8 @@ func TestConvertBlock4(t *testing.T) {
 		BaseType: "int",
 		Version:  util.Version,
 		Values:   values,
-		Case:     0,
-		S1:       "",
-		S2:       "",
 		TagTable: "sweetStrings",
+		Extra:    make(map[string]string),
 	}))
 }
 
@@ -248,9 +239,7 @@ func TestConvertBlockMultiple(t *testing.T) {
 		Version:  util.Version,
 		Values:   model.ValuesOf("Mars", "Bounty", "Snickers", "Kitkat"),
 		Case:     transform.Upper,
-		S1:       "",
-		S2:       "",
-		TagTable: "",
+		Extra:    make(map[string]string),
 	}))
 }
 
@@ -288,9 +277,7 @@ func TestConvertSeparate1(t *testing.T) {
 		Version:  util.Version,
 		Values:   model.ValuesOf("Mars", "Bounty", "Snickers", "Kitkat"),
 		Case:     transform.Upper,
-		S1:       "",
-		S2:       "",
-		TagTable: "",
+		Extra:    make(map[string]string),
 	}))
 }
 
@@ -334,9 +321,7 @@ func TestConvertSeparate2(t *testing.T) {
 		Version:  util.Version,
 		Values:   expected,
 		Case:     transform.Upper,
-		S1:       "",
-		S2:       "",
-		TagTable: "",
+		Extra:    make(map[string]string),
 	}))
 }
 
@@ -367,9 +352,7 @@ func TestConvertSeparateMultiple(t *testing.T) {
 		Version:  util.Version,
 		Values:   model.ValuesOf("Mars", "Bounty", "Snickers", "Kitkat"),
 		Case:     transform.Upper,
-		S1:       "",
-		S2:       "",
-		TagTable: "",
+		Extra:    make(map[string]string),
 	}))
 }
 

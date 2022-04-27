@@ -93,9 +93,9 @@ type Model struct {
 	Version          string
 	Values           Values
 	Case             transform.Case
-	S1, S2           string
 	TagTable         string
 	AliasTable       string
+	Extra            map[string]string
 }
 
 func (m Model) CheckBadPrefixSuffix() error {
@@ -106,7 +106,7 @@ func (m Model) CheckBadPrefixSuffix() error {
 	for _, v := range m.Values {
 		s := shortenIdentifier(v.Identifier, Prefix, Suffix)
 		if s == "" {
-			return fmt.Errorf(v.Identifier + ": cannot strip prefix/suffix when the identifier matches exactly")
+			return fmt.Errorf("%s %s: cannot strip prefix/suffix when the identifier matches exactly", m.MainType, v.Identifier)
 		}
 	}
 
@@ -121,7 +121,7 @@ func (m Model) CheckBadPrefixSuffix() error {
 		if any {
 			for _, v := range m.Values {
 				if !strings.HasPrefix(v.Identifier, Prefix) {
-					return fmt.Errorf("%s: all identifiers must have the prefix %s (or none)", v, Prefix)
+					return fmt.Errorf("%s %s: all identifiers must have the prefix %s (or none)", m.MainType, v, Prefix)
 				}
 			}
 		}
@@ -138,13 +138,53 @@ func (m Model) CheckBadPrefixSuffix() error {
 		if any {
 			for _, v := range m.Values {
 				if !strings.HasSuffix(v.Identifier, Suffix) {
-					return fmt.Errorf("%s: all identifiers must have the suffix %s (or none)", v, Suffix)
+					return fmt.Errorf("%s %s: all identifiers must have the suffix %s (or none)", m.MainType, v, Suffix)
 				}
 			}
 		}
 	}
 
 	return nil
+}
+
+func (m Model) CheckBadTags() error {
+	jsonCount := 0
+	for _, v := range m.Values {
+		if v.JSON != "" {
+			jsonCount++
+		}
+	}
+
+	sqlCount := 0
+	for _, v := range m.Values {
+		if v.SQL != "" {
+			sqlCount++
+		}
+	}
+
+	if 0 < jsonCount && jsonCount < len(m.Values) {
+		return fmt.Errorf("%s: some identifiers don't have the `json` tag", m.MainType)
+	}
+
+	if 0 < sqlCount && sqlCount < len(m.Values) {
+		return fmt.Errorf("%s: some identifiers don't have the `sql` tag", m.MainType)
+	}
+
+	return nil
+}
+
+func (m Model) HasJSONTags() bool {
+	if len(m.Values) == 0 {
+		return false
+	}
+	return m.Values[0].JSON != ""
+}
+
+func (m Model) HasSQLTags() bool {
+	if len(m.Values) == 0 {
+		return false
+	}
+	return m.Values[0].SQL != ""
 }
 
 func (m Model) Asymmetric() bool {
@@ -183,6 +223,9 @@ func (m Model) expression(s string) string {
 func (m Model) FnMap() template.FuncMap {
 	fns := make(template.FuncMap)
 	fns["transform"] = m.expression
+	fns["concat"] = func(ss []string) string {
+		return strings.Join(ss, "")
+	}
 	return fns
 }
 

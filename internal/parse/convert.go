@@ -18,34 +18,6 @@ var fset *token.FileSet
 
 var tagRE = regexp.MustCompile(`[a-z]:"`)
 
-func filterExportedItems(mainType string, ids []constItem) (exported model.Values, defaultValue string) {
-	var currentType string
-	exported = make(model.Values, 0, len(ids))
-
-	for _, v := range ids {
-		if v.typ == mainType {
-			if token.IsExported(v.id) {
-				exported = exported.Append(v.id, v.tag)
-				switch v.expression {
-				case "0", "iota":
-					defaultValue = v.id
-				}
-			}
-
-		} else if v.typ == "" && v.expression == "" && currentType == mainType {
-			if token.IsExported(v.id) {
-				exported = exported.Append(v.id, v.tag)
-			}
-		}
-
-		if v.typ != "" {
-			currentType = v.typ
-		}
-	}
-
-	return exported, defaultValue
-}
-
 // https://go.dev/doc/go1.17_spec#Type_declarations (without type parameters)
 // TypeDecl = "type" ( TypeSpec | "(" { TypeSpec ";" } ")" ) .
 // TypeSpec = AliasDecl | TypeDef .
@@ -72,6 +44,7 @@ func Convert(in io.Reader, input string, xCase transform.Case, config model.Conf
 		Case:       xCase,
 		TagTable:   UsingTable,
 		AliasTable: AliasTable,
+		Extra:      make(map[string]string),
 	}
 
 	s := newFileScanner(input, src)
@@ -116,5 +89,37 @@ func Convert(in io.Reader, input string, xCase transform.Case, config model.Conf
 		return model.Model{}, e2
 	}
 
+	if e2 := m.CheckBadTags(); e2 != nil {
+		return model.Model{}, e2
+	}
+
 	return m, nil
+}
+
+func filterExportedItems(mainType string, ids []constItem) (exported model.Values, defaultValue string) {
+	var currentType string
+	exported = make(model.Values, 0, len(ids))
+
+	for _, v := range ids {
+		if v.typ == mainType {
+			if token.IsExported(v.id) {
+				exported = exported.Append(v.id, v.tag)
+				switch v.expression {
+				case "0", "iota":
+					defaultValue = v.id
+				}
+			}
+
+		} else if v.typ == "" && v.expression == "" && currentType == mainType {
+			if token.IsExported(v.id) {
+				exported = exported.Append(v.id, v.tag)
+			}
+		}
+
+		if v.typ != "" {
+			currentType = v.typ
+		}
+	}
+
+	return exported, defaultValue
 }

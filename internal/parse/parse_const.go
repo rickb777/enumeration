@@ -46,7 +46,7 @@ func parseConst(s *scanner, items []constItem) []constItem {
 }
 
 func parseConstSpec(s *scanner, items []constItem) []constItem {
-	ids := parseIdentifierList(s)
+	ids := parseStringList(s)
 
 	// parse the Type and the ExpressionList
 	for s.Scan() != token.EOF {
@@ -68,7 +68,7 @@ func parseConstSpec(s *scanner, items []constItem) []constItem {
 	return items
 }
 
-func parseIdentifierList(s *scanner) []string {
+func parseStringList(s *scanner) []string {
 	var ids []string
 	for s.Tok == token.IDENT {
 		ids = append(ids, s.Lit)
@@ -88,7 +88,7 @@ func parseConstBlock(s *scanner, items []constItem) []constItem {
 	for s.Scan() != token.EOF {
 		switch s.Tok {
 		case token.IDENT:
-			ids := parseIdentifierList(s)
+			ids := parseStringList(s)
 
 			switch s.Scan() {
 			case token.IDENT:

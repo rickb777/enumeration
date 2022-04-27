@@ -100,7 +100,7 @@ func (v *Representation) parse(in string, rep Representation) error {
 
 	s := strings.ToLower(in)
 
-	if v.parseIdentifier(s) {
+	if v.parseString(s) {
 		return nil
 	}
 
@@ -127,8 +127,8 @@ func (v *Representation) parseOrdinal(s string) (ok bool) {
 	return false
 }
 
-// parseIdentifier attempts to match an identifier.
-func (v *Representation) parseIdentifier(s string) (ok bool) {
+// parseString attempts to match an identifier.
+func (v *Representation) parseString(s string) (ok bool) {
 	var i0 uint16 = 0
 
 	for j := 1; j < len(representationEnumIndex); j++ {

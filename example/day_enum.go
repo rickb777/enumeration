@@ -12,10 +12,6 @@ import (
 	"strings"
 )
 
-const dayEnumStrings = "SundayMondayTuesdayWednesdayThursdayFridaySaturday"
-
-var dayEnumIndex = [...]uint16{0, 6, 12, 19, 28, 36, 42, 50}
-
 // AllDays lists all 7 values in order.
 var AllDays = []Day{
 	Sunday, Monday, Tuesday, Wednesday,
@@ -28,19 +24,47 @@ var AllDayEnums = enum.IntEnums{
 	Thursday, Friday, Saturday,
 }
 
-// String returns the literal string representation of a Day, which is
-// the same as the const identifier.
-func (i Day) String() string {
+const (
+	dayEnumStrings = "SundayMondayTuesdayWednesdayThursdayFridaySaturday"
+)
+
+var (
+	dayEnumIndex = [...]uint16{0, 6, 12, 19, 28, 36, 42, 50}
+)
+
+func (i Day) toString(concats string, indexes []uint16) string {
 	o := i.Ordinal()
 	if o < 0 || o >= len(AllDays) {
 		return fmt.Sprintf("Day(%d)", i)
 	}
-	return dayEnumStrings[dayEnumIndex[o]:dayEnumIndex[o+1]]
+	return concats[indexes[o]:indexes[o+1]]
+}
+
+// parseString attempts to match an identifier.
+func (v *Day) parseString(s string, concats string, indexes []uint16) (ok bool) {
+	var i0 uint16 = 0
+
+	for j := 1; j < len(indexes); j++ {
+		i1 := indexes[j]
+		p := concats[i0:i1]
+		if s == p {
+			*v = AllDays[j-1]
+			return true
+		}
+		i0 = i1
+	}
+	return false
 }
 
 // Tag returns the string representation of a Day. This is an alias for String.
 func (i Day) Tag() string {
 	return i.String()
+}
+
+// String returns the literal string representation of a Day, which is
+// the same as the const identifier.
+func (i Day) String() string {
+	return i.toString(dayEnumStrings, dayEnumIndex[:])
 }
 
 // Ordinal returns the ordinal number of a Day. This is an integer counting
@@ -112,7 +136,7 @@ func (v *Day) parse(in string, rep enum.Representation) error {
 
 	s := in
 
-	if v.parseIdentifier(s) {
+	if v.parseString(s, dayEnumStrings, dayEnumIndex[:]) {
 		return nil
 	}
 
@@ -135,22 +159,6 @@ func (v *Day) parseOrdinal(s string) (ok bool) {
 	if err == nil && 0 <= ord && ord < len(AllDays) {
 		*v = AllDays[ord]
 		return true
-	}
-	return false
-}
-
-// parseIdentifier attempts to match an identifier.
-func (v *Day) parseIdentifier(s string) (ok bool) {
-	var i0 uint16 = 0
-
-	for j := 1; j < len(dayEnumIndex); j++ {
-		i1 := dayEnumIndex[j]
-		p := dayEnumStrings[i0:i1]
-		if s == p {
-			*v = AllDays[j-1]
-			return true
-		}
-		i0 = i1
 	}
 	return false
 }
@@ -235,6 +243,10 @@ func (i *Day) UnmarshalJSON(text []byte) error {
 		return nil
 	}
 	s = strings.Trim(s, "\"")
+	return i.unmarshalJSON(s)
+}
+
+func (i *Day) unmarshalJSON(s string) error {
 	return i.Parse(s)
 }
 

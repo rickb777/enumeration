@@ -13,10 +13,6 @@ import (
 	"strings"
 )
 
-const greekalphabetEnumStrings = "ΑλφαΒήταΓάμμαΔέλταΕψιλονΖήταΗταΘήταΙώταΚάππαΛάμβδαΜυΝυΞιΟμικρονΠιΡώΣίγμαΤαυΥψιλονΦιΧιΨιΩμέγα"
-
-var greekalphabetEnumIndex = [...]uint16{0, 8, 16, 26, 36, 48, 56, 62, 70, 78, 88, 100, 104, 108, 112, 126, 130, 134, 144, 150, 162, 166, 170, 174, 184}
-
 // AllGreekAlphabets lists all 24 values in order.
 var AllGreekAlphabets = []GreekAlphabet{
 	Αλφα, Βήτα, Γάμμα, Δέλτα,
@@ -35,14 +31,36 @@ var AllGreekAlphabetEnums = enum.IntEnums{
 	Υψιλον, Φι, Χι, Ψι, Ωμέγα,
 }
 
-// String returns the literal string representation of a GreekAlphabet, which is
-// the same as the const identifier.
-func (i GreekAlphabet) String() string {
+const (
+	greekalphabetEnumStrings = "ΑλφαΒήταΓάμμαΔέλταΕψιλονΖήταΗταΘήταΙώταΚάππαΛάμβδαΜυΝυΞιΟμικρονΠιΡώΣίγμαΤαυΥψιλονΦιΧιΨιΩμέγα"
+)
+
+var (
+	greekalphabetEnumIndex = [...]uint16{0, 8, 16, 26, 36, 48, 56, 62, 70, 78, 88, 100, 104, 108, 112, 126, 130, 134, 144, 150, 162, 166, 170, 174, 184}
+)
+
+func (i GreekAlphabet) toString(concats string, indexes []uint16) string {
 	o := i.Ordinal()
 	if o < 0 || o >= len(AllGreekAlphabets) {
 		return fmt.Sprintf("GreekAlphabet(%d)", i)
 	}
-	return greekalphabetEnumStrings[greekalphabetEnumIndex[o]:greekalphabetEnumIndex[o+1]]
+	return concats[indexes[o]:indexes[o+1]]
+}
+
+// parseString attempts to match an identifier.
+func (v *GreekAlphabet) parseString(s string, concats string, indexes []uint16) (ok bool) {
+	var i0 uint16 = 0
+
+	for j := 1; j < len(indexes); j++ {
+		i1 := indexes[j]
+		p := concats[i0:i1]
+		if s == p {
+			*v = AllGreekAlphabets[j-1]
+			return true
+		}
+		i0 = i1
+	}
+	return false
 }
 
 var greekTagsInverse = map[string]GreekAlphabet{}
@@ -79,6 +97,12 @@ func (i GreekAlphabet) Tag() string {
 		return s
 	}
 	return i.String()
+}
+
+// String returns the literal string representation of a GreekAlphabet, which is
+// the same as the const identifier.
+func (i GreekAlphabet) String() string {
+	return i.toString(greekalphabetEnumStrings, greekalphabetEnumIndex[:])
 }
 
 // Ordinal returns the ordinal number of a GreekAlphabet. This is an integer counting
@@ -185,11 +209,11 @@ func (v *GreekAlphabet) parse(in string, rep enum.Representation) error {
 	s := in
 
 	if rep == enum.Identifier {
-		if v.parseIdentifier(s) || v.parseTag(s) {
+		if v.parseString(s, greekalphabetEnumStrings, greekalphabetEnumIndex[:]) || v.parseTag(s) {
 			return nil
 		}
 	} else {
-		if v.parseTag(s) || v.parseIdentifier(s) {
+		if v.parseTag(s) || v.parseString(s, greekalphabetEnumStrings, greekalphabetEnumIndex[:]) {
 			return nil
 		}
 	}
@@ -221,22 +245,6 @@ func (v *GreekAlphabet) parseOrdinal(s string) (ok bool) {
 func (v *GreekAlphabet) parseTag(s string) (ok bool) {
 	*v, ok = greekTagsInverse[s]
 	return ok
-}
-
-// parseIdentifier attempts to match an identifier.
-func (v *GreekAlphabet) parseIdentifier(s string) (ok bool) {
-	var i0 uint16 = 0
-
-	for j := 1; j < len(greekalphabetEnumIndex); j++ {
-		i1 := greekalphabetEnumIndex[j]
-		p := greekalphabetEnumStrings[i0:i1]
-		if s == p {
-			*v = AllGreekAlphabets[j-1]
-			return true
-		}
-		i0 = i1
-	}
-	return false
 }
 
 // AsGreekAlphabet parses a string to find the corresponding GreekAlphabet, accepting either one of the string values or
@@ -319,6 +327,10 @@ func (i *GreekAlphabet) UnmarshalJSON(text []byte) error {
 		return nil
 	}
 	s = strings.Trim(s, "\"")
+	return i.unmarshalJSON(s)
+}
+
+func (i *GreekAlphabet) unmarshalJSON(s string) error {
 	return i.Parse(s)
 }
 

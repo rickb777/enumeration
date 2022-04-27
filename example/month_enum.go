@@ -12,13 +12,6 @@ import (
 	"strings"
 )
 
-const (
-	monthEnumStrings = "JanuaryFebruaryMarchAprilMayJuneJulyAugustSeptemberOctoberNovemberDecember"
-	monthEnumInputs  = "januaryfebruarymarchaprilmayjunejulyaugustseptemberoctobernovemberdecember"
-)
-
-var monthEnumIndex = [...]uint16{0, 7, 15, 20, 25, 28, 32, 36, 42, 51, 58, 66, 74}
-
 // AllMonths lists all 12 values in order.
 var AllMonths = []Month{
 	January, February, March, April,
@@ -33,19 +26,48 @@ var AllMonthEnums = enum.IntEnums{
 	October, November, December,
 }
 
-// String returns the literal string representation of a Month, which is
-// the same as the const identifier.
-func (i Month) String() string {
+const (
+	monthEnumStrings = "JanuaryFebruaryMarchAprilMayJuneJulyAugustSeptemberOctoberNovemberDecember"
+	monthEnumInputs  = "januaryfebruarymarchaprilmayjunejulyaugustseptemberoctobernovemberdecember"
+)
+
+var (
+	monthEnumIndex = [...]uint16{0, 7, 15, 20, 25, 28, 32, 36, 42, 51, 58, 66, 74}
+)
+
+func (i Month) toString(concats string, indexes []uint16) string {
 	o := i.Ordinal()
 	if o < 0 || o >= len(AllMonths) {
 		return fmt.Sprintf("Month(%d)", i)
 	}
-	return monthEnumStrings[monthEnumIndex[o]:monthEnumIndex[o+1]]
+	return concats[indexes[o]:indexes[o+1]]
+}
+
+// parseString attempts to match an identifier.
+func (v *Month) parseString(s string, concats string, indexes []uint16) (ok bool) {
+	var i0 uint16 = 0
+
+	for j := 1; j < len(indexes); j++ {
+		i1 := indexes[j]
+		p := concats[i0:i1]
+		if s == p {
+			*v = AllMonths[j-1]
+			return true
+		}
+		i0 = i1
+	}
+	return false
 }
 
 // Tag returns the string representation of a Month. This is an alias for String.
 func (i Month) Tag() string {
 	return i.String()
+}
+
+// String returns the literal string representation of a Month, which is
+// the same as the const identifier.
+func (i Month) String() string {
+	return i.toString(monthEnumStrings, monthEnumIndex[:])
 }
 
 // Ordinal returns the ordinal number of a Month. This is an integer counting
@@ -128,7 +150,7 @@ func (v *Month) parse(in string, rep enum.Representation) error {
 
 	s := strings.ToLower(in)
 
-	if v.parseIdentifier(s) {
+	if v.parseString(s, monthEnumInputs, monthEnumIndex[:]) {
 		return nil
 	}
 
@@ -151,22 +173,6 @@ func (v *Month) parseOrdinal(s string) (ok bool) {
 	if err == nil && 0 <= ord && ord < len(AllMonths) {
 		*v = AllMonths[ord]
 		return true
-	}
-	return false
-}
-
-// parseIdentifier attempts to match an identifier.
-func (v *Month) parseIdentifier(s string) (ok bool) {
-	var i0 uint16 = 0
-
-	for j := 1; j < len(monthEnumIndex); j++ {
-		i1 := monthEnumIndex[j]
-		p := monthEnumInputs[i0:i1]
-		if s == p {
-			*v = AllMonths[j-1]
-			return true
-		}
-		i0 = i1
 	}
 	return false
 }
@@ -253,6 +259,10 @@ func (i *Month) UnmarshalJSON(text []byte) error {
 		return nil
 	}
 	s = strings.Trim(s, "\"")
+	return i.unmarshalJSON(s)
+}
+
+func (i *Month) unmarshalJSON(s string) error {
 	return i.Parse(s)
 }
 

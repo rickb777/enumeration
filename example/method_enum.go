@@ -13,13 +13,6 @@ import (
 	"strings"
 )
 
-const (
-	methodEnumStrings = "HEADGETPUTPOSTPATCHDELETE"
-	methodEnumInputs  = "headgetputpostpatchdelete"
-)
-
-var methodEnumIndex = [...]uint16{0, 4, 7, 10, 14, 19, 25}
-
 // AllMethods lists all 6 values in order.
 var AllMethods = []Method{
 	HEAD, GET, PUT, POST,
@@ -32,14 +25,37 @@ var AllMethodEnums = enum.IntEnums{
 	PATCH, DELETE,
 }
 
-// String returns the literal string representation of a Method, which is
-// the same as the const identifier.
-func (i Method) String() string {
+const (
+	methodEnumStrings = "HEADGETPUTPOSTPATCHDELETE"
+	methodEnumInputs  = "headgetputpostpatchdelete"
+)
+
+var (
+	methodEnumIndex = [...]uint16{0, 4, 7, 10, 14, 19, 25}
+)
+
+func (i Method) toString(concats string, indexes []uint16) string {
 	o := i.Ordinal()
 	if o < 0 || o >= len(AllMethods) {
 		return fmt.Sprintf("Method(%d)", i)
 	}
-	return methodEnumStrings[methodEnumIndex[o]:methodEnumIndex[o+1]]
+	return concats[indexes[o]:indexes[o+1]]
+}
+
+// parseString attempts to match an identifier.
+func (v *Method) parseString(s string, concats string, indexes []uint16) (ok bool) {
+	var i0 uint16 = 0
+
+	for j := 1; j < len(indexes); j++ {
+		i1 := indexes[j]
+		p := concats[i0:i1]
+		if s == p {
+			*v = AllMethods[j-1]
+			return true
+		}
+		i0 = i1
+	}
+	return false
 }
 
 var methodTagsInverse = map[string]Method{}
@@ -76,6 +92,12 @@ func (i Method) Tag() string {
 		return s
 	}
 	return i.String()
+}
+
+// String returns the literal string representation of a Method, which is
+// the same as the const identifier.
+func (i Method) String() string {
+	return i.toString(methodEnumStrings, methodEnumIndex[:])
 }
 
 // Ordinal returns the ordinal number of a Method. This is an integer counting
@@ -147,11 +169,11 @@ func (v *Method) parse(in string, rep enum.Representation) error {
 	s := strings.ToLower(in)
 
 	if rep == enum.Identifier {
-		if v.parseIdentifier(s) || v.parseTag(s) {
+		if v.parseString(s, methodEnumInputs, methodEnumIndex[:]) || v.parseTag(s) {
 			return nil
 		}
 	} else {
-		if v.parseTag(s) || v.parseIdentifier(s) {
+		if v.parseTag(s) || v.parseString(s, methodEnumInputs, methodEnumIndex[:]) {
 			return nil
 		}
 	}
@@ -183,22 +205,6 @@ func (v *Method) parseOrdinal(s string) (ok bool) {
 func (v *Method) parseTag(s string) (ok bool) {
 	*v, ok = methodTagsInverse[s]
 	return ok
-}
-
-// parseIdentifier attempts to match an identifier.
-func (v *Method) parseIdentifier(s string) (ok bool) {
-	var i0 uint16 = 0
-
-	for j := 1; j < len(methodEnumIndex); j++ {
-		i1 := methodEnumIndex[j]
-		p := methodEnumInputs[i0:i1]
-		if s == p {
-			*v = AllMethods[j-1]
-			return true
-		}
-		i0 = i1
-	}
-	return false
 }
 
 // AsMethod parses a string to find the corresponding Method, accepting either one of the string values or
@@ -283,6 +289,10 @@ func (i *Method) UnmarshalJSON(text []byte) error {
 		return nil
 	}
 	s = strings.Trim(s, "\"")
+	return i.unmarshalJSON(s)
+}
+
+func (i *Method) unmarshalJSON(s string) error {
 	return i.Parse(s)
 }
 

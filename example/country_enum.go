@@ -13,13 +13,6 @@ import (
 	"strings"
 )
 
-const (
-	countryEnumStrings = "AfghanistanAland_IslandsAlbaniaAlgeriaAmerican_SamoaAndorraAngolaAnguillaAntarcticaAntigua_and_BarbudaArgentinaArmeniaArubaAustraliaAustriaAzerbaijanBahamasBahrainBangladeshBarbadosBelarusBelgiumBelizeBeninBermudaBhutanBoliviaBosnia_and_HerzegovinaBotswanaBouvet_IslandBrazilBritish_Virgin_IslandsBritish_Indian_Ocean_TerritoryBrunei_DarussalamBulgariaBurkina_FasoBurundiCambodiaCameroonCanadaCape_VerdeCayman_IslandsCentral_African_RepublicChadChileChinaHong_KongMacaoChristmas_IslandCocos_IslandsColombiaComorosCongo_BrazzavilleCongo_DRCCook_IslandsCosta_RicaCôte_dIvoireCroatiaCubaCyprusCzech_RepublicDenmarkDjiboutiDominicaDominican_RepublicEcuadorEgyptEl_SalvadorEquatorial_GuineaEritreaEstoniaEthiopiaFalkland_IslandsFaroe_IslandsFijiFinlandFranceFrench_GuianaFrench_PolynesiaFrench_Southern_TerritoriesGabonGambiaGeorgiaGermanyGhanaGibraltarGreeceGreenlandGrenadaGuadeloupeGuamGuatemalaGuernseyGuineaGuinea_BissauGuyanaHaitiHeard_Island_and_Mcdonald_IslandsHoly_SeeHondurasHungaryIcelandIndiaIndonesiaIranIraqIrelandIsle_of_ManIsraelItalyJamaicaJapanJerseyJordanKazakhstanKenyaKiribatiDemocratic_Peoples_Republic_of_KoreaSouth_KoreaKuwaitKyrgyzstanLao_PDRLatviaLebanonLesothoLiberiaLibyaLiechtensteinLithuaniaLuxembourgMacedoniaMadagascarMalawiMalaysiaMaldivesMaliMaltaMarshall_IslandsMartiniqueMauritaniaMauritiusMayotteMexicoMicronesiaMoldovaMonacoMongoliaMontenegroMontserratMoroccoMozambiqueMyanmarNamibiaNauruNepalNetherlandsNetherlands_AntillesNew_CaledoniaNew_ZealandNicaraguaNigerNigeriaNiueNorfolk_IslandNorthern_Mariana_IslandsNorwayOmanPakistanPalauPalestinian_TerritoryPanamaPapua_New_GuineaParaguayPeruPhilippinesPitcairnPolandPortugalPuerto_RicoQatarRéunionRomaniaRussian_FederationRwandaSaint_BarthélemySaint_HelenaSaint_Kitts_and_NevisSaint_LuciaSaint_MartinSaint_Pierre_and_MiquelonSaint_Vincent_and_GrenadinesSamoaSan_MarinoSao_Tome_and_PrincipeSaudi_ArabiaSenegalSerbiaSeychellesSierra_LeoneSingaporeSlovakiaSloveniaSolomon_IslandsSomaliaSouth_AfricaSouth_Georgia_and_the_South_Sandwich_IslandsSouth_SudanSpainSri_LankaSudanSurinameSvalbard_and_Jan_Mayen_IslandsSwazilandSwedenSwitzerlandSyriaTaiwanTajikistanTanzaniaThailandTimor_LesteTogoTokelauTongaTrinidad_and_TobagoTunisiaTurkeyTurkmenistanTurks_and_Caicos_IslandsTuvaluUgandaUkraineUnited_Arab_EmiratesUnited_KingdomUnited_States_of_AmericaUnited_States_Minor_Outlying_IslandsUruguayUzbekistanVanuatuVenezuelaViet_NamVirgin_IslandsWallis_and_Futuna_IslandsWestern_SaharaYemenZambiaZimbabwe"
-	countryEnumInputs  = "afghanistanaland_islandsalbaniaalgeriaamerican_samoaandorraangolaanguillaantarcticaantigua_and_barbudaargentinaarmeniaarubaaustraliaaustriaazerbaijanbahamasbahrainbangladeshbarbadosbelarusbelgiumbelizebeninbermudabhutanboliviabosnia_and_herzegovinabotswanabouvet_islandbrazilbritish_virgin_islandsbritish_indian_ocean_territorybrunei_darussalambulgariaburkina_fasoburundicambodiacamerooncanadacape_verdecayman_islandscentral_african_republicchadchilechinahong_kongmacaochristmas_islandcocos_islandscolombiacomoroscongo_brazzavillecongo_drccook_islandscosta_ricacôte_divoirecroatiacubacyprusczech_republicdenmarkdjiboutidominicadominican_republicecuadoregyptel_salvadorequatorial_guineaeritreaestoniaethiopiafalkland_islandsfaroe_islandsfijifinlandfrancefrench_guianafrench_polynesiafrench_southern_territoriesgabongambiageorgiagermanyghanagibraltargreecegreenlandgrenadaguadeloupeguamguatemalaguernseyguineaguinea_bissauguyanahaitiheard_island_and_mcdonald_islandsholy_seehondurashungaryicelandindiaindonesiairaniraqirelandisle_of_manisraelitalyjamaicajapanjerseyjordankazakhstankenyakiribatidemocratic_peoples_republic_of_koreasouth_koreakuwaitkyrgyzstanlao_pdrlatvialebanonlesotholiberialibyaliechtensteinlithuanialuxembourgmacedoniamadagascarmalawimalaysiamaldivesmalimaltamarshall_islandsmartiniquemauritaniamauritiusmayottemexicomicronesiamoldovamonacomongoliamontenegromontserratmoroccomozambiquemyanmarnamibianaurunepalnetherlandsnetherlands_antillesnew_caledonianew_zealandnicaraguanigernigerianiuenorfolk_islandnorthern_mariana_islandsnorwayomanpakistanpalaupalestinian_territorypanamapapua_new_guineaparaguayperuphilippinespitcairnpolandportugalpuerto_ricoqatarréunionromaniarussian_federationrwandasaint_barthélemysaint_helenasaint_kitts_and_nevissaint_luciasaint_martinsaint_pierre_and_miquelonsaint_vincent_and_grenadinessamoasan_marinosao_tome_and_principesaudi_arabiasenegalserbiaseychellessierra_leonesingaporeslovakiasloveniasolomon_islandssomaliasouth_africasouth_georgia_and_the_south_sandwich_islandssouth_sudanspainsri_lankasudansurinamesvalbard_and_jan_mayen_islandsswazilandswedenswitzerlandsyriataiwantajikistantanzaniathailandtimor_lestetogotokelautongatrinidad_and_tobagotunisiaturkeyturkmenistanturks_and_caicos_islandstuvaluugandaukraineunited_arab_emiratesunited_kingdomunited_states_of_americaunited_states_minor_outlying_islandsuruguayuzbekistanvanuatuvenezuelaviet_namvirgin_islandswallis_and_futuna_islandswestern_saharayemenzambiazimbabwe"
-)
-
-var countryEnumIndex = [...]uint16{0, 11, 24, 31, 38, 52, 59, 65, 73, 83, 102, 111, 118, 123, 132, 139, 149, 156, 163, 173, 181, 188, 195, 201, 206, 213, 219, 226, 248, 256, 269, 275, 297, 327, 344, 352, 364, 371, 379, 387, 393, 403, 417, 441, 445, 450, 455, 464, 469, 485, 498, 506, 513, 530, 539, 551, 561, 574, 581, 585, 591, 605, 612, 620, 628, 646, 653, 658, 669, 686, 693, 700, 708, 724, 737, 741, 748, 754, 767, 783, 810, 815, 821, 828, 835, 840, 849, 855, 864, 871, 881, 885, 894, 902, 908, 921, 927, 932, 965, 973, 981, 988, 995, 1000, 1009, 1013, 1017, 1024, 1035, 1041, 1046, 1053, 1058, 1064, 1070, 1080, 1085, 1093, 1129, 1140, 1146, 1156, 1163, 1169, 1176, 1183, 1190, 1195, 1208, 1217, 1227, 1236, 1246, 1252, 1260, 1268, 1272, 1277, 1293, 1303, 1313, 1322, 1329, 1335, 1345, 1352, 1358, 1366, 1376, 1386, 1393, 1403, 1410, 1417, 1422, 1427, 1438, 1458, 1471, 1482, 1491, 1496, 1503, 1507, 1521, 1545, 1551, 1555, 1563, 1568, 1589, 1595, 1611, 1619, 1623, 1634, 1642, 1648, 1656, 1667, 1672, 1680, 1687, 1705, 1711, 1728, 1740, 1761, 1772, 1784, 1809, 1837, 1842, 1852, 1873, 1885, 1892, 1898, 1908, 1920, 1929, 1937, 1945, 1960, 1967, 1979, 2023, 2034, 2039, 2048, 2053, 2061, 2091, 2100, 2106, 2117, 2122, 2128, 2138, 2146, 2154, 2165, 2169, 2176, 2181, 2200, 2207, 2213, 2225, 2249, 2255, 2261, 2268, 2288, 2302, 2326, 2362, 2369, 2379, 2386, 2395, 2403, 2417, 2442, 2456, 2461, 2467, 2475}
-
 // AllCountries lists all 247 values in order.
 var AllCountries = []Country{
 	Afghanistan, Aland_Islands, Albania, Algeria,
@@ -128,14 +121,37 @@ var AllCountryEnums = enum.IntEnums{
 	Yemen, Zambia, Zimbabwe,
 }
 
-// String returns the literal string representation of a Country, which is
-// the same as the const identifier.
-func (i Country) String() string {
+const (
+	countryEnumStrings = "AfghanistanAland_IslandsAlbaniaAlgeriaAmerican_SamoaAndorraAngolaAnguillaAntarcticaAntigua_and_BarbudaArgentinaArmeniaArubaAustraliaAustriaAzerbaijanBahamasBahrainBangladeshBarbadosBelarusBelgiumBelizeBeninBermudaBhutanBoliviaBosnia_and_HerzegovinaBotswanaBouvet_IslandBrazilBritish_Virgin_IslandsBritish_Indian_Ocean_TerritoryBrunei_DarussalamBulgariaBurkina_FasoBurundiCambodiaCameroonCanadaCape_VerdeCayman_IslandsCentral_African_RepublicChadChileChinaHong_KongMacaoChristmas_IslandCocos_IslandsColombiaComorosCongo_BrazzavilleCongo_DRCCook_IslandsCosta_RicaCôte_dIvoireCroatiaCubaCyprusCzech_RepublicDenmarkDjiboutiDominicaDominican_RepublicEcuadorEgyptEl_SalvadorEquatorial_GuineaEritreaEstoniaEthiopiaFalkland_IslandsFaroe_IslandsFijiFinlandFranceFrench_GuianaFrench_PolynesiaFrench_Southern_TerritoriesGabonGambiaGeorgiaGermanyGhanaGibraltarGreeceGreenlandGrenadaGuadeloupeGuamGuatemalaGuernseyGuineaGuinea_BissauGuyanaHaitiHeard_Island_and_Mcdonald_IslandsHoly_SeeHondurasHungaryIcelandIndiaIndonesiaIranIraqIrelandIsle_of_ManIsraelItalyJamaicaJapanJerseyJordanKazakhstanKenyaKiribatiDemocratic_Peoples_Republic_of_KoreaSouth_KoreaKuwaitKyrgyzstanLao_PDRLatviaLebanonLesothoLiberiaLibyaLiechtensteinLithuaniaLuxembourgMacedoniaMadagascarMalawiMalaysiaMaldivesMaliMaltaMarshall_IslandsMartiniqueMauritaniaMauritiusMayotteMexicoMicronesiaMoldovaMonacoMongoliaMontenegroMontserratMoroccoMozambiqueMyanmarNamibiaNauruNepalNetherlandsNetherlands_AntillesNew_CaledoniaNew_ZealandNicaraguaNigerNigeriaNiueNorfolk_IslandNorthern_Mariana_IslandsNorwayOmanPakistanPalauPalestinian_TerritoryPanamaPapua_New_GuineaParaguayPeruPhilippinesPitcairnPolandPortugalPuerto_RicoQatarRéunionRomaniaRussian_FederationRwandaSaint_BarthélemySaint_HelenaSaint_Kitts_and_NevisSaint_LuciaSaint_MartinSaint_Pierre_and_MiquelonSaint_Vincent_and_GrenadinesSamoaSan_MarinoSao_Tome_and_PrincipeSaudi_ArabiaSenegalSerbiaSeychellesSierra_LeoneSingaporeSlovakiaSloveniaSolomon_IslandsSomaliaSouth_AfricaSouth_Georgia_and_the_South_Sandwich_IslandsSouth_SudanSpainSri_LankaSudanSurinameSvalbard_and_Jan_Mayen_IslandsSwazilandSwedenSwitzerlandSyriaTaiwanTajikistanTanzaniaThailandTimor_LesteTogoTokelauTongaTrinidad_and_TobagoTunisiaTurkeyTurkmenistanTurks_and_Caicos_IslandsTuvaluUgandaUkraineUnited_Arab_EmiratesUnited_KingdomUnited_States_of_AmericaUnited_States_Minor_Outlying_IslandsUruguayUzbekistanVanuatuVenezuelaViet_NamVirgin_IslandsWallis_and_Futuna_IslandsWestern_SaharaYemenZambiaZimbabwe"
+	countryEnumInputs  = "afghanistanaland_islandsalbaniaalgeriaamerican_samoaandorraangolaanguillaantarcticaantigua_and_barbudaargentinaarmeniaarubaaustraliaaustriaazerbaijanbahamasbahrainbangladeshbarbadosbelarusbelgiumbelizebeninbermudabhutanboliviabosnia_and_herzegovinabotswanabouvet_islandbrazilbritish_virgin_islandsbritish_indian_ocean_territorybrunei_darussalambulgariaburkina_fasoburundicambodiacamerooncanadacape_verdecayman_islandscentral_african_republicchadchilechinahong_kongmacaochristmas_islandcocos_islandscolombiacomoroscongo_brazzavillecongo_drccook_islandscosta_ricacôte_divoirecroatiacubacyprusczech_republicdenmarkdjiboutidominicadominican_republicecuadoregyptel_salvadorequatorial_guineaeritreaestoniaethiopiafalkland_islandsfaroe_islandsfijifinlandfrancefrench_guianafrench_polynesiafrench_southern_territoriesgabongambiageorgiagermanyghanagibraltargreecegreenlandgrenadaguadeloupeguamguatemalaguernseyguineaguinea_bissauguyanahaitiheard_island_and_mcdonald_islandsholy_seehondurashungaryicelandindiaindonesiairaniraqirelandisle_of_manisraelitalyjamaicajapanjerseyjordankazakhstankenyakiribatidemocratic_peoples_republic_of_koreasouth_koreakuwaitkyrgyzstanlao_pdrlatvialebanonlesotholiberialibyaliechtensteinlithuanialuxembourgmacedoniamadagascarmalawimalaysiamaldivesmalimaltamarshall_islandsmartiniquemauritaniamauritiusmayottemexicomicronesiamoldovamonacomongoliamontenegromontserratmoroccomozambiquemyanmarnamibianaurunepalnetherlandsnetherlands_antillesnew_caledonianew_zealandnicaraguanigernigerianiuenorfolk_islandnorthern_mariana_islandsnorwayomanpakistanpalaupalestinian_territorypanamapapua_new_guineaparaguayperuphilippinespitcairnpolandportugalpuerto_ricoqatarréunionromaniarussian_federationrwandasaint_barthélemysaint_helenasaint_kitts_and_nevissaint_luciasaint_martinsaint_pierre_and_miquelonsaint_vincent_and_grenadinessamoasan_marinosao_tome_and_principesaudi_arabiasenegalserbiaseychellessierra_leonesingaporeslovakiasloveniasolomon_islandssomaliasouth_africasouth_georgia_and_the_south_sandwich_islandssouth_sudanspainsri_lankasudansurinamesvalbard_and_jan_mayen_islandsswazilandswedenswitzerlandsyriataiwantajikistantanzaniathailandtimor_lestetogotokelautongatrinidad_and_tobagotunisiaturkeyturkmenistanturks_and_caicos_islandstuvaluugandaukraineunited_arab_emiratesunited_kingdomunited_states_of_americaunited_states_minor_outlying_islandsuruguayuzbekistanvanuatuvenezuelaviet_namvirgin_islandswallis_and_futuna_islandswestern_saharayemenzambiazimbabwe"
+)
+
+var (
+	countryEnumIndex = [...]uint16{0, 11, 24, 31, 38, 52, 59, 65, 73, 83, 102, 111, 118, 123, 132, 139, 149, 156, 163, 173, 181, 188, 195, 201, 206, 213, 219, 226, 248, 256, 269, 275, 297, 327, 344, 352, 364, 371, 379, 387, 393, 403, 417, 441, 445, 450, 455, 464, 469, 485, 498, 506, 513, 530, 539, 551, 561, 574, 581, 585, 591, 605, 612, 620, 628, 646, 653, 658, 669, 686, 693, 700, 708, 724, 737, 741, 748, 754, 767, 783, 810, 815, 821, 828, 835, 840, 849, 855, 864, 871, 881, 885, 894, 902, 908, 921, 927, 932, 965, 973, 981, 988, 995, 1000, 1009, 1013, 1017, 1024, 1035, 1041, 1046, 1053, 1058, 1064, 1070, 1080, 1085, 1093, 1129, 1140, 1146, 1156, 1163, 1169, 1176, 1183, 1190, 1195, 1208, 1217, 1227, 1236, 1246, 1252, 1260, 1268, 1272, 1277, 1293, 1303, 1313, 1322, 1329, 1335, 1345, 1352, 1358, 1366, 1376, 1386, 1393, 1403, 1410, 1417, 1422, 1427, 1438, 1458, 1471, 1482, 1491, 1496, 1503, 1507, 1521, 1545, 1551, 1555, 1563, 1568, 1589, 1595, 1611, 1619, 1623, 1634, 1642, 1648, 1656, 1667, 1672, 1680, 1687, 1705, 1711, 1728, 1740, 1761, 1772, 1784, 1809, 1837, 1842, 1852, 1873, 1885, 1892, 1898, 1908, 1920, 1929, 1937, 1945, 1960, 1967, 1979, 2023, 2034, 2039, 2048, 2053, 2061, 2091, 2100, 2106, 2117, 2122, 2128, 2138, 2146, 2154, 2165, 2169, 2176, 2181, 2200, 2207, 2213, 2225, 2249, 2255, 2261, 2268, 2288, 2302, 2326, 2362, 2369, 2379, 2386, 2395, 2403, 2417, 2442, 2456, 2461, 2467, 2475}
+)
+
+func (i Country) toString(concats string, indexes []uint16) string {
 	o := i.Ordinal()
 	if o < 0 || o >= len(AllCountries) {
 		return fmt.Sprintf("Country(%d)", i)
 	}
-	return countryEnumStrings[countryEnumIndex[o]:countryEnumIndex[o+1]]
+	return concats[indexes[o]:indexes[o+1]]
+}
+
+// parseString attempts to match an identifier.
+func (v *Country) parseString(s string, concats string, indexes []uint16) (ok bool) {
+	var i0 uint16 = 0
+
+	for j := 1; j < len(indexes); j++ {
+		i1 := indexes[j]
+		p := concats[i0:i1]
+		if s == p {
+			*v = AllCountries[j-1]
+			return true
+		}
+		i0 = i1
+	}
+	return false
 }
 
 var iso3166TagsInverse = map[string]Country{}
@@ -172,6 +188,12 @@ func (i Country) Tag() string {
 		return s
 	}
 	return i.String()
+}
+
+// String returns the literal string representation of a Country, which is
+// the same as the const identifier.
+func (i Country) String() string {
+	return i.toString(countryEnumStrings, countryEnumIndex[:])
 }
 
 // Ordinal returns the ordinal number of a Country. This is an integer counting
@@ -725,11 +747,11 @@ func (v *Country) parse(in string, rep enum.Representation) error {
 	s := strings.ToLower(in)
 
 	if rep == enum.Identifier {
-		if v.parseIdentifier(s) || v.parseTag(s) {
+		if v.parseString(s, countryEnumInputs, countryEnumIndex[:]) || v.parseTag(s) {
 			return nil
 		}
 	} else {
-		if v.parseTag(s) || v.parseIdentifier(s) {
+		if v.parseTag(s) || v.parseString(s, countryEnumInputs, countryEnumIndex[:]) {
 			return nil
 		}
 	}
@@ -761,22 +783,6 @@ func (v *Country) parseOrdinal(s string) (ok bool) {
 func (v *Country) parseTag(s string) (ok bool) {
 	*v, ok = iso3166TagsInverse[s]
 	return ok
-}
-
-// parseIdentifier attempts to match an identifier.
-func (v *Country) parseIdentifier(s string) (ok bool) {
-	var i0 uint16 = 0
-
-	for j := 1; j < len(countryEnumIndex); j++ {
-		i1 := countryEnumIndex[j]
-		p := countryEnumInputs[i0:i1]
-		if s == p {
-			*v = AllCountries[j-1]
-			return true
-		}
-		i0 = i1
-	}
-	return false
 }
 
 // AsCountry parses a string to find the corresponding Country, accepting either one of the string values or
@@ -861,6 +867,10 @@ func (i *Country) UnmarshalJSON(text []byte) error {
 		return nil
 	}
 	s = strings.Trim(s, "\"")
+	return i.unmarshalJSON(s)
+}
+
+func (i *Country) unmarshalJSON(s string) error {
 	return i.Parse(s)
 }
 

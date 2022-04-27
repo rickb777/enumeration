@@ -32,60 +32,6 @@ func (m Model) writeHead(w io.Writer) {
 
 //-------------------------------------------------------------------------------------------------
 
-const joinedStringAndIndexes = `
-<<- if .Asymmetric>>
-const (
-	<<.LcType>>EnumStrings = "<<.TransformedOutputValues>>"
-	<<.LcType>>EnumInputs  = "<<.TransformedInputValues>>"
-)
-<<- else>>
-const <<.LcType>>EnumStrings = "<<.TransformedOutputValues>>"
-<<- end>>
-
-var <<.LcType>>EnumIndex = [...]uint16{<<.Indexes>>}
-`
-
-func (m Model) TransformedInputValuesSlice() []string {
-	vs := make([]string, len(m.Values))
-	for i, v := range m.Values {
-		vs[i] = m.inputTransform(v.Shortened)
-	}
-	return vs
-}
-
-func (m Model) TransformedInputValues() string {
-	return strings.Join(m.TransformedInputValuesSlice(), "")
-}
-
-func (m Model) TransformedOutputValuesSlice() []string {
-	vs := make([]string, len(m.Values))
-	for i, v := range m.Values {
-		vs[i] = m.outputTransform(v.Shortened)
-	}
-	return vs
-}
-
-func (m Model) TransformedOutputValues() string {
-	return strings.Join(m.TransformedOutputValuesSlice(), "")
-}
-
-func (m Model) Indexes() string {
-	buf := &strings.Builder{}
-	buf.WriteString("0")
-	n := 0
-	for _, v := range m.Values {
-		n += len(v.Shortened)
-		fmt.Fprintf(buf, ", %d", n)
-	}
-	return buf.String()
-}
-
-func (m Model) writeJoinedStringAndIndexes(w io.Writer) {
-	m.execTemplate(w, joinedStringAndIndexes)
-}
-
-//-------------------------------------------------------------------------------------------------
-
 const allItems = `
 // All<<.Plural>> lists all <<len .Values>> values in order.
 var All<<.Plural>> = []<<.MainType>>{
@@ -114,20 +60,129 @@ func (m Model) writeAllItems(w io.Writer) {
 
 //-------------------------------------------------------------------------------------------------
 
-const stringMethod = `
-// String returns the literal string representation of a <<.MainType>>, which is
-// the same as the const identifier.
-func (i <<.MainType>>) String() string {
+const joinedStringAndIndexes = `
+const (
+	<<.LcType>>EnumStrings = "<<concat .TransformedOutputValues>>"
+<<- if .Asymmetric>>
+	<<.LcType>>EnumInputs  = "<<concat .TransformedInputValues>>"
+<<- end>>
+<<- if .HasJSONTags>>
+	<<.LcType>>JSONStrings = "<<concat .OutputJSONValues>>"
+<<- if .Asymmetric>>
+	<<.LcType>>JSONInputs  = "<<concat .InputJSONValues>>"
+<<- end>>
+<<- end>>
+)
+
+var (
+	<<.LcType>>EnumIndex = [...]uint16{<<.Indexes>>}
+<<- if .HasJSONTags>>
+	<<.LcType>>JSONIndex = [...]uint16{<<.JSONIndexes>>}
+<<- end>>
+)
+`
+
+func (m Model) TransformedInputValues() []string {
+	vs := make([]string, len(m.Values))
+	for i, v := range m.Values {
+		vs[i] = m.inputTransform(v.Shortened)
+	}
+	return vs
+}
+
+func (m Model) TransformedOutputValues() []string {
+	vs := make([]string, len(m.Values))
+	for i, v := range m.Values {
+		vs[i] = m.outputTransform(v.Shortened)
+	}
+	return vs
+}
+
+func (m Model) InputJSONValues() []string {
+	vs := make([]string, len(m.Values))
+	for i, v := range m.Values {
+		vs[i] = m.InputCase().Transform(v.JSON)
+	}
+	return vs
+}
+
+func (m Model) OutputJSONValues() []string {
+	vs := make([]string, len(m.Values))
+	for i, v := range m.Values {
+		vs[i] = v.JSON
+	}
+	return vs
+}
+
+func (m Model) Indexes() string {
+	buf := &strings.Builder{}
+	buf.WriteString("0")
+	n := 0
+	for _, v := range m.Values {
+		n += len(v.Shortened)
+		fmt.Fprintf(buf, ", %d", n)
+	}
+	return buf.String()
+}
+
+func (m Model) JSONIndexes() string {
+	buf := &strings.Builder{}
+	buf.WriteString("0")
+	n := 0
+	for _, v := range m.Values {
+		n += len(v.JSON)
+		fmt.Fprintf(buf, ", %d", n)
+	}
+	return buf.String()
+}
+
+func (m Model) writeJoinedStringAndIndexes(w io.Writer) {
+	m.execTemplate(w, joinedStringAndIndexes)
+}
+
+//-------------------------------------------------------------------------------------------------
+
+const toStringMethod = `
+func (i <<.MainType>>) toString(concats string, indexes []uint16) string {
 	o := i.Ordinal()
 	if o < 0 || o >= len(All<<.Plural>>) {
 		return fmt.Sprintf("<<.MainType>>(<<.Placeholder>>)", i)
 	}
-	return <<.LcType>>EnumStrings[<<.LcType>>EnumIndex[o]:<<.LcType>>EnumIndex[o+1]]
+	return concats[indexes[o]:indexes[o+1]]
 }
 `
 
-func (m Model) writeStringMethod(w io.Writer) {
-	m.execTemplate(w, stringMethod)
+func (m Model) writeToStringMethod(w io.Writer) {
+	m.execTemplate(w, toStringMethod)
+}
+
+//-------------------------------------------------------------------------------------------------
+
+const parseStringMethod = `
+// parseString attempts to match an identifier.
+func (v *<<.MainType>>) parseString(s string, concats string, indexes []uint16) (ok bool) {
+	var i0 uint16 = 0
+
+	for j := 1; j < len(indexes); j++ {
+		i1 := indexes[j]
+		p := concats[i0:i1]
+		if s == p {
+			*v = All<<.Plural>>[j-1]
+			return true
+		}
+		i0 = i1
+	}
+<<- if .AliasTable>>
+	*v, ok = <<.AliasTable>>[s]
+	return ok
+<<- else>>
+	return false
+<<- end>>
+}
+`
+
+func (m Model) writeParseIdentifierMethod(w io.Writer) {
+	m.execTemplate(w, parseStringMethod)
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -178,6 +233,20 @@ func (i <<.MainType>>) Tag() string {
 
 func (m Model) writeTagMethod(w io.Writer) {
 	m.execTemplate(w, tagMethod)
+}
+
+//-------------------------------------------------------------------------------------------------
+
+const stringMethod = `
+// String returns the literal string representation of a <<.MainType>>, which is
+// the same as the const identifier.
+func (i <<.MainType>>) String() string {
+	return i.toString(<<.LcType>>EnumStrings, <<.LcType>>EnumIndex[:])
+}
+`
+
+func (m Model) writeStringMethod(w io.Writer) {
+	m.execTemplate(w, stringMethod)
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -306,17 +375,30 @@ func (v *<<.MainType>>) parse(in string, rep enum.Representation) error {
 <<- if .TagTable>>
 
 	if rep == enum.Identifier {
-		if v.parseIdentifier(s) || v.parseTag(s) {
+<<- if .Asymmetric>>
+		if v.parseString(s, <<.LcType>>EnumInputs, <<.LcType>>EnumIndex[:]) || v.parseTag(s) {
+<<- else >>
+		if v.parseString(s, <<.LcType>>EnumStrings, <<.LcType>>EnumIndex[:]) || v.parseTag(s) {
+<<- end >>
 			return nil
 		}
 	} else {
-		if v.parseTag(s) || v.parseIdentifier(s) {
+<<- if .Asymmetric>>
+		if v.parseTag(s) || v.parseString(s, <<.LcType>>EnumInputs, <<.LcType>>EnumIndex[:]) {
+<<- else >>
+		if v.parseTag(s) || v.parseString(s, <<.LcType>>EnumStrings, <<.LcType>>EnumIndex[:]) {
+<<- end >>
 			return nil
 		}
 	}
 <<- else>>
+<<- if .Asymmetric>>
 
-	if v.parseIdentifier(s) {
+	if v.parseString(s, <<.LcType>>EnumInputs, <<.LcType>>EnumIndex[:]) {
+<<- else >>
+
+	if v.parseString(s, <<.LcType>>EnumStrings, <<.LcType>>EnumIndex[:]) {
+<<- end >>
 		return nil
 	}
 <<- end>>
@@ -355,31 +437,6 @@ func (v *<<.MainType>>) parseTag(s string) (ok bool) {
 	return ok
 }
 <<- end>>
-
-// parseIdentifier attempts to match an identifier.
-func (v *<<.MainType>>) parseIdentifier(s string) (ok bool) {
-	var i0 uint16 = 0
-
-	for j := 1; j < len(<<.LcType>>EnumIndex); j++ {
-		i1 := <<.LcType>>EnumIndex[j]
-<<- if .Asymmetric>>
-		p := <<.LcType>>EnumInputs[i0:i1]
-<<- else >>
-		p := <<.LcType>>EnumStrings[i0:i1]
-<<- end >>
-		if s == p {
-			*v = All<<.Plural>>[j-1]
-			return true
-		}
-		i0 = i1
-	}
-<<- if .AliasTable>>
-	*v, ok = <<.AliasTable>>[s]
-	return ok
-<<- else>>
-	return false
-<<- end>>
-}
 `
 
 func (m Model) writeParseMethod(w io.Writer) {
@@ -443,7 +500,15 @@ func (i <<.MainType>>) MarshalText() (text []byte, err error) {
 // MarshalJSON converts values to bytes suitable for transmission via JSON.
 // The representation is chosen according to <<.LcType>>MarshalTextRep.
 func (i <<.MainType>>) MarshalJSON() ([]byte, error) {
+<<- if .HasJSONTags>>
+	o := i.Ordinal()
+	if o < 0 || o >= len(All<<.MainType>>s) {
+		return i.quotedString(fmt.Sprintf("<<.MainType>>(%d)", i)), nil
+	}
+	return i.quotedString(<<.LcType>>JSONStrings[<<.LcType>>JSONIndex[o]:<<.LcType>>JSONIndex[o+1]]), nil
+<<- else >>
 	return i.marshalText(<<.LcType>>MarshalTextRep, true)
+<<- end >>
 }
 
 func (i <<.MainType>>) marshalText(rep enum.Representation, quoted bool) (text []byte, err error) {
@@ -503,12 +568,62 @@ func (i *<<.MainType>>) UnmarshalJSON(text []byte) error {
 		return nil
 	}
 	s = strings.Trim(s, "\"")
-	return i.Parse(s)
+	return i.unmarshalJSON(s)
 }
 `
 
 func (m Model) writeUnmarshalText(w io.Writer) {
 	m.execTemplate(w, unmarshalText)
+}
+
+//-------------------------------------------------------------------------------------------------
+
+const unmarshalJSONUsingParse = `
+func (i *<<.MainType>>) unmarshalJSON(s string) error {
+	return i.Parse(s)
+}
+`
+
+const unmarshalJSONUsingStructTags = `
+func (v *<<.MainType>>) unmarshalJSON(in string) error {
+	if v.parseNumber(in) {
+		return nil
+	}
+
+	s := << transform "in" >>
+
+	var i0 uint16 = 0
+	for j := 1; j < len(<<.LcType>>JSONIndex); j++ {
+		i1 := <<.LcType>>JSONIndex[j]
+<<- if .Asymmetric>>
+		p := <<.LcType>>JSONInputs[i0:i1]
+<<- else >>
+		p := <<.LcType>>JSONStrings[i0:i1]
+<<- end >>
+		if s == p {
+			*v = All<<.MainType>>s[j-1]
+			return nil
+		}
+		i0 = i1
+	}
+<<- if .AliasTable>>
+
+	*v, ok = <<.AliasTable>>[s]
+	if ok {
+		return nil
+	}
+<<- end>>
+
+	return errors.New(in + ": unrecognised <<.LcType>>")
+}
+`
+
+func (m Model) writeUnmarshalJSON(w io.Writer) {
+	if m.HasJSONTags() {
+		m.execTemplate(w, unmarshalJSONUsingStructTags)
+	} else {
+		m.execTemplate(w, unmarshalJSONUsingParse)
+	}
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -574,10 +689,12 @@ func (m Model) writeScanValue(w io.Writer) {
 
 func (m Model) WriteGo(w io.Writer) {
 	m.writeHead(w)
-	m.writeJoinedStringAndIndexes(w)
 	m.writeAllItems(w)
-	m.writeStringMethod(w)
+	m.writeJoinedStringAndIndexes(w)
+	m.writeToStringMethod(w)
+	m.writeParseIdentifierMethod(w)
 	m.writeTagMethod(w)
+	m.writeStringMethod(w)
 	m.writeOrdinalMethod(w)
 	m.writeBaseMethod(w)
 	m.writeOfMethod(w)
@@ -587,6 +704,7 @@ func (m Model) WriteGo(w io.Writer) {
 	m.writeMustParseMethod(w)
 	m.writeMarshalText(w)
 	m.writeUnmarshalText(w)
+	m.writeUnmarshalJSON(w)
 	m.writeScanValue(w)
 
 	if c, ok := w.(io.Closer); ok {

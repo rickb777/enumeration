@@ -31,36 +31,7 @@ func TestWriteHead(t *testing.T) {
 
 //-------------------------------------------------------------------------------------------------
 
-const e2nc = `
-const sweetEnumStrings = "MarsBountySnickersKitkatFerrero Rocher"
-
-var sweetEnumIndex = [...]uint16{0, 4, 10, 18, 24, 38}
-`
-
-const e2lc = `
-const sweetEnumStrings = "marsbountysnickerskitkat"
-
-var sweetEnumIndex = [...]uint16{0, 4, 10, 18, 24}
-`
-
-const e2ic = `
-const (
-	sweetEnumStrings = "MarsBountySnickersKitkatFerrero_Rocher"
-	sweetEnumInputs  = "marsbountysnickerskitkatferrero_rocher"
-)
-
-var sweetEnumIndex = [...]uint16{0, 4, 10, 18, 24, 38}
-`
-
-func TestWriteJoinedStringAndIndexes(t *testing.T) {
-	testStage(t, modelNoChange().writeJoinedStringAndIndexes, e2nc)
-	testStage(t, modelLowerWithLookupTable().writeJoinedStringAndIndexes, e2lc)
-	testStage(t, modelIgnoreCase().writeJoinedStringAndIndexes, e2ic)
-}
-
-//-------------------------------------------------------------------------------------------------
-
-const e3 = `
+const e2 = `
 // AllSweets lists all 5 values in order.
 var AllSweets = []Sweet{
 	Mars, Bounty, Snickers, Kitkat,
@@ -75,50 +46,99 @@ var AllSweetEnums = enum.IntEnums{
 `
 
 func TestWriteAllItems(t *testing.T) {
-	testStage(t, modelNoChange().writeAllItems, e3)
+	testStage(t, modelNoChange().writeAllItems, e2)
+}
+
+//-------------------------------------------------------------------------------------------------
+
+const e2nc = `
+const (
+	sweetEnumStrings = "MarsBountySnickersKitkatFerrero Rocher"
+)
+
+var (
+	sweetEnumIndex = [...]uint16{0, 4, 10, 18, 24, 38}
+)
+`
+
+const e3lc = `
+const (
+	sweetEnumStrings = "marsbountysnickerskitkat"
+)
+
+var (
+	sweetEnumIndex = [...]uint16{0, 4, 10, 18, 24}
+)
+`
+
+const e3ic = `
+const (
+	sweetEnumStrings = "MarsBountySnickersKitkatFerrero_Rocher"
+	sweetEnumInputs  = "marsbountysnickerskitkatferrero_rocher"
+)
+
+var (
+	sweetEnumIndex = [...]uint16{0, 4, 10, 18, 24, 38}
+)
+`
+
+func TestWriteJoinedStringAndIndexes(t *testing.T) {
+	testStage(t, modelNoChange().writeJoinedStringAndIndexes, e2nc)
+	testStage(t, modelLowerWithLookupTable().writeJoinedStringAndIndexes, e3lc)
+	testStage(t, modelIgnoreCase().writeJoinedStringAndIndexes, e3ic)
 }
 
 //-------------------------------------------------------------------------------------------------
 
 const e4nc = `
-// String returns the literal string representation of a Sweet, which is
-// the same as the const identifier.
-func (i Sweet) String() string {
+func (i Sweet) toString(concats string, indexes []uint16) string {
 	o := i.Ordinal()
 	if o < 0 || o >= len(AllSweets) {
 		return fmt.Sprintf("Sweet(%d)", i)
 	}
-	return sweetEnumStrings[sweetEnumIndex[o]:sweetEnumIndex[o+1]]
+	return concats[indexes[o]:indexes[o+1]]
 }
 `
 
 const e4lc = `
-// String returns the literal string representation of a Sweet, which is
-// the same as the const identifier.
-func (i Sweet) String() string {
+func (i Sweet) toString(concats string, indexes []uint16) string {
 	o := i.Ordinal()
 	if o < 0 || o >= len(AllSweets) {
 		return fmt.Sprintf("Sweet(%g)", i)
 	}
-	return sweetEnumStrings[sweetEnumIndex[o]:sweetEnumIndex[o+1]]
+	return concats[indexes[o]:indexes[o+1]]
 }
 `
 
 func TestWriteLiteralMethod(t *testing.T) {
-	testStage(t, modelNoChange().writeStringMethod, e4nc)
-	testStage(t, modelLowerWithLookupTable().writeStringMethod, e4lc)
+	testStage(t, modelNoChange().writeToStringMethod, e4nc)
+	testStage(t, modelLowerWithLookupTable().writeToStringMethod, e4lc)
 }
 
 //-------------------------------------------------------------------------------------------------
 
-const e5nc = `
+const string_nc = `
+// String returns the literal string representation of a Sweet, which is
+// the same as the const identifier.
+func (i Sweet) String() string {
+	return i.toString(sweetEnumStrings, sweetEnumIndex[:])
+}
+`
+
+func TestWriteStringMethod(t *testing.T) {
+	testStage(t, modelNoChange().writeStringMethod, string_nc)
+}
+
+//-------------------------------------------------------------------------------------------------
+
+const tag_nc = `
 // Tag returns the string representation of a Sweet. This is an alias for String.
 func (i Sweet) Tag() string {
 	return i.String()
 }
 `
 
-const e5lc = `
+const tag_lc = `
 var sweetNamesInverse = map[string]Sweet{}
 
 func init() {
@@ -157,13 +177,13 @@ func (i Sweet) Tag() string {
 `
 
 func TestWriteTagMethod(t *testing.T) {
-	testStage(t, modelNoChange().writeTagMethod, e5nc)
-	testStage(t, modelLowerWithLookupTable().writeTagMethod, e5lc)
+	testStage(t, modelNoChange().writeTagMethod, tag_nc)
+	testStage(t, modelLowerWithLookupTable().writeTagMethod, tag_lc)
 }
 
 //-------------------------------------------------------------------------------------------------
 
-const e6nc = `
+const ordinal_nc = `
 // Ordinal returns the ordinal number of a Sweet. This is an integer counting
 // from zero. It is *not* the same as the const number assigned to the value.
 func (i Sweet) Ordinal() int {
@@ -183,7 +203,7 @@ func (i Sweet) Ordinal() int {
 }
 `
 
-const e6lc = `
+const ordinal_lc = `
 // Ordinal returns the ordinal number of a Sweet. This is an integer counting
 // from zero. It is *not* the same as the const number assigned to the value.
 func (i Sweet) Ordinal() int {
@@ -202,13 +222,13 @@ func (i Sweet) Ordinal() int {
 `
 
 func TestWriteOrdinalMethod(t *testing.T) {
-	testStage(t, modelNoChange().writeOrdinalMethod, e6nc)
-	testStage(t, modelLowerWithLookupTable().writeOrdinalMethod, e6lc)
+	testStage(t, modelNoChange().writeOrdinalMethod, ordinal_nc)
+	testStage(t, modelLowerWithLookupTable().writeOrdinalMethod, ordinal_lc)
 }
 
 //-------------------------------------------------------------------------------------------------
 
-const e7nc = `
+const int_nc = `
 // Int returns the int value, which is not necessarily the same as the ordinal.
 // This facilitates polymorphism (see enum.IntEnum).
 func (i Sweet) Int() int {
@@ -216,7 +236,7 @@ func (i Sweet) Int() int {
 }
 `
 
-const e7lc = `
+const float_lc = `
 // Float returns the float64 value. It serves to facilitate polymorphism (see enum.FloatEnum).
 func (i Sweet) Float() float64 {
 	return float64(i)
@@ -224,13 +244,13 @@ func (i Sweet) Float() float64 {
 `
 
 func TestWriteBaseMethod(t *testing.T) {
-	testStage(t, modelNoChange().writeBaseMethod, e7nc)
-	testStage(t, modelLowerWithLookupTable().writeBaseMethod, e7lc)
+	testStage(t, modelNoChange().writeBaseMethod, int_nc)
+	testStage(t, modelLowerWithLookupTable().writeBaseMethod, float_lc)
 }
 
 //-------------------------------------------------------------------------------------------------
 
-const e8nc = `
+const sweetOf_nc = `
 // SweetOf returns a Sweet based on an ordinal number. This is the inverse of Ordinal.
 // If the ordinal is out of range, an invalid Sweet is returned.
 func SweetOf(i int) Sweet {
@@ -242,7 +262,7 @@ func SweetOf(i int) Sweet {
 }
 `
 
-const e8lc = `
+const sweetOf_lc = `
 // SweetOf returns a Sweet based on an ordinal number. This is the inverse of Ordinal.
 // If the ordinal is out of range, an invalid Sweet is returned.
 func SweetOf(i int) Sweet {
@@ -255,12 +275,13 @@ func SweetOf(i int) Sweet {
 `
 
 func TestWriteOfMethod(t *testing.T) {
-	testStage(t, modelNoChange().writeOfMethod, e8nc)
-	testStage(t, modelLowerWithLookupTable().writeOfMethod, e8lc)
+	testStage(t, modelNoChange().writeOfMethod, sweetOf_nc)
+	testStage(t, modelLowerWithLookupTable().writeOfMethod, sweetOf_lc)
 }
 
 //-------------------------------------------------------------------------------------------------
-const e9 = `
+
+const isValid = `
 // IsValid determines whether a Sweet is one of the defined constants.
 func (i Sweet) IsValid() bool {
 	return i.Ordinal() >= 0
@@ -268,13 +289,13 @@ func (i Sweet) IsValid() bool {
 `
 
 func TestWriteIsValid(t *testing.T) {
-	testStage(t, modelNoChange().writeIsValidMethod, e9)
-	testStage(t, modelLowerWithLookupTable().writeIsValidMethod, e9)
+	testStage(t, modelNoChange().writeIsValidMethod, isValid)
+	testStage(t, modelLowerWithLookupTable().writeIsValidMethod, isValid)
 }
 
 //-------------------------------------------------------------------------------------------------
 
-const e10nc = `
+const parse_nc = `
 // Parse parses a string to find the corresponding Sweet, accepting one of the string values or
 // a number. The input representation is determined by sweetMarshalTextRep. It is used by AsSweet.
 //
@@ -301,7 +322,7 @@ func (v *Sweet) parse(in string, rep enum.Representation) error {
 
 	s := strings.ReplaceAll(in, "_", " ")
 
-	if v.parseIdentifier(s) {
+	if v.parseString(s, sweetEnumStrings, sweetEnumIndex[:]) {
 		return nil
 	}
 
@@ -327,25 +348,9 @@ func (v *Sweet) parseOrdinal(s string) (ok bool) {
 	}
 	return false
 }
-
-// parseIdentifier attempts to match an identifier.
-func (v *Sweet) parseIdentifier(s string) (ok bool) {
-	var i0 uint16 = 0
-
-	for j := 1; j < len(sweetEnumIndex); j++ {
-		i1 := sweetEnumIndex[j]
-		p := sweetEnumStrings[i0:i1]
-		if s == p {
-			*v = AllSweets[j-1]
-			return true
-		}
-		i0 = i1
-	}
-	return false
-}
 `
 
-const e10lc = `
+const parse_lc = `
 // Parse parses a string to find the corresponding Sweet, accepting one of the string values or
 // a number. The input representation is determined by sweetMarshalTextRep. It is used by AsSweet.
 //
@@ -373,11 +378,11 @@ func (v *Sweet) parse(in string, rep enum.Representation) error {
 	s := strings.ToLower(strings.ReplaceAll(in, "_", " "))
 
 	if rep == enum.Identifier {
-		if v.parseIdentifier(s) || v.parseTag(s) {
+		if v.parseString(s, sweetEnumStrings, sweetEnumIndex[:]) || v.parseTag(s) {
 			return nil
 		}
 	} else {
-		if v.parseTag(s) || v.parseIdentifier(s) {
+		if v.parseTag(s) || v.parseString(s, sweetEnumStrings, sweetEnumIndex[:]) {
 			return nil
 		}
 	}
@@ -410,26 +415,9 @@ func (v *Sweet) parseTag(s string) (ok bool) {
 	*v, ok = sweetNamesInverse[s]
 	return ok
 }
-
-// parseIdentifier attempts to match an identifier.
-func (v *Sweet) parseIdentifier(s string) (ok bool) {
-	var i0 uint16 = 0
-
-	for j := 1; j < len(sweetEnumIndex); j++ {
-		i1 := sweetEnumIndex[j]
-		p := sweetEnumStrings[i0:i1]
-		if s == p {
-			*v = AllSweets[j-1]
-			return true
-		}
-		i0 = i1
-	}
-	*v, ok = sweetAlias[s]
-	return ok
-}
 `
 
-const e10ic = `
+const parse_ic = `
 // Parse parses a string to find the corresponding Sweet, accepting one of the string values or
 // a number. The input representation is determined by sweetMarshalTextRep. It is used by AsSweet.
 // The input case does not matter.
@@ -457,7 +445,7 @@ func (v *Sweet) parse(in string, rep enum.Representation) error {
 
 	s := strings.ToLower(in)
 
-	if v.parseIdentifier(s) {
+	if v.parseString(s, sweetEnumInputs, sweetEnumIndex[:]) {
 		return nil
 	}
 
@@ -483,14 +471,24 @@ func (v *Sweet) parseOrdinal(s string) (ok bool) {
 	}
 	return false
 }
+`
 
-// parseIdentifier attempts to match an identifier.
-func (v *Sweet) parseIdentifier(s string) (ok bool) {
+func TestWriteParseMethod(t *testing.T) {
+	testStage(t, modelNoChange().writeParseMethod, parse_nc)
+	testStage(t, modelLowerWithLookupTable().writeParseMethod, parse_lc)
+	testStage(t, modelIgnoreCase().writeParseMethod, parse_ic)
+}
+
+//-------------------------------------------------------------------------------------------------
+
+const parseString_nc = `
+// parseString attempts to match an identifier.
+func (v *Sweet) parseString(s string, concats string, indexes []uint16) (ok bool) {
 	var i0 uint16 = 0
 
-	for j := 1; j < len(sweetEnumIndex); j++ {
-		i1 := sweetEnumIndex[j]
-		p := sweetEnumInputs[i0:i1]
+	for j := 1; j < len(indexes); j++ {
+		i1 := indexes[j]
+		p := concats[i0:i1]
 		if s == p {
 			*v = AllSweets[j-1]
 			return true
@@ -501,10 +499,28 @@ func (v *Sweet) parseIdentifier(s string) (ok bool) {
 }
 `
 
-func TestWriteParseMethod(t *testing.T) {
-	testStage(t, modelNoChange().writeParseMethod, e10nc)
-	testStage(t, modelLowerWithLookupTable().writeParseMethod, e10lc)
-	testStage(t, modelIgnoreCase().writeParseMethod, e10ic)
+const parseString_aliasTable = `
+// parseString attempts to match an identifier.
+func (v *Sweet) parseString(s string, concats string, indexes []uint16) (ok bool) {
+	var i0 uint16 = 0
+
+	for j := 1; j < len(indexes); j++ {
+		i1 := indexes[j]
+		p := concats[i0:i1]
+		if s == p {
+			*v = AllSweets[j-1]
+			return true
+		}
+		i0 = i1
+	}
+	*v, ok = sweetAlias[s]
+	return ok
+}
+`
+
+func TestWriteParseIdentifierMethod(t *testing.T) {
+	testStage(t, modelNoChange().writeParseIdentifierMethod, parseString_nc)
+	testStage(t, modelWithJSONStructTags(false, transform.Stet).writeParseIdentifierMethod, parseString_aliasTable)
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -702,18 +718,87 @@ func (i *Sweet) UnmarshalJSON(text []byte) error {
 		return nil
 	}
 	s = strings.Trim(s, "\"")
-	return i.Parse(s)
+	return i.unmarshalJSON(s)
 }
 `
 
 func TestWriteUnmarshalText(t *testing.T) {
 	testStage(t, modelNoChange().writeUnmarshalText, e14)
-	testStage(t, modelLowerWithLookupTable().writeUnmarshalText, e14)
 }
 
 //-------------------------------------------------------------------------------------------------
 
+const e15short = `
+func (i *Sweet) unmarshalJSON(s string) error {
+	return i.Parse(s)
+}
+`
+
 const e15nc = `
+func (v *Sweet) unmarshalJSON(in string) error {
+	if v.parseNumber(in) {
+		return nil
+	}
+
+	s := in
+
+	var i0 uint16 = 0
+	for j := 1; j < len(sweetJSONIndex); j++ {
+		i1 := sweetJSONIndex[j]
+		p := sweetJSONStrings[i0:i1]
+		if s == p {
+			*v = AllSweets[j-1]
+			return nil
+		}
+		i0 = i1
+	}
+
+	*v, ok = sweetAlias[s]
+	if ok {
+		return nil
+	}
+
+	return errors.New(in + ": unrecognised sweet")
+}
+`
+
+const e15ic = `
+func (v *Sweet) unmarshalJSON(in string) error {
+	if v.parseNumber(in) {
+		return nil
+	}
+
+	s := strings.ToLower(in)
+
+	var i0 uint16 = 0
+	for j := 1; j < len(sweetJSONIndex); j++ {
+		i1 := sweetJSONIndex[j]
+		p := sweetJSONInputs[i0:i1]
+		if s == p {
+			*v = AllSweets[j-1]
+			return nil
+		}
+		i0 = i1
+	}
+
+	*v, ok = sweetAlias[s]
+	if ok {
+		return nil
+	}
+
+	return errors.New(in + ": unrecognised sweet")
+}
+`
+
+func TestWriteUnmarshalJSON(t *testing.T) {
+	testStage(t, modelNoChange().writeUnmarshalJSON, e15short)
+	testStage(t, modelWithJSONStructTags(false, transform.Stet).writeUnmarshalJSON, e15nc)
+	testStage(t, modelWithJSONStructTags(true, transform.Stet).writeUnmarshalJSON, e15ic)
+}
+
+//-------------------------------------------------------------------------------------------------
+
+const e16nc = `
 // sweetStoreRep controls database storage via the Scan and Value methods.
 // By default, it is enum.Identifier and quoted strings are used.
 var sweetStoreRep = enum.Identifier
@@ -762,7 +847,7 @@ func (i Sweet) Value() (driver.Value, error) {
 }
 `
 
-const e15lc = `
+const e16lc = `
 // sweetStoreRep controls database storage via the Scan and Value methods.
 // By default, it is enum.Identifier and quoted strings are used.
 var sweetStoreRep = enum.Identifier
@@ -812,8 +897,8 @@ func (i Sweet) Value() (driver.Value, error) {
 `
 
 func TestWriteScanValue(t *testing.T) {
-	testStage(t, modelNoChange().writeScanValue, e15nc)
-	testStage(t, modelLowerWithLookupTable().writeScanValue, e15lc)
+	testStage(t, modelNoChange().writeScanValue, e16nc)
+	testStage(t, modelLowerWithLookupTable().writeScanValue, e16lc)
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -877,6 +962,7 @@ func modelNoChange() Model {
 		BaseType: "int",
 		Version:  util.Version,
 		Values:   ValuesOf("Mars", "Bounty", "Snickers", "Kitkat", "Ferrero_Rocher"),
+		Extra:    make(map[string]string),
 	}
 }
 
@@ -894,6 +980,32 @@ func modelIgnoreCase() Model {
 		BaseType: "int",
 		Version:  util.Version,
 		Values:   ValuesOf("Mars", "Bounty", "Snickers", "Kitkat", "Ferrero_Rocher"),
+		Extra:    make(map[string]string),
+	}
+}
+
+func modelWithJSONStructTags(ic bool, c transform.Case) Model {
+	Prefix = ""
+	Suffix = ""
+	var values Values
+	values = values.Append("Mars", `json:"mmm"`)
+	values = values.Append("Bounty", `json:"bbb"`)
+	values = values.Append("Snickers", `json:"sss"`)
+	values = values.Append("Kitkat", `json:"kkk"`)
+	return Model{
+		Config: Config{
+			MainType:   "Sweet",
+			Plural:     "Sweets",
+			Pkg:        "confectionary",
+			IgnoreCase: ic,
+		},
+		LcType:     "sweet",
+		BaseType:   "int",
+		Version:    util.Version,
+		Case:       c,
+		Values:     values,
+		AliasTable: "sweetAlias",
+		Extra:      make(map[string]string),
 	}
 }
 
@@ -915,5 +1027,6 @@ func modelLowerWithLookupTable() Model {
 		Case:       transform.Lower,
 		TagTable:   "sweetNames",
 		AliasTable: "sweetAlias",
+		Extra:      make(map[string]string),
 	}
 }

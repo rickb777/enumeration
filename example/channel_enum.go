@@ -12,10 +12,6 @@ import (
 	"strings"
 )
 
-const saleschannelEnumStrings = "onlineinstoretelephone"
-
-var saleschannelEnumIndex = [...]uint16{0, 6, 13, 22}
-
 // AllSalesChannels lists all 3 values in order.
 var AllSalesChannels = []SalesChannel{
 	OnlineSales, InstoreSales, TelephoneSales,
@@ -26,19 +22,49 @@ var AllSalesChannelEnums = enum.IntEnums{
 	OnlineSales, InstoreSales, TelephoneSales,
 }
 
-// String returns the literal string representation of a SalesChannel, which is
-// the same as the const identifier.
-func (i SalesChannel) String() string {
+const (
+	saleschannelEnumStrings = "onlineinstoretelephone"
+	saleschannelJSONStrings = "webshopstorephone"
+)
+
+var (
+	saleschannelEnumIndex = [...]uint16{0, 6, 13, 22}
+	saleschannelJSONIndex = [...]uint16{0, 7, 12, 17}
+)
+
+func (i SalesChannel) toString(concats string, indexes []uint16) string {
 	o := i.Ordinal()
 	if o < 0 || o >= len(AllSalesChannels) {
 		return fmt.Sprintf("SalesChannel(%d)", i)
 	}
-	return saleschannelEnumStrings[saleschannelEnumIndex[o]:saleschannelEnumIndex[o+1]]
+	return concats[indexes[o]:indexes[o+1]]
+}
+
+// parseString attempts to match an identifier.
+func (v *SalesChannel) parseString(s string, concats string, indexes []uint16) (ok bool) {
+	var i0 uint16 = 0
+
+	for j := 1; j < len(indexes); j++ {
+		i1 := indexes[j]
+		p := concats[i0:i1]
+		if s == p {
+			*v = AllSalesChannels[j-1]
+			return true
+		}
+		i0 = i1
+	}
+	return false
 }
 
 // Tag returns the string representation of a SalesChannel. This is an alias for String.
 func (i SalesChannel) Tag() string {
 	return i.String()
+}
+
+// String returns the literal string representation of a SalesChannel, which is
+// the same as the const identifier.
+func (i SalesChannel) String() string {
+	return i.toString(saleschannelEnumStrings, saleschannelEnumIndex[:])
 }
 
 // Ordinal returns the ordinal number of a SalesChannel. This is an integer counting
@@ -102,7 +128,7 @@ func (v *SalesChannel) parse(in string, rep enum.Representation) error {
 
 	s := strings.ToLower(in)
 
-	if v.parseIdentifier(s) {
+	if v.parseString(s, saleschannelEnumStrings, saleschannelEnumIndex[:]) {
 		return nil
 	}
 
@@ -125,22 +151,6 @@ func (v *SalesChannel) parseOrdinal(s string) (ok bool) {
 	if err == nil && 0 <= ord && ord < len(AllSalesChannels) {
 		*v = AllSalesChannels[ord]
 		return true
-	}
-	return false
-}
-
-// parseIdentifier attempts to match an identifier.
-func (v *SalesChannel) parseIdentifier(s string) (ok bool) {
-	var i0 uint16 = 0
-
-	for j := 1; j < len(saleschannelEnumIndex); j++ {
-		i1 := saleschannelEnumIndex[j]
-		p := saleschannelEnumStrings[i0:i1]
-		if s == p {
-			*v = AllSalesChannels[j-1]
-			return true
-		}
-		i0 = i1
 	}
 	return false
 }
@@ -177,7 +187,11 @@ func (i SalesChannel) MarshalText() (text []byte, err error) {
 // MarshalJSON converts values to bytes suitable for transmission via JSON.
 // The representation is chosen according to saleschannelMarshalTextRep.
 func (i SalesChannel) MarshalJSON() ([]byte, error) {
-	return i.marshalText(saleschannelMarshalTextRep, true)
+	o := i.Ordinal()
+	if o < 0 || o >= len(AllSalesChannels) {
+		return i.quotedString(fmt.Sprintf("SalesChannel(%d)", i)), nil
+	}
+	return i.quotedString(saleschannelJSONStrings[saleschannelJSONIndex[o]:saleschannelJSONIndex[o+1]]), nil
 }
 
 func (i SalesChannel) marshalText(rep enum.Representation, quoted bool) (text []byte, err error) {
@@ -225,7 +239,28 @@ func (i *SalesChannel) UnmarshalJSON(text []byte) error {
 		return nil
 	}
 	s = strings.Trim(s, "\"")
-	return i.Parse(s)
+	return i.unmarshalJSON(s)
+}
+
+func (v *SalesChannel) unmarshalJSON(in string) error {
+	if v.parseNumber(in) {
+		return nil
+	}
+
+	s := strings.ToLower(in)
+
+	var i0 uint16 = 0
+	for j := 1; j < len(saleschannelJSONIndex); j++ {
+		i1 := saleschannelJSONIndex[j]
+		p := saleschannelJSONStrings[i0:i1]
+		if s == p {
+			*v = AllSalesChannels[j-1]
+			return nil
+		}
+		i0 = i1
+	}
+
+	return errors.New(in + ": unrecognised saleschannel")
 }
 
 // saleschannelStoreRep controls database storage via the Scan and Value methods.

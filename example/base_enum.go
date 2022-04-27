@@ -12,10 +12,6 @@ import (
 	"strings"
 )
 
-const baseEnumStrings = "acgt"
-
-var baseEnumIndex = [...]uint16{0, 1, 2, 3, 4}
-
 // AllBases lists all 4 values in order.
 var AllBases = []Base{
 	A, C, G, T,
@@ -26,19 +22,47 @@ var AllBaseEnums = enum.FloatEnums{
 	A, C, G, T,
 }
 
-// String returns the literal string representation of a Base, which is
-// the same as the const identifier.
-func (i Base) String() string {
+const (
+	baseEnumStrings = "acgt"
+)
+
+var (
+	baseEnumIndex = [...]uint16{0, 1, 2, 3, 4}
+)
+
+func (i Base) toString(concats string, indexes []uint16) string {
 	o := i.Ordinal()
 	if o < 0 || o >= len(AllBases) {
 		return fmt.Sprintf("Base(%g)", i)
 	}
-	return baseEnumStrings[baseEnumIndex[o]:baseEnumIndex[o+1]]
+	return concats[indexes[o]:indexes[o+1]]
+}
+
+// parseString attempts to match an identifier.
+func (v *Base) parseString(s string, concats string, indexes []uint16) (ok bool) {
+	var i0 uint16 = 0
+
+	for j := 1; j < len(indexes); j++ {
+		i1 := indexes[j]
+		p := concats[i0:i1]
+		if s == p {
+			*v = AllBases[j-1]
+			return true
+		}
+		i0 = i1
+	}
+	return false
 }
 
 // Tag returns the string representation of a Base. This is an alias for String.
 func (i Base) Tag() string {
 	return i.String()
+}
+
+// String returns the literal string representation of a Base, which is
+// the same as the const identifier.
+func (i Base) String() string {
+	return i.toString(baseEnumStrings, baseEnumIndex[:])
 }
 
 // Ordinal returns the ordinal number of a Base. This is an integer counting
@@ -103,7 +127,7 @@ func (v *Base) parse(in string, rep enum.Representation) error {
 
 	s := strings.ToLower(in)
 
-	if v.parseIdentifier(s) {
+	if v.parseString(s, baseEnumStrings, baseEnumIndex[:]) {
 		return nil
 	}
 
@@ -126,22 +150,6 @@ func (v *Base) parseOrdinal(s string) (ok bool) {
 	if err == nil && 0 <= ord && ord < len(AllBases) {
 		*v = AllBases[ord]
 		return true
-	}
-	return false
-}
-
-// parseIdentifier attempts to match an identifier.
-func (v *Base) parseIdentifier(s string) (ok bool) {
-	var i0 uint16 = 0
-
-	for j := 1; j < len(baseEnumIndex); j++ {
-		i1 := baseEnumIndex[j]
-		p := baseEnumStrings[i0:i1]
-		if s == p {
-			*v = AllBases[j-1]
-			return true
-		}
-		i0 = i1
 	}
 	return false
 }
@@ -226,6 +234,10 @@ func (i *Base) UnmarshalJSON(text []byte) error {
 		return nil
 	}
 	s = strings.Trim(s, "\"")
+	return i.unmarshalJSON(s)
+}
+
+func (i *Base) unmarshalJSON(s string) error {
 	return i.Parse(s)
 }
 
