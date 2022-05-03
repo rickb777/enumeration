@@ -47,7 +47,6 @@ func (i GreekAlphabet) toString(concats string, indexes []uint16) string {
 	return concats[indexes[o]:indexes[o+1]]
 }
 
-// parseString attempts to match an identifier.
 func (v *GreekAlphabet) parseString(s string, concats string, indexes []uint16) (ok bool) {
 	var i0 uint16 = 0
 
@@ -71,7 +70,7 @@ func init() {
 		if !exists {
 			fmt.Fprintf(os.Stderr, "Warning: GreekAlphabet: %s is missing from greekTags\n", id)
 		} else {
-			k := v
+			k := greekalphabetTransformInput(v)
 			if _, exists := greekTagsInverse[k]; exists {
 				fmt.Fprintf(os.Stderr, "Warning: GreekAlphabet: %q is duplicated in greekTags\n", k)
 			}
@@ -206,7 +205,7 @@ func (v *GreekAlphabet) parse(in string, rep enum.Representation) error {
 		}
 	}
 
-	s := in
+	s := greekalphabetTransformInput(in)
 
 	if rep == enum.Identifier {
 		if v.parseString(s, greekalphabetEnumStrings, greekalphabetEnumIndex[:]) || v.parseTag(s) {
@@ -245,6 +244,13 @@ func (v *GreekAlphabet) parseOrdinal(s string) (ok bool) {
 func (v *GreekAlphabet) parseTag(s string) (ok bool) {
 	*v, ok = greekTagsInverse[s]
 	return ok
+}
+
+// greekalphabetTransformInput may alter input strings before they are parsed.
+// This function is pluggable and is initialised using command-line flags
+// -ic -lc -uc -unsnake.
+var greekalphabetTransformInput = func(in string) string {
+	return in
 }
 
 // AsGreekAlphabet parses a string to find the corresponding GreekAlphabet, accepting either one of the string values or
@@ -340,12 +346,12 @@ var greekalphabetStoreRep = enum.Identifier
 
 // Scan parses some value, which can be a number, a string or []byte.
 // It implements sql.Scanner, https://golang.org/pkg/database/sql/#Scanner
-func (i *GreekAlphabet) Scan(value interface{}) (err error) {
+func (i *GreekAlphabet) Scan(value interface{}) error {
 	if value == nil {
 		return nil
 	}
 
-	err = nil
+	var s string
 	switch v := value.(type) {
 	case int64:
 		if greekalphabetStoreRep == enum.Ordinal {
@@ -353,17 +359,19 @@ func (i *GreekAlphabet) Scan(value interface{}) (err error) {
 		} else {
 			*i = GreekAlphabet(v)
 		}
+		return nil
 	case float64:
 		*i = GreekAlphabet(v)
+		return nil
 	case []byte:
-		err = i.parse(string(v), greekalphabetStoreRep)
+		s = string(v)
 	case string:
-		err = i.parse(v, greekalphabetStoreRep)
+		s = v
 	default:
-		err = fmt.Errorf("%T %+v is not a meaningful greekalphabet", value, value)
+		return fmt.Errorf("%T %+v is not a meaningful greekalphabet", value, value)
 	}
 
-	return err
+	return i.parse(s, greekalphabetStoreRep)
 }
 
 // Value converts the GreekAlphabet to a string.

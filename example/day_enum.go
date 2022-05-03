@@ -40,7 +40,6 @@ func (i Day) toString(concats string, indexes []uint16) string {
 	return concats[indexes[o]:indexes[o+1]]
 }
 
-// parseString attempts to match an identifier.
 func (v *Day) parseString(s string, concats string, indexes []uint16) (ok bool) {
 	var i0 uint16 = 0
 
@@ -134,7 +133,7 @@ func (v *Day) parse(in string, rep enum.Representation) error {
 		}
 	}
 
-	s := in
+	s := dayTransformInput(in)
 
 	if v.parseString(s, dayEnumStrings, dayEnumIndex[:]) {
 		return nil
@@ -161,6 +160,13 @@ func (v *Day) parseOrdinal(s string) (ok bool) {
 		return true
 	}
 	return false
+}
+
+// dayTransformInput may alter input strings before they are parsed.
+// This function is pluggable and is initialised using command-line flags
+// -ic -lc -uc -unsnake.
+var dayTransformInput = func(in string) string {
+	return in
 }
 
 // AsDay parses a string to find the corresponding Day, accepting either one of the string values or
@@ -256,12 +262,12 @@ var dayStoreRep = enum.Identifier
 
 // Scan parses some value, which can be a number, a string or []byte.
 // It implements sql.Scanner, https://golang.org/pkg/database/sql/#Scanner
-func (i *Day) Scan(value interface{}) (err error) {
+func (i *Day) Scan(value interface{}) error {
 	if value == nil {
 		return nil
 	}
 
-	err = nil
+	var s string
 	switch v := value.(type) {
 	case int64:
 		if dayStoreRep == enum.Ordinal {
@@ -269,17 +275,19 @@ func (i *Day) Scan(value interface{}) (err error) {
 		} else {
 			*i = Day(v)
 		}
+		return nil
 	case float64:
 		*i = Day(v)
+		return nil
 	case []byte:
-		err = i.parse(string(v), dayStoreRep)
+		s = string(v)
 	case string:
-		err = i.parse(v, dayStoreRep)
+		s = v
 	default:
-		err = fmt.Errorf("%T %+v is not a meaningful day", value, value)
+		return fmt.Errorf("%T %+v is not a meaningful day", value, value)
 	}
 
-	return err
+	return i.parse(s, dayStoreRep)
 }
 
 // Value converts the Day to a string.

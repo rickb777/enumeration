@@ -8,10 +8,10 @@ import (
 	"testing"
 )
 
-const e0 = `// generated code - do not edit
+const head0 = `// generated code - do not edit
 // github.com/rickb777/enumeration/v2 `
 
-const e1 = `
+const head1 = `
 
 package confectionary
 
@@ -26,71 +26,128 @@ import (
 `
 
 func TestWriteHead(t *testing.T) {
-	testStage(t, modelNoChange().writeHead, e0+util.Version+e1)
+	expected := head0 + util.Version + head1
+	testStage(t, unsnake(basicModel()).writeHead, expected)
 }
 
 //-------------------------------------------------------------------------------------------------
 
-const e2 = `
+const AllSweets_simple = `
 // AllSweets lists all 5 values in order.
 var AllSweets = []Sweet{
 	Mars, Bounty, Snickers, Kitkat,
-	Ferrero_Rocher,
+	Dairy_Milk,
 }
 
 // AllSweetEnums lists all 5 values in order.
 var AllSweetEnums = enum.IntEnums{
 	Mars, Bounty, Snickers, Kitkat,
-	Ferrero_Rocher,
+	Dairy_Milk,
+}
+`
+
+const AllSweets_prefixed = `
+// AllSweets lists all 5 values in order.
+var AllSweets = []Sweet{
+	AMarsBar, ABountyBar, ASnickersBar, AKitkatBar,
+	ADairy_MilkBar,
+}
+
+// AllSweetEnums lists all 5 values in order.
+var AllSweetEnums = enum.FloatEnums{
+	AMarsBar, ABountyBar, ASnickersBar, AKitkatBar,
+	ADairy_MilkBar,
 }
 `
 
 func TestWriteAllItems(t *testing.T) {
-	testStage(t, modelNoChange().writeAllItems, e2)
+	testStage(t, unsnake(basicModel()).writeAllItems, AllSweets_simple)
+	testStage(t, unsnake(basicModel()).writeAllItems, AllSweets_simple)
+	testStage(t, floatModelWithPrefixes().writeAllItems, AllSweets_prefixed)
 }
 
 //-------------------------------------------------------------------------------------------------
 
-const e2nc = `
+const enumStrings_nc = `
 const (
-	sweetEnumStrings = "MarsBountySnickersKitkatFerrero Rocher"
+	sweetEnumStrings = "MarsBountySnickersKitkatDairy_Milk"
 )
 
 var (
-	sweetEnumIndex = [...]uint16{0, 4, 10, 18, 24, 38}
+	sweetEnumIndex = [...]uint16{0, 4, 10, 18, 24, 34}
 )
 `
 
-const e3lc = `
+const enumStrings_nc_unsnake = `
 const (
-	sweetEnumStrings = "marsbountysnickerskitkat"
+	sweetEnumStrings = "MarsBountySnickersKitkatDairy Milk"
 )
 
 var (
-	sweetEnumIndex = [...]uint16{0, 4, 10, 18, 24}
+	sweetEnumIndex = [...]uint16{0, 4, 10, 18, 24, 34}
 )
 `
 
-const e3ic = `
+const enumStrings_lc = `
 const (
-	sweetEnumStrings = "MarsBountySnickersKitkatFerrero_Rocher"
-	sweetEnumInputs  = "marsbountysnickerskitkatferrero_rocher"
+	sweetEnumStrings = "marsbountysnickerskitkatdairy_milk"
 )
 
 var (
-	sweetEnumIndex = [...]uint16{0, 4, 10, 18, 24, 38}
+	sweetEnumIndex = [...]uint16{0, 4, 10, 18, 24, 34}
+)
+`
+
+const enumStrings_lc_unsnake = `
+const (
+	sweetEnumStrings = "marsbountysnickerskitkatdairy milk"
+)
+
+var (
+	sweetEnumIndex = [...]uint16{0, 4, 10, 18, 24, 34}
+)
+`
+
+const enumStrings_ic = `
+const (
+	sweetEnumStrings = "MarsBountySnickersKitkatDairy_Milk"
+	sweetEnumInputs  = "marsbountysnickerskitkatdairy_milk"
+)
+
+var (
+	sweetEnumIndex = [...]uint16{0, 4, 10, 18, 24, 34}
+)
+`
+
+const enumStrings_tagged_nc = `
+const (
+	sweetEnumStrings = "MarsBountySnickersKitkatDairy_Milk"
+	sweetEnumInputs  = "marsbountysnickerskitkatdairy_milk"
+	sweetJSONStrings = "mmmbbbssskkkddd"
+	sweetJSONInputs  = "mmmbbbssskkkddd"
+	sweetSQLStrings  = "mbskd"
+	sweetSQLInputs   = "mbskd"
+)
+
+var (
+	sweetEnumIndex = [...]uint16{0, 4, 10, 18, 24, 34}
+	sweetJSONIndex = [...]uint16{0, 3, 6, 9, 12, 15}
+	sweetSQLIndex = [...]uint16{0, 1, 2, 3, 4, 5}
 )
 `
 
 func TestWriteJoinedStringAndIndexes(t *testing.T) {
-	testStage(t, modelNoChange().writeJoinedStringAndIndexes, e2nc)
-	testStage(t, modelLowerWithLookupTable().writeJoinedStringAndIndexes, e3lc)
-	testStage(t, modelIgnoreCase().writeJoinedStringAndIndexes, e3ic)
+	testStage(t, basicModel().writeJoinedStringAndIndexes, enumStrings_nc)
+	testStage(t, unsnake(basicModel()).writeJoinedStringAndIndexes, enumStrings_nc_unsnake)
+	testStage(t, lowerCase(floatModelWithPrefixes()).writeJoinedStringAndIndexes, enumStrings_lc)
+	testStage(t, lowerCase(unsnake(floatModelWithPrefixes())).writeJoinedStringAndIndexes, enumStrings_lc_unsnake)
+	testStage(t, ignoreCase(basicModel()).writeJoinedStringAndIndexes, enumStrings_ic)
+	testStage(t, ignoreCase(modelWithStructTags()).writeJoinedStringAndIndexes, enumStrings_tagged_nc)
 }
 
 //-------------------------------------------------------------------------------------------------
 
-const e4nc = `
+const toString_int = `
 func (i Sweet) toString(concats string, indexes []uint16) string {
 	o := i.Ordinal()
 	if o < 0 || o >= len(AllSweets) {
@@ -100,7 +157,7 @@ func (i Sweet) toString(concats string, indexes []uint16) string {
 }
 `
 
-const e4lc = `
+const toString_float = `
 func (i Sweet) toString(concats string, indexes []uint16) string {
 	o := i.Ordinal()
 	if o < 0 || o >= len(AllSweets) {
@@ -111,13 +168,13 @@ func (i Sweet) toString(concats string, indexes []uint16) string {
 `
 
 func TestWriteLiteralMethod(t *testing.T) {
-	testStage(t, modelNoChange().writeToStringMethod, e4nc)
-	testStage(t, modelLowerWithLookupTable().writeToStringMethod, e4lc)
+	testStage(t, basicModel().writeToStringMethod, toString_int)
+	testStage(t, floatModelWithPrefixes().writeToStringMethod, toString_float)
 }
 
 //-------------------------------------------------------------------------------------------------
 
-const string_nc = `
+const String_all = `
 // String returns the literal string representation of a Sweet, which is
 // the same as the const identifier.
 func (i Sweet) String() string {
@@ -126,19 +183,19 @@ func (i Sweet) String() string {
 `
 
 func TestWriteStringMethod(t *testing.T) {
-	testStage(t, modelNoChange().writeStringMethod, string_nc)
+	testStage(t, basicModel().writeStringMethod, String_all)
 }
 
 //-------------------------------------------------------------------------------------------------
 
-const tag_nc = `
+const Tag_no_table = `
 // Tag returns the string representation of a Sweet. This is an alias for String.
 func (i Sweet) Tag() string {
 	return i.String()
 }
 `
 
-const tag_lc = `
+const Tag_with_table = `
 var sweetNamesInverse = map[string]Sweet{}
 
 func init() {
@@ -147,7 +204,7 @@ func init() {
 		if !exists {
 			fmt.Fprintf(os.Stderr, "Warning: Sweet: %s is missing from sweetNames\n", id)
 		} else {
-			k := strings.ToLower(strings.ReplaceAll(v, "_", " "))
+			k := sweetTransformInput(v)
 			if _, exists := sweetNamesInverse[k]; exists {
 				fmt.Fprintf(os.Stderr, "Warning: Sweet: %q is duplicated in sweetNames\n", k)
 			}
@@ -155,8 +212,8 @@ func init() {
 		}
 	}
 
-	if len(sweetNames) != 4 {
-		panic(fmt.Sprintf("Sweet: sweetNames has %d items but should have 4", len(sweetNames)))
+	if len(sweetNames) != 5 {
+		panic(fmt.Sprintf("Sweet: sweetNames has %d items but should have 5", len(sweetNames)))
 	}
 
 	if len(sweetNames) != len(sweetNamesInverse) {
@@ -177,13 +234,13 @@ func (i Sweet) Tag() string {
 `
 
 func TestWriteTagMethod(t *testing.T) {
-	testStage(t, modelNoChange().writeTagMethod, tag_nc)
-	testStage(t, modelLowerWithLookupTable().writeTagMethod, tag_lc)
+	testStage(t, basicModel().writeTagMethod, Tag_no_table)
+	testStage(t, lookupTables(basicModel()).writeTagMethod, Tag_with_table)
 }
 
 //-------------------------------------------------------------------------------------------------
 
-const ordinal_nc = `
+const ordinal_no_prefix = `
 // Ordinal returns the ordinal number of a Sweet. This is an integer counting
 // from zero. It is *not* the same as the const number assigned to the value.
 func (i Sweet) Ordinal() int {
@@ -196,34 +253,36 @@ func (i Sweet) Ordinal() int {
 		return 2
 	case Kitkat:
 		return 3
-	case Ferrero_Rocher:
+	case Dairy_Milk:
 		return 4
 	}
 	return -1
 }
 `
 
-const ordinal_lc = `
+const ordinal_with_prefix = `
 // Ordinal returns the ordinal number of a Sweet. This is an integer counting
 // from zero. It is *not* the same as the const number assigned to the value.
 func (i Sweet) Ordinal() int {
 	switch i {
-	case MarsBar:
+	case AMarsBar:
 		return 0
-	case BountyBar:
+	case ABountyBar:
 		return 1
-	case SnickersBar:
+	case ASnickersBar:
 		return 2
-	case KitkatBar:
+	case AKitkatBar:
 		return 3
+	case ADairy_MilkBar:
+		return 4
 	}
 	return -1
 }
 `
 
 func TestWriteOrdinalMethod(t *testing.T) {
-	testStage(t, modelNoChange().writeOrdinalMethod, ordinal_nc)
-	testStage(t, modelLowerWithLookupTable().writeOrdinalMethod, ordinal_lc)
+	testStage(t, unsnake(basicModel()).writeOrdinalMethod, ordinal_no_prefix)
+	testStage(t, floatModelWithPrefixes().writeOrdinalMethod, ordinal_with_prefix)
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -244,13 +303,13 @@ func (i Sweet) Float() float64 {
 `
 
 func TestWriteBaseMethod(t *testing.T) {
-	testStage(t, modelNoChange().writeBaseMethod, int_nc)
-	testStage(t, modelLowerWithLookupTable().writeBaseMethod, float_lc)
+	testStage(t, basicModel().writeBaseMethod, int_nc)
+	testStage(t, floatModelWithPrefixes().writeBaseMethod, float_lc)
 }
 
 //-------------------------------------------------------------------------------------------------
 
-const sweetOf_nc = `
+const SweetOf_no_prefix = `
 // SweetOf returns a Sweet based on an ordinal number. This is the inverse of Ordinal.
 // If the ordinal is out of range, an invalid Sweet is returned.
 func SweetOf(i int) Sweet {
@@ -258,11 +317,11 @@ func SweetOf(i int) Sweet {
 		return AllSweets[i]
 	}
 	// an invalid result
-	return Mars + Bounty + Snickers + Kitkat + Ferrero_Rocher + 1
+	return Mars + Bounty + Snickers + Kitkat + Dairy_Milk + 1
 }
 `
 
-const sweetOf_lc = `
+const SweetOf_with_prefix = `
 // SweetOf returns a Sweet based on an ordinal number. This is the inverse of Ordinal.
 // If the ordinal is out of range, an invalid Sweet is returned.
 func SweetOf(i int) Sweet {
@@ -270,18 +329,18 @@ func SweetOf(i int) Sweet {
 		return AllSweets[i]
 	}
 	// an invalid result
-	return MarsBar + BountyBar + SnickersBar + KitkatBar + 1
+	return AMarsBar + ABountyBar + ASnickersBar + AKitkatBar + ADairy_MilkBar + 1
 }
 `
 
 func TestWriteOfMethod(t *testing.T) {
-	testStage(t, modelNoChange().writeOfMethod, sweetOf_nc)
-	testStage(t, modelLowerWithLookupTable().writeOfMethod, sweetOf_lc)
+	testStage(t, basicModel().writeOfMethod, SweetOf_no_prefix)
+	testStage(t, floatModelWithPrefixes().writeOfMethod, SweetOf_with_prefix)
 }
 
 //-------------------------------------------------------------------------------------------------
 
-const isValid = `
+const IsValid_all = `
 // IsValid determines whether a Sweet is one of the defined constants.
 func (i Sweet) IsValid() bool {
 	return i.Ordinal() >= 0
@@ -289,13 +348,13 @@ func (i Sweet) IsValid() bool {
 `
 
 func TestWriteIsValid(t *testing.T) {
-	testStage(t, modelNoChange().writeIsValidMethod, isValid)
-	testStage(t, modelLowerWithLookupTable().writeIsValidMethod, isValid)
+	testStage(t, basicModel().writeIsValidMethod, IsValid_all)
+	testStage(t, floatModelWithPrefixes().writeIsValidMethod, IsValid_all)
 }
 
 //-------------------------------------------------------------------------------------------------
 
-const parse_nc = `
+const Parse_nc = `
 // Parse parses a string to find the corresponding Sweet, accepting one of the string values or
 // a number. The input representation is determined by sweetMarshalTextRep. It is used by AsSweet.
 //
@@ -320,7 +379,7 @@ func (v *Sweet) parse(in string, rep enum.Representation) error {
 		}
 	}
 
-	s := strings.ReplaceAll(in, "_", " ")
+	s := sweetTransformInput(in)
 
 	if v.parseString(s, sweetEnumStrings, sweetEnumIndex[:]) {
 		return nil
@@ -328,7 +387,94 @@ func (v *Sweet) parse(in string, rep enum.Representation) error {
 
 	return errors.New(in + ": unrecognised sweet")
 }
+`
 
+const Parse_lc = `
+// Parse parses a string to find the corresponding Sweet, accepting one of the string values or
+// a number. The input representation is determined by sweetMarshalTextRep. It is used by AsSweet.
+//
+// Usage Example
+//
+//    v := new(Sweet)
+//    err := v.Parse(s)
+//    ...  etc
+//
+func (v *Sweet) Parse(s string) error {
+	return v.parse(s, sweetMarshalTextRep)
+}
+
+func (v *Sweet) parse(in string, rep enum.Representation) error {
+	if rep == enum.Ordinal {
+		if v.parseOrdinal(in) {
+			return nil
+		}
+	} else {
+		if v.parseNumber(in) {
+			return nil
+		}
+	}
+
+	s := sweetTransformInput(in)
+
+	if rep == enum.Identifier {
+		if v.parseString(s, sweetEnumStrings, sweetEnumIndex[:]) || v.parseTag(s) {
+			return nil
+		}
+	} else {
+		if v.parseTag(s) || v.parseString(s, sweetEnumStrings, sweetEnumIndex[:]) {
+			return nil
+		}
+	}
+
+	return errors.New(in + ": unrecognised sweet")
+}
+`
+
+const Parse_ic = `
+// Parse parses a string to find the corresponding Sweet, accepting one of the string values or
+// a number. The input representation is determined by sweetMarshalTextRep. It is used by AsSweet.
+// The input case does not matter.
+//
+// Usage Example
+//
+//    v := new(Sweet)
+//    err := v.Parse(s)
+//    ...  etc
+//
+func (v *Sweet) Parse(s string) error {
+	return v.parse(s, sweetMarshalTextRep)
+}
+
+func (v *Sweet) parse(in string, rep enum.Representation) error {
+	if rep == enum.Ordinal {
+		if v.parseOrdinal(in) {
+			return nil
+		}
+	} else {
+		if v.parseNumber(in) {
+			return nil
+		}
+	}
+
+	s := sweetTransformInput(in)
+
+	if v.parseString(s, sweetEnumInputs, sweetEnumIndex[:]) {
+		return nil
+	}
+
+	return errors.New(in + ": unrecognised sweet")
+}
+`
+
+func TestWriteParseMethod(t *testing.T) {
+	testStage(t, unsnake(basicModel()).writeParseMethod, Parse_nc)
+	testStage(t, lookupTables(floatModelWithPrefixes()).writeParseMethod, Parse_lc)
+	testStage(t, ignoreCase(unsnake(basicModel())).writeParseMethod, Parse_ic)
+}
+
+//-------------------------------------------------------------------------------------------------
+
+const parseHelpers_nc = `
 // parseNumber attempts to convert a decimal value
 func (v *Sweet) parseNumber(s string) (ok bool) {
 	num, err := strconv.ParseInt(s, 10, 64)
@@ -350,46 +496,7 @@ func (v *Sweet) parseOrdinal(s string) (ok bool) {
 }
 `
 
-const parse_lc = `
-// Parse parses a string to find the corresponding Sweet, accepting one of the string values or
-// a number. The input representation is determined by sweetMarshalTextRep. It is used by AsSweet.
-//
-// Usage Example
-//
-//    v := new(Sweet)
-//    err := v.Parse(s)
-//    ...  etc
-//
-func (v *Sweet) Parse(s string) error {
-	return v.parse(s, sweetMarshalTextRep)
-}
-
-func (v *Sweet) parse(in string, rep enum.Representation) error {
-	if rep == enum.Ordinal {
-		if v.parseOrdinal(in) {
-			return nil
-		}
-	} else {
-		if v.parseNumber(in) {
-			return nil
-		}
-	}
-
-	s := strings.ToLower(strings.ReplaceAll(in, "_", " "))
-
-	if rep == enum.Identifier {
-		if v.parseString(s, sweetEnumStrings, sweetEnumIndex[:]) || v.parseTag(s) {
-			return nil
-		}
-	} else {
-		if v.parseTag(s) || v.parseString(s, sweetEnumStrings, sweetEnumIndex[:]) {
-			return nil
-		}
-	}
-
-	return errors.New(in + ": unrecognised sweet")
-}
-
+const parseHelpers_lc = `
 // parseNumber attempts to convert a decimal value
 func (v *Sweet) parseNumber(s string) (ok bool) {
 	num, err := strconv.ParseFloat(s, 64)
@@ -417,41 +524,7 @@ func (v *Sweet) parseTag(s string) (ok bool) {
 }
 `
 
-const parse_ic = `
-// Parse parses a string to find the corresponding Sweet, accepting one of the string values or
-// a number. The input representation is determined by sweetMarshalTextRep. It is used by AsSweet.
-// The input case does not matter.
-//
-// Usage Example
-//
-//    v := new(Sweet)
-//    err := v.Parse(s)
-//    ...  etc
-//
-func (v *Sweet) Parse(s string) error {
-	return v.parse(s, sweetMarshalTextRep)
-}
-
-func (v *Sweet) parse(in string, rep enum.Representation) error {
-	if rep == enum.Ordinal {
-		if v.parseOrdinal(in) {
-			return nil
-		}
-	} else {
-		if v.parseNumber(in) {
-			return nil
-		}
-	}
-
-	s := strings.ToLower(in)
-
-	if v.parseString(s, sweetEnumInputs, sweetEnumIndex[:]) {
-		return nil
-	}
-
-	return errors.New(in + ": unrecognised sweet")
-}
-
+const parseHelpers_ic = `
 // parseNumber attempts to convert a decimal value
 func (v *Sweet) parseNumber(s string) (ok bool) {
 	num, err := strconv.ParseInt(s, 10, 64)
@@ -473,16 +546,51 @@ func (v *Sweet) parseOrdinal(s string) (ok bool) {
 }
 `
 
-func TestWriteParseMethod(t *testing.T) {
-	testStage(t, modelNoChange().writeParseMethod, parse_nc)
-	testStage(t, modelLowerWithLookupTable().writeParseMethod, parse_lc)
-	testStage(t, modelIgnoreCase().writeParseMethod, parse_ic)
+func TestWriteParseHelperMethods(t *testing.T) {
+	testStage(t, unsnake(basicModel()).writeParseHelperMethods, parseHelpers_nc)
+	testStage(t, lookupTables(floatModelWithPrefixes()).writeParseHelperMethods, parseHelpers_lc)
+	testStage(t, ignoreCase(unsnake(basicModel())).writeParseHelperMethods, parseHelpers_ic)
+}
+
+//-------------------------------------------------------------------------------------------------
+
+const transformInput_nc = `
+// sweetTransformInput may alter input strings before they are parsed.
+// This function is pluggable and is initialised using command-line flags
+// -ic -lc -uc -unsnake.
+var sweetTransformInput = func(in string) string {
+	return in
+}
+`
+
+const transformInput_lc = `
+// sweetTransformInput may alter input strings before they are parsed.
+// This function is pluggable and is initialised using command-line flags
+// -ic -lc -uc -unsnake.
+var sweetTransformInput = func(in string) string {
+	return strings.ToLower(in)
+}
+`
+
+const transformInput_uc_unsnake = `
+// sweetTransformInput may alter input strings before they are parsed.
+// This function is pluggable and is initialised using command-line flags
+// -ic -lc -uc -unsnake.
+var sweetTransformInput = func(in string) string {
+	return strings.ToUpper(strings.ReplaceAll(in, "_", " "))
+}
+`
+
+func TestWriteTransformInputMethod(t *testing.T) {
+	testStage(t, basicModel().writeTransformInputFunction, transformInput_nc)
+	testStage(t, ignoreCase(basicModel()).writeTransformInputFunction, transformInput_lc)
+	testStage(t, lowerCase(basicModel()).writeTransformInputFunction, transformInput_lc)
+	testStage(t, upperCase(unsnake(basicModel())).writeTransformInputFunction, transformInput_uc_unsnake)
 }
 
 //-------------------------------------------------------------------------------------------------
 
 const parseString_nc = `
-// parseString attempts to match an identifier.
 func (v *Sweet) parseString(s string, concats string, indexes []uint16) (ok bool) {
 	var i0 uint16 = 0
 
@@ -500,7 +608,6 @@ func (v *Sweet) parseString(s string, concats string, indexes []uint16) (ok bool
 `
 
 const parseString_aliasTable = `
-// parseString attempts to match an identifier.
 func (v *Sweet) parseString(s string, concats string, indexes []uint16) (ok bool) {
 	var i0 uint16 = 0
 
@@ -519,13 +626,14 @@ func (v *Sweet) parseString(s string, concats string, indexes []uint16) (ok bool
 `
 
 func TestWriteParseIdentifierMethod(t *testing.T) {
-	testStage(t, modelNoChange().writeParseIdentifierMethod, parseString_nc)
-	testStage(t, modelWithJSONStructTags(false, transform.Stet).writeParseIdentifierMethod, parseString_aliasTable)
+	testStage(t, unsnake(basicModel()).writeParseIdentifierMethod, parseString_nc)
+	testStage(t, modelWithStructTags().writeParseIdentifierMethod, parseString_aliasTable)
+	testStage(t, ignoreCase(modelWithStructTags()).writeParseIdentifierMethod, parseString_aliasTable)
 }
 
 //-------------------------------------------------------------------------------------------------
 
-const e11nc = `
+const AsSweet_nc = `
 // AsSweet parses a string to find the corresponding Sweet, accepting either one of the string values or
 // a number. The input representation is determined by sweetMarshalTextRep. It wraps Parse.
 func AsSweet(s string) (Sweet, error) {
@@ -535,7 +643,7 @@ func AsSweet(s string) (Sweet, error) {
 }
 `
 
-const e11lc = `
+const AsSweet_lc = `
 // AsSweet parses a string to find the corresponding Sweet, accepting either one of the string values or
 // a number. The input representation is determined by sweetMarshalTextRep. It wraps Parse.
 func AsSweet(s string) (Sweet, error) {
@@ -545,7 +653,7 @@ func AsSweet(s string) (Sweet, error) {
 }
 `
 
-const e11ic = `
+const AsSweet_ic = `
 // AsSweet parses a string to find the corresponding Sweet, accepting either one of the string values or
 // a number. The input representation is determined by sweetMarshalTextRep. It wraps Parse.
 // The input case does not matter.
@@ -557,14 +665,14 @@ func AsSweet(s string) (Sweet, error) {
 `
 
 func TestWriteAsMethod(t *testing.T) {
-	testStage(t, modelNoChange().writeAsMethod, e11nc)
-	testStage(t, modelLowerWithLookupTable().writeAsMethod, e11lc)
-	testStage(t, modelIgnoreCase().writeAsMethod, e11ic)
+	testStage(t, unsnake(basicModel()).writeAsMethod, AsSweet_nc)
+	testStage(t, floatModelWithPrefixes().writeAsMethod, AsSweet_lc)
+	testStage(t, ignoreCase(unsnake(basicModel())).writeAsMethod, AsSweet_ic)
 }
 
 //-------------------------------------------------------------------------------------------------
 
-const e12lc = `
+const MustParseSweet_nc = `
 // MustParseSweet is similar to AsSweet except that it panics on error.
 func MustParseSweet(s string) Sweet {
 	i, err := AsSweet(s)
@@ -575,7 +683,7 @@ func MustParseSweet(s string) Sweet {
 }
 `
 
-const e12ic = `
+const MustParseSweet_ic = `
 // MustParseSweet is similar to AsSweet except that it panics on error.
 // The input case does not matter.
 func MustParseSweet(s string) Sweet {
@@ -588,19 +696,21 @@ func MustParseSweet(s string) Sweet {
 `
 
 func TestWriteMustParseMethod(t *testing.T) {
-	testStage(t, modelNoChange().writeMustParseMethod, e12lc)
-	testStage(t, modelIgnoreCase().writeMustParseMethod, e12ic)
+	testStage(t, unsnake(basicModel()).writeMustParseMethod, MustParseSweet_nc)
+	testStage(t, ignoreCase(unsnake(basicModel())).writeMustParseMethod, MustParseSweet_ic)
 }
 
 //-------------------------------------------------------------------------------------------------
 
-const e13nc = `
+const sweetMarshalTextRep = `
 // sweetMarshalTextRep controls representation used for XML and other text encodings.
 // When enum.Identifier, quoted strings are used. When enum.Tag the quoted strings will use
 // the associated tag map values. When enum.Ordinal, an integer will be used based on the
 // Ordinal method. When enum.Number, the number underlying the value will be used.
 var sweetMarshalTextRep = enum.Identifier
+`
 
+const MarshalJSON_simple = `
 // MarshalText converts values to a form suitable for transmission via JSON, XML etc.
 // The representation is chosen according to sweetMarshalTextRep.
 func (i Sweet) MarshalText() (text []byte, err error) {
@@ -611,47 +721,10 @@ func (i Sweet) MarshalText() (text []byte, err error) {
 // The representation is chosen according to sweetMarshalTextRep.
 func (i Sweet) MarshalJSON() ([]byte, error) {
 	return i.marshalText(sweetMarshalTextRep, true)
-}
-
-func (i Sweet) marshalText(rep enum.Representation, quoted bool) (text []byte, err error) {
-	var bs []byte
-	switch rep {
-	case enum.Number:
-		bs = []byte(strconv.FormatInt(int64(i), 10))
-	case enum.Ordinal:
-		bs = []byte(strconv.Itoa(i.Ordinal()))
-	case enum.Tag:
-		if quoted {
-			bs = i.quotedString(i.Tag())
-		} else {
-			bs = []byte(i.Tag())
-		}
-	default:
-		if quoted {
-			bs = []byte(i.quotedString(i.String()))
-		} else {
-			bs = []byte(i.String())
-		}
-	}
-	return bs, nil
-}
-
-func (i Sweet) quotedString(s string) []byte {
-	b := make([]byte, len(s)+2)
-	b[0] = '"'
-	copy(b[1:], s)
-	b[len(s)+1] = '"'
-	return b
 }
 `
 
-const e13lc = `
-// sweetMarshalTextRep controls representation used for XML and other text encodings.
-// When enum.Identifier, quoted strings are used. When enum.Tag the quoted strings will use
-// the associated tag map values. When enum.Ordinal, an integer will be used based on the
-// Ordinal method. When enum.Number, the number underlying the value will be used.
-var sweetMarshalTextRep = enum.Identifier
-
+const MarshalJSON_struct_tags = `
 // MarshalText converts values to a form suitable for transmission via JSON, XML etc.
 // The representation is chosen according to sweetMarshalTextRep.
 func (i Sweet) MarshalText() (text []byte, err error) {
@@ -661,9 +734,11 @@ func (i Sweet) MarshalText() (text []byte, err error) {
 // MarshalJSON converts values to bytes suitable for transmission via JSON.
 // The representation is chosen according to sweetMarshalTextRep.
 func (i Sweet) MarshalJSON() ([]byte, error) {
-	return i.marshalText(sweetMarshalTextRep, true)
+	return i.quotedString(i.toString(sweetJSONStrings, sweetJSONIndex[:])), nil
 }
+`
 
+const marshalText_float = `
 func (i Sweet) marshalText(rep enum.Representation, quoted bool) (text []byte, err error) {
 	var bs []byte
 	switch rep {
@@ -686,7 +761,34 @@ func (i Sweet) marshalText(rep enum.Representation, quoted bool) (text []byte, e
 	}
 	return bs, nil
 }
+`
 
+const marshalText_int = `
+func (i Sweet) marshalText(rep enum.Representation, quoted bool) (text []byte, err error) {
+	var bs []byte
+	switch rep {
+	case enum.Number:
+		bs = []byte(strconv.FormatInt(int64(i), 10))
+	case enum.Ordinal:
+		bs = []byte(strconv.Itoa(i.Ordinal()))
+	case enum.Tag:
+		if quoted {
+			bs = i.quotedString(i.Tag())
+		} else {
+			bs = []byte(i.Tag())
+		}
+	default:
+		if quoted {
+			bs = []byte(i.quotedString(i.String()))
+		} else {
+			bs = []byte(i.String())
+		}
+	}
+	return bs, nil
+}
+`
+
+const quotedString = `
 func (i Sweet) quotedString(s string) []byte {
 	b := make([]byte, len(s)+2)
 	b[0] = '"'
@@ -697,13 +799,15 @@ func (i Sweet) quotedString(s string) []byte {
 `
 
 func TestWriteMarshalText(t *testing.T) {
-	testStage(t, modelNoChange().writeMarshalText, e13nc)
-	testStage(t, modelLowerWithLookupTable().writeMarshalText, e13lc)
+	testStage(t, basicModel().writeMarshalText, sweetMarshalTextRep+MarshalJSON_simple+marshalText_int+quotedString)
+	testStage(t, floatModelWithPrefixes().writeMarshalText, sweetMarshalTextRep+MarshalJSON_simple+marshalText_float+quotedString)
+	testStage(t, modelWithStructTags().writeMarshalText, sweetMarshalTextRep+MarshalJSON_struct_tags+marshalText_int+quotedString)
+	testStage(t, ignoreCase(modelWithStructTags()).writeMarshalText, sweetMarshalTextRep+MarshalJSON_struct_tags+marshalText_int+quotedString)
 }
 
 //-------------------------------------------------------------------------------------------------
 
-const e14 = `
+const UnmarshalText_all = `
 // UnmarshalText converts transmitted values to ordinary values.
 func (i *Sweet) UnmarshalText(text []byte) error {
 	return i.Parse(string(text))
@@ -723,34 +827,28 @@ func (i *Sweet) UnmarshalJSON(text []byte) error {
 `
 
 func TestWriteUnmarshalText(t *testing.T) {
-	testStage(t, modelNoChange().writeUnmarshalText, e14)
+	testStage(t, unsnake(basicModel()).writeUnmarshalText, UnmarshalText_all)
+	testStage(t, floatModelWithPrefixes().writeUnmarshalText, UnmarshalText_all)
 }
 
 //-------------------------------------------------------------------------------------------------
 
-const e15short = `
+const unmarshalJSON_short = `
 func (i *Sweet) unmarshalJSON(s string) error {
 	return i.Parse(s)
 }
 `
 
-const e15nc = `
+const unmarshalJSON_nc = `
 func (v *Sweet) unmarshalJSON(in string) error {
 	if v.parseNumber(in) {
 		return nil
 	}
 
-	s := in
+	s := sweetTransformInput(in)
 
-	var i0 uint16 = 0
-	for j := 1; j < len(sweetJSONIndex); j++ {
-		i1 := sweetJSONIndex[j]
-		p := sweetJSONStrings[i0:i1]
-		if s == p {
-			*v = AllSweets[j-1]
-			return nil
-		}
-		i0 = i1
+	if v.parseString(s, sweetJSONStrings, sweetJSONIndex[:]) {
+		return nil
 	}
 
 	*v, ok = sweetAlias[s]
@@ -762,23 +860,16 @@ func (v *Sweet) unmarshalJSON(in string) error {
 }
 `
 
-const e15ic = `
+const unmarshalJSON_ic = `
 func (v *Sweet) unmarshalJSON(in string) error {
 	if v.parseNumber(in) {
 		return nil
 	}
 
-	s := strings.ToLower(in)
+	s := sweetTransformInput(in)
 
-	var i0 uint16 = 0
-	for j := 1; j < len(sweetJSONIndex); j++ {
-		i1 := sweetJSONIndex[j]
-		p := sweetJSONInputs[i0:i1]
-		if s == p {
-			*v = AllSweets[j-1]
-			return nil
-		}
-		i0 = i1
+	if v.parseString(s, sweetJSONInputs, sweetJSONIndex[:]) {
+		return nil
 	}
 
 	*v, ok = sweetAlias[s]
@@ -791,26 +882,26 @@ func (v *Sweet) unmarshalJSON(in string) error {
 `
 
 func TestWriteUnmarshalJSON(t *testing.T) {
-	testStage(t, modelNoChange().writeUnmarshalJSON, e15short)
-	testStage(t, modelWithJSONStructTags(false, transform.Stet).writeUnmarshalJSON, e15nc)
-	testStage(t, modelWithJSONStructTags(true, transform.Stet).writeUnmarshalJSON, e15ic)
+	testStage(t, unsnake(basicModel()).writeUnmarshalJSON, unmarshalJSON_short)
+	testStage(t, modelWithStructTags().writeUnmarshalJSON, unmarshalJSON_nc)
+	testStage(t, ignoreCase(modelWithStructTags()).writeUnmarshalJSON, unmarshalJSON_ic)
 }
 
 //-------------------------------------------------------------------------------------------------
 
-const e16nc = `
+const Scan_nc = `
 // sweetStoreRep controls database storage via the Scan and Value methods.
 // By default, it is enum.Identifier and quoted strings are used.
 var sweetStoreRep = enum.Identifier
 
 // Scan parses some value, which can be a number, a string or []byte.
 // It implements sql.Scanner, https://golang.org/pkg/database/sql/#Scanner
-func (i *Sweet) Scan(value interface{}) (err error) {
+func (i *Sweet) Scan(value interface{}) error {
 	if value == nil {
 		return nil
 	}
 
-	err = nil
+	var s string
 	switch v := value.(type) {
 	case int64:
 		if sweetStoreRep == enum.Ordinal {
@@ -818,19 +909,108 @@ func (i *Sweet) Scan(value interface{}) (err error) {
 		} else {
 			*i = Sweet(v)
 		}
+		return nil
 	case float64:
 		*i = Sweet(v)
+		return nil
 	case []byte:
-		err = i.parse(string(v), sweetStoreRep)
+		s = string(v)
 	case string:
-		err = i.parse(v, sweetStoreRep)
+		s = v
 	default:
-		err = fmt.Errorf("%T %+v is not a meaningful sweet", value, value)
+		return fmt.Errorf("%T %+v is not a meaningful sweet", value, value)
 	}
 
-	return err
+	return i.parse(s, sweetStoreRep)
+}
+`
+
+const Scan_lc = `
+// sweetStoreRep controls database storage via the Scan and Value methods.
+// By default, it is enum.Identifier and quoted strings are used.
+var sweetStoreRep = enum.Identifier
+
+// Scan parses some value, which can be a number, a string or []byte.
+// It implements sql.Scanner, https://golang.org/pkg/database/sql/#Scanner
+func (i *Sweet) Scan(value interface{}) error {
+	if value == nil {
+		return nil
+	}
+
+	var s string
+	switch v := value.(type) {
+	case int64:
+		if sweetStoreRep == enum.Ordinal {
+			*i = SweetOf(int(v))
+		} else {
+			*i = Sweet(v)
+		}
+		return nil
+	case float64:
+		*i = Sweet(v)
+		return nil
+	case []byte:
+		s = string(v)
+	case string:
+		s = v
+	default:
+		return fmt.Errorf("%T %+v is not a meaningful sweet", value, value)
+	}
+
+	return i.parse(s, sweetStoreRep)
+}
+`
+
+const Scan_struct_tags = `
+// sweetStoreRep controls database storage via the Scan and Value methods.
+// By default, it is enum.Identifier and quoted strings are used.
+var sweetStoreRep = enum.Identifier
+
+// Scan parses some value, which can be a number, a string or []byte.
+// It implements sql.Scanner, https://golang.org/pkg/database/sql/#Scanner
+func (i *Sweet) Scan(value interface{}) error {
+	if value == nil {
+		return nil
+	}
+
+	var s string
+	switch v := value.(type) {
+	case int64:
+		if sweetStoreRep == enum.Ordinal {
+			*i = SweetOf(int(v))
+		} else {
+			*i = Sweet(v)
+		}
+		return nil
+	case float64:
+		*i = Sweet(v)
+		return nil
+	case []byte:
+		s = string(v)
+	case string:
+		s = v
+	default:
+		return fmt.Errorf("%T %+v is not a meaningful sweet", value, value)
+	}
+
+	if i.parseString(s, sweetSQLStrings, sweetSQLIndex[:]) {
+		return nil
+	}
+
+	return errors.New(s + ": unrecognised sweet")
+}
+`
+
+func TestWriteScanMethod(t *testing.T) {
+	testStage(t, basicModel().writeScanMethod, Scan_nc)
+	testStage(t, floatModelWithPrefixes().writeScanMethod, Scan_lc)
+	testStage(t, modelWithStructTags().writeScanMethod, Scan_struct_tags)
+	testStage(t, ignoreCase(modelWithStructTags()).writeScanMethod, Scan_struct_tags)
 }
 
+//-------------------------------------------------------------------------------------------------
+
+const Value_int = `
 // Value converts the Sweet to a string.
 // It implements driver.Valuer, https://golang.org/pkg/database/sql/driver/#Valuer
 func (i Sweet) Value() (driver.Value, error) {
@@ -847,39 +1027,7 @@ func (i Sweet) Value() (driver.Value, error) {
 }
 `
 
-const e16lc = `
-// sweetStoreRep controls database storage via the Scan and Value methods.
-// By default, it is enum.Identifier and quoted strings are used.
-var sweetStoreRep = enum.Identifier
-
-// Scan parses some value, which can be a number, a string or []byte.
-// It implements sql.Scanner, https://golang.org/pkg/database/sql/#Scanner
-func (i *Sweet) Scan(value interface{}) (err error) {
-	if value == nil {
-		return nil
-	}
-
-	err = nil
-	switch v := value.(type) {
-	case int64:
-		if sweetStoreRep == enum.Ordinal {
-			*i = SweetOf(int(v))
-		} else {
-			*i = Sweet(v)
-		}
-	case float64:
-		*i = Sweet(v)
-	case []byte:
-		err = i.parse(string(v), sweetStoreRep)
-	case string:
-		err = i.parse(v, sweetStoreRep)
-	default:
-		err = fmt.Errorf("%T %+v is not a meaningful sweet", value, value)
-	}
-
-	return err
-}
-
+const Value_float = `
 // Value converts the Sweet to a string.
 // It implements driver.Valuer, https://golang.org/pkg/database/sql/driver/#Valuer
 func (i Sweet) Value() (driver.Value, error) {
@@ -896,9 +1044,28 @@ func (i Sweet) Value() (driver.Value, error) {
 }
 `
 
-func TestWriteScanValue(t *testing.T) {
-	testStage(t, modelNoChange().writeScanValue, e16nc)
-	testStage(t, modelLowerWithLookupTable().writeScanValue, e16lc)
+const Value_struct_tags = `
+// Value converts the Sweet to a string.
+// It implements driver.Valuer, https://golang.org/pkg/database/sql/driver/#Valuer
+func (i Sweet) Value() (driver.Value, error) {
+	switch sweetStoreRep {
+	case enum.Number:
+		return int64(i), nil
+	case enum.Ordinal:
+		return int64(i.Ordinal()), nil
+	case enum.Tag:
+		return i.Tag(), nil
+	default:
+		return i.toString(sweetSQLStrings, sweetSQLIndex[:]), nil
+	}
+}
+`
+
+func TestWriteValueMethod(t *testing.T) {
+	testStage(t, basicModel().writeValueMethod, Value_int)
+	testStage(t, floatModelWithPrefixes().writeValueMethod, Value_float)
+	testStage(t, modelWithStructTags().writeValueMethod, Value_struct_tags)
+	testStage(t, ignoreCase(modelWithStructTags()).writeValueMethod, Value_struct_tags)
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -948,7 +1115,7 @@ func compare(t *testing.T, actual, expected string) {
 
 //-------------------------------------------------------------------------------------------------
 
-func modelNoChange() Model {
+func basicModel() Model {
 	Prefix = ""
 	Suffix = ""
 	return Model{
@@ -956,77 +1123,78 @@ func modelNoChange() Model {
 			MainType: "Sweet",
 			Plural:   "Sweets",
 			Pkg:      "confectionary",
-			Unsnake:  true,
 		},
 		LcType:   "sweet",
 		BaseType: "int",
 		Version:  util.Version,
-		Values:   ValuesOf("Mars", "Bounty", "Snickers", "Kitkat", "Ferrero_Rocher"),
+		Values:   ValuesOf("Mars", "Bounty", "Snickers", "Kitkat", "Dairy_Milk"),
 		Extra:    make(map[string]string),
 	}
 }
 
-func modelIgnoreCase() Model {
-	Prefix = ""
-	Suffix = ""
+func floatModelWithPrefixes() Model {
+	Prefix = "A"
+	Suffix = "Bar"
 	return Model{
 		Config: Config{
-			MainType:   "Sweet",
-			Plural:     "Sweets",
-			Pkg:        "confectionary",
-			IgnoreCase: true,
+			MainType: "Sweet",
+			Plural:   "Sweets",
+			Pkg:      "confectionary",
 		},
 		LcType:   "sweet",
-		BaseType: "int",
+		BaseType: "float64",
 		Version:  util.Version,
-		Values:   ValuesOf("Mars", "Bounty", "Snickers", "Kitkat", "Ferrero_Rocher"),
+		Values:   ValuesOf("AMarsBar", "ABountyBar", "ASnickersBar", "AKitkatBar", "ADairy_MilkBar"),
 		Extra:    make(map[string]string),
 	}
 }
 
-func modelWithJSONStructTags(ic bool, c transform.Case) Model {
+func modelWithStructTags() Model {
 	Prefix = ""
 	Suffix = ""
 	var values Values
-	values = values.Append("Mars", `json:"mmm"`)
-	values = values.Append("Bounty", `json:"bbb"`)
-	values = values.Append("Snickers", `json:"sss"`)
-	values = values.Append("Kitkat", `json:"kkk"`)
+	values = values.Append("Mars", `json:"mmm" sql:"m"`)
+	values = values.Append("Bounty", `json:"bbb" sql:"b"`)
+	values = values.Append("Snickers", `json:"sss" sql:"s"`)
+	values = values.Append("Kitkat", `json:"kkk" sql:"k"`)
+	values = values.Append("Dairy_Milk", `json:"ddd" sql:"d"`)
 	return Model{
 		Config: Config{
-			MainType:   "Sweet",
-			Plural:     "Sweets",
-			Pkg:        "confectionary",
-			IgnoreCase: ic,
+			MainType: "Sweet",
+			Plural:   "Sweets",
+			Pkg:      "confectionary",
 		},
 		LcType:     "sweet",
 		BaseType:   "int",
 		Version:    util.Version,
-		Case:       c,
 		Values:     values,
 		AliasTable: "sweetAlias",
 		Extra:      make(map[string]string),
 	}
 }
 
-func modelLowerWithLookupTable() Model {
-	Prefix = ""
-	Suffix = "Bar"
-	return Model{
-		Config: Config{
-			MainType:   "Sweet",
-			Plural:     "Sweets",
-			Pkg:        "confectionary",
-			IgnoreCase: false,
-			Unsnake:    true,
-		},
-		LcType:     "sweet",
-		BaseType:   "float64",
-		Version:    util.Version,
-		Values:     ValuesOf("MarsBar", "BountyBar", "SnickersBar", "KitkatBar"),
-		Case:       transform.Lower,
-		TagTable:   "sweetNames",
-		AliasTable: "sweetAlias",
-		Extra:      make(map[string]string),
-	}
+func ignoreCase(m Model) Model {
+	m.IgnoreCase = true
+	return m
+}
+
+func unsnake(m Model) Model {
+	m.Unsnake = true
+	return m
+}
+
+func lowerCase(m Model) Model {
+	m.Case = transform.Lower
+	return m
+}
+
+func upperCase(m Model) Model {
+	m.Case = transform.Upper
+	return m
+}
+
+func lookupTables(m Model) Model {
+	m.TagTable = "sweetNames"
+	m.AliasTable = "sweetAlias"
+	return m
 }

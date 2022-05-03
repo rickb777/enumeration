@@ -42,7 +42,6 @@ func (i Method) toString(concats string, indexes []uint16) string {
 	return concats[indexes[o]:indexes[o+1]]
 }
 
-// parseString attempts to match an identifier.
 func (v *Method) parseString(s string, concats string, indexes []uint16) (ok bool) {
 	var i0 uint16 = 0
 
@@ -66,7 +65,7 @@ func init() {
 		if !exists {
 			fmt.Fprintf(os.Stderr, "Warning: Method: %s is missing from methodTags\n", id)
 		} else {
-			k := strings.ToLower(v)
+			k := methodTransformInput(v)
 			if _, exists := methodTagsInverse[k]; exists {
 				fmt.Fprintf(os.Stderr, "Warning: Method: %q is duplicated in methodTags\n", k)
 			}
@@ -166,7 +165,7 @@ func (v *Method) parse(in string, rep enum.Representation) error {
 		}
 	}
 
-	s := strings.ToLower(in)
+	s := methodTransformInput(in)
 
 	if rep == enum.Identifier {
 		if v.parseString(s, methodEnumInputs, methodEnumIndex[:]) || v.parseTag(s) {
@@ -205,6 +204,13 @@ func (v *Method) parseOrdinal(s string) (ok bool) {
 func (v *Method) parseTag(s string) (ok bool) {
 	*v, ok = methodTagsInverse[s]
 	return ok
+}
+
+// methodTransformInput may alter input strings before they are parsed.
+// This function is pluggable and is initialised using command-line flags
+// -ic -lc -uc -unsnake.
+var methodTransformInput = func(in string) string {
+	return strings.ToLower(in)
 }
 
 // AsMethod parses a string to find the corresponding Method, accepting either one of the string values or
@@ -302,12 +308,12 @@ var methodStoreRep = enum.Identifier
 
 // Scan parses some value, which can be a number, a string or []byte.
 // It implements sql.Scanner, https://golang.org/pkg/database/sql/#Scanner
-func (i *Method) Scan(value interface{}) (err error) {
+func (i *Method) Scan(value interface{}) error {
 	if value == nil {
 		return nil
 	}
 
-	err = nil
+	var s string
 	switch v := value.(type) {
 	case int64:
 		if methodStoreRep == enum.Ordinal {
@@ -315,17 +321,19 @@ func (i *Method) Scan(value interface{}) (err error) {
 		} else {
 			*i = Method(v)
 		}
+		return nil
 	case float64:
 		*i = Method(v)
+		return nil
 	case []byte:
-		err = i.parse(string(v), methodStoreRep)
+		s = string(v)
 	case string:
-		err = i.parse(v, methodStoreRep)
+		s = v
 	default:
-		err = fmt.Errorf("%T %+v is not a meaningful method", value, value)
+		return fmt.Errorf("%T %+v is not a meaningful method", value, value)
 	}
 
-	return err
+	return i.parse(s, methodStoreRep)
 }
 
 // Value converts the Method to a string.

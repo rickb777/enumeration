@@ -38,7 +38,6 @@ func (i Base) toString(concats string, indexes []uint16) string {
 	return concats[indexes[o]:indexes[o+1]]
 }
 
-// parseString attempts to match an identifier.
 func (v *Base) parseString(s string, concats string, indexes []uint16) (ok bool) {
 	var i0 uint16 = 0
 
@@ -125,7 +124,7 @@ func (v *Base) parse(in string, rep enum.Representation) error {
 		}
 	}
 
-	s := strings.ToLower(in)
+	s := baseTransformInput(in)
 
 	if v.parseString(s, baseEnumStrings, baseEnumIndex[:]) {
 		return nil
@@ -152,6 +151,13 @@ func (v *Base) parseOrdinal(s string) (ok bool) {
 		return true
 	}
 	return false
+}
+
+// baseTransformInput may alter input strings before they are parsed.
+// This function is pluggable and is initialised using command-line flags
+// -ic -lc -uc -unsnake.
+var baseTransformInput = func(in string) string {
+	return strings.ToLower(in)
 }
 
 // AsBase parses a string to find the corresponding Base, accepting either one of the string values or
@@ -247,12 +253,12 @@ var baseStoreRep = enum.Identifier
 
 // Scan parses some value, which can be a number, a string or []byte.
 // It implements sql.Scanner, https://golang.org/pkg/database/sql/#Scanner
-func (i *Base) Scan(value interface{}) (err error) {
+func (i *Base) Scan(value interface{}) error {
 	if value == nil {
 		return nil
 	}
 
-	err = nil
+	var s string
 	switch v := value.(type) {
 	case int64:
 		if baseStoreRep == enum.Ordinal {
@@ -260,17 +266,19 @@ func (i *Base) Scan(value interface{}) (err error) {
 		} else {
 			*i = Base(v)
 		}
+		return nil
 	case float64:
 		*i = Base(v)
+		return nil
 	case []byte:
-		err = i.parse(string(v), baseStoreRep)
+		s = string(v)
 	case string:
-		err = i.parse(v, baseStoreRep)
+		s = v
 	default:
-		err = fmt.Errorf("%T %+v is not a meaningful base", value, value)
+		return fmt.Errorf("%T %+v is not a meaningful base", value, value)
 	}
 
-	return err
+	return i.parse(s, baseStoreRep)
 }
 
 // Value converts the Base to a string.

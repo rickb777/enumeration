@@ -138,7 +138,6 @@ func (i Country) toString(concats string, indexes []uint16) string {
 	return concats[indexes[o]:indexes[o+1]]
 }
 
-// parseString attempts to match an identifier.
 func (v *Country) parseString(s string, concats string, indexes []uint16) (ok bool) {
 	var i0 uint16 = 0
 
@@ -162,7 +161,7 @@ func init() {
 		if !exists {
 			fmt.Fprintf(os.Stderr, "Warning: Country: %s is missing from iso3166Tags\n", id)
 		} else {
-			k := strings.ToLower(v)
+			k := countryTransformInput(v)
 			if _, exists := iso3166TagsInverse[k]; exists {
 				fmt.Fprintf(os.Stderr, "Warning: Country: %q is duplicated in iso3166Tags\n", k)
 			}
@@ -744,7 +743,7 @@ func (v *Country) parse(in string, rep enum.Representation) error {
 		}
 	}
 
-	s := strings.ToLower(in)
+	s := countryTransformInput(in)
 
 	if rep == enum.Identifier {
 		if v.parseString(s, countryEnumInputs, countryEnumIndex[:]) || v.parseTag(s) {
@@ -783,6 +782,13 @@ func (v *Country) parseOrdinal(s string) (ok bool) {
 func (v *Country) parseTag(s string) (ok bool) {
 	*v, ok = iso3166TagsInverse[s]
 	return ok
+}
+
+// countryTransformInput may alter input strings before they are parsed.
+// This function is pluggable and is initialised using command-line flags
+// -ic -lc -uc -unsnake.
+var countryTransformInput = func(in string) string {
+	return strings.ToLower(in)
 }
 
 // AsCountry parses a string to find the corresponding Country, accepting either one of the string values or
@@ -880,12 +886,12 @@ var countryStoreRep = enum.Identifier
 
 // Scan parses some value, which can be a number, a string or []byte.
 // It implements sql.Scanner, https://golang.org/pkg/database/sql/#Scanner
-func (i *Country) Scan(value interface{}) (err error) {
+func (i *Country) Scan(value interface{}) error {
 	if value == nil {
 		return nil
 	}
 
-	err = nil
+	var s string
 	switch v := value.(type) {
 	case int64:
 		if countryStoreRep == enum.Ordinal {
@@ -893,17 +899,19 @@ func (i *Country) Scan(value interface{}) (err error) {
 		} else {
 			*i = Country(v)
 		}
+		return nil
 	case float64:
 		*i = Country(v)
+		return nil
 	case []byte:
-		err = i.parse(string(v), countryStoreRep)
+		s = string(v)
 	case string:
-		err = i.parse(v, countryStoreRep)
+		s = v
 	default:
-		err = fmt.Errorf("%T %+v is not a meaningful country", value, value)
+		return fmt.Errorf("%T %+v is not a meaningful country", value, value)
 	}
 
-	return err
+	return i.parse(s, countryStoreRep)
 }
 
 // Value converts the Country to a string.

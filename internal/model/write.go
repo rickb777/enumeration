@@ -72,6 +72,12 @@ const (
 	<<.LcType>>JSONInputs  = "<<concat .InputJSONValues>>"
 <<- end>>
 <<- end>>
+<<- if .HasSQLTags>>
+	<<.LcType>>SQLStrings  = "<<concat .OutputSQLValues>>"
+<<- if .Asymmetric>>
+	<<.LcType>>SQLInputs   = "<<concat .InputSQLValues>>"
+<<- end>>
+<<- end>>
 )
 
 var (
@@ -79,8 +85,13 @@ var (
 <<- if .HasJSONTags>>
 	<<.LcType>>JSONIndex = [...]uint16{<<.JSONIndexes>>}
 <<- end>>
+<<- if .HasSQLTags>>
+	<<.LcType>>SQLIndex = [...]uint16{<<.SQLIndexes>>}
+<<- end>>
 )
 `
+
+//-------------------------------------------------------------------------------------------------
 
 func (m Model) TransformedInputValues() []string {
 	vs := make([]string, len(m.Values))
@@ -98,6 +109,19 @@ func (m Model) TransformedOutputValues() []string {
 	return vs
 }
 
+func (m Model) Indexes() string {
+	buf := &strings.Builder{}
+	buf.WriteString("0")
+	n := 0
+	for _, v := range m.Values {
+		n += len(v.Shortened)
+		fmt.Fprintf(buf, ", %d", n)
+	}
+	return buf.String()
+}
+
+//-------------------------------------------------------------------------------------------------
+
 func (m Model) InputJSONValues() []string {
 	vs := make([]string, len(m.Values))
 	for i, v := range m.Values {
@@ -114,17 +138,6 @@ func (m Model) OutputJSONValues() []string {
 	return vs
 }
 
-func (m Model) Indexes() string {
-	buf := &strings.Builder{}
-	buf.WriteString("0")
-	n := 0
-	for _, v := range m.Values {
-		n += len(v.Shortened)
-		fmt.Fprintf(buf, ", %d", n)
-	}
-	return buf.String()
-}
-
 func (m Model) JSONIndexes() string {
 	buf := &strings.Builder{}
 	buf.WriteString("0")
@@ -135,6 +148,37 @@ func (m Model) JSONIndexes() string {
 	}
 	return buf.String()
 }
+
+//-------------------------------------------------------------------------------------------------
+
+func (m Model) InputSQLValues() []string {
+	vs := make([]string, len(m.Values))
+	for i, v := range m.Values {
+		vs[i] = m.InputCase().Transform(v.SQL)
+	}
+	return vs
+}
+
+func (m Model) OutputSQLValues() []string {
+	vs := make([]string, len(m.Values))
+	for i, v := range m.Values {
+		vs[i] = v.SQL
+	}
+	return vs
+}
+
+func (m Model) SQLIndexes() string {
+	buf := &strings.Builder{}
+	buf.WriteString("0")
+	n := 0
+	for _, v := range m.Values {
+		n += len(v.SQL)
+		fmt.Fprintf(buf, ", %d", n)
+	}
+	return buf.String()
+}
+
+//-------------------------------------------------------------------------------------------------
 
 func (m Model) writeJoinedStringAndIndexes(w io.Writer) {
 	m.execTemplate(w, joinedStringAndIndexes)
@@ -159,7 +203,6 @@ func (m Model) writeToStringMethod(w io.Writer) {
 //-------------------------------------------------------------------------------------------------
 
 const parseStringMethod = `
-// parseString attempts to match an identifier.
 func (v *<<.MainType>>) parseString(s string, concats string, indexes []uint16) (ok bool) {
 	var i0 uint16 = 0
 
@@ -196,7 +239,7 @@ func init() {
 		if !exists {
 			fmt.Fprintf(os.Stderr, "Warning: <<.MainType>>: %s is missing from <<.TagTable>>\n", id)
 		} else {
-			k := << transform "v" >>
+			k := <<.LcType>>TransformInput(v)
 			if _, exists := <<.TagTable>>Inverse[k]; exists {
 				fmt.Fprintf(os.Stderr, "Warning: <<.MainType>>: %q is duplicated in <<.TagTable>>\n", k)
 			}
@@ -371,7 +414,7 @@ func (v *<<.MainType>>) parse(in string, rep enum.Representation) error {
 		}
 	}
 
-	s := << transform "in" >>
+	s := <<.LcType>>TransformInput(in)
 <<- if .TagTable>>
 
 	if rep == enum.Identifier {
@@ -405,7 +448,15 @@ func (v *<<.MainType>>) parse(in string, rep enum.Representation) error {
 
 	return errors.New(in + ": unrecognised <<.LcType>>")
 }
+`
 
+func (m Model) writeParseMethod(w io.Writer) {
+	m.execTemplate(w, parseMethod)
+}
+
+//-------------------------------------------------------------------------------------------------
+
+const parseHelperMethods = `
 // parseNumber attempts to convert a decimal value
 func (v *<<.MainType>>) parseNumber(s string) (ok bool) {
 <<- if .IsFloat>>
@@ -439,8 +490,8 @@ func (v *<<.MainType>>) parseTag(s string) (ok bool) {
 <<- end>>
 `
 
-func (m Model) writeParseMethod(w io.Writer) {
-	m.execTemplate(w, parseMethod)
+func (m Model) writeParseHelperMethods(w io.Writer) {
+	m.execTemplate(w, parseHelperMethods)
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -501,11 +552,7 @@ func (i <<.MainType>>) MarshalText() (text []byte, err error) {
 // The representation is chosen according to <<.LcType>>MarshalTextRep.
 func (i <<.MainType>>) MarshalJSON() ([]byte, error) {
 <<- if .HasJSONTags>>
-	o := i.Ordinal()
-	if o < 0 || o >= len(All<<.MainType>>s) {
-		return i.quotedString(fmt.Sprintf("<<.MainType>>(%d)", i)), nil
-	}
-	return i.quotedString(<<.LcType>>JSONStrings[<<.LcType>>JSONIndex[o]:<<.LcType>>JSONIndex[o+1]]), nil
+	return i.quotedString(i.toString(<<.LcType>>JSONStrings, <<.LcType>>JSONIndex[:])), nil
 <<- else >>
 	return i.marshalText(<<.LcType>>MarshalTextRep, true)
 <<- end >>
@@ -578,6 +625,21 @@ func (m Model) writeUnmarshalText(w io.Writer) {
 
 //-------------------------------------------------------------------------------------------------
 
+const transformFunction = `
+// <<.LcType>>TransformInput may alter input strings before they are parsed.
+// This function is pluggable and is initialised using command-line flags
+// -ic -lc -uc -unsnake.
+var <<.LcType>>TransformInput = func(in string) string {
+	return << transform "in" >>
+}
+`
+
+func (m Model) writeTransformInputFunction(w io.Writer) {
+	m.execTemplate(w, transformFunction)
+}
+
+//-------------------------------------------------------------------------------------------------
+
 const unmarshalJSONUsingParse = `
 func (i *<<.MainType>>) unmarshalJSON(s string) error {
 	return i.Parse(s)
@@ -590,21 +652,15 @@ func (v *<<.MainType>>) unmarshalJSON(in string) error {
 		return nil
 	}
 
-	s := << transform "in" >>
-
-	var i0 uint16 = 0
-	for j := 1; j < len(<<.LcType>>JSONIndex); j++ {
-		i1 := <<.LcType>>JSONIndex[j]
+	s := <<.LcType>>TransformInput(in)
 <<- if .Asymmetric>>
-		p := <<.LcType>>JSONInputs[i0:i1]
+
+	if v.parseString(s, <<.LcType>>JSONInputs, <<.LcType>>JSONIndex[:]) {
 <<- else >>
-		p := <<.LcType>>JSONStrings[i0:i1]
+
+	if v.parseString(s, <<.LcType>>JSONStrings, <<.LcType>>JSONIndex[:]) {
 <<- end >>
-		if s == p {
-			*v = All<<.MainType>>s[j-1]
-			return nil
-		}
-		i0 = i1
+		return nil
 	}
 <<- if .AliasTable>>
 
@@ -628,19 +684,19 @@ func (m Model) writeUnmarshalJSON(w io.Writer) {
 
 //-------------------------------------------------------------------------------------------------
 
-const scanValue = `
+const scan_all = `
 // <<.LcType>>StoreRep controls database storage via the Scan and Value methods.
 // By default, it is enum.Identifier and quoted strings are used.
 var <<.LcType>>StoreRep = enum.Identifier
 
 // Scan parses some value, which can be a number, a string or []byte.
 // It implements sql.Scanner, https://golang.org/pkg/database/sql/#Scanner
-func (i *<<.MainType>>) Scan(value interface{}) (err error) {
+func (i *<<.MainType>>) Scan(value interface{}) error {
 	if value == nil {
 		return nil
 	}
 
-	err = nil
+	var s string
 	switch v := value.(type) {
 	case int64:
 		if <<.LcType>>StoreRep == enum.Ordinal {
@@ -648,19 +704,38 @@ func (i *<<.MainType>>) Scan(value interface{}) (err error) {
 		} else {
 			*i = <<.MainType>>(v)
 		}
+		return nil
 	case float64:
 		*i = <<.MainType>>(v)
+		return nil
 	case []byte:
-		err = i.parse(string(v), <<.LcType>>StoreRep)
+		s = string(v)
 	case string:
-		err = i.parse(v, <<.LcType>>StoreRep)
+		s = v
 	default:
-		err = fmt.Errorf("%T %+v is not a meaningful <<.LcType>>", value, value)
+		return fmt.Errorf("%T %+v is not a meaningful <<.LcType>>", value, value)
+	}
+<<- if .HasSQLTags>>
+
+	if i.parseString(s, <<.LcType>>SQLStrings, <<.LcType>>SQLIndex[:]) {
+		return nil
 	}
 
-	return err
+	return errors.New(s + ": unrecognised <<.LcType>>")
+<<- else >>
+
+	return i.parse(s, <<.LcType>>StoreRep)
+<<- end >>
+}
+`
+
+func (m Model) writeScanMethod(w io.Writer) {
+	m.execTemplate(w, scan_all)
 }
 
+//-------------------------------------------------------------------------------------------------
+
+const value_all = `
 // Value converts the <<.MainType>> to a string.
 // It implements driver.Valuer, https://golang.org/pkg/database/sql/driver/#Valuer
 func (i <<.MainType>>) Value() (driver.Value, error) {
@@ -676,13 +751,17 @@ func (i <<.MainType>>) Value() (driver.Value, error) {
 	case enum.Tag:
 		return i.Tag(), nil
 	default:
+<<- if .HasSQLTags>>
+		return i.toString(<<.LcType>>SQLStrings, <<.LcType>>SQLIndex[:]), nil
+<<- else >>
 		return i.String(), nil
+<<- end >>
 	}
 }
 `
 
-func (m Model) writeScanValue(w io.Writer) {
-	m.execTemplate(w, scanValue)
+func (m Model) writeValueMethod(w io.Writer) {
+	m.execTemplate(w, value_all)
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -700,12 +779,15 @@ func (m Model) WriteGo(w io.Writer) {
 	m.writeOfMethod(w)
 	m.writeIsValidMethod(w)
 	m.writeParseMethod(w)
+	m.writeParseHelperMethods(w)
+	m.writeTransformInputFunction(w)
 	m.writeAsMethod(w)
 	m.writeMustParseMethod(w)
 	m.writeMarshalText(w)
 	m.writeUnmarshalText(w)
 	m.writeUnmarshalJSON(w)
-	m.writeScanValue(w)
+	m.writeScanMethod(w)
+	m.writeValueMethod(w)
 
 	if c, ok := w.(io.Closer); ok {
 		checkErr(c.Close())

@@ -43,7 +43,6 @@ func (i Month) toString(concats string, indexes []uint16) string {
 	return concats[indexes[o]:indexes[o+1]]
 }
 
-// parseString attempts to match an identifier.
 func (v *Month) parseString(s string, concats string, indexes []uint16) (ok bool) {
 	var i0 uint16 = 0
 
@@ -148,7 +147,7 @@ func (v *Month) parse(in string, rep enum.Representation) error {
 		}
 	}
 
-	s := strings.ToLower(in)
+	s := monthTransformInput(in)
 
 	if v.parseString(s, monthEnumInputs, monthEnumIndex[:]) {
 		return nil
@@ -175,6 +174,13 @@ func (v *Month) parseOrdinal(s string) (ok bool) {
 		return true
 	}
 	return false
+}
+
+// monthTransformInput may alter input strings before they are parsed.
+// This function is pluggable and is initialised using command-line flags
+// -ic -lc -uc -unsnake.
+var monthTransformInput = func(in string) string {
+	return strings.ToLower(in)
 }
 
 // AsMonth parses a string to find the corresponding Month, accepting either one of the string values or
@@ -272,12 +278,12 @@ var monthStoreRep = enum.Identifier
 
 // Scan parses some value, which can be a number, a string or []byte.
 // It implements sql.Scanner, https://golang.org/pkg/database/sql/#Scanner
-func (i *Month) Scan(value interface{}) (err error) {
+func (i *Month) Scan(value interface{}) error {
 	if value == nil {
 		return nil
 	}
 
-	err = nil
+	var s string
 	switch v := value.(type) {
 	case int64:
 		if monthStoreRep == enum.Ordinal {
@@ -285,17 +291,19 @@ func (i *Month) Scan(value interface{}) (err error) {
 		} else {
 			*i = Month(v)
 		}
+		return nil
 	case float64:
 		*i = Month(v)
+		return nil
 	case []byte:
-		err = i.parse(string(v), monthStoreRep)
+		s = string(v)
 	case string:
-		err = i.parse(v, monthStoreRep)
+		s = v
 	default:
-		err = fmt.Errorf("%T %+v is not a meaningful month", value, value)
+		return fmt.Errorf("%T %+v is not a meaningful month", value, value)
 	}
 
-	return err
+	return i.parse(s, monthStoreRep)
 }
 
 // Value converts the Month to a string.

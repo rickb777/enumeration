@@ -25,11 +25,13 @@ var AllSalesChannelEnums = enum.IntEnums{
 const (
 	saleschannelEnumStrings = "onlineinstoretelephone"
 	saleschannelJSONStrings = "webshopstorephone"
+	saleschannelSQLStrings  = "ost"
 )
 
 var (
 	saleschannelEnumIndex = [...]uint16{0, 6, 13, 22}
 	saleschannelJSONIndex = [...]uint16{0, 7, 12, 17}
+	saleschannelSQLIndex  = [...]uint16{0, 1, 2, 3}
 )
 
 func (i SalesChannel) toString(concats string, indexes []uint16) string {
@@ -40,7 +42,6 @@ func (i SalesChannel) toString(concats string, indexes []uint16) string {
 	return concats[indexes[o]:indexes[o+1]]
 }
 
-// parseString attempts to match an identifier.
 func (v *SalesChannel) parseString(s string, concats string, indexes []uint16) (ok bool) {
 	var i0 uint16 = 0
 
@@ -126,7 +127,7 @@ func (v *SalesChannel) parse(in string, rep enum.Representation) error {
 		}
 	}
 
-	s := strings.ToLower(in)
+	s := saleschannelTransformInput(in)
 
 	if v.parseString(s, saleschannelEnumStrings, saleschannelEnumIndex[:]) {
 		return nil
@@ -153,6 +154,13 @@ func (v *SalesChannel) parseOrdinal(s string) (ok bool) {
 		return true
 	}
 	return false
+}
+
+// saleschannelTransformInput may alter input strings before they are parsed.
+// This function is pluggable and is initialised using command-line flags
+// -ic -lc -uc -unsnake.
+var saleschannelTransformInput = func(in string) string {
+	return strings.ToLower(in)
 }
 
 // AsSalesChannel parses a string to find the corresponding SalesChannel, accepting either one of the string values or
@@ -187,11 +195,7 @@ func (i SalesChannel) MarshalText() (text []byte, err error) {
 // MarshalJSON converts values to bytes suitable for transmission via JSON.
 // The representation is chosen according to saleschannelMarshalTextRep.
 func (i SalesChannel) MarshalJSON() ([]byte, error) {
-	o := i.Ordinal()
-	if o < 0 || o >= len(AllSalesChannels) {
-		return i.quotedString(fmt.Sprintf("SalesChannel(%d)", i)), nil
-	}
-	return i.quotedString(saleschannelJSONStrings[saleschannelJSONIndex[o]:saleschannelJSONIndex[o+1]]), nil
+	return i.quotedString(i.toString(saleschannelJSONStrings, saleschannelJSONIndex[:])), nil
 }
 
 func (i SalesChannel) marshalText(rep enum.Representation, quoted bool) (text []byte, err error) {
@@ -247,17 +251,10 @@ func (v *SalesChannel) unmarshalJSON(in string) error {
 		return nil
 	}
 
-	s := strings.ToLower(in)
+	s := saleschannelTransformInput(in)
 
-	var i0 uint16 = 0
-	for j := 1; j < len(saleschannelJSONIndex); j++ {
-		i1 := saleschannelJSONIndex[j]
-		p := saleschannelJSONStrings[i0:i1]
-		if s == p {
-			*v = AllSalesChannels[j-1]
-			return nil
-		}
-		i0 = i1
+	if v.parseString(s, saleschannelJSONStrings, saleschannelJSONIndex[:]) {
+		return nil
 	}
 
 	return errors.New(in + ": unrecognised saleschannel")
@@ -269,12 +266,12 @@ var saleschannelStoreRep = enum.Identifier
 
 // Scan parses some value, which can be a number, a string or []byte.
 // It implements sql.Scanner, https://golang.org/pkg/database/sql/#Scanner
-func (i *SalesChannel) Scan(value interface{}) (err error) {
+func (i *SalesChannel) Scan(value interface{}) error {
 	if value == nil {
 		return nil
 	}
 
-	err = nil
+	var s string
 	switch v := value.(type) {
 	case int64:
 		if saleschannelStoreRep == enum.Ordinal {
@@ -282,17 +279,23 @@ func (i *SalesChannel) Scan(value interface{}) (err error) {
 		} else {
 			*i = SalesChannel(v)
 		}
+		return nil
 	case float64:
 		*i = SalesChannel(v)
+		return nil
 	case []byte:
-		err = i.parse(string(v), saleschannelStoreRep)
+		s = string(v)
 	case string:
-		err = i.parse(v, saleschannelStoreRep)
+		s = v
 	default:
-		err = fmt.Errorf("%T %+v is not a meaningful saleschannel", value, value)
+		return fmt.Errorf("%T %+v is not a meaningful saleschannel", value, value)
 	}
 
-	return err
+	if i.parseString(s, saleschannelSQLStrings, saleschannelSQLIndex[:]) {
+		return nil
+	}
+
+	return errors.New(s + ": unrecognised saleschannel")
 }
 
 // Value converts the SalesChannel to a string.
@@ -306,6 +309,6 @@ func (i SalesChannel) Value() (driver.Value, error) {
 	case enum.Tag:
 		return i.Tag(), nil
 	default:
-		return i.String(), nil
+		return i.toString(saleschannelSQLStrings, saleschannelSQLIndex[:]), nil
 	}
 }

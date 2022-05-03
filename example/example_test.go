@@ -15,6 +15,7 @@ func TestString(t *testing.T) {
 	g.Expect(Sunday.String()).Should(gomega.Equal("Sunday"))
 	g.Expect(Monday.String()).Should(gomega.Equal("Monday"))
 	g.Expect(MyDog.String()).Should(gomega.Equal("dog"))
+	g.Expect(OnlineSales.String()).Should(gomega.Equal("online"))
 }
 
 func TestOrdinal(t *testing.T) {
@@ -74,6 +75,7 @@ type Group struct {
 	X Method
 	M Month
 	P Pet
+	C SalesChannel
 }
 
 func TestMarshalUsingNumber(t *testing.T) {
@@ -81,13 +83,13 @@ func TestMarshalUsingNumber(t *testing.T) {
 
 	setMarshalReps(enum.Number)
 
-	v := Group{G, Tuesday, Θήτα, POST, November, MyKoala_Bear}
+	v := Group{G, Tuesday, Θήτα, POST, November, MyKoala_Bear, OnlineSales}
 	s, err := json.Marshal(v)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 	x, err := xml.Marshal(v)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
-	g.Expect(string(s)).Should(gomega.Equal(`{"B":347.2,"D":3,"G":8,"X":3,"M":11,"P":4}`))
-	g.Expect(string(x)).Should(gomega.Equal(`<Group><B>347.2</B><D>3</D><G>8</G><X>3</X><M>11</M><P>4</P></Group>`), string(x))
+	g.Expect(string(s)).Should(gomega.Equal(`{"B":347.2,"D":3,"G":8,"X":3,"M":11,"P":4,"C":"webshop"}`))
+	g.Expect(string(x)).Should(gomega.Equal(`<Group><B>347.2</B><D>3</D><G>8</G><X>3</X><M>11</M><P>4</P><C>online</C></Group>`), string(x))
 }
 
 func TestMarshalUsingOrdinal(t *testing.T) {
@@ -95,13 +97,13 @@ func TestMarshalUsingOrdinal(t *testing.T) {
 
 	setMarshalReps(enum.Ordinal)
 
-	v := Group{G, Tuesday, Θήτα, POST, November, MyKoala_Bear}
+	v := Group{G, Tuesday, Θήτα, POST, November, MyKoala_Bear, OnlineSales}
 	s, err := json.Marshal(v)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 	x, err := xml.Marshal(v)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
-	g.Expect(string(s)).Should(gomega.Equal(`{"B":2,"D":2,"G":7,"X":3,"M":10,"P":4}`))
-	g.Expect(string(x)).Should(gomega.Equal(`<Group><B>2</B><D>2</D><G>7</G><X>3</X><M>10</M><P>4</P></Group>`), string(x))
+	g.Expect(string(s)).Should(gomega.Equal(`{"B":2,"D":2,"G":7,"X":3,"M":10,"P":4,"C":"webshop"}`))
+	g.Expect(string(x)).Should(gomega.Equal(`<Group><B>2</B><D>2</D><G>7</G><X>3</X><M>10</M><P>4</P><C>online</C></Group>`), string(x))
 }
 
 func TestMarshalUsingIdentifier(t *testing.T) {
@@ -111,13 +113,13 @@ func TestMarshalUsingIdentifier(t *testing.T) {
 
 	g.Expect(G.MarshalJSON()).Should(gomega.Equal([]byte{'"', 'g', '"'}))
 
-	v := Group{G, Tuesday, Θήτα, POST, November, MyKoala_Bear}
+	v := Group{G, Tuesday, Θήτα, POST, November, MyKoala_Bear, OnlineSales}
 	s, err := json.Marshal(v)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 	x, err := xml.Marshal(v)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
-	g.Expect(string(s)).Should(gomega.Equal(`{"B":"g","D":"Tuesday","G":"Θήτα","X":"POST","M":"November","P":"koala bear"}`))
-	g.Expect(string(x)).Should(gomega.Equal(`<Group><B>g</B><D>Tuesday</D><G>Θήτα</G><X>POST</X><M>November</M><P>koala bear</P></Group>`), string(x))
+	g.Expect(string(s)).Should(gomega.Equal(`{"B":"g","D":"Tuesday","G":"Θήτα","X":"POST","M":"November","P":"koala bear","C":"webshop"}`))
+	g.Expect(string(x)).Should(gomega.Equal(`<Group><B>g</B><D>Tuesday</D><G>Θήτα</G><X>POST</X><M>November</M><P>koala bear</P><C>online</C></Group>`), string(x))
 }
 
 func TestMarshalUsingTag(t *testing.T) {
@@ -127,13 +129,13 @@ func TestMarshalUsingTag(t *testing.T) {
 
 	g.Expect(G.MarshalJSON()).Should(gomega.Equal([]byte{'"', 'g', '"'}))
 
-	v := Group{G, Tuesday, Θήτα, POST, November, MyElephant}
+	v := Group{G, Tuesday, Θήτα, POST, November, MyElephant, OnlineSales}
 	s, err := json.Marshal(v)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 	x, err := xml.Marshal(v)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
-	g.Expect(string(s)).Should(gomega.Equal(`{"B":"g","D":"Tuesday","G":"theta","X":"PO","M":"November","P":"Loxodonta Africana"}`))
-	g.Expect(string(x)).Should(gomega.Equal(`<Group><B>g</B><D>Tuesday</D><G>theta</G><X>PO</X><M>November</M><P>Loxodonta Africana</P></Group>`), string(x))
+	g.Expect(string(s)).Should(gomega.Equal(`{"B":"g","D":"Tuesday","G":"theta","X":"PO","M":"November","P":"Loxodonta Africana","C":"webshop"}`))
+	g.Expect(string(x)).Should(gomega.Equal(`<Group><B>g</B><D>Tuesday</D><G>theta</G><X>PO</X><M>November</M><P>Loxodonta Africana</P><C>online</C></Group>`), string(x))
 }
 
 func TestUnmarshalJSON1(t *testing.T) {
@@ -142,18 +144,18 @@ func TestUnmarshalJSON1(t *testing.T) {
 		input string
 		rep   enum.Representation
 	}{
-		{input: `{"B":347.2,"D":3,"G":8,"X":3,"M":11,"P":4}`, rep: enum.Identifier},
-		{input: `{"B":"g","D":"Tuesday","G":"Θήτα","X":"post","M":"November","P":"Koala Bear"}`, rep: enum.Identifier},
+		{input: `{"B":347.2,"D":3,"G":8,"X":3,"M":11,"P":4,"C":1}`, rep: enum.Identifier},
+		{input: `{"B":"g","D":"Tuesday","G":"Θήτα","X":"post","M":"November","P":"Koala Bear","C":"webshop"}`, rep: enum.Identifier},
 
-		{input: `{"B":347.2,"D":3,"G":8,"X":3,"M":11,"P":4}`, rep: enum.Tag},
-		{input: `{"B":"g","D":"Tuesday","G":"theta","X":"PO","M":"November","P":"Koala Bear"}`, rep: enum.Tag},
+		{input: `{"B":347.2,"D":3,"G":8,"X":3,"M":11,"P":4,"C":1}`, rep: enum.Tag},
+		{input: `{"B":"g","D":"Tuesday","G":"theta","X":"PO","M":"November","P":"Koala Bear","C":"webshop"}`, rep: enum.Tag},
 
-		{input: `{"B":347.2,"D":3,"G":8,"X":3,"M":11,"P":4}`, rep: enum.Number},
-		{input: `{"B":"G","D":"Tuesday","G":"theta","X":"po","M":"november","P":"Koala Bear"}`, rep: enum.Number},
+		{input: `{"B":347.2,"D":3,"G":8,"X":3,"M":11,"P":4,"C":1}`, rep: enum.Number},
+		{input: `{"B":"G","D":"Tuesday","G":"theta","X":"po","M":"november","P":"Koala Bear","C":"webshop"}`, rep: enum.Number},
 
-		{input: `{"B":2,"D":2,"G":7,"X":3,"M":10,"P":4}`, rep: enum.Ordinal},
-		{input: `{"B":"G","D":"Tuesday","G":"Θήτα","X":"POST","M":"NOVEMBER","P":"Koala Bear"}`, rep: enum.Ordinal},
-		{input: `{"B":"G","D":"Tuesday","G":"Θήτα","X":"POST","M":"NOVEMBER","P":"Cuddly"}`, rep: enum.Identifier},
+		{input: `{"B":2,"D":2,"G":7,"X":3,"M":10,"P":4,"C":1}`, rep: enum.Ordinal},
+		{input: `{"B":"G","D":"Tuesday","G":"Θήτα","X":"POST","M":"NOVEMBER","P":"Koala Bear","C":"webshop"}`, rep: enum.Ordinal},
+		{input: `{"B":"G","D":"Tuesday","G":"Θήτα","X":"POST","M":"NOVEMBER","P":"Cuddly","C":"webshop"}`, rep: enum.Identifier},
 	}
 	for i, c := range cases {
 		setMarshalReps(c.rep)
@@ -161,7 +163,7 @@ func TestUnmarshalJSON1(t *testing.T) {
 		var v Group
 		err := json.Unmarshal([]byte(c.input), &v)
 		g.Expect(err).NotTo(gomega.HaveOccurred(), "%d %s %d", i, c.input, c.rep)
-		g.Expect(v).Should(gomega.Equal(Group{G, Tuesday, Θήτα, POST, November, MyKoala_Bear}), "%d %s %d", i, c.input, c.rep)
+		g.Expect(v).Should(gomega.Equal(Group{G, Tuesday, Θήτα, POST, November, MyKoala_Bear, OnlineSales}), "%d %s %d", i, c.input, c.rep)
 	}
 }
 
@@ -213,6 +215,25 @@ func TestPetScan(t *testing.T) {
 		err := m.Scan(s)
 		g.Expect(err).NotTo(gomega.HaveOccurred())
 		g.Expect(*m).Should(gomega.Equal(MyKoala_Bear))
+	}
+}
+
+func TestSalesChannelScan(t *testing.T) {
+	g := gomega.NewWithT(t)
+	saleschannelStoreRep = enum.Ordinal
+	expected := TelephoneSales // ordinal = 2
+	cases := []interface{}{
+		int64(2), int64(2), float64(2), "s", []byte("s"),
+	}
+	for i, s := range cases {
+		if i > 0 {
+			saleschannelStoreRep = enum.Identifier
+			expected = InstoreSales // value = 2
+		}
+		var m = new(SalesChannel)
+		err := m.Scan(s)
+		g.Expect(err).NotTo(gomega.HaveOccurred())
+		g.Expect(*m).Should(gomega.Equal(expected))
 	}
 }
 

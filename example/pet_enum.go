@@ -41,7 +41,6 @@ func (i Pet) toString(concats string, indexes []uint16) string {
 	return concats[indexes[o]:indexes[o+1]]
 }
 
-// parseString attempts to match an identifier.
 func (v *Pet) parseString(s string, concats string, indexes []uint16) (ok bool) {
 	var i0 uint16 = 0
 
@@ -66,7 +65,7 @@ func init() {
 		if !exists {
 			fmt.Fprintf(os.Stderr, "Warning: Pet: %s is missing from petTags\n", id)
 		} else {
-			k := strings.ToLower(strings.ReplaceAll(v, "_", " "))
+			k := petTransformInput(v)
 			if _, exists := petTagsInverse[k]; exists {
 				fmt.Fprintf(os.Stderr, "Warning: Pet: %q is duplicated in petTags\n", k)
 			}
@@ -163,7 +162,7 @@ func (v *Pet) parse(in string, rep enum.Representation) error {
 		}
 	}
 
-	s := strings.ToLower(strings.ReplaceAll(in, "_", " "))
+	s := petTransformInput(in)
 
 	if rep == enum.Identifier {
 		if v.parseString(s, petEnumStrings, petEnumIndex[:]) || v.parseTag(s) {
@@ -202,6 +201,13 @@ func (v *Pet) parseOrdinal(s string) (ok bool) {
 func (v *Pet) parseTag(s string) (ok bool) {
 	*v, ok = petTagsInverse[s]
 	return ok
+}
+
+// petTransformInput may alter input strings before they are parsed.
+// This function is pluggable and is initialised using command-line flags
+// -ic -lc -uc -unsnake.
+var petTransformInput = func(in string) string {
+	return strings.ToLower(strings.ReplaceAll(in, "_", " "))
 }
 
 // AsPet parses a string to find the corresponding Pet, accepting either one of the string values or
@@ -297,12 +303,12 @@ var petStoreRep = enum.Identifier
 
 // Scan parses some value, which can be a number, a string or []byte.
 // It implements sql.Scanner, https://golang.org/pkg/database/sql/#Scanner
-func (i *Pet) Scan(value interface{}) (err error) {
+func (i *Pet) Scan(value interface{}) error {
 	if value == nil {
 		return nil
 	}
 
-	err = nil
+	var s string
 	switch v := value.(type) {
 	case int64:
 		if petStoreRep == enum.Ordinal {
@@ -310,17 +316,19 @@ func (i *Pet) Scan(value interface{}) (err error) {
 		} else {
 			*i = Pet(v)
 		}
+		return nil
 	case float64:
 		*i = Pet(v)
+		return nil
 	case []byte:
-		err = i.parse(string(v), petStoreRep)
+		s = string(v)
 	case string:
-		err = i.parse(v, petStoreRep)
+		s = v
 	default:
-		err = fmt.Errorf("%T %+v is not a meaningful pet", value, value)
+		return fmt.Errorf("%T %+v is not a meaningful pet", value, value)
 	}
 
-	return err
+	return i.parse(s, petStoreRep)
 }
 
 // Value converts the Pet to a string.
