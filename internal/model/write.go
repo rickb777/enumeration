@@ -266,6 +266,11 @@ func (i <<.MainType>>) Tag() string {
 	}
 	return i.String()
 }
+<<- else if .HasJSONTags>>
+// Tag returns the JSON representation of a <<.MainType>>.
+func (i <<.MainType>>) Tag() string {
+	return i.toString(<<.LcType>>JSONStrings, <<.LcType>>JSONIndex[:])
+}
 <<- else>>
 // Tag returns the string representation of a <<.MainType>>. This is an alias for String.
 func (i <<.MainType>>) Tag() string {
@@ -282,7 +287,7 @@ func (m Model) writeTagMethod(w io.Writer) {
 
 const stringMethod = `
 // String returns the literal string representation of a <<.MainType>>, which is
-// the same as the const identifier.
+// the same as the const identifier but without prefix or suffix.
 func (i <<.MainType>>) String() string {
 	return i.toString(<<.LcType>>EnumStrings, <<.LcType>>EnumIndex[:])
 }

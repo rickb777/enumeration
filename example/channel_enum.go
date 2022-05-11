@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v2 v2.13.0
+// github.com/rickb777/enumeration/v2 v2.14.0
 
 package example
 
@@ -57,13 +57,13 @@ func (v *SalesChannel) parseString(s string, concats string, indexes []uint16) (
 	return false
 }
 
-// Tag returns the string representation of a SalesChannel. This is an alias for String.
+// Tag returns the JSON representation of a SalesChannel.
 func (i SalesChannel) Tag() string {
-	return i.String()
+	return i.toString(saleschannelJSONStrings, saleschannelJSONIndex[:])
 }
 
 // String returns the literal string representation of a SalesChannel, which is
-// the same as the const identifier.
+// the same as the const identifier but without prefix or suffix.
 func (i SalesChannel) String() string {
 	return i.toString(saleschannelEnumStrings, saleschannelEnumIndex[:])
 }

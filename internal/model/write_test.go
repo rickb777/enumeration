@@ -176,7 +176,7 @@ func TestWriteLiteralMethod(t *testing.T) {
 
 const String_all = `
 // String returns the literal string representation of a Sweet, which is
-// the same as the const identifier.
+// the same as the const identifier but without prefix or suffix.
 func (i Sweet) String() string {
 	return i.toString(sweetEnumStrings, sweetEnumIndex[:])
 }
@@ -192,6 +192,13 @@ const Tag_no_table = `
 // Tag returns the string representation of a Sweet. This is an alias for String.
 func (i Sweet) Tag() string {
 	return i.String()
+}
+`
+
+const Tag_as_JSON = `
+// Tag returns the JSON representation of a Sweet.
+func (i Sweet) Tag() string {
+	return i.toString(sweetJSONStrings, sweetJSONIndex[:])
 }
 `
 
@@ -235,6 +242,7 @@ func (i Sweet) Tag() string {
 
 func TestWriteTagMethod(t *testing.T) {
 	testStage(t, basicModel().writeTagMethod, Tag_no_table)
+	testStage(t, modelWithStructTags().writeTagMethod, Tag_as_JSON)
 	testStage(t, lookupTables(basicModel()).writeTagMethod, Tag_with_table)
 }
 

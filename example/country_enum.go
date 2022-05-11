@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v2 v2.13.0
+// github.com/rickb777/enumeration/v2 v2.14.0
 
 package example
 
@@ -190,7 +190,7 @@ func (i Country) Tag() string {
 }
 
 // String returns the literal string representation of a Country, which is
-// the same as the const identifier.
+// the same as the const identifier but without prefix or suffix.
 func (i Country) String() string {
 	return i.toString(countryEnumStrings, countryEnumIndex[:])
 }
