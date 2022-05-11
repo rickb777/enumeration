@@ -851,6 +851,7 @@ func (v *Sweet) unmarshalJSON(in string) error {
 		return nil
 	}
 
+	var ok bool
 	*v, ok = sweetAlias[s]
 	if ok {
 		return nil
@@ -872,6 +873,7 @@ func (v *Sweet) unmarshalJSON(in string) error {
 		return nil
 	}
 
+	var ok bool
 	*v, ok = sweetAlias[s]
 	if ok {
 		return nil

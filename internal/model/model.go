@@ -150,14 +150,14 @@ func (m Model) CheckBadPrefixSuffix() error {
 func (m Model) CheckBadTags() error {
 	jsonCount := 0
 	for _, v := range m.Values {
-		if v.JSON != "" {
+		if v.Identifier != "" && v.JSON != "" {
 			jsonCount++
 		}
 	}
 
 	sqlCount := 0
 	for _, v := range m.Values {
-		if v.SQL != "" {
+		if v.Identifier != "" && v.SQL != "" {
 			sqlCount++
 		}
 	}

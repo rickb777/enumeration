@@ -71,7 +71,11 @@ func Convert(in io.Reader, input string, xCase transform.Case, config model.Conf
 		}
 	}
 
+	debugConstItems(constItems)
+
 	m.Values, _ = filterExportedItems(config.MainType, constItems)
+
+	debugValues(m.Values)
 
 	if s.gs.ErrorCount > 0 {
 		return model.Model{}, fmt.Errorf("Syntax error in %s", input)
@@ -122,4 +126,22 @@ func filterExportedItems(mainType string, ids []constItem) (exported model.Value
 	}
 
 	return exported, defaultValue
+}
+
+func debugConstItems(ids []constItem) {
+	if util.Dbg {
+		util.Debug("\n   %-25s %-25s %-25s %s\n", "id", "type", "expression", "tag")
+		for i, v := range ids {
+			util.Debug("%-2d %-25s %-25s %-25s %s\n", i, v.id, v.typ, v.expression, v.tag)
+		}
+	}
+}
+
+func debugValues(values model.Values) {
+	if util.Dbg {
+		util.Debug("\n   %-25s %-25s %-25s %s\n", "id", "short", "json", "sql")
+		for i, v := range values {
+			util.Debug("%-2d %-25s %-25s %-25s %s\n", i, v.Identifier, v.Shortened, v.JSON, v.SQL)
+		}
+	}
 }

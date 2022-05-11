@@ -664,6 +664,7 @@ func (v *<<.MainType>>) unmarshalJSON(in string) error {
 	}
 <<- if .AliasTable>>
 
+	var ok bool
 	*v, ok = <<.AliasTable>>[s]
 	if ok {
 		return nil
