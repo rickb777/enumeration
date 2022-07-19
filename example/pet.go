@@ -12,7 +12,7 @@ package example
 //  * Because of '-unsnake', underscores are replaced with spaces so "MyKoala_Bear" is
 //     treated as "koala bear".
 
-//go:generate enumeration -v -type Pet -prefix My -unsnake -lc -using petTags -marshaltext tag -alias petAliases
+//go:generate enumeration -v -type Pet -prefix My -unsnake -lc -using petTags -marshaltext tag -alias petAliases -lenient
 
 type Pet uint16
 

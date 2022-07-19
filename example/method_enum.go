@@ -180,7 +180,8 @@ func (v *Method) parse(in string, rep enum.Representation) error {
 	return errors.New(in + ": unrecognised method")
 }
 
-// parseNumber attempts to convert a decimal value
+// parseNumber attempts to convert a decimal value.
+// Only numbers that correspond to the enumeration are valid.
 func (v *Method) parseNumber(s string) (ok bool) {
 	num, err := strconv.ParseInt(s, 10, 64)
 	if err == nil {
@@ -190,7 +191,7 @@ func (v *Method) parseNumber(s string) (ok bool) {
 	return false
 }
 
-// parseOrdinal attempts to convert an ordinal value
+// parseOrdinal attempts to convert an ordinal value.
 func (v *Method) parseOrdinal(s string) (ok bool) {
 	ord, err := strconv.Atoi(s)
 	if err == nil && 0 <= ord && ord < len(AllMethods) {
@@ -351,6 +352,10 @@ func (v *Method) Scan(value interface{}) error {
 // Value converts the Method to a string.
 // It implements driver.Valuer, https://golang.org/pkg/database/sql/driver/#Valuer
 func (v Method) Value() (driver.Value, error) {
+	if methodStoreRep != enum.Number && !v.IsValid() {
+		return nil, fmt.Errorf("%v: cannot be stored", v)
+	}
+
 	switch methodStoreRep {
 	case enum.Number:
 		return int64(v), nil

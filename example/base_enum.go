@@ -133,7 +133,8 @@ func (v *Base) parse(in string, rep enum.Representation) error {
 	return errors.New(in + ": unrecognised base")
 }
 
-// parseNumber attempts to convert a decimal value
+// parseNumber attempts to convert a decimal value.
+// Only numbers that correspond to the enumeration are valid.
 func (v *Base) parseNumber(s string) (ok bool) {
 	num, err := strconv.ParseFloat(s, 64)
 	if err == nil {
@@ -143,7 +144,7 @@ func (v *Base) parseNumber(s string) (ok bool) {
 	return false
 }
 
-// parseOrdinal attempts to convert an ordinal value
+// parseOrdinal attempts to convert an ordinal value.
 func (v *Base) parseOrdinal(s string) (ok bool) {
 	ord, err := strconv.Atoi(s)
 	if err == nil && 0 <= ord && ord < len(AllBases) {
@@ -296,6 +297,10 @@ func (v *Base) Scan(value interface{}) error {
 // Value converts the Base to a string.
 // It implements driver.Valuer, https://golang.org/pkg/database/sql/driver/#Valuer
 func (v Base) Value() (driver.Value, error) {
+	if baseStoreRep != enum.Number && !v.IsValid() {
+		return nil, fmt.Errorf("%v: cannot be stored", v)
+	}
+
 	switch baseStoreRep {
 	case enum.Number:
 		return float64(v), nil

@@ -177,17 +177,18 @@ func (v *Pet) parse(in string, rep enum.Representation) error {
 	return errors.New(in + ": unrecognised pet")
 }
 
-// parseNumber attempts to convert a decimal value
+// parseNumber attempts to convert a decimal value.
+// Any number is allowed, even if the result is invalid.
 func (v *Pet) parseNumber(s string) (ok bool) {
 	num, err := strconv.ParseInt(s, 10, 64)
 	if err == nil {
 		*v = Pet(num)
-		return v.IsValid()
+		return true
 	}
 	return false
 }
 
-// parseOrdinal attempts to convert an ordinal value
+// parseOrdinal attempts to convert an ordinal value.
 func (v *Pet) parseOrdinal(s string) (ok bool) {
 	ord, err := strconv.Atoi(s)
 	if err == nil && 0 <= ord && ord < len(AllPets) {
@@ -346,6 +347,10 @@ func (v *Pet) Scan(value interface{}) error {
 // Value converts the Pet to a string.
 // It implements driver.Valuer, https://golang.org/pkg/database/sql/driver/#Valuer
 func (v Pet) Value() (driver.Value, error) {
+	if petStoreRep != enum.Number && !v.IsValid() {
+		return nil, fmt.Errorf("%v: cannot be stored", v)
+	}
+
 	switch petStoreRep {
 	case enum.Number:
 		return int64(v), nil

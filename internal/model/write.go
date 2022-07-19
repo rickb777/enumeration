@@ -462,7 +462,9 @@ func (m Model) writeParseMethod(w io.Writer) {
 //-------------------------------------------------------------------------------------------------
 
 const parseHelperMethods = `
-// parseNumber attempts to convert a decimal value
+// parseNumber attempts to convert a decimal value.
+// << if .Lenient >>Any number is allowed, even if the result is invalid.<< else ->>
+Only numbers that correspond to the enumeration are valid.<< end >>
 func (v *<<.MainType>>) parseNumber(s string) (ok bool) {
 <<- if .IsFloat>>
 	num, err := strconv.ParseFloat(s, 64)
@@ -471,12 +473,12 @@ func (v *<<.MainType>>) parseNumber(s string) (ok bool) {
 <<- end>>
 	if err == nil {
 		*v = <<.MainType>>(num)
-		return v.IsValid()
+		return << if .Lenient >>true<< else >>v.IsValid()<< end >>
 	}
 	return false
 }
 
-// parseOrdinal attempts to convert an ordinal value
+// parseOrdinal attempts to convert an ordinal value.
 func (v *<<.MainType>>) parseOrdinal(s string) (ok bool) {
 	ord, err := strconv.Atoi(s)
 	if err == nil && 0 <= ord && ord < len(All<<.Plural>>) {
@@ -765,6 +767,10 @@ const value_all = `
 // Value converts the <<.MainType>> to a string.
 // It implements driver.Valuer, https://golang.org/pkg/database/sql/driver/#Valuer
 func (v <<.MainType>>) Value() (driver.Value, error) {
+	if <<.LcType>>StoreRep != enum.Number && !v.IsValid() {
+		return nil, fmt.Errorf("%v: cannot be stored", v)
+	}
+
 	switch <<.LcType>>StoreRep {
 	case enum.Number:
 <<- if .IsFloat>>

@@ -156,7 +156,8 @@ func (v *Month) parse(in string, rep enum.Representation) error {
 	return errors.New(in + ": unrecognised month")
 }
 
-// parseNumber attempts to convert a decimal value
+// parseNumber attempts to convert a decimal value.
+// Only numbers that correspond to the enumeration are valid.
 func (v *Month) parseNumber(s string) (ok bool) {
 	num, err := strconv.ParseInt(s, 10, 64)
 	if err == nil {
@@ -166,7 +167,7 @@ func (v *Month) parseNumber(s string) (ok bool) {
 	return false
 }
 
-// parseOrdinal attempts to convert an ordinal value
+// parseOrdinal attempts to convert an ordinal value.
 func (v *Month) parseOrdinal(s string) (ok bool) {
 	ord, err := strconv.Atoi(s)
 	if err == nil && 0 <= ord && ord < len(AllMonths) {
@@ -321,6 +322,10 @@ func (v *Month) Scan(value interface{}) error {
 // Value converts the Month to a string.
 // It implements driver.Valuer, https://golang.org/pkg/database/sql/driver/#Valuer
 func (v Month) Value() (driver.Value, error) {
+	if monthStoreRep != enum.Number && !v.IsValid() {
+		return nil, fmt.Errorf("%v: cannot be stored", v)
+	}
+
 	switch monthStoreRep {
 	case enum.Number:
 		return int64(v), nil

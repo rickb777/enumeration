@@ -483,7 +483,8 @@ func TestWriteParseMethod(t *testing.T) {
 //-------------------------------------------------------------------------------------------------
 
 const parseHelpers_nc = `
-// parseNumber attempts to convert a decimal value
+// parseNumber attempts to convert a decimal value.
+// Only numbers that correspond to the enumeration are valid.
 func (v *Sweet) parseNumber(s string) (ok bool) {
 	num, err := strconv.ParseInt(s, 10, 64)
 	if err == nil {
@@ -493,7 +494,7 @@ func (v *Sweet) parseNumber(s string) (ok bool) {
 	return false
 }
 
-// parseOrdinal attempts to convert an ordinal value
+// parseOrdinal attempts to convert an ordinal value.
 func (v *Sweet) parseOrdinal(s string) (ok bool) {
 	ord, err := strconv.Atoi(s)
 	if err == nil && 0 <= ord && ord < len(AllSweets) {
@@ -505,7 +506,8 @@ func (v *Sweet) parseOrdinal(s string) (ok bool) {
 `
 
 const parseHelpers_lc = `
-// parseNumber attempts to convert a decimal value
+// parseNumber attempts to convert a decimal value.
+// Only numbers that correspond to the enumeration are valid.
 func (v *Sweet) parseNumber(s string) (ok bool) {
 	num, err := strconv.ParseFloat(s, 64)
 	if err == nil {
@@ -515,7 +517,7 @@ func (v *Sweet) parseNumber(s string) (ok bool) {
 	return false
 }
 
-// parseOrdinal attempts to convert an ordinal value
+// parseOrdinal attempts to convert an ordinal value.
 func (v *Sweet) parseOrdinal(s string) (ok bool) {
 	ord, err := strconv.Atoi(s)
 	if err == nil && 0 <= ord && ord < len(AllSweets) {
@@ -533,17 +535,18 @@ func (v *Sweet) parseTag(s string) (ok bool) {
 `
 
 const parseHelpers_ic = `
-// parseNumber attempts to convert a decimal value
+// parseNumber attempts to convert a decimal value.
+// Any number is allowed, even if the result is invalid.
 func (v *Sweet) parseNumber(s string) (ok bool) {
 	num, err := strconv.ParseInt(s, 10, 64)
 	if err == nil {
 		*v = Sweet(num)
-		return v.IsValid()
+		return true
 	}
 	return false
 }
 
-// parseOrdinal attempts to convert an ordinal value
+// parseOrdinal attempts to convert an ordinal value.
 func (v *Sweet) parseOrdinal(s string) (ok bool) {
 	ord, err := strconv.Atoi(s)
 	if err == nil && 0 <= ord && ord < len(AllSweets) {
@@ -557,7 +560,7 @@ func (v *Sweet) parseOrdinal(s string) (ok bool) {
 func TestWriteParseHelperMethods(t *testing.T) {
 	testStage(t, unsnake(basicModel()).writeParseHelperMethods, parseHelpers_nc)
 	testStage(t, lookupTables(floatModelWithPrefixes()).writeParseHelperMethods, parseHelpers_lc)
-	testStage(t, ignoreCase(unsnake(basicModel())).writeParseHelperMethods, parseHelpers_ic)
+	testStage(t, lenient(ignoreCase(unsnake(basicModel()))).writeParseHelperMethods, parseHelpers_ic)
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -1037,6 +1040,10 @@ const Value_int = `
 // Value converts the Sweet to a string.
 // It implements driver.Valuer, https://golang.org/pkg/database/sql/driver/#Valuer
 func (v Sweet) Value() (driver.Value, error) {
+	if sweetStoreRep != enum.Number && !v.IsValid() {
+		return nil, fmt.Errorf("%v: cannot be stored", v)
+	}
+
 	switch sweetStoreRep {
 	case enum.Number:
 		return int64(v), nil
@@ -1054,6 +1061,10 @@ const Value_float = `
 // Value converts the Sweet to a string.
 // It implements driver.Valuer, https://golang.org/pkg/database/sql/driver/#Valuer
 func (v Sweet) Value() (driver.Value, error) {
+	if sweetStoreRep != enum.Number && !v.IsValid() {
+		return nil, fmt.Errorf("%v: cannot be stored", v)
+	}
+
 	switch sweetStoreRep {
 	case enum.Number:
 		return float64(v), nil
@@ -1071,6 +1082,10 @@ const Value_struct_tags = `
 // Value converts the Sweet to a string.
 // It implements driver.Valuer, https://golang.org/pkg/database/sql/driver/#Valuer
 func (v Sweet) Value() (driver.Value, error) {
+	if sweetStoreRep != enum.Number && !v.IsValid() {
+		return nil, fmt.Errorf("%v: cannot be stored", v)
+	}
+
 	switch sweetStoreRep {
 	case enum.Number:
 		return int64(v), nil
@@ -1219,5 +1234,10 @@ func upperCase(m Model) Model {
 func lookupTables(m Model) Model {
 	m.TagTable = "sweetNames"
 	m.AliasTable = "sweetAlias"
+	return m
+}
+
+func lenient(m Model) Model {
+	m.Lenient = true
 	return m
 }

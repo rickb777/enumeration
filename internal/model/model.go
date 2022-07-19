@@ -21,6 +21,7 @@ type Config struct {
 	StoreRep       enum.Representation
 	IgnoreCase     bool
 	Unsnake        bool
+	Lenient        bool
 }
 
 type Value struct {

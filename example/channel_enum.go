@@ -136,7 +136,8 @@ func (v *SalesChannel) parse(in string, rep enum.Representation) error {
 	return errors.New(in + ": unrecognised saleschannel")
 }
 
-// parseNumber attempts to convert a decimal value
+// parseNumber attempts to convert a decimal value.
+// Only numbers that correspond to the enumeration are valid.
 func (v *SalesChannel) parseNumber(s string) (ok bool) {
 	num, err := strconv.ParseInt(s, 10, 64)
 	if err == nil {
@@ -146,7 +147,7 @@ func (v *SalesChannel) parseNumber(s string) (ok bool) {
 	return false
 }
 
-// parseOrdinal attempts to convert an ordinal value
+// parseOrdinal attempts to convert an ordinal value.
 func (v *SalesChannel) parseOrdinal(s string) (ok bool) {
 	ord, err := strconv.Atoi(s)
 	if err == nil && 0 <= ord && ord < len(AllSalesChannels) {
@@ -321,6 +322,10 @@ func (v *SalesChannel) Scan(value interface{}) error {
 // Value converts the SalesChannel to a string.
 // It implements driver.Valuer, https://golang.org/pkg/database/sql/driver/#Valuer
 func (v SalesChannel) Value() (driver.Value, error) {
+	if saleschannelStoreRep != enum.Number && !v.IsValid() {
+		return nil, fmt.Errorf("%v: cannot be stored", v)
+	}
+
 	switch saleschannelStoreRep {
 	case enum.Number:
 		return int64(v), nil

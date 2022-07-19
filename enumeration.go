@@ -31,6 +31,7 @@ func defineFlags() {
 	flag.StringVar(&marshalTextRep, "marshaltext", "Identifier", "Marshal values using Identifier, Tag, Number or Ordinal")
 	flag.StringVar(&storeRep, "store", "Identifier", "Store values in a DB using Identifier, Tag, Number or Ordinal")
 
+	flag.BoolVar(&config.Lenient, "lenient", false, "Allow parsing to yield invalid values.")
 	flag.BoolVar(&force, "f", false, "Force writing the output file even if up to date (not used when piping stdin or stdout).")
 	flag.BoolVar(&lowercase, "lc", false, "Convert strings to lowercase and ignore case when parsing")
 	flag.BoolVar(&uppercase, "uc", false, "Convert strings to uppercase and ignore case when parsing.")
