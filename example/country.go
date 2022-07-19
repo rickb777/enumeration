@@ -4,7 +4,7 @@ package example
 // collections. Because of '-ic', the parser ignores case. The '-using' option
 // provides cross-mapping between the country names and their ISO-3166 tags.
 
-//go:generate enumeration -v -type Country -plural Countries -ic -using iso3166Tags -marshaltext tag
+//go:generate enumeration -v -type Country -plural Countries -ic -using iso3166Tags -marshaltext tag -store tag
 
 type Country int
 

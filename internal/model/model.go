@@ -18,6 +18,7 @@ type Config struct {
 	MainType       string
 	Plural, Pkg    string
 	MarshalTextRep enum.Representation
+	StoreRep       enum.Representation
 	IgnoreCase     bool
 	Unsnake        bool
 }

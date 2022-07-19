@@ -15,7 +15,7 @@ import (
 )
 
 var config model.Config
-var inputGo, outputGo, outputJSON, marshalTextRep string
+var inputGo, outputGo, outputJSON, marshalTextRep, storeRep string
 var force, lowercase, uppercase, showVersion bool
 
 func defineFlags() {
@@ -29,6 +29,7 @@ func defineFlags() {
 	flag.StringVar(&parse.AliasTable, "alias", "", "Uses your own map[string]Type as aliases during parsing.")
 	flag.StringVar(&config.Pkg, "package", "", "Name of the output package (optional). Defaults to the output directory.")
 	flag.StringVar(&marshalTextRep, "marshaltext", "Identifier", "Marshal values using Identifier, Tag, Number or Ordinal")
+	flag.StringVar(&storeRep, "store", "Identifier", "Store values in a DB using Identifier, Tag, Number or Ordinal")
 
 	flag.BoolVar(&force, "f", false, "Force writing the output file even if up to date (not used when piping stdin or stdout).")
 	flag.BoolVar(&lowercase, "lc", false, "Convert strings to lowercase and ignore case when parsing")
@@ -74,6 +75,9 @@ func generate() {
 	var err error
 	config.MarshalTextRep, err = enum.AsRepresentation(marshalTextRep)
 	util.Must(err, "(-marshaltext)")
+
+	config.StoreRep, err = enum.AsRepresentation(storeRep)
+	util.Must(err, "(-store)")
 
 	var in io.Reader = os.Stdin
 	if inputGo != "-" {

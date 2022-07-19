@@ -545,6 +545,8 @@ const marshalText = `
 // When enum.Identifier, quoted strings are used. When enum.Tag the quoted strings will use
 // the associated tag map values. When enum.Ordinal, an integer will be used based on the
 // Ordinal method. When enum.Number, the number underlying the value will be used.
+// By default, it is enum.<<.MarshalTextRep>>.
+// The initial value is set using the -marshaltext command line parameter.
 var <<.LcType>>MarshalTextRep = enum.<<.MarshalTextRep>>
 
 // MarshalText converts values to a form suitable for transmission via XML etc.
@@ -709,8 +711,9 @@ func (m Model) writeUnmarshalJSON(w io.Writer) {
 
 const scan_all = `
 // <<.LcType>>StoreRep controls database storage via the Scan and Value methods.
-// By default, it is enum.Identifier and quoted strings are used.
-var <<.LcType>>StoreRep = enum.Identifier
+// By default, it is enum.<<.StoreRep>>.
+// The initial value is set using the -store command line parameter.
+var <<.LcType>>StoreRep = enum.<<.StoreRep>>
 
 // Scan parses some value, which can be a number, a string or []byte.
 // It implements sql.Scanner, https://golang.org/pkg/database/sql/#Scanner

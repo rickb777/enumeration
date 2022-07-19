@@ -715,6 +715,8 @@ const sweetMarshalTextRep = `
 // When enum.Identifier, quoted strings are used. When enum.Tag the quoted strings will use
 // the associated tag map values. When enum.Ordinal, an integer will be used based on the
 // Ordinal method. When enum.Number, the number underlying the value will be used.
+// By default, it is enum.Identifier.
+// The initial value is set using the -marshaltext command line parameter.
 var sweetMarshalTextRep = enum.Identifier
 `
 
@@ -909,7 +911,8 @@ func TestWriteUnmarshalJSON(t *testing.T) {
 
 const Scan_nc = `
 // sweetStoreRep controls database storage via the Scan and Value methods.
-// By default, it is enum.Identifier and quoted strings are used.
+// By default, it is enum.Identifier.
+// The initial value is set using the -store command line parameter.
 var sweetStoreRep = enum.Identifier
 
 // Scan parses some value, which can be a number, a string or []byte.
@@ -945,7 +948,8 @@ func (v *Sweet) Scan(value interface{}) error {
 
 const Scan_lc = `
 // sweetStoreRep controls database storage via the Scan and Value methods.
-// By default, it is enum.Identifier and quoted strings are used.
+// By default, it is enum.Identifier.
+// The initial value is set using the -store command line parameter.
 var sweetStoreRep = enum.Identifier
 
 // Scan parses some value, which can be a number, a string or []byte.
@@ -981,7 +985,8 @@ func (v *Sweet) Scan(value interface{}) error {
 
 const Scan_struct_tags = `
 // sweetStoreRep controls database storage via the Scan and Value methods.
-// By default, it is enum.Identifier and quoted strings are used.
+// By default, it is enum.Identifier.
+// The initial value is set using the -store command line parameter.
 var sweetStoreRep = enum.Identifier
 
 // Scan parses some value, which can be a number, a string or []byte.

@@ -184,6 +184,8 @@ func MustParseSalesChannel(s string) SalesChannel {
 // When enum.Identifier, quoted strings are used. When enum.Tag the quoted strings will use
 // the associated tag map values. When enum.Ordinal, an integer will be used based on the
 // Ordinal method. When enum.Number, the number underlying the value will be used.
+// By default, it is enum.Identifier.
+// The initial value is set using the -marshaltext command line parameter.
 var saleschannelMarshalTextRep = enum.Identifier
 
 // MarshalText converts values to a form suitable for transmission via XML etc.
@@ -278,7 +280,8 @@ func (v *SalesChannel) unmarshalJSON(in string) error {
 }
 
 // saleschannelStoreRep controls database storage via the Scan and Value methods.
-// By default, it is enum.Identifier and quoted strings are used.
+// By default, it is enum.Identifier.
+// The initial value is set using the -store command line parameter.
 var saleschannelStoreRep = enum.Identifier
 
 // Scan parses some value, which can be a number, a string or []byte.
