@@ -187,10 +187,10 @@ func (m Model) writeJoinedStringAndIndexes(w io.Writer) {
 //-------------------------------------------------------------------------------------------------
 
 const toStringMethod = `
-func (i <<.MainType>>) toString(concats string, indexes []uint16) string {
-	o := i.Ordinal()
+func (v <<.MainType>>) toString(concats string, indexes []uint16) string {
+	o := v.Ordinal()
 	if o < 0 || o >= len(All<<.Plural>>) {
-		return fmt.Sprintf("<<.MainType>>(<<.Placeholder>>)", i)
+		return fmt.Sprintf("<<.MainType>>(<<.Placeholder>>)", v)
 	}
 	return concats[indexes[o]:indexes[o+1]]
 }
@@ -258,23 +258,23 @@ func init() {
 }
 
 // Tag returns the string representation of a <<.MainType>>. For invalid values,
-// this returns i.String() (see IsValid).
-func (i <<.MainType>>) Tag() string {
-	s, ok := <<.TagTable>>[i]
+// this returns v.String() (see IsValid).
+func (v <<.MainType>>) Tag() string {
+	s, ok := <<.TagTable>>[v]
 	if ok {
 		return s
 	}
-	return i.String()
+	return v.String()
 }
 <<- else if .HasJSONTags>>
 // Tag returns the JSON representation of a <<.MainType>>.
-func (i <<.MainType>>) Tag() string {
-	return i.toString(<<.LcType>>JSONStrings, <<.LcType>>JSONIndex[:])
+func (v <<.MainType>>) Tag() string {
+	return v.toString(<<.LcType>>JSONStrings, <<.LcType>>JSONIndex[:])
 }
 <<- else>>
 // Tag returns the string representation of a <<.MainType>>. This is an alias for String.
-func (i <<.MainType>>) Tag() string {
-	return i.String()
+func (v <<.MainType>>) Tag() string {
+	return v.String()
 }
 <<- end>>
 `
@@ -288,8 +288,8 @@ func (m Model) writeTagMethod(w io.Writer) {
 const stringMethod = `
 // String returns the literal string representation of a <<.MainType>>, which is
 // the same as the const identifier but without prefix or suffix.
-func (i <<.MainType>>) String() string {
-	return i.toString(<<.LcType>>EnumStrings, <<.LcType>>EnumIndex[:])
+func (v <<.MainType>>) String() string {
+	return v.toString(<<.LcType>>EnumStrings, <<.LcType>>EnumIndex[:])
 }
 `
 
@@ -302,8 +302,8 @@ func (m Model) writeStringMethod(w io.Writer) {
 const ordinalMethod = `
 // Ordinal returns the ordinal number of a <<.MainType>>. This is an integer counting
 // from zero. It is *not* the same as the const number assigned to the value.
-func (i <<.MainType>>) Ordinal() int {
-	switch i {
+func (v <<.MainType>>) Ordinal() int {
+	switch v {
 	<<- range $i, $v := .Values>>
 	case <<$v.Identifier>>:
 		return <<$i>>
@@ -321,14 +321,14 @@ func (m Model) writeOrdinalMethod(w io.Writer) {
 
 const baseMethod = `<<if .IsFloat>>
 // Float returns the float64 value. It serves to facilitate polymorphism (see enum.FloatEnum).
-func (i <<.MainType>>) Float() float64 {
-	return float64(i)
+func (v <<.MainType>>) Float() float64 {
+	return float64(v)
 }
 <<- else>>
 // Int returns the int value, which is not necessarily the same as the ordinal.
 // This facilitates polymorphism (see enum.IntEnum).
-func (i <<.MainType>>) Int() int {
-	return int(i)
+func (v <<.MainType>>) Int() int {
+	return int(v)
 }
 <<- end>>
 `
@@ -342,9 +342,9 @@ func (m Model) writeBaseMethod(w io.Writer) {
 const ofMethod = `
 // <<.MainType>>Of returns a <<.MainType>> based on an ordinal number. This is the inverse of Ordinal.
 // If the ordinal is out of range, an invalid <<.MainType>> is returned.
-func <<.MainType>>Of(i int) <<.MainType>> {
-	if 0 <= i && i < len(All<<.Plural>>) {
-		return All<<.Plural>>[i]
+func <<.MainType>>Of(v int) <<.MainType>> {
+	if 0 <= v && v < len(All<<.Plural>>) {
+		return All<<.Plural>>[v]
 	}
 	// an invalid result
 	return <<.ValuesJoined 0 " + ">> + 1
@@ -359,8 +359,8 @@ func (m Model) writeOfMethod(w io.Writer) {
 
 const isValidMethod = `
 // IsValid determines whether a <<.MainType>> is one of the defined constants.
-func (i <<.MainType>>) IsValid() bool {
-	return i.Ordinal() >= 0
+func (v <<.MainType>>) IsValid() bool {
+	return v.Ordinal() >= 0
 }
 `
 
@@ -508,9 +508,9 @@ const asMethod = `
 // The input case does not matter.
 <<- end>>
 func As<<.MainType>>(s string) (<<.MainType>>, error) {
-	var i = new(<<.MainType>>)
-	err := i.Parse(s)
-	return *i, err
+	var v = new(<<.MainType>>)
+	err := v.Parse(s)
+	return *v, err
 }
 `
 
@@ -526,11 +526,11 @@ const mustParseMethod = `
 // The input case does not matter.
 <<- end>>
 func MustParse<<.MainType>>(s string) <<.MainType>> {
-	i, err := As<<.MainType>>(s)
+	v, err := As<<.MainType>>(s)
 	if err != nil {
 		panic(err)
 	}
-	return i
+	return v
 }
 `
 
@@ -549,50 +549,50 @@ var <<.LcType>>MarshalTextRep = enum.<<.MarshalTextRep>>
 
 // MarshalText converts values to a form suitable for transmission via XML etc.
 // The representation is chosen according to <<.LcType>>MarshalTextRep.
-func (i <<.MainType>>) MarshalText() (text []byte, err error) {
-	return i.marshalText(<<.LcType>>MarshalTextRep, false)
+func (v <<.MainType>>) MarshalText() (text []byte, err error) {
+	return v.marshalText(<<.LcType>>MarshalTextRep, false)
 }
 
 // MarshalJSON converts values to bytes suitable for transmission via JSON.
 // The representation is chosen according to <<.LcType>>MarshalTextRep.
-func (i <<.MainType>>) MarshalJSON() ([]byte, error) {
+func (v <<.MainType>>) MarshalJSON() ([]byte, error) {
 <<- if .HasJSONTags>>
-	o := i.Ordinal()
-	if o < 0 || o >= len(All<<.Plural>>) {
+	o := v.Ordinal()
+	if o < 0 {
 		if <<.LcType>>MarshalTextRep == enum.Ordinal {
-			return nil, fmt.Errorf("%v is out of range", i)
+			return nil, fmt.Errorf("%v is out of range", v)
 		}
-		return <<.LcType>>MarshalNumber(i)
+		return <<.LcType>>MarshalNumber(v)
 	}
 	s := <<.LcType>>JSONStrings[<<.LcType>>JSONIndex[o]:<<.LcType>>JSONIndex[o+1]]
 	return enum.QuotedString(s), nil
 <<- else >>
-	return i.marshalText(<<.LcType>>MarshalTextRep, true)
+	return v.marshalText(<<.LcType>>MarshalTextRep, true)
 <<- end >>
 }
 
-func (i <<.MainType>>) marshalText(rep enum.Representation, quoted bool) (text []byte, err error) {
-	if <<.LcType>>MarshalTextRep != enum.Ordinal && i.Ordinal() < 0 {
-		return <<.LcType>>MarshalNumber(i)
+func (v <<.MainType>>) marshalText(rep enum.Representation, quoted bool) (text []byte, err error) {
+	if rep != enum.Ordinal && !v.IsValid() {
+		return <<.LcType>>MarshalNumber(v)
 	}
 
 	var bs []byte
 	switch rep {
 	case enum.Number:
-		return <<.LcType>>MarshalNumber(i)
+		return <<.LcType>>MarshalNumber(v)
 	case enum.Ordinal:
-		return i.marshalOrdinal()
+		return v.marshalOrdinal()
 	case enum.Tag:
 		if quoted {
-			bs = enum.QuotedString(i.Tag())
+			bs = enum.QuotedString(v.Tag())
 		} else {
-			bs = []byte(i.Tag())
+			bs = []byte(v.Tag())
 		}
 	default:
 		if quoted {
-			bs = enum.QuotedString(i.String())
+			bs = enum.QuotedString(v.String())
 		} else {
-			bs = []byte(i.String())
+			bs = []byte(v.String())
 		}
 	}
 	return bs, nil
@@ -601,17 +601,17 @@ func (i <<.MainType>>) marshalText(rep enum.Representation, quoted bool) (text [
 // <<.LcType>>MarshalNumber handles marshaling where a number is required or where
 // the value is out of range but <<.LcType>>MarshalTextRep != enum.Ordinal.
 // This function can be replaced with any bespoke function than matches signature.
-var <<.LcType>>MarshalNumber = func(i <<.MainType>>) (text []byte, err error) {
+var <<.LcType>>MarshalNumber = func(v <<.MainType>>) (text []byte, err error) {
 <<- if .IsFloat>>
-	bs := []byte(strconv.FormatFloat(float64(i), 'g', 7, 64))
+	bs := []byte(strconv.FormatFloat(float64(v), 'g', 7, 64))
 <<- else>>
-	bs := []byte(strconv.FormatInt(int64(i), 10))
+	bs := []byte(strconv.FormatInt(int64(v), 10))
 <<- end>>
 	return bs, nil
 }
 
-func (i <<.MainType>>) marshalOrdinal() (text []byte, err error) {
-	bs := []byte(strconv.Itoa(i.Ordinal()))
+func (v <<.MainType>>) marshalOrdinal() (text []byte, err error) {
+	bs := []byte(strconv.Itoa(v.Ordinal()))
 	return bs, nil
 }
 `
@@ -624,20 +624,20 @@ func (m Model) writeMarshalText(w io.Writer) {
 
 const unmarshalText = `
 // UnmarshalText converts transmitted values to ordinary values.
-func (i *<<.MainType>>) UnmarshalText(text []byte) error {
-	return i.Parse(string(text))
+func (v *<<.MainType>>) UnmarshalText(text []byte) error {
+	return v.Parse(string(text))
 }
 
 // UnmarshalJSON converts transmitted JSON values to ordinary values. It allows both
 // ordinals and strings to represent the values.
-func (i *<<.MainType>>) UnmarshalJSON(text []byte) error {
+func (v *<<.MainType>>) UnmarshalJSON(text []byte) error {
 	s := string(text)
 	if s == "null" {
 		// Ignore null, like in the main JSON package.
 		return nil
 	}
 	s = strings.Trim(s, "\"")
-	return i.unmarshalJSON(s)
+	return v.unmarshalJSON(s)
 }
 `
 
@@ -663,8 +663,8 @@ func (m Model) writeTransformInputFunction(w io.Writer) {
 //-------------------------------------------------------------------------------------------------
 
 const unmarshalJSONUsingParse = `
-func (i *<<.MainType>>) unmarshalJSON(s string) error {
-	return i.Parse(s)
+func (v *<<.MainType>>) unmarshalJSON(s string) error {
+	return v.Parse(s)
 }
 `
 
@@ -714,40 +714,40 @@ var <<.LcType>>StoreRep = enum.Identifier
 
 // Scan parses some value, which can be a number, a string or []byte.
 // It implements sql.Scanner, https://golang.org/pkg/database/sql/#Scanner
-func (i *<<.MainType>>) Scan(value interface{}) error {
+func (v *<<.MainType>>) Scan(value interface{}) error {
 	if value == nil {
 		return nil
 	}
 
 	var s string
-	switch v := value.(type) {
+	switch x := value.(type) {
 	case int64:
 		if <<.LcType>>StoreRep == enum.Ordinal {
-			*i = <<.MainType>>Of(int(v))
+			*v = <<.MainType>>Of(int(x))
 		} else {
-			*i = <<.MainType>>(v)
+			*v = <<.MainType>>(x)
 		}
 		return nil
 	case float64:
-		*i = <<.MainType>>(v)
+		*v = <<.MainType>>(x)
 		return nil
 	case []byte:
-		s = string(v)
+		s = string(x)
 	case string:
-		s = v
+		s = x
 	default:
 		return fmt.Errorf("%T %+v is not a meaningful <<.LcType>>", value, value)
 	}
 <<- if .HasSQLTags>>
 
-	if i.parseString(s, <<.LcType>>SQLStrings, <<.LcType>>SQLIndex[:]) {
+	if v.parseString(s, <<.LcType>>SQLStrings, <<.LcType>>SQLIndex[:]) {
 		return nil
 	}
 
 	return errors.New(s + ": unrecognised <<.LcType>>")
 <<- else >>
 
-	return i.parse(s, <<.LcType>>StoreRep)
+	return v.parse(s, <<.LcType>>StoreRep)
 <<- end >>
 }
 `
@@ -761,23 +761,23 @@ func (m Model) writeScanMethod(w io.Writer) {
 const value_all = `
 // Value converts the <<.MainType>> to a string.
 // It implements driver.Valuer, https://golang.org/pkg/database/sql/driver/#Valuer
-func (i <<.MainType>>) Value() (driver.Value, error) {
+func (v <<.MainType>>) Value() (driver.Value, error) {
 	switch <<.LcType>>StoreRep {
 	case enum.Number:
 <<- if .IsFloat>>
-		return float64(i), nil
+		return float64(v), nil
 <<- else>>
-		return int64(i), nil
+		return int64(v), nil
 <<- end>>
 	case enum.Ordinal:
-		return int64(i.Ordinal()), nil
+		return int64(v.Ordinal()), nil
 	case enum.Tag:
-		return i.Tag(), nil
+		return v.Tag(), nil
 	default:
 <<- if .HasSQLTags>>
-		return i.toString(<<.LcType>>SQLStrings, <<.LcType>>SQLIndex[:]), nil
+		return v.toString(<<.LcType>>SQLStrings, <<.LcType>>SQLIndex[:]), nil
 <<- else >>
-		return i.String(), nil
+		return v.String(), nil
 <<- end >>
 	}
 }
@@ -798,9 +798,9 @@ func (m Model) WriteGo(w io.Writer) {
 	m.writeTagMethod(w)
 	m.writeStringMethod(w)
 	m.writeOrdinalMethod(w)
+	m.writeIsValidMethod(w)
 	m.writeBaseMethod(w)
 	m.writeOfMethod(w)
-	m.writeIsValidMethod(w)
 	m.writeParseMethod(w)
 	m.writeParseHelperMethods(w)
 	m.writeTransformInputFunction(w)

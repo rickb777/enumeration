@@ -34,10 +34,10 @@ var (
 	saleschannelSQLIndex  = [...]uint16{0, 1, 2, 3}
 )
 
-func (i SalesChannel) toString(concats string, indexes []uint16) string {
-	o := i.Ordinal()
+func (v SalesChannel) toString(concats string, indexes []uint16) string {
+	o := v.Ordinal()
 	if o < 0 || o >= len(AllSalesChannels) {
-		return fmt.Sprintf("SalesChannel(%d)", i)
+		return fmt.Sprintf("SalesChannel(%d)", v)
 	}
 	return concats[indexes[o]:indexes[o+1]]
 }
@@ -58,20 +58,20 @@ func (v *SalesChannel) parseString(s string, concats string, indexes []uint16) (
 }
 
 // Tag returns the JSON representation of a SalesChannel.
-func (i SalesChannel) Tag() string {
-	return i.toString(saleschannelJSONStrings, saleschannelJSONIndex[:])
+func (v SalesChannel) Tag() string {
+	return v.toString(saleschannelJSONStrings, saleschannelJSONIndex[:])
 }
 
 // String returns the literal string representation of a SalesChannel, which is
 // the same as the const identifier but without prefix or suffix.
-func (i SalesChannel) String() string {
-	return i.toString(saleschannelEnumStrings, saleschannelEnumIndex[:])
+func (v SalesChannel) String() string {
+	return v.toString(saleschannelEnumStrings, saleschannelEnumIndex[:])
 }
 
 // Ordinal returns the ordinal number of a SalesChannel. This is an integer counting
 // from zero. It is *not* the same as the const number assigned to the value.
-func (i SalesChannel) Ordinal() int {
-	switch i {
+func (v SalesChannel) Ordinal() int {
+	switch v {
 	case OnlineSales:
 		return 0
 	case InstoreSales:
@@ -82,25 +82,25 @@ func (i SalesChannel) Ordinal() int {
 	return -1
 }
 
+// IsValid determines whether a SalesChannel is one of the defined constants.
+func (v SalesChannel) IsValid() bool {
+	return v.Ordinal() >= 0
+}
+
 // Int returns the int value, which is not necessarily the same as the ordinal.
 // This facilitates polymorphism (see enum.IntEnum).
-func (i SalesChannel) Int() int {
-	return int(i)
+func (v SalesChannel) Int() int {
+	return int(v)
 }
 
 // SalesChannelOf returns a SalesChannel based on an ordinal number. This is the inverse of Ordinal.
 // If the ordinal is out of range, an invalid SalesChannel is returned.
-func SalesChannelOf(i int) SalesChannel {
-	if 0 <= i && i < len(AllSalesChannels) {
-		return AllSalesChannels[i]
+func SalesChannelOf(v int) SalesChannel {
+	if 0 <= v && v < len(AllSalesChannels) {
+		return AllSalesChannels[v]
 	}
 	// an invalid result
 	return OnlineSales + InstoreSales + TelephoneSales + 1
-}
-
-// IsValid determines whether a SalesChannel is one of the defined constants.
-func (i SalesChannel) IsValid() bool {
-	return i.Ordinal() >= 0
 }
 
 // Parse parses a string to find the corresponding SalesChannel, accepting one of the string values or
@@ -166,18 +166,18 @@ var saleschannelTransformInput = func(in string) string {
 // AsSalesChannel parses a string to find the corresponding SalesChannel, accepting either one of the string values or
 // a number. The input representation is determined by saleschannelMarshalTextRep. It wraps Parse.
 func AsSalesChannel(s string) (SalesChannel, error) {
-	var i = new(SalesChannel)
-	err := i.Parse(s)
-	return *i, err
+	var v = new(SalesChannel)
+	err := v.Parse(s)
+	return *v, err
 }
 
 // MustParseSalesChannel is similar to AsSalesChannel except that it panics on error.
 func MustParseSalesChannel(s string) SalesChannel {
-	i, err := AsSalesChannel(s)
+	v, err := AsSalesChannel(s)
 	if err != nil {
 		panic(err)
 	}
-	return i
+	return v
 }
 
 // saleschannelMarshalTextRep controls representation used for XML and other text encodings.
@@ -188,46 +188,46 @@ var saleschannelMarshalTextRep = enum.Identifier
 
 // MarshalText converts values to a form suitable for transmission via XML etc.
 // The representation is chosen according to saleschannelMarshalTextRep.
-func (i SalesChannel) MarshalText() (text []byte, err error) {
-	return i.marshalText(saleschannelMarshalTextRep, false)
+func (v SalesChannel) MarshalText() (text []byte, err error) {
+	return v.marshalText(saleschannelMarshalTextRep, false)
 }
 
 // MarshalJSON converts values to bytes suitable for transmission via JSON.
 // The representation is chosen according to saleschannelMarshalTextRep.
-func (i SalesChannel) MarshalJSON() ([]byte, error) {
-	o := i.Ordinal()
-	if o < 0 || o >= len(AllSalesChannels) {
+func (v SalesChannel) MarshalJSON() ([]byte, error) {
+	o := v.Ordinal()
+	if o < 0 {
 		if saleschannelMarshalTextRep == enum.Ordinal {
-			return nil, fmt.Errorf("%v is out of range", i)
+			return nil, fmt.Errorf("%v is out of range", v)
 		}
-		return saleschannelMarshalNumber(i)
+		return saleschannelMarshalNumber(v)
 	}
 	s := saleschannelJSONStrings[saleschannelJSONIndex[o]:saleschannelJSONIndex[o+1]]
 	return enum.QuotedString(s), nil
 }
 
-func (i SalesChannel) marshalText(rep enum.Representation, quoted bool) (text []byte, err error) {
-	if saleschannelMarshalTextRep != enum.Ordinal && i.Ordinal() < 0 {
-		return saleschannelMarshalNumber(i)
+func (v SalesChannel) marshalText(rep enum.Representation, quoted bool) (text []byte, err error) {
+	if rep != enum.Ordinal && !v.IsValid() {
+		return saleschannelMarshalNumber(v)
 	}
 
 	var bs []byte
 	switch rep {
 	case enum.Number:
-		return saleschannelMarshalNumber(i)
+		return saleschannelMarshalNumber(v)
 	case enum.Ordinal:
-		return i.marshalOrdinal()
+		return v.marshalOrdinal()
 	case enum.Tag:
 		if quoted {
-			bs = enum.QuotedString(i.Tag())
+			bs = enum.QuotedString(v.Tag())
 		} else {
-			bs = []byte(i.Tag())
+			bs = []byte(v.Tag())
 		}
 	default:
 		if quoted {
-			bs = enum.QuotedString(i.String())
+			bs = enum.QuotedString(v.String())
 		} else {
-			bs = []byte(i.String())
+			bs = []byte(v.String())
 		}
 	}
 	return bs, nil
@@ -236,31 +236,31 @@ func (i SalesChannel) marshalText(rep enum.Representation, quoted bool) (text []
 // saleschannelMarshalNumber handles marshaling where a number is required or where
 // the value is out of range but saleschannelMarshalTextRep != enum.Ordinal.
 // This function can be replaced with any bespoke function than matches signature.
-var saleschannelMarshalNumber = func(i SalesChannel) (text []byte, err error) {
-	bs := []byte(strconv.FormatInt(int64(i), 10))
+var saleschannelMarshalNumber = func(v SalesChannel) (text []byte, err error) {
+	bs := []byte(strconv.FormatInt(int64(v), 10))
 	return bs, nil
 }
 
-func (i SalesChannel) marshalOrdinal() (text []byte, err error) {
-	bs := []byte(strconv.Itoa(i.Ordinal()))
+func (v SalesChannel) marshalOrdinal() (text []byte, err error) {
+	bs := []byte(strconv.Itoa(v.Ordinal()))
 	return bs, nil
 }
 
 // UnmarshalText converts transmitted values to ordinary values.
-func (i *SalesChannel) UnmarshalText(text []byte) error {
-	return i.Parse(string(text))
+func (v *SalesChannel) UnmarshalText(text []byte) error {
+	return v.Parse(string(text))
 }
 
 // UnmarshalJSON converts transmitted JSON values to ordinary values. It allows both
 // ordinals and strings to represent the values.
-func (i *SalesChannel) UnmarshalJSON(text []byte) error {
+func (v *SalesChannel) UnmarshalJSON(text []byte) error {
 	s := string(text)
 	if s == "null" {
 		// Ignore null, like in the main JSON package.
 		return nil
 	}
 	s = strings.Trim(s, "\"")
-	return i.unmarshalJSON(s)
+	return v.unmarshalJSON(s)
 }
 
 func (v *SalesChannel) unmarshalJSON(in string) error {
@@ -283,32 +283,32 @@ var saleschannelStoreRep = enum.Identifier
 
 // Scan parses some value, which can be a number, a string or []byte.
 // It implements sql.Scanner, https://golang.org/pkg/database/sql/#Scanner
-func (i *SalesChannel) Scan(value interface{}) error {
+func (v *SalesChannel) Scan(value interface{}) error {
 	if value == nil {
 		return nil
 	}
 
 	var s string
-	switch v := value.(type) {
+	switch x := value.(type) {
 	case int64:
 		if saleschannelStoreRep == enum.Ordinal {
-			*i = SalesChannelOf(int(v))
+			*v = SalesChannelOf(int(x))
 		} else {
-			*i = SalesChannel(v)
+			*v = SalesChannel(x)
 		}
 		return nil
 	case float64:
-		*i = SalesChannel(v)
+		*v = SalesChannel(x)
 		return nil
 	case []byte:
-		s = string(v)
+		s = string(x)
 	case string:
-		s = v
+		s = x
 	default:
 		return fmt.Errorf("%T %+v is not a meaningful saleschannel", value, value)
 	}
 
-	if i.parseString(s, saleschannelSQLStrings, saleschannelSQLIndex[:]) {
+	if v.parseString(s, saleschannelSQLStrings, saleschannelSQLIndex[:]) {
 		return nil
 	}
 
@@ -317,15 +317,15 @@ func (i *SalesChannel) Scan(value interface{}) error {
 
 // Value converts the SalesChannel to a string.
 // It implements driver.Valuer, https://golang.org/pkg/database/sql/driver/#Valuer
-func (i SalesChannel) Value() (driver.Value, error) {
+func (v SalesChannel) Value() (driver.Value, error) {
 	switch saleschannelStoreRep {
 	case enum.Number:
-		return int64(i), nil
+		return int64(v), nil
 	case enum.Ordinal:
-		return int64(i.Ordinal()), nil
+		return int64(v.Ordinal()), nil
 	case enum.Tag:
-		return i.Tag(), nil
+		return v.Tag(), nil
 	default:
-		return i.toString(saleschannelSQLStrings, saleschannelSQLIndex[:]), nil
+		return v.toString(saleschannelSQLStrings, saleschannelSQLIndex[:]), nil
 	}
 }

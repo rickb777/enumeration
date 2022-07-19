@@ -34,10 +34,10 @@ var (
 	methodEnumIndex = [...]uint16{0, 4, 7, 10, 14, 19, 25}
 )
 
-func (i Method) toString(concats string, indexes []uint16) string {
-	o := i.Ordinal()
+func (v Method) toString(concats string, indexes []uint16) string {
+	o := v.Ordinal()
 	if o < 0 || o >= len(AllMethods) {
-		return fmt.Sprintf("Method(%d)", i)
+		return fmt.Sprintf("Method(%d)", v)
 	}
 	return concats[indexes[o]:indexes[o+1]]
 }
@@ -84,25 +84,25 @@ func init() {
 }
 
 // Tag returns the string representation of a Method. For invalid values,
-// this returns i.String() (see IsValid).
-func (i Method) Tag() string {
-	s, ok := methodTags[i]
+// this returns v.String() (see IsValid).
+func (v Method) Tag() string {
+	s, ok := methodTags[v]
 	if ok {
 		return s
 	}
-	return i.String()
+	return v.String()
 }
 
 // String returns the literal string representation of a Method, which is
 // the same as the const identifier but without prefix or suffix.
-func (i Method) String() string {
-	return i.toString(methodEnumStrings, methodEnumIndex[:])
+func (v Method) String() string {
+	return v.toString(methodEnumStrings, methodEnumIndex[:])
 }
 
 // Ordinal returns the ordinal number of a Method. This is an integer counting
 // from zero. It is *not* the same as the const number assigned to the value.
-func (i Method) Ordinal() int {
-	switch i {
+func (v Method) Ordinal() int {
+	switch v {
 	case HEAD:
 		return 0
 	case GET:
@@ -119,25 +119,25 @@ func (i Method) Ordinal() int {
 	return -1
 }
 
+// IsValid determines whether a Method is one of the defined constants.
+func (v Method) IsValid() bool {
+	return v.Ordinal() >= 0
+}
+
 // Int returns the int value, which is not necessarily the same as the ordinal.
 // This facilitates polymorphism (see enum.IntEnum).
-func (i Method) Int() int {
-	return int(i)
+func (v Method) Int() int {
+	return int(v)
 }
 
 // MethodOf returns a Method based on an ordinal number. This is the inverse of Ordinal.
 // If the ordinal is out of range, an invalid Method is returned.
-func MethodOf(i int) Method {
-	if 0 <= i && i < len(AllMethods) {
-		return AllMethods[i]
+func MethodOf(v int) Method {
+	if 0 <= v && v < len(AllMethods) {
+		return AllMethods[v]
 	}
 	// an invalid result
 	return HEAD + GET + PUT + POST + PATCH + DELETE + 1
-}
-
-// IsValid determines whether a Method is one of the defined constants.
-func (i Method) IsValid() bool {
-	return i.Ordinal() >= 0
 }
 
 // Parse parses a string to find the corresponding Method, accepting one of the string values or
@@ -217,19 +217,19 @@ var methodTransformInput = func(in string) string {
 // a number. The input representation is determined by methodMarshalTextRep. It wraps Parse.
 // The input case does not matter.
 func AsMethod(s string) (Method, error) {
-	var i = new(Method)
-	err := i.Parse(s)
-	return *i, err
+	var v = new(Method)
+	err := v.Parse(s)
+	return *v, err
 }
 
 // MustParseMethod is similar to AsMethod except that it panics on error.
 // The input case does not matter.
 func MustParseMethod(s string) Method {
-	i, err := AsMethod(s)
+	v, err := AsMethod(s)
 	if err != nil {
 		panic(err)
 	}
-	return i
+	return v
 }
 
 // methodMarshalTextRep controls representation used for XML and other text encodings.
@@ -240,38 +240,38 @@ var methodMarshalTextRep = enum.Identifier
 
 // MarshalText converts values to a form suitable for transmission via XML etc.
 // The representation is chosen according to methodMarshalTextRep.
-func (i Method) MarshalText() (text []byte, err error) {
-	return i.marshalText(methodMarshalTextRep, false)
+func (v Method) MarshalText() (text []byte, err error) {
+	return v.marshalText(methodMarshalTextRep, false)
 }
 
 // MarshalJSON converts values to bytes suitable for transmission via JSON.
 // The representation is chosen according to methodMarshalTextRep.
-func (i Method) MarshalJSON() ([]byte, error) {
-	return i.marshalText(methodMarshalTextRep, true)
+func (v Method) MarshalJSON() ([]byte, error) {
+	return v.marshalText(methodMarshalTextRep, true)
 }
 
-func (i Method) marshalText(rep enum.Representation, quoted bool) (text []byte, err error) {
-	if methodMarshalTextRep != enum.Ordinal && i.Ordinal() < 0 {
-		return methodMarshalNumber(i)
+func (v Method) marshalText(rep enum.Representation, quoted bool) (text []byte, err error) {
+	if rep != enum.Ordinal && !v.IsValid() {
+		return methodMarshalNumber(v)
 	}
 
 	var bs []byte
 	switch rep {
 	case enum.Number:
-		return methodMarshalNumber(i)
+		return methodMarshalNumber(v)
 	case enum.Ordinal:
-		return i.marshalOrdinal()
+		return v.marshalOrdinal()
 	case enum.Tag:
 		if quoted {
-			bs = enum.QuotedString(i.Tag())
+			bs = enum.QuotedString(v.Tag())
 		} else {
-			bs = []byte(i.Tag())
+			bs = []byte(v.Tag())
 		}
 	default:
 		if quoted {
-			bs = enum.QuotedString(i.String())
+			bs = enum.QuotedString(v.String())
 		} else {
-			bs = []byte(i.String())
+			bs = []byte(v.String())
 		}
 	}
 	return bs, nil
@@ -280,35 +280,35 @@ func (i Method) marshalText(rep enum.Representation, quoted bool) (text []byte, 
 // methodMarshalNumber handles marshaling where a number is required or where
 // the value is out of range but methodMarshalTextRep != enum.Ordinal.
 // This function can be replaced with any bespoke function than matches signature.
-var methodMarshalNumber = func(i Method) (text []byte, err error) {
-	bs := []byte(strconv.FormatInt(int64(i), 10))
+var methodMarshalNumber = func(v Method) (text []byte, err error) {
+	bs := []byte(strconv.FormatInt(int64(v), 10))
 	return bs, nil
 }
 
-func (i Method) marshalOrdinal() (text []byte, err error) {
-	bs := []byte(strconv.Itoa(i.Ordinal()))
+func (v Method) marshalOrdinal() (text []byte, err error) {
+	bs := []byte(strconv.Itoa(v.Ordinal()))
 	return bs, nil
 }
 
 // UnmarshalText converts transmitted values to ordinary values.
-func (i *Method) UnmarshalText(text []byte) error {
-	return i.Parse(string(text))
+func (v *Method) UnmarshalText(text []byte) error {
+	return v.Parse(string(text))
 }
 
 // UnmarshalJSON converts transmitted JSON values to ordinary values. It allows both
 // ordinals and strings to represent the values.
-func (i *Method) UnmarshalJSON(text []byte) error {
+func (v *Method) UnmarshalJSON(text []byte) error {
 	s := string(text)
 	if s == "null" {
 		// Ignore null, like in the main JSON package.
 		return nil
 	}
 	s = strings.Trim(s, "\"")
-	return i.unmarshalJSON(s)
+	return v.unmarshalJSON(s)
 }
 
-func (i *Method) unmarshalJSON(s string) error {
-	return i.Parse(s)
+func (v *Method) unmarshalJSON(s string) error {
+	return v.Parse(s)
 }
 
 // methodStoreRep controls database storage via the Scan and Value methods.
@@ -317,45 +317,45 @@ var methodStoreRep = enum.Identifier
 
 // Scan parses some value, which can be a number, a string or []byte.
 // It implements sql.Scanner, https://golang.org/pkg/database/sql/#Scanner
-func (i *Method) Scan(value interface{}) error {
+func (v *Method) Scan(value interface{}) error {
 	if value == nil {
 		return nil
 	}
 
 	var s string
-	switch v := value.(type) {
+	switch x := value.(type) {
 	case int64:
 		if methodStoreRep == enum.Ordinal {
-			*i = MethodOf(int(v))
+			*v = MethodOf(int(x))
 		} else {
-			*i = Method(v)
+			*v = Method(x)
 		}
 		return nil
 	case float64:
-		*i = Method(v)
+		*v = Method(x)
 		return nil
 	case []byte:
-		s = string(v)
+		s = string(x)
 	case string:
-		s = v
+		s = x
 	default:
 		return fmt.Errorf("%T %+v is not a meaningful method", value, value)
 	}
 
-	return i.parse(s, methodStoreRep)
+	return v.parse(s, methodStoreRep)
 }
 
 // Value converts the Method to a string.
 // It implements driver.Valuer, https://golang.org/pkg/database/sql/driver/#Valuer
-func (i Method) Value() (driver.Value, error) {
+func (v Method) Value() (driver.Value, error) {
 	switch methodStoreRep {
 	case enum.Number:
-		return int64(i), nil
+		return int64(v), nil
 	case enum.Ordinal:
-		return int64(i.Ordinal()), nil
+		return int64(v.Ordinal()), nil
 	case enum.Tag:
-		return i.Tag(), nil
+		return v.Tag(), nil
 	default:
-		return i.String(), nil
+		return v.String(), nil
 	}
 }

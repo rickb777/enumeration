@@ -28,7 +28,7 @@ func defineFlags() {
 	flag.StringVar(&parse.UsingTable, "using", "", "Uses your own map[Type]string instead of generating one.")
 	flag.StringVar(&parse.AliasTable, "alias", "", "Uses your own map[string]Type as aliases during parsing.")
 	flag.StringVar(&config.Pkg, "package", "", "Name of the output package (optional). Defaults to the output directory.")
-	flag.StringVar(&marshalTextRep, "marshaltext", "Identifier", "Marshal values using Identifier (default), Tag, Number or Ordinal")
+	flag.StringVar(&marshalTextRep, "marshaltext", "Identifier", "Marshal values using Identifier, Tag, Number or Ordinal")
 
 	flag.BoolVar(&force, "f", false, "Force writing the output file even if up to date (not used when piping stdin or stdout).")
 	flag.BoolVar(&lowercase, "lc", false, "Convert strings to lowercase and ignore case when parsing")

@@ -30,10 +30,10 @@ var (
 	baseEnumIndex = [...]uint16{0, 1, 2, 3, 4}
 )
 
-func (i Base) toString(concats string, indexes []uint16) string {
-	o := i.Ordinal()
+func (v Base) toString(concats string, indexes []uint16) string {
+	o := v.Ordinal()
 	if o < 0 || o >= len(AllBases) {
-		return fmt.Sprintf("Base(%g)", i)
+		return fmt.Sprintf("Base(%g)", v)
 	}
 	return concats[indexes[o]:indexes[o+1]]
 }
@@ -54,20 +54,20 @@ func (v *Base) parseString(s string, concats string, indexes []uint16) (ok bool)
 }
 
 // Tag returns the string representation of a Base. This is an alias for String.
-func (i Base) Tag() string {
-	return i.String()
+func (v Base) Tag() string {
+	return v.String()
 }
 
 // String returns the literal string representation of a Base, which is
 // the same as the const identifier but without prefix or suffix.
-func (i Base) String() string {
-	return i.toString(baseEnumStrings, baseEnumIndex[:])
+func (v Base) String() string {
+	return v.toString(baseEnumStrings, baseEnumIndex[:])
 }
 
 // Ordinal returns the ordinal number of a Base. This is an integer counting
 // from zero. It is *not* the same as the const number assigned to the value.
-func (i Base) Ordinal() int {
-	switch i {
+func (v Base) Ordinal() int {
+	switch v {
 	case A:
 		return 0
 	case C:
@@ -80,24 +80,24 @@ func (i Base) Ordinal() int {
 	return -1
 }
 
+// IsValid determines whether a Base is one of the defined constants.
+func (v Base) IsValid() bool {
+	return v.Ordinal() >= 0
+}
+
 // Float returns the float64 value. It serves to facilitate polymorphism (see enum.FloatEnum).
-func (i Base) Float() float64 {
-	return float64(i)
+func (v Base) Float() float64 {
+	return float64(v)
 }
 
 // BaseOf returns a Base based on an ordinal number. This is the inverse of Ordinal.
 // If the ordinal is out of range, an invalid Base is returned.
-func BaseOf(i int) Base {
-	if 0 <= i && i < len(AllBases) {
-		return AllBases[i]
+func BaseOf(v int) Base {
+	if 0 <= v && v < len(AllBases) {
+		return AllBases[v]
 	}
 	// an invalid result
 	return A + C + G + T + 1
-}
-
-// IsValid determines whether a Base is one of the defined constants.
-func (i Base) IsValid() bool {
-	return i.Ordinal() >= 0
 }
 
 // Parse parses a string to find the corresponding Base, accepting one of the string values or
@@ -163,18 +163,18 @@ var baseTransformInput = func(in string) string {
 // AsBase parses a string to find the corresponding Base, accepting either one of the string values or
 // a number. The input representation is determined by baseMarshalTextRep. It wraps Parse.
 func AsBase(s string) (Base, error) {
-	var i = new(Base)
-	err := i.Parse(s)
-	return *i, err
+	var v = new(Base)
+	err := v.Parse(s)
+	return *v, err
 }
 
 // MustParseBase is similar to AsBase except that it panics on error.
 func MustParseBase(s string) Base {
-	i, err := AsBase(s)
+	v, err := AsBase(s)
 	if err != nil {
 		panic(err)
 	}
-	return i
+	return v
 }
 
 // baseMarshalTextRep controls representation used for XML and other text encodings.
@@ -185,38 +185,38 @@ var baseMarshalTextRep = enum.Identifier
 
 // MarshalText converts values to a form suitable for transmission via XML etc.
 // The representation is chosen according to baseMarshalTextRep.
-func (i Base) MarshalText() (text []byte, err error) {
-	return i.marshalText(baseMarshalTextRep, false)
+func (v Base) MarshalText() (text []byte, err error) {
+	return v.marshalText(baseMarshalTextRep, false)
 }
 
 // MarshalJSON converts values to bytes suitable for transmission via JSON.
 // The representation is chosen according to baseMarshalTextRep.
-func (i Base) MarshalJSON() ([]byte, error) {
-	return i.marshalText(baseMarshalTextRep, true)
+func (v Base) MarshalJSON() ([]byte, error) {
+	return v.marshalText(baseMarshalTextRep, true)
 }
 
-func (i Base) marshalText(rep enum.Representation, quoted bool) (text []byte, err error) {
-	if baseMarshalTextRep != enum.Ordinal && i.Ordinal() < 0 {
-		return baseMarshalNumber(i)
+func (v Base) marshalText(rep enum.Representation, quoted bool) (text []byte, err error) {
+	if rep != enum.Ordinal && !v.IsValid() {
+		return baseMarshalNumber(v)
 	}
 
 	var bs []byte
 	switch rep {
 	case enum.Number:
-		return baseMarshalNumber(i)
+		return baseMarshalNumber(v)
 	case enum.Ordinal:
-		return i.marshalOrdinal()
+		return v.marshalOrdinal()
 	case enum.Tag:
 		if quoted {
-			bs = enum.QuotedString(i.Tag())
+			bs = enum.QuotedString(v.Tag())
 		} else {
-			bs = []byte(i.Tag())
+			bs = []byte(v.Tag())
 		}
 	default:
 		if quoted {
-			bs = enum.QuotedString(i.String())
+			bs = enum.QuotedString(v.String())
 		} else {
-			bs = []byte(i.String())
+			bs = []byte(v.String())
 		}
 	}
 	return bs, nil
@@ -225,35 +225,35 @@ func (i Base) marshalText(rep enum.Representation, quoted bool) (text []byte, er
 // baseMarshalNumber handles marshaling where a number is required or where
 // the value is out of range but baseMarshalTextRep != enum.Ordinal.
 // This function can be replaced with any bespoke function than matches signature.
-var baseMarshalNumber = func(i Base) (text []byte, err error) {
-	bs := []byte(strconv.FormatFloat(float64(i), 'g', 7, 64))
+var baseMarshalNumber = func(v Base) (text []byte, err error) {
+	bs := []byte(strconv.FormatFloat(float64(v), 'g', 7, 64))
 	return bs, nil
 }
 
-func (i Base) marshalOrdinal() (text []byte, err error) {
-	bs := []byte(strconv.Itoa(i.Ordinal()))
+func (v Base) marshalOrdinal() (text []byte, err error) {
+	bs := []byte(strconv.Itoa(v.Ordinal()))
 	return bs, nil
 }
 
 // UnmarshalText converts transmitted values to ordinary values.
-func (i *Base) UnmarshalText(text []byte) error {
-	return i.Parse(string(text))
+func (v *Base) UnmarshalText(text []byte) error {
+	return v.Parse(string(text))
 }
 
 // UnmarshalJSON converts transmitted JSON values to ordinary values. It allows both
 // ordinals and strings to represent the values.
-func (i *Base) UnmarshalJSON(text []byte) error {
+func (v *Base) UnmarshalJSON(text []byte) error {
 	s := string(text)
 	if s == "null" {
 		// Ignore null, like in the main JSON package.
 		return nil
 	}
 	s = strings.Trim(s, "\"")
-	return i.unmarshalJSON(s)
+	return v.unmarshalJSON(s)
 }
 
-func (i *Base) unmarshalJSON(s string) error {
-	return i.Parse(s)
+func (v *Base) unmarshalJSON(s string) error {
+	return v.Parse(s)
 }
 
 // baseStoreRep controls database storage via the Scan and Value methods.
@@ -262,45 +262,45 @@ var baseStoreRep = enum.Identifier
 
 // Scan parses some value, which can be a number, a string or []byte.
 // It implements sql.Scanner, https://golang.org/pkg/database/sql/#Scanner
-func (i *Base) Scan(value interface{}) error {
+func (v *Base) Scan(value interface{}) error {
 	if value == nil {
 		return nil
 	}
 
 	var s string
-	switch v := value.(type) {
+	switch x := value.(type) {
 	case int64:
 		if baseStoreRep == enum.Ordinal {
-			*i = BaseOf(int(v))
+			*v = BaseOf(int(x))
 		} else {
-			*i = Base(v)
+			*v = Base(x)
 		}
 		return nil
 	case float64:
-		*i = Base(v)
+		*v = Base(x)
 		return nil
 	case []byte:
-		s = string(v)
+		s = string(x)
 	case string:
-		s = v
+		s = x
 	default:
 		return fmt.Errorf("%T %+v is not a meaningful base", value, value)
 	}
 
-	return i.parse(s, baseStoreRep)
+	return v.parse(s, baseStoreRep)
 }
 
 // Value converts the Base to a string.
 // It implements driver.Valuer, https://golang.org/pkg/database/sql/driver/#Valuer
-func (i Base) Value() (driver.Value, error) {
+func (v Base) Value() (driver.Value, error) {
 	switch baseStoreRep {
 	case enum.Number:
-		return float64(i), nil
+		return float64(v), nil
 	case enum.Ordinal:
-		return int64(i.Ordinal()), nil
+		return int64(v.Ordinal()), nil
 	case enum.Tag:
-		return i.Tag(), nil
+		return v.Tag(), nil
 	default:
-		return i.String(), nil
+		return v.String(), nil
 	}
 }

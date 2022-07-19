@@ -32,10 +32,10 @@ var (
 	dayEnumIndex = [...]uint16{0, 6, 12, 19, 28, 36, 42, 50}
 )
 
-func (i Day) toString(concats string, indexes []uint16) string {
-	o := i.Ordinal()
+func (v Day) toString(concats string, indexes []uint16) string {
+	o := v.Ordinal()
 	if o < 0 || o >= len(AllDays) {
-		return fmt.Sprintf("Day(%d)", i)
+		return fmt.Sprintf("Day(%d)", v)
 	}
 	return concats[indexes[o]:indexes[o+1]]
 }
@@ -56,20 +56,20 @@ func (v *Day) parseString(s string, concats string, indexes []uint16) (ok bool) 
 }
 
 // Tag returns the string representation of a Day. This is an alias for String.
-func (i Day) Tag() string {
-	return i.String()
+func (v Day) Tag() string {
+	return v.String()
 }
 
 // String returns the literal string representation of a Day, which is
 // the same as the const identifier but without prefix or suffix.
-func (i Day) String() string {
-	return i.toString(dayEnumStrings, dayEnumIndex[:])
+func (v Day) String() string {
+	return v.toString(dayEnumStrings, dayEnumIndex[:])
 }
 
 // Ordinal returns the ordinal number of a Day. This is an integer counting
 // from zero. It is *not* the same as the const number assigned to the value.
-func (i Day) Ordinal() int {
-	switch i {
+func (v Day) Ordinal() int {
+	switch v {
 	case Sunday:
 		return 0
 	case Monday:
@@ -88,25 +88,25 @@ func (i Day) Ordinal() int {
 	return -1
 }
 
+// IsValid determines whether a Day is one of the defined constants.
+func (v Day) IsValid() bool {
+	return v.Ordinal() >= 0
+}
+
 // Int returns the int value, which is not necessarily the same as the ordinal.
 // This facilitates polymorphism (see enum.IntEnum).
-func (i Day) Int() int {
-	return int(i)
+func (v Day) Int() int {
+	return int(v)
 }
 
 // DayOf returns a Day based on an ordinal number. This is the inverse of Ordinal.
 // If the ordinal is out of range, an invalid Day is returned.
-func DayOf(i int) Day {
-	if 0 <= i && i < len(AllDays) {
-		return AllDays[i]
+func DayOf(v int) Day {
+	if 0 <= v && v < len(AllDays) {
+		return AllDays[v]
 	}
 	// an invalid result
 	return Sunday + Monday + Tuesday + Wednesday + Thursday + Friday + Saturday + 1
-}
-
-// IsValid determines whether a Day is one of the defined constants.
-func (i Day) IsValid() bool {
-	return i.Ordinal() >= 0
 }
 
 // Parse parses a string to find the corresponding Day, accepting one of the string values or
@@ -172,18 +172,18 @@ var dayTransformInput = func(in string) string {
 // AsDay parses a string to find the corresponding Day, accepting either one of the string values or
 // a number. The input representation is determined by dayMarshalTextRep. It wraps Parse.
 func AsDay(s string) (Day, error) {
-	var i = new(Day)
-	err := i.Parse(s)
-	return *i, err
+	var v = new(Day)
+	err := v.Parse(s)
+	return *v, err
 }
 
 // MustParseDay is similar to AsDay except that it panics on error.
 func MustParseDay(s string) Day {
-	i, err := AsDay(s)
+	v, err := AsDay(s)
 	if err != nil {
 		panic(err)
 	}
-	return i
+	return v
 }
 
 // dayMarshalTextRep controls representation used for XML and other text encodings.
@@ -194,38 +194,38 @@ var dayMarshalTextRep = enum.Identifier
 
 // MarshalText converts values to a form suitable for transmission via XML etc.
 // The representation is chosen according to dayMarshalTextRep.
-func (i Day) MarshalText() (text []byte, err error) {
-	return i.marshalText(dayMarshalTextRep, false)
+func (v Day) MarshalText() (text []byte, err error) {
+	return v.marshalText(dayMarshalTextRep, false)
 }
 
 // MarshalJSON converts values to bytes suitable for transmission via JSON.
 // The representation is chosen according to dayMarshalTextRep.
-func (i Day) MarshalJSON() ([]byte, error) {
-	return i.marshalText(dayMarshalTextRep, true)
+func (v Day) MarshalJSON() ([]byte, error) {
+	return v.marshalText(dayMarshalTextRep, true)
 }
 
-func (i Day) marshalText(rep enum.Representation, quoted bool) (text []byte, err error) {
-	if dayMarshalTextRep != enum.Ordinal && i.Ordinal() < 0 {
-		return dayMarshalNumber(i)
+func (v Day) marshalText(rep enum.Representation, quoted bool) (text []byte, err error) {
+	if rep != enum.Ordinal && !v.IsValid() {
+		return dayMarshalNumber(v)
 	}
 
 	var bs []byte
 	switch rep {
 	case enum.Number:
-		return dayMarshalNumber(i)
+		return dayMarshalNumber(v)
 	case enum.Ordinal:
-		return i.marshalOrdinal()
+		return v.marshalOrdinal()
 	case enum.Tag:
 		if quoted {
-			bs = enum.QuotedString(i.Tag())
+			bs = enum.QuotedString(v.Tag())
 		} else {
-			bs = []byte(i.Tag())
+			bs = []byte(v.Tag())
 		}
 	default:
 		if quoted {
-			bs = enum.QuotedString(i.String())
+			bs = enum.QuotedString(v.String())
 		} else {
-			bs = []byte(i.String())
+			bs = []byte(v.String())
 		}
 	}
 	return bs, nil
@@ -234,35 +234,35 @@ func (i Day) marshalText(rep enum.Representation, quoted bool) (text []byte, err
 // dayMarshalNumber handles marshaling where a number is required or where
 // the value is out of range but dayMarshalTextRep != enum.Ordinal.
 // This function can be replaced with any bespoke function than matches signature.
-var dayMarshalNumber = func(i Day) (text []byte, err error) {
-	bs := []byte(strconv.FormatInt(int64(i), 10))
+var dayMarshalNumber = func(v Day) (text []byte, err error) {
+	bs := []byte(strconv.FormatInt(int64(v), 10))
 	return bs, nil
 }
 
-func (i Day) marshalOrdinal() (text []byte, err error) {
-	bs := []byte(strconv.Itoa(i.Ordinal()))
+func (v Day) marshalOrdinal() (text []byte, err error) {
+	bs := []byte(strconv.Itoa(v.Ordinal()))
 	return bs, nil
 }
 
 // UnmarshalText converts transmitted values to ordinary values.
-func (i *Day) UnmarshalText(text []byte) error {
-	return i.Parse(string(text))
+func (v *Day) UnmarshalText(text []byte) error {
+	return v.Parse(string(text))
 }
 
 // UnmarshalJSON converts transmitted JSON values to ordinary values. It allows both
 // ordinals and strings to represent the values.
-func (i *Day) UnmarshalJSON(text []byte) error {
+func (v *Day) UnmarshalJSON(text []byte) error {
 	s := string(text)
 	if s == "null" {
 		// Ignore null, like in the main JSON package.
 		return nil
 	}
 	s = strings.Trim(s, "\"")
-	return i.unmarshalJSON(s)
+	return v.unmarshalJSON(s)
 }
 
-func (i *Day) unmarshalJSON(s string) error {
-	return i.Parse(s)
+func (v *Day) unmarshalJSON(s string) error {
+	return v.Parse(s)
 }
 
 // dayStoreRep controls database storage via the Scan and Value methods.
@@ -271,45 +271,45 @@ var dayStoreRep = enum.Identifier
 
 // Scan parses some value, which can be a number, a string or []byte.
 // It implements sql.Scanner, https://golang.org/pkg/database/sql/#Scanner
-func (i *Day) Scan(value interface{}) error {
+func (v *Day) Scan(value interface{}) error {
 	if value == nil {
 		return nil
 	}
 
 	var s string
-	switch v := value.(type) {
+	switch x := value.(type) {
 	case int64:
 		if dayStoreRep == enum.Ordinal {
-			*i = DayOf(int(v))
+			*v = DayOf(int(x))
 		} else {
-			*i = Day(v)
+			*v = Day(x)
 		}
 		return nil
 	case float64:
-		*i = Day(v)
+		*v = Day(x)
 		return nil
 	case []byte:
-		s = string(v)
+		s = string(x)
 	case string:
-		s = v
+		s = x
 	default:
 		return fmt.Errorf("%T %+v is not a meaningful day", value, value)
 	}
 
-	return i.parse(s, dayStoreRep)
+	return v.parse(s, dayStoreRep)
 }
 
 // Value converts the Day to a string.
 // It implements driver.Valuer, https://golang.org/pkg/database/sql/driver/#Valuer
-func (i Day) Value() (driver.Value, error) {
+func (v Day) Value() (driver.Value, error) {
 	switch dayStoreRep {
 	case enum.Number:
-		return int64(i), nil
+		return int64(v), nil
 	case enum.Ordinal:
-		return int64(i.Ordinal()), nil
+		return int64(v.Ordinal()), nil
 	case enum.Tag:
-		return i.Tag(), nil
+		return v.Tag(), nil
 	default:
-		return i.String(), nil
+		return v.String(), nil
 	}
 }

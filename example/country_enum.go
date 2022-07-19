@@ -130,10 +130,10 @@ var (
 	countryEnumIndex = [...]uint16{0, 11, 24, 31, 38, 52, 59, 65, 73, 83, 102, 111, 118, 123, 132, 139, 149, 156, 163, 173, 181, 188, 195, 201, 206, 213, 219, 226, 248, 256, 269, 275, 297, 327, 344, 352, 364, 371, 379, 387, 393, 403, 417, 441, 445, 450, 455, 464, 469, 485, 498, 506, 513, 530, 539, 551, 561, 574, 581, 585, 591, 605, 612, 620, 628, 646, 653, 658, 669, 686, 693, 700, 708, 724, 737, 741, 748, 754, 767, 783, 810, 815, 821, 828, 835, 840, 849, 855, 864, 871, 881, 885, 894, 902, 908, 921, 927, 932, 965, 973, 981, 988, 995, 1000, 1009, 1013, 1017, 1024, 1035, 1041, 1046, 1053, 1058, 1064, 1070, 1080, 1085, 1093, 1129, 1140, 1146, 1156, 1163, 1169, 1176, 1183, 1190, 1195, 1208, 1217, 1227, 1236, 1246, 1252, 1260, 1268, 1272, 1277, 1293, 1303, 1313, 1322, 1329, 1335, 1345, 1352, 1358, 1366, 1376, 1386, 1393, 1403, 1410, 1417, 1422, 1427, 1438, 1458, 1471, 1482, 1491, 1496, 1503, 1507, 1521, 1545, 1551, 1555, 1563, 1568, 1589, 1595, 1611, 1619, 1623, 1634, 1642, 1648, 1656, 1667, 1672, 1680, 1687, 1705, 1711, 1728, 1740, 1761, 1772, 1784, 1809, 1837, 1842, 1852, 1873, 1885, 1892, 1898, 1908, 1920, 1929, 1937, 1945, 1960, 1967, 1979, 2023, 2034, 2039, 2048, 2053, 2061, 2091, 2100, 2106, 2117, 2122, 2128, 2138, 2146, 2154, 2165, 2169, 2176, 2181, 2200, 2207, 2213, 2225, 2249, 2255, 2261, 2268, 2288, 2302, 2326, 2362, 2369, 2379, 2386, 2395, 2403, 2417, 2442, 2456, 2461, 2467, 2475}
 )
 
-func (i Country) toString(concats string, indexes []uint16) string {
-	o := i.Ordinal()
+func (v Country) toString(concats string, indexes []uint16) string {
+	o := v.Ordinal()
 	if o < 0 || o >= len(AllCountries) {
-		return fmt.Sprintf("Country(%d)", i)
+		return fmt.Sprintf("Country(%d)", v)
 	}
 	return concats[indexes[o]:indexes[o+1]]
 }
@@ -180,25 +180,25 @@ func init() {
 }
 
 // Tag returns the string representation of a Country. For invalid values,
-// this returns i.String() (see IsValid).
-func (i Country) Tag() string {
-	s, ok := iso3166Tags[i]
+// this returns v.String() (see IsValid).
+func (v Country) Tag() string {
+	s, ok := iso3166Tags[v]
 	if ok {
 		return s
 	}
-	return i.String()
+	return v.String()
 }
 
 // String returns the literal string representation of a Country, which is
 // the same as the const identifier but without prefix or suffix.
-func (i Country) String() string {
-	return i.toString(countryEnumStrings, countryEnumIndex[:])
+func (v Country) String() string {
+	return v.toString(countryEnumStrings, countryEnumIndex[:])
 }
 
 // Ordinal returns the ordinal number of a Country. This is an integer counting
 // from zero. It is *not* the same as the const number assigned to the value.
-func (i Country) Ordinal() int {
-	switch i {
+func (v Country) Ordinal() int {
+	switch v {
 	case Afghanistan:
 		return 0
 	case Aland_Islands:
@@ -697,25 +697,25 @@ func (i Country) Ordinal() int {
 	return -1
 }
 
+// IsValid determines whether a Country is one of the defined constants.
+func (v Country) IsValid() bool {
+	return v.Ordinal() >= 0
+}
+
 // Int returns the int value, which is not necessarily the same as the ordinal.
 // This facilitates polymorphism (see enum.IntEnum).
-func (i Country) Int() int {
-	return int(i)
+func (v Country) Int() int {
+	return int(v)
 }
 
 // CountryOf returns a Country based on an ordinal number. This is the inverse of Ordinal.
 // If the ordinal is out of range, an invalid Country is returned.
-func CountryOf(i int) Country {
-	if 0 <= i && i < len(AllCountries) {
-		return AllCountries[i]
+func CountryOf(v int) Country {
+	if 0 <= v && v < len(AllCountries) {
+		return AllCountries[v]
 	}
 	// an invalid result
 	return Afghanistan + Aland_Islands + Albania + Algeria + American_Samoa + Andorra + Angola + Anguilla + Antarctica + Antigua_and_Barbuda + Argentina + Armenia + Aruba + Australia + Austria + Azerbaijan + Bahamas + Bahrain + Bangladesh + Barbados + Belarus + Belgium + Belize + Benin + Bermuda + Bhutan + Bolivia + Bosnia_and_Herzegovina + Botswana + Bouvet_Island + Brazil + British_Virgin_Islands + British_Indian_Ocean_Territory + Brunei_Darussalam + Bulgaria + Burkina_Faso + Burundi + Cambodia + Cameroon + Canada + Cape_Verde + Cayman_Islands + Central_African_Republic + Chad + Chile + China + Hong_Kong + Macao + Christmas_Island + Cocos_Islands + Colombia + Comoros + Congo_Brazzaville + Congo_DRC + Cook_Islands + Costa_Rica + Côte_dIvoire + Croatia + Cuba + Cyprus + Czech_Republic + Denmark + Djibouti + Dominica + Dominican_Republic + Ecuador + Egypt + El_Salvador + Equatorial_Guinea + Eritrea + Estonia + Ethiopia + Falkland_Islands + Faroe_Islands + Fiji + Finland + France + French_Guiana + French_Polynesia + French_Southern_Territories + Gabon + Gambia + Georgia + Germany + Ghana + Gibraltar + Greece + Greenland + Grenada + Guadeloupe + Guam + Guatemala + Guernsey + Guinea + Guinea_Bissau + Guyana + Haiti + Heard_Island_and_Mcdonald_Islands + Holy_See + Honduras + Hungary + Iceland + India + Indonesia + Iran + Iraq + Ireland + Isle_of_Man + Israel + Italy + Jamaica + Japan + Jersey + Jordan + Kazakhstan + Kenya + Kiribati + Democratic_Peoples_Republic_of_Korea + South_Korea + Kuwait + Kyrgyzstan + Lao_PDR + Latvia + Lebanon + Lesotho + Liberia + Libya + Liechtenstein + Lithuania + Luxembourg + Macedonia + Madagascar + Malawi + Malaysia + Maldives + Mali + Malta + Marshall_Islands + Martinique + Mauritania + Mauritius + Mayotte + Mexico + Micronesia + Moldova + Monaco + Mongolia + Montenegro + Montserrat + Morocco + Mozambique + Myanmar + Namibia + Nauru + Nepal + Netherlands + Netherlands_Antilles + New_Caledonia + New_Zealand + Nicaragua + Niger + Nigeria + Niue + Norfolk_Island + Northern_Mariana_Islands + Norway + Oman + Pakistan + Palau + Palestinian_Territory + Panama + Papua_New_Guinea + Paraguay + Peru + Philippines + Pitcairn + Poland + Portugal + Puerto_Rico + Qatar + Réunion + Romania + Russian_Federation + Rwanda + Saint_Barthélemy + Saint_Helena + Saint_Kitts_and_Nevis + Saint_Lucia + Saint_Martin + Saint_Pierre_and_Miquelon + Saint_Vincent_and_Grenadines + Samoa + San_Marino + Sao_Tome_and_Principe + Saudi_Arabia + Senegal + Serbia + Seychelles + Sierra_Leone + Singapore + Slovakia + Slovenia + Solomon_Islands + Somalia + South_Africa + South_Georgia_and_the_South_Sandwich_Islands + South_Sudan + Spain + Sri_Lanka + Sudan + Suriname + Svalbard_and_Jan_Mayen_Islands + Swaziland + Sweden + Switzerland + Syria + Taiwan + Tajikistan + Tanzania + Thailand + Timor_Leste + Togo + Tokelau + Tonga + Trinidad_and_Tobago + Tunisia + Turkey + Turkmenistan + Turks_and_Caicos_Islands + Tuvalu + Uganda + Ukraine + United_Arab_Emirates + United_Kingdom + United_States_of_America + United_States_Minor_Outlying_Islands + Uruguay + Uzbekistan + Vanuatu + Venezuela + Viet_Nam + Virgin_Islands + Wallis_and_Futuna_Islands + Western_Sahara + Yemen + Zambia + Zimbabwe + 1
-}
-
-// IsValid determines whether a Country is one of the defined constants.
-func (i Country) IsValid() bool {
-	return i.Ordinal() >= 0
 }
 
 // Parse parses a string to find the corresponding Country, accepting one of the string values or
@@ -795,19 +795,19 @@ var countryTransformInput = func(in string) string {
 // a number. The input representation is determined by countryMarshalTextRep. It wraps Parse.
 // The input case does not matter.
 func AsCountry(s string) (Country, error) {
-	var i = new(Country)
-	err := i.Parse(s)
-	return *i, err
+	var v = new(Country)
+	err := v.Parse(s)
+	return *v, err
 }
 
 // MustParseCountry is similar to AsCountry except that it panics on error.
 // The input case does not matter.
 func MustParseCountry(s string) Country {
-	i, err := AsCountry(s)
+	v, err := AsCountry(s)
 	if err != nil {
 		panic(err)
 	}
-	return i
+	return v
 }
 
 // countryMarshalTextRep controls representation used for XML and other text encodings.
@@ -818,38 +818,38 @@ var countryMarshalTextRep = enum.Tag
 
 // MarshalText converts values to a form suitable for transmission via XML etc.
 // The representation is chosen according to countryMarshalTextRep.
-func (i Country) MarshalText() (text []byte, err error) {
-	return i.marshalText(countryMarshalTextRep, false)
+func (v Country) MarshalText() (text []byte, err error) {
+	return v.marshalText(countryMarshalTextRep, false)
 }
 
 // MarshalJSON converts values to bytes suitable for transmission via JSON.
 // The representation is chosen according to countryMarshalTextRep.
-func (i Country) MarshalJSON() ([]byte, error) {
-	return i.marshalText(countryMarshalTextRep, true)
+func (v Country) MarshalJSON() ([]byte, error) {
+	return v.marshalText(countryMarshalTextRep, true)
 }
 
-func (i Country) marshalText(rep enum.Representation, quoted bool) (text []byte, err error) {
-	if countryMarshalTextRep != enum.Ordinal && i.Ordinal() < 0 {
-		return countryMarshalNumber(i)
+func (v Country) marshalText(rep enum.Representation, quoted bool) (text []byte, err error) {
+	if rep != enum.Ordinal && !v.IsValid() {
+		return countryMarshalNumber(v)
 	}
 
 	var bs []byte
 	switch rep {
 	case enum.Number:
-		return countryMarshalNumber(i)
+		return countryMarshalNumber(v)
 	case enum.Ordinal:
-		return i.marshalOrdinal()
+		return v.marshalOrdinal()
 	case enum.Tag:
 		if quoted {
-			bs = enum.QuotedString(i.Tag())
+			bs = enum.QuotedString(v.Tag())
 		} else {
-			bs = []byte(i.Tag())
+			bs = []byte(v.Tag())
 		}
 	default:
 		if quoted {
-			bs = enum.QuotedString(i.String())
+			bs = enum.QuotedString(v.String())
 		} else {
-			bs = []byte(i.String())
+			bs = []byte(v.String())
 		}
 	}
 	return bs, nil
@@ -858,35 +858,35 @@ func (i Country) marshalText(rep enum.Representation, quoted bool) (text []byte,
 // countryMarshalNumber handles marshaling where a number is required or where
 // the value is out of range but countryMarshalTextRep != enum.Ordinal.
 // This function can be replaced with any bespoke function than matches signature.
-var countryMarshalNumber = func(i Country) (text []byte, err error) {
-	bs := []byte(strconv.FormatInt(int64(i), 10))
+var countryMarshalNumber = func(v Country) (text []byte, err error) {
+	bs := []byte(strconv.FormatInt(int64(v), 10))
 	return bs, nil
 }
 
-func (i Country) marshalOrdinal() (text []byte, err error) {
-	bs := []byte(strconv.Itoa(i.Ordinal()))
+func (v Country) marshalOrdinal() (text []byte, err error) {
+	bs := []byte(strconv.Itoa(v.Ordinal()))
 	return bs, nil
 }
 
 // UnmarshalText converts transmitted values to ordinary values.
-func (i *Country) UnmarshalText(text []byte) error {
-	return i.Parse(string(text))
+func (v *Country) UnmarshalText(text []byte) error {
+	return v.Parse(string(text))
 }
 
 // UnmarshalJSON converts transmitted JSON values to ordinary values. It allows both
 // ordinals and strings to represent the values.
-func (i *Country) UnmarshalJSON(text []byte) error {
+func (v *Country) UnmarshalJSON(text []byte) error {
 	s := string(text)
 	if s == "null" {
 		// Ignore null, like in the main JSON package.
 		return nil
 	}
 	s = strings.Trim(s, "\"")
-	return i.unmarshalJSON(s)
+	return v.unmarshalJSON(s)
 }
 
-func (i *Country) unmarshalJSON(s string) error {
-	return i.Parse(s)
+func (v *Country) unmarshalJSON(s string) error {
+	return v.Parse(s)
 }
 
 // countryStoreRep controls database storage via the Scan and Value methods.
@@ -895,45 +895,45 @@ var countryStoreRep = enum.Identifier
 
 // Scan parses some value, which can be a number, a string or []byte.
 // It implements sql.Scanner, https://golang.org/pkg/database/sql/#Scanner
-func (i *Country) Scan(value interface{}) error {
+func (v *Country) Scan(value interface{}) error {
 	if value == nil {
 		return nil
 	}
 
 	var s string
-	switch v := value.(type) {
+	switch x := value.(type) {
 	case int64:
 		if countryStoreRep == enum.Ordinal {
-			*i = CountryOf(int(v))
+			*v = CountryOf(int(x))
 		} else {
-			*i = Country(v)
+			*v = Country(x)
 		}
 		return nil
 	case float64:
-		*i = Country(v)
+		*v = Country(x)
 		return nil
 	case []byte:
-		s = string(v)
+		s = string(x)
 	case string:
-		s = v
+		s = x
 	default:
 		return fmt.Errorf("%T %+v is not a meaningful country", value, value)
 	}
 
-	return i.parse(s, countryStoreRep)
+	return v.parse(s, countryStoreRep)
 }
 
 // Value converts the Country to a string.
 // It implements driver.Valuer, https://golang.org/pkg/database/sql/driver/#Valuer
-func (i Country) Value() (driver.Value, error) {
+func (v Country) Value() (driver.Value, error) {
 	switch countryStoreRep {
 	case enum.Number:
-		return int64(i), nil
+		return int64(v), nil
 	case enum.Ordinal:
-		return int64(i.Ordinal()), nil
+		return int64(v.Ordinal()), nil
 	case enum.Tag:
-		return i.Tag(), nil
+		return v.Tag(), nil
 	default:
-		return i.String(), nil
+		return v.String(), nil
 	}
 }

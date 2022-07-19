@@ -33,10 +33,10 @@ var (
 	petEnumIndex = [...]uint16{0, 3, 6, 11, 19, 29}
 )
 
-func (i Pet) toString(concats string, indexes []uint16) string {
-	o := i.Ordinal()
+func (v Pet) toString(concats string, indexes []uint16) string {
+	o := v.Ordinal()
 	if o < 0 || o >= len(AllPets) {
-		return fmt.Sprintf("Pet(%d)", i)
+		return fmt.Sprintf("Pet(%d)", v)
 	}
 	return concats[indexes[o]:indexes[o+1]]
 }
@@ -84,25 +84,25 @@ func init() {
 }
 
 // Tag returns the string representation of a Pet. For invalid values,
-// this returns i.String() (see IsValid).
-func (i Pet) Tag() string {
-	s, ok := petTags[i]
+// this returns v.String() (see IsValid).
+func (v Pet) Tag() string {
+	s, ok := petTags[v]
 	if ok {
 		return s
 	}
-	return i.String()
+	return v.String()
 }
 
 // String returns the literal string representation of a Pet, which is
 // the same as the const identifier but without prefix or suffix.
-func (i Pet) String() string {
-	return i.toString(petEnumStrings, petEnumIndex[:])
+func (v Pet) String() string {
+	return v.toString(petEnumStrings, petEnumIndex[:])
 }
 
 // Ordinal returns the ordinal number of a Pet. This is an integer counting
 // from zero. It is *not* the same as the const number assigned to the value.
-func (i Pet) Ordinal() int {
-	switch i {
+func (v Pet) Ordinal() int {
+	switch v {
 	case MyCat:
 		return 0
 	case MyDog:
@@ -117,25 +117,25 @@ func (i Pet) Ordinal() int {
 	return -1
 }
 
+// IsValid determines whether a Pet is one of the defined constants.
+func (v Pet) IsValid() bool {
+	return v.Ordinal() >= 0
+}
+
 // Int returns the int value, which is not necessarily the same as the ordinal.
 // This facilitates polymorphism (see enum.IntEnum).
-func (i Pet) Int() int {
-	return int(i)
+func (v Pet) Int() int {
+	return int(v)
 }
 
 // PetOf returns a Pet based on an ordinal number. This is the inverse of Ordinal.
 // If the ordinal is out of range, an invalid Pet is returned.
-func PetOf(i int) Pet {
-	if 0 <= i && i < len(AllPets) {
-		return AllPets[i]
+func PetOf(v int) Pet {
+	if 0 <= v && v < len(AllPets) {
+		return AllPets[v]
 	}
 	// an invalid result
 	return MyCat + MyDog + MyMouse + MyElephant + MyKoala_Bear + 1
-}
-
-// IsValid determines whether a Pet is one of the defined constants.
-func (i Pet) IsValid() bool {
-	return i.Ordinal() >= 0
 }
 
 // Parse parses a string to find the corresponding Pet, accepting one of the string values or
@@ -213,18 +213,18 @@ var petTransformInput = func(in string) string {
 // AsPet parses a string to find the corresponding Pet, accepting either one of the string values or
 // a number. The input representation is determined by petMarshalTextRep. It wraps Parse.
 func AsPet(s string) (Pet, error) {
-	var i = new(Pet)
-	err := i.Parse(s)
-	return *i, err
+	var v = new(Pet)
+	err := v.Parse(s)
+	return *v, err
 }
 
 // MustParsePet is similar to AsPet except that it panics on error.
 func MustParsePet(s string) Pet {
-	i, err := AsPet(s)
+	v, err := AsPet(s)
 	if err != nil {
 		panic(err)
 	}
-	return i
+	return v
 }
 
 // petMarshalTextRep controls representation used for XML and other text encodings.
@@ -235,38 +235,38 @@ var petMarshalTextRep = enum.Tag
 
 // MarshalText converts values to a form suitable for transmission via XML etc.
 // The representation is chosen according to petMarshalTextRep.
-func (i Pet) MarshalText() (text []byte, err error) {
-	return i.marshalText(petMarshalTextRep, false)
+func (v Pet) MarshalText() (text []byte, err error) {
+	return v.marshalText(petMarshalTextRep, false)
 }
 
 // MarshalJSON converts values to bytes suitable for transmission via JSON.
 // The representation is chosen according to petMarshalTextRep.
-func (i Pet) MarshalJSON() ([]byte, error) {
-	return i.marshalText(petMarshalTextRep, true)
+func (v Pet) MarshalJSON() ([]byte, error) {
+	return v.marshalText(petMarshalTextRep, true)
 }
 
-func (i Pet) marshalText(rep enum.Representation, quoted bool) (text []byte, err error) {
-	if petMarshalTextRep != enum.Ordinal && i.Ordinal() < 0 {
-		return petMarshalNumber(i)
+func (v Pet) marshalText(rep enum.Representation, quoted bool) (text []byte, err error) {
+	if rep != enum.Ordinal && !v.IsValid() {
+		return petMarshalNumber(v)
 	}
 
 	var bs []byte
 	switch rep {
 	case enum.Number:
-		return petMarshalNumber(i)
+		return petMarshalNumber(v)
 	case enum.Ordinal:
-		return i.marshalOrdinal()
+		return v.marshalOrdinal()
 	case enum.Tag:
 		if quoted {
-			bs = enum.QuotedString(i.Tag())
+			bs = enum.QuotedString(v.Tag())
 		} else {
-			bs = []byte(i.Tag())
+			bs = []byte(v.Tag())
 		}
 	default:
 		if quoted {
-			bs = enum.QuotedString(i.String())
+			bs = enum.QuotedString(v.String())
 		} else {
-			bs = []byte(i.String())
+			bs = []byte(v.String())
 		}
 	}
 	return bs, nil
@@ -275,35 +275,35 @@ func (i Pet) marshalText(rep enum.Representation, quoted bool) (text []byte, err
 // petMarshalNumber handles marshaling where a number is required or where
 // the value is out of range but petMarshalTextRep != enum.Ordinal.
 // This function can be replaced with any bespoke function than matches signature.
-var petMarshalNumber = func(i Pet) (text []byte, err error) {
-	bs := []byte(strconv.FormatInt(int64(i), 10))
+var petMarshalNumber = func(v Pet) (text []byte, err error) {
+	bs := []byte(strconv.FormatInt(int64(v), 10))
 	return bs, nil
 }
 
-func (i Pet) marshalOrdinal() (text []byte, err error) {
-	bs := []byte(strconv.Itoa(i.Ordinal()))
+func (v Pet) marshalOrdinal() (text []byte, err error) {
+	bs := []byte(strconv.Itoa(v.Ordinal()))
 	return bs, nil
 }
 
 // UnmarshalText converts transmitted values to ordinary values.
-func (i *Pet) UnmarshalText(text []byte) error {
-	return i.Parse(string(text))
+func (v *Pet) UnmarshalText(text []byte) error {
+	return v.Parse(string(text))
 }
 
 // UnmarshalJSON converts transmitted JSON values to ordinary values. It allows both
 // ordinals and strings to represent the values.
-func (i *Pet) UnmarshalJSON(text []byte) error {
+func (v *Pet) UnmarshalJSON(text []byte) error {
 	s := string(text)
 	if s == "null" {
 		// Ignore null, like in the main JSON package.
 		return nil
 	}
 	s = strings.Trim(s, "\"")
-	return i.unmarshalJSON(s)
+	return v.unmarshalJSON(s)
 }
 
-func (i *Pet) unmarshalJSON(s string) error {
-	return i.Parse(s)
+func (v *Pet) unmarshalJSON(s string) error {
+	return v.Parse(s)
 }
 
 // petStoreRep controls database storage via the Scan and Value methods.
@@ -312,45 +312,45 @@ var petStoreRep = enum.Identifier
 
 // Scan parses some value, which can be a number, a string or []byte.
 // It implements sql.Scanner, https://golang.org/pkg/database/sql/#Scanner
-func (i *Pet) Scan(value interface{}) error {
+func (v *Pet) Scan(value interface{}) error {
 	if value == nil {
 		return nil
 	}
 
 	var s string
-	switch v := value.(type) {
+	switch x := value.(type) {
 	case int64:
 		if petStoreRep == enum.Ordinal {
-			*i = PetOf(int(v))
+			*v = PetOf(int(x))
 		} else {
-			*i = Pet(v)
+			*v = Pet(x)
 		}
 		return nil
 	case float64:
-		*i = Pet(v)
+		*v = Pet(x)
 		return nil
 	case []byte:
-		s = string(v)
+		s = string(x)
 	case string:
-		s = v
+		s = x
 	default:
 		return fmt.Errorf("%T %+v is not a meaningful pet", value, value)
 	}
 
-	return i.parse(s, petStoreRep)
+	return v.parse(s, petStoreRep)
 }
 
 // Value converts the Pet to a string.
 // It implements driver.Valuer, https://golang.org/pkg/database/sql/driver/#Valuer
-func (i Pet) Value() (driver.Value, error) {
+func (v Pet) Value() (driver.Value, error) {
 	switch petStoreRep {
 	case enum.Number:
-		return int64(i), nil
+		return int64(v), nil
 	case enum.Ordinal:
-		return int64(i.Ordinal()), nil
+		return int64(v.Ordinal()), nil
 	case enum.Tag:
-		return i.Tag(), nil
+		return v.Tag(), nil
 	default:
-		return i.String(), nil
+		return v.String(), nil
 	}
 }

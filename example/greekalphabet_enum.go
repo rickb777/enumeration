@@ -39,10 +39,10 @@ var (
 	greekalphabetEnumIndex = [...]uint16{0, 8, 16, 26, 36, 48, 56, 62, 70, 78, 88, 100, 104, 108, 112, 126, 130, 134, 144, 150, 162, 166, 170, 174, 184}
 )
 
-func (i GreekAlphabet) toString(concats string, indexes []uint16) string {
-	o := i.Ordinal()
+func (v GreekAlphabet) toString(concats string, indexes []uint16) string {
+	o := v.Ordinal()
 	if o < 0 || o >= len(AllGreekAlphabets) {
-		return fmt.Sprintf("GreekAlphabet(%d)", i)
+		return fmt.Sprintf("GreekAlphabet(%d)", v)
 	}
 	return concats[indexes[o]:indexes[o+1]]
 }
@@ -89,25 +89,25 @@ func init() {
 }
 
 // Tag returns the string representation of a GreekAlphabet. For invalid values,
-// this returns i.String() (see IsValid).
-func (i GreekAlphabet) Tag() string {
-	s, ok := greekTags[i]
+// this returns v.String() (see IsValid).
+func (v GreekAlphabet) Tag() string {
+	s, ok := greekTags[v]
 	if ok {
 		return s
 	}
-	return i.String()
+	return v.String()
 }
 
 // String returns the literal string representation of a GreekAlphabet, which is
 // the same as the const identifier but without prefix or suffix.
-func (i GreekAlphabet) String() string {
-	return i.toString(greekalphabetEnumStrings, greekalphabetEnumIndex[:])
+func (v GreekAlphabet) String() string {
+	return v.toString(greekalphabetEnumStrings, greekalphabetEnumIndex[:])
 }
 
 // Ordinal returns the ordinal number of a GreekAlphabet. This is an integer counting
 // from zero. It is *not* the same as the const number assigned to the value.
-func (i GreekAlphabet) Ordinal() int {
-	switch i {
+func (v GreekAlphabet) Ordinal() int {
+	switch v {
 	case Αλφα:
 		return 0
 	case Βήτα:
@@ -160,25 +160,25 @@ func (i GreekAlphabet) Ordinal() int {
 	return -1
 }
 
+// IsValid determines whether a GreekAlphabet is one of the defined constants.
+func (v GreekAlphabet) IsValid() bool {
+	return v.Ordinal() >= 0
+}
+
 // Int returns the int value, which is not necessarily the same as the ordinal.
 // This facilitates polymorphism (see enum.IntEnum).
-func (i GreekAlphabet) Int() int {
-	return int(i)
+func (v GreekAlphabet) Int() int {
+	return int(v)
 }
 
 // GreekAlphabetOf returns a GreekAlphabet based on an ordinal number. This is the inverse of Ordinal.
 // If the ordinal is out of range, an invalid GreekAlphabet is returned.
-func GreekAlphabetOf(i int) GreekAlphabet {
-	if 0 <= i && i < len(AllGreekAlphabets) {
-		return AllGreekAlphabets[i]
+func GreekAlphabetOf(v int) GreekAlphabet {
+	if 0 <= v && v < len(AllGreekAlphabets) {
+		return AllGreekAlphabets[v]
 	}
 	// an invalid result
 	return Αλφα + Βήτα + Γάμμα + Δέλτα + Εψιλον + Ζήτα + Ητα + Θήτα + Ιώτα + Κάππα + Λάμβδα + Μυ + Νυ + Ξι + Ομικρον + Πι + Ρώ + Σίγμα + Ταυ + Υψιλον + Φι + Χι + Ψι + Ωμέγα + 1
-}
-
-// IsValid determines whether a GreekAlphabet is one of the defined constants.
-func (i GreekAlphabet) IsValid() bool {
-	return i.Ordinal() >= 0
 }
 
 // Parse parses a string to find the corresponding GreekAlphabet, accepting one of the string values or
@@ -256,18 +256,18 @@ var greekalphabetTransformInput = func(in string) string {
 // AsGreekAlphabet parses a string to find the corresponding GreekAlphabet, accepting either one of the string values or
 // a number. The input representation is determined by greekalphabetMarshalTextRep. It wraps Parse.
 func AsGreekAlphabet(s string) (GreekAlphabet, error) {
-	var i = new(GreekAlphabet)
-	err := i.Parse(s)
-	return *i, err
+	var v = new(GreekAlphabet)
+	err := v.Parse(s)
+	return *v, err
 }
 
 // MustParseGreekAlphabet is similar to AsGreekAlphabet except that it panics on error.
 func MustParseGreekAlphabet(s string) GreekAlphabet {
-	i, err := AsGreekAlphabet(s)
+	v, err := AsGreekAlphabet(s)
 	if err != nil {
 		panic(err)
 	}
-	return i
+	return v
 }
 
 // greekalphabetMarshalTextRep controls representation used for XML and other text encodings.
@@ -278,38 +278,38 @@ var greekalphabetMarshalTextRep = enum.Tag
 
 // MarshalText converts values to a form suitable for transmission via XML etc.
 // The representation is chosen according to greekalphabetMarshalTextRep.
-func (i GreekAlphabet) MarshalText() (text []byte, err error) {
-	return i.marshalText(greekalphabetMarshalTextRep, false)
+func (v GreekAlphabet) MarshalText() (text []byte, err error) {
+	return v.marshalText(greekalphabetMarshalTextRep, false)
 }
 
 // MarshalJSON converts values to bytes suitable for transmission via JSON.
 // The representation is chosen according to greekalphabetMarshalTextRep.
-func (i GreekAlphabet) MarshalJSON() ([]byte, error) {
-	return i.marshalText(greekalphabetMarshalTextRep, true)
+func (v GreekAlphabet) MarshalJSON() ([]byte, error) {
+	return v.marshalText(greekalphabetMarshalTextRep, true)
 }
 
-func (i GreekAlphabet) marshalText(rep enum.Representation, quoted bool) (text []byte, err error) {
-	if greekalphabetMarshalTextRep != enum.Ordinal && i.Ordinal() < 0 {
-		return greekalphabetMarshalNumber(i)
+func (v GreekAlphabet) marshalText(rep enum.Representation, quoted bool) (text []byte, err error) {
+	if rep != enum.Ordinal && !v.IsValid() {
+		return greekalphabetMarshalNumber(v)
 	}
 
 	var bs []byte
 	switch rep {
 	case enum.Number:
-		return greekalphabetMarshalNumber(i)
+		return greekalphabetMarshalNumber(v)
 	case enum.Ordinal:
-		return i.marshalOrdinal()
+		return v.marshalOrdinal()
 	case enum.Tag:
 		if quoted {
-			bs = enum.QuotedString(i.Tag())
+			bs = enum.QuotedString(v.Tag())
 		} else {
-			bs = []byte(i.Tag())
+			bs = []byte(v.Tag())
 		}
 	default:
 		if quoted {
-			bs = enum.QuotedString(i.String())
+			bs = enum.QuotedString(v.String())
 		} else {
-			bs = []byte(i.String())
+			bs = []byte(v.String())
 		}
 	}
 	return bs, nil
@@ -318,35 +318,35 @@ func (i GreekAlphabet) marshalText(rep enum.Representation, quoted bool) (text [
 // greekalphabetMarshalNumber handles marshaling where a number is required or where
 // the value is out of range but greekalphabetMarshalTextRep != enum.Ordinal.
 // This function can be replaced with any bespoke function than matches signature.
-var greekalphabetMarshalNumber = func(i GreekAlphabet) (text []byte, err error) {
-	bs := []byte(strconv.FormatInt(int64(i), 10))
+var greekalphabetMarshalNumber = func(v GreekAlphabet) (text []byte, err error) {
+	bs := []byte(strconv.FormatInt(int64(v), 10))
 	return bs, nil
 }
 
-func (i GreekAlphabet) marshalOrdinal() (text []byte, err error) {
-	bs := []byte(strconv.Itoa(i.Ordinal()))
+func (v GreekAlphabet) marshalOrdinal() (text []byte, err error) {
+	bs := []byte(strconv.Itoa(v.Ordinal()))
 	return bs, nil
 }
 
 // UnmarshalText converts transmitted values to ordinary values.
-func (i *GreekAlphabet) UnmarshalText(text []byte) error {
-	return i.Parse(string(text))
+func (v *GreekAlphabet) UnmarshalText(text []byte) error {
+	return v.Parse(string(text))
 }
 
 // UnmarshalJSON converts transmitted JSON values to ordinary values. It allows both
 // ordinals and strings to represent the values.
-func (i *GreekAlphabet) UnmarshalJSON(text []byte) error {
+func (v *GreekAlphabet) UnmarshalJSON(text []byte) error {
 	s := string(text)
 	if s == "null" {
 		// Ignore null, like in the main JSON package.
 		return nil
 	}
 	s = strings.Trim(s, "\"")
-	return i.unmarshalJSON(s)
+	return v.unmarshalJSON(s)
 }
 
-func (i *GreekAlphabet) unmarshalJSON(s string) error {
-	return i.Parse(s)
+func (v *GreekAlphabet) unmarshalJSON(s string) error {
+	return v.Parse(s)
 }
 
 // greekalphabetStoreRep controls database storage via the Scan and Value methods.
@@ -355,45 +355,45 @@ var greekalphabetStoreRep = enum.Identifier
 
 // Scan parses some value, which can be a number, a string or []byte.
 // It implements sql.Scanner, https://golang.org/pkg/database/sql/#Scanner
-func (i *GreekAlphabet) Scan(value interface{}) error {
+func (v *GreekAlphabet) Scan(value interface{}) error {
 	if value == nil {
 		return nil
 	}
 
 	var s string
-	switch v := value.(type) {
+	switch x := value.(type) {
 	case int64:
 		if greekalphabetStoreRep == enum.Ordinal {
-			*i = GreekAlphabetOf(int(v))
+			*v = GreekAlphabetOf(int(x))
 		} else {
-			*i = GreekAlphabet(v)
+			*v = GreekAlphabet(x)
 		}
 		return nil
 	case float64:
-		*i = GreekAlphabet(v)
+		*v = GreekAlphabet(x)
 		return nil
 	case []byte:
-		s = string(v)
+		s = string(x)
 	case string:
-		s = v
+		s = x
 	default:
 		return fmt.Errorf("%T %+v is not a meaningful greekalphabet", value, value)
 	}
 
-	return i.parse(s, greekalphabetStoreRep)
+	return v.parse(s, greekalphabetStoreRep)
 }
 
 // Value converts the GreekAlphabet to a string.
 // It implements driver.Valuer, https://golang.org/pkg/database/sql/driver/#Valuer
-func (i GreekAlphabet) Value() (driver.Value, error) {
+func (v GreekAlphabet) Value() (driver.Value, error) {
 	switch greekalphabetStoreRep {
 	case enum.Number:
-		return int64(i), nil
+		return int64(v), nil
 	case enum.Ordinal:
-		return int64(i.Ordinal()), nil
+		return int64(v.Ordinal()), nil
 	case enum.Tag:
-		return i.Tag(), nil
+		return v.Tag(), nil
 	default:
-		return i.String(), nil
+		return v.String(), nil
 	}
 }

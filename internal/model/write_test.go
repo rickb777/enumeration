@@ -148,20 +148,20 @@ func TestWriteJoinedStringAndIndexes(t *testing.T) {
 //-------------------------------------------------------------------------------------------------
 
 const toString_int = `
-func (i Sweet) toString(concats string, indexes []uint16) string {
-	o := i.Ordinal()
+func (v Sweet) toString(concats string, indexes []uint16) string {
+	o := v.Ordinal()
 	if o < 0 || o >= len(AllSweets) {
-		return fmt.Sprintf("Sweet(%d)", i)
+		return fmt.Sprintf("Sweet(%d)", v)
 	}
 	return concats[indexes[o]:indexes[o+1]]
 }
 `
 
 const toString_float = `
-func (i Sweet) toString(concats string, indexes []uint16) string {
-	o := i.Ordinal()
+func (v Sweet) toString(concats string, indexes []uint16) string {
+	o := v.Ordinal()
 	if o < 0 || o >= len(AllSweets) {
-		return fmt.Sprintf("Sweet(%g)", i)
+		return fmt.Sprintf("Sweet(%g)", v)
 	}
 	return concats[indexes[o]:indexes[o+1]]
 }
@@ -177,8 +177,8 @@ func TestWriteLiteralMethod(t *testing.T) {
 const String_all = `
 // String returns the literal string representation of a Sweet, which is
 // the same as the const identifier but without prefix or suffix.
-func (i Sweet) String() string {
-	return i.toString(sweetEnumStrings, sweetEnumIndex[:])
+func (v Sweet) String() string {
+	return v.toString(sweetEnumStrings, sweetEnumIndex[:])
 }
 `
 
@@ -190,15 +190,15 @@ func TestWriteStringMethod(t *testing.T) {
 
 const Tag_no_table = `
 // Tag returns the string representation of a Sweet. This is an alias for String.
-func (i Sweet) Tag() string {
-	return i.String()
+func (v Sweet) Tag() string {
+	return v.String()
 }
 `
 
 const Tag_as_JSON = `
 // Tag returns the JSON representation of a Sweet.
-func (i Sweet) Tag() string {
-	return i.toString(sweetJSONStrings, sweetJSONIndex[:])
+func (v Sweet) Tag() string {
+	return v.toString(sweetJSONStrings, sweetJSONIndex[:])
 }
 `
 
@@ -230,13 +230,13 @@ func init() {
 }
 
 // Tag returns the string representation of a Sweet. For invalid values,
-// this returns i.String() (see IsValid).
-func (i Sweet) Tag() string {
-	s, ok := sweetNames[i]
+// this returns v.String() (see IsValid).
+func (v Sweet) Tag() string {
+	s, ok := sweetNames[v]
 	if ok {
 		return s
 	}
-	return i.String()
+	return v.String()
 }
 `
 
@@ -251,8 +251,8 @@ func TestWriteTagMethod(t *testing.T) {
 const ordinal_no_prefix = `
 // Ordinal returns the ordinal number of a Sweet. This is an integer counting
 // from zero. It is *not* the same as the const number assigned to the value.
-func (i Sweet) Ordinal() int {
-	switch i {
+func (v Sweet) Ordinal() int {
+	switch v {
 	case Mars:
 		return 0
 	case Bounty:
@@ -271,8 +271,8 @@ func (i Sweet) Ordinal() int {
 const ordinal_with_prefix = `
 // Ordinal returns the ordinal number of a Sweet. This is an integer counting
 // from zero. It is *not* the same as the const number assigned to the value.
-func (i Sweet) Ordinal() int {
-	switch i {
+func (v Sweet) Ordinal() int {
+	switch v {
 	case AMarsBar:
 		return 0
 	case ABountyBar:
@@ -298,15 +298,15 @@ func TestWriteOrdinalMethod(t *testing.T) {
 const int_nc = `
 // Int returns the int value, which is not necessarily the same as the ordinal.
 // This facilitates polymorphism (see enum.IntEnum).
-func (i Sweet) Int() int {
-	return int(i)
+func (v Sweet) Int() int {
+	return int(v)
 }
 `
 
 const float_lc = `
 // Float returns the float64 value. It serves to facilitate polymorphism (see enum.FloatEnum).
-func (i Sweet) Float() float64 {
-	return float64(i)
+func (v Sweet) Float() float64 {
+	return float64(v)
 }
 `
 
@@ -320,9 +320,9 @@ func TestWriteBaseMethod(t *testing.T) {
 const SweetOf_no_prefix = `
 // SweetOf returns a Sweet based on an ordinal number. This is the inverse of Ordinal.
 // If the ordinal is out of range, an invalid Sweet is returned.
-func SweetOf(i int) Sweet {
-	if 0 <= i && i < len(AllSweets) {
-		return AllSweets[i]
+func SweetOf(v int) Sweet {
+	if 0 <= v && v < len(AllSweets) {
+		return AllSweets[v]
 	}
 	// an invalid result
 	return Mars + Bounty + Snickers + Kitkat + Dairy_Milk + 1
@@ -332,9 +332,9 @@ func SweetOf(i int) Sweet {
 const SweetOf_with_prefix = `
 // SweetOf returns a Sweet based on an ordinal number. This is the inverse of Ordinal.
 // If the ordinal is out of range, an invalid Sweet is returned.
-func SweetOf(i int) Sweet {
-	if 0 <= i && i < len(AllSweets) {
-		return AllSweets[i]
+func SweetOf(v int) Sweet {
+	if 0 <= v && v < len(AllSweets) {
+		return AllSweets[v]
 	}
 	// an invalid result
 	return AMarsBar + ABountyBar + ASnickersBar + AKitkatBar + ADairy_MilkBar + 1
@@ -350,8 +350,8 @@ func TestWriteOfMethod(t *testing.T) {
 
 const IsValid_all = `
 // IsValid determines whether a Sweet is one of the defined constants.
-func (i Sweet) IsValid() bool {
-	return i.Ordinal() >= 0
+func (v Sweet) IsValid() bool {
+	return v.Ordinal() >= 0
 }
 `
 
@@ -645,9 +645,9 @@ const AsSweet_nc = `
 // AsSweet parses a string to find the corresponding Sweet, accepting either one of the string values or
 // a number. The input representation is determined by sweetMarshalTextRep. It wraps Parse.
 func AsSweet(s string) (Sweet, error) {
-	var i = new(Sweet)
-	err := i.Parse(s)
-	return *i, err
+	var v = new(Sweet)
+	err := v.Parse(s)
+	return *v, err
 }
 `
 
@@ -655,9 +655,9 @@ const AsSweet_lc = `
 // AsSweet parses a string to find the corresponding Sweet, accepting either one of the string values or
 // a number. The input representation is determined by sweetMarshalTextRep. It wraps Parse.
 func AsSweet(s string) (Sweet, error) {
-	var i = new(Sweet)
-	err := i.Parse(s)
-	return *i, err
+	var v = new(Sweet)
+	err := v.Parse(s)
+	return *v, err
 }
 `
 
@@ -666,9 +666,9 @@ const AsSweet_ic = `
 // a number. The input representation is determined by sweetMarshalTextRep. It wraps Parse.
 // The input case does not matter.
 func AsSweet(s string) (Sweet, error) {
-	var i = new(Sweet)
-	err := i.Parse(s)
-	return *i, err
+	var v = new(Sweet)
+	err := v.Parse(s)
+	return *v, err
 }
 `
 
@@ -683,11 +683,11 @@ func TestWriteAsMethod(t *testing.T) {
 const MustParseSweet_nc = `
 // MustParseSweet is similar to AsSweet except that it panics on error.
 func MustParseSweet(s string) Sweet {
-	i, err := AsSweet(s)
+	v, err := AsSweet(s)
 	if err != nil {
 		panic(err)
 	}
-	return i
+	return v
 }
 `
 
@@ -695,11 +695,11 @@ const MustParseSweet_ic = `
 // MustParseSweet is similar to AsSweet except that it panics on error.
 // The input case does not matter.
 func MustParseSweet(s string) Sweet {
-	i, err := AsSweet(s)
+	v, err := AsSweet(s)
 	if err != nil {
 		panic(err)
 	}
-	return i
+	return v
 }
 `
 
@@ -721,33 +721,33 @@ var sweetMarshalTextRep = enum.Identifier
 const MarshalJSON_simple = `
 // MarshalText converts values to a form suitable for transmission via XML etc.
 // The representation is chosen according to sweetMarshalTextRep.
-func (i Sweet) MarshalText() (text []byte, err error) {
-	return i.marshalText(sweetMarshalTextRep, false)
+func (v Sweet) MarshalText() (text []byte, err error) {
+	return v.marshalText(sweetMarshalTextRep, false)
 }
 
 // MarshalJSON converts values to bytes suitable for transmission via JSON.
 // The representation is chosen according to sweetMarshalTextRep.
-func (i Sweet) MarshalJSON() ([]byte, error) {
-	return i.marshalText(sweetMarshalTextRep, true)
+func (v Sweet) MarshalJSON() ([]byte, error) {
+	return v.marshalText(sweetMarshalTextRep, true)
 }
 `
 
 const MarshalJSON_struct_tags = `
 // MarshalText converts values to a form suitable for transmission via XML etc.
 // The representation is chosen according to sweetMarshalTextRep.
-func (i Sweet) MarshalText() (text []byte, err error) {
-	return i.marshalText(sweetMarshalTextRep, false)
+func (v Sweet) MarshalText() (text []byte, err error) {
+	return v.marshalText(sweetMarshalTextRep, false)
 }
 
 // MarshalJSON converts values to bytes suitable for transmission via JSON.
 // The representation is chosen according to sweetMarshalTextRep.
-func (i Sweet) MarshalJSON() ([]byte, error) {
-	o := i.Ordinal()
-	if o < 0 || o >= len(AllSweets) {
+func (v Sweet) MarshalJSON() ([]byte, error) {
+	o := v.Ordinal()
+	if o < 0 {
 		if sweetMarshalTextRep == enum.Ordinal {
-			return nil, fmt.Errorf("%v is out of range", i)
+			return nil, fmt.Errorf("%v is out of range", v)
 		}
-		return sweetMarshalNumber(i)
+		return sweetMarshalNumber(v)
 	}
 	s := sweetJSONStrings[sweetJSONIndex[o]:sweetJSONIndex[o+1]]
 	return enum.QuotedString(s), nil
@@ -755,28 +755,28 @@ func (i Sweet) MarshalJSON() ([]byte, error) {
 `
 
 const sweetMarshalText = `
-func (i Sweet) marshalText(rep enum.Representation, quoted bool) (text []byte, err error) {
-	if sweetMarshalTextRep != enum.Ordinal && i.Ordinal() < 0 {
-		return sweetMarshalNumber(i)
+func (v Sweet) marshalText(rep enum.Representation, quoted bool) (text []byte, err error) {
+	if rep != enum.Ordinal && !v.IsValid() {
+		return sweetMarshalNumber(v)
 	}
 
 	var bs []byte
 	switch rep {
 	case enum.Number:
-		return sweetMarshalNumber(i)
+		return sweetMarshalNumber(v)
 	case enum.Ordinal:
-		return i.marshalOrdinal()
+		return v.marshalOrdinal()
 	case enum.Tag:
 		if quoted {
-			bs = enum.QuotedString(i.Tag())
+			bs = enum.QuotedString(v.Tag())
 		} else {
-			bs = []byte(i.Tag())
+			bs = []byte(v.Tag())
 		}
 	default:
 		if quoted {
-			bs = enum.QuotedString(i.String())
+			bs = enum.QuotedString(v.String())
 		} else {
-			bs = []byte(i.String())
+			bs = []byte(v.String())
 		}
 	}
 	return bs, nil
@@ -787,8 +787,8 @@ const sweetMarshalNumber_float = `
 // sweetMarshalNumber handles marshaling where a number is required or where
 // the value is out of range but sweetMarshalTextRep != enum.Ordinal.
 // This function can be replaced with any bespoke function than matches signature.
-var sweetMarshalNumber = func(i Sweet) (text []byte, err error) {
-	bs := []byte(strconv.FormatFloat(float64(i), 'g', 7, 64))
+var sweetMarshalNumber = func(v Sweet) (text []byte, err error) {
+	bs := []byte(strconv.FormatFloat(float64(v), 'g', 7, 64))
 	return bs, nil
 }
 `
@@ -797,15 +797,15 @@ const sweetMarshalNumber_int = `
 // sweetMarshalNumber handles marshaling where a number is required or where
 // the value is out of range but sweetMarshalTextRep != enum.Ordinal.
 // This function can be replaced with any bespoke function than matches signature.
-var sweetMarshalNumber = func(i Sweet) (text []byte, err error) {
-	bs := []byte(strconv.FormatInt(int64(i), 10))
+var sweetMarshalNumber = func(v Sweet) (text []byte, err error) {
+	bs := []byte(strconv.FormatInt(int64(v), 10))
 	return bs, nil
 }
 `
 
 const sweetMarshalOrdinal = `
-func (i Sweet) marshalOrdinal() (text []byte, err error) {
-	bs := []byte(strconv.Itoa(i.Ordinal()))
+func (v Sweet) marshalOrdinal() (text []byte, err error) {
+	bs := []byte(strconv.Itoa(v.Ordinal()))
 	return bs, nil
 }
 `
@@ -825,20 +825,20 @@ func TestWriteMarshalText(t *testing.T) {
 
 const UnmarshalText_all = `
 // UnmarshalText converts transmitted values to ordinary values.
-func (i *Sweet) UnmarshalText(text []byte) error {
-	return i.Parse(string(text))
+func (v *Sweet) UnmarshalText(text []byte) error {
+	return v.Parse(string(text))
 }
 
 // UnmarshalJSON converts transmitted JSON values to ordinary values. It allows both
 // ordinals and strings to represent the values.
-func (i *Sweet) UnmarshalJSON(text []byte) error {
+func (v *Sweet) UnmarshalJSON(text []byte) error {
 	s := string(text)
 	if s == "null" {
 		// Ignore null, like in the main JSON package.
 		return nil
 	}
 	s = strings.Trim(s, "\"")
-	return i.unmarshalJSON(s)
+	return v.unmarshalJSON(s)
 }
 `
 
@@ -850,8 +850,8 @@ func TestWriteUnmarshalText(t *testing.T) {
 //-------------------------------------------------------------------------------------------------
 
 const unmarshalJSON_short = `
-func (i *Sweet) unmarshalJSON(s string) error {
-	return i.Parse(s)
+func (v *Sweet) unmarshalJSON(s string) error {
+	return v.Parse(s)
 }
 `
 
@@ -914,32 +914,32 @@ var sweetStoreRep = enum.Identifier
 
 // Scan parses some value, which can be a number, a string or []byte.
 // It implements sql.Scanner, https://golang.org/pkg/database/sql/#Scanner
-func (i *Sweet) Scan(value interface{}) error {
+func (v *Sweet) Scan(value interface{}) error {
 	if value == nil {
 		return nil
 	}
 
 	var s string
-	switch v := value.(type) {
+	switch x := value.(type) {
 	case int64:
 		if sweetStoreRep == enum.Ordinal {
-			*i = SweetOf(int(v))
+			*v = SweetOf(int(x))
 		} else {
-			*i = Sweet(v)
+			*v = Sweet(x)
 		}
 		return nil
 	case float64:
-		*i = Sweet(v)
+		*v = Sweet(x)
 		return nil
 	case []byte:
-		s = string(v)
+		s = string(x)
 	case string:
-		s = v
+		s = x
 	default:
 		return fmt.Errorf("%T %+v is not a meaningful sweet", value, value)
 	}
 
-	return i.parse(s, sweetStoreRep)
+	return v.parse(s, sweetStoreRep)
 }
 `
 
@@ -950,32 +950,32 @@ var sweetStoreRep = enum.Identifier
 
 // Scan parses some value, which can be a number, a string or []byte.
 // It implements sql.Scanner, https://golang.org/pkg/database/sql/#Scanner
-func (i *Sweet) Scan(value interface{}) error {
+func (v *Sweet) Scan(value interface{}) error {
 	if value == nil {
 		return nil
 	}
 
 	var s string
-	switch v := value.(type) {
+	switch x := value.(type) {
 	case int64:
 		if sweetStoreRep == enum.Ordinal {
-			*i = SweetOf(int(v))
+			*v = SweetOf(int(x))
 		} else {
-			*i = Sweet(v)
+			*v = Sweet(x)
 		}
 		return nil
 	case float64:
-		*i = Sweet(v)
+		*v = Sweet(x)
 		return nil
 	case []byte:
-		s = string(v)
+		s = string(x)
 	case string:
-		s = v
+		s = x
 	default:
 		return fmt.Errorf("%T %+v is not a meaningful sweet", value, value)
 	}
 
-	return i.parse(s, sweetStoreRep)
+	return v.parse(s, sweetStoreRep)
 }
 `
 
@@ -986,32 +986,32 @@ var sweetStoreRep = enum.Identifier
 
 // Scan parses some value, which can be a number, a string or []byte.
 // It implements sql.Scanner, https://golang.org/pkg/database/sql/#Scanner
-func (i *Sweet) Scan(value interface{}) error {
+func (v *Sweet) Scan(value interface{}) error {
 	if value == nil {
 		return nil
 	}
 
 	var s string
-	switch v := value.(type) {
+	switch x := value.(type) {
 	case int64:
 		if sweetStoreRep == enum.Ordinal {
-			*i = SweetOf(int(v))
+			*v = SweetOf(int(x))
 		} else {
-			*i = Sweet(v)
+			*v = Sweet(x)
 		}
 		return nil
 	case float64:
-		*i = Sweet(v)
+		*v = Sweet(x)
 		return nil
 	case []byte:
-		s = string(v)
+		s = string(x)
 	case string:
-		s = v
+		s = x
 	default:
 		return fmt.Errorf("%T %+v is not a meaningful sweet", value, value)
 	}
 
-	if i.parseString(s, sweetSQLStrings, sweetSQLIndex[:]) {
+	if v.parseString(s, sweetSQLStrings, sweetSQLIndex[:]) {
 		return nil
 	}
 
@@ -1031,16 +1031,16 @@ func TestWriteScanMethod(t *testing.T) {
 const Value_int = `
 // Value converts the Sweet to a string.
 // It implements driver.Valuer, https://golang.org/pkg/database/sql/driver/#Valuer
-func (i Sweet) Value() (driver.Value, error) {
+func (v Sweet) Value() (driver.Value, error) {
 	switch sweetStoreRep {
 	case enum.Number:
-		return int64(i), nil
+		return int64(v), nil
 	case enum.Ordinal:
-		return int64(i.Ordinal()), nil
+		return int64(v.Ordinal()), nil
 	case enum.Tag:
-		return i.Tag(), nil
+		return v.Tag(), nil
 	default:
-		return i.String(), nil
+		return v.String(), nil
 	}
 }
 `
@@ -1048,16 +1048,16 @@ func (i Sweet) Value() (driver.Value, error) {
 const Value_float = `
 // Value converts the Sweet to a string.
 // It implements driver.Valuer, https://golang.org/pkg/database/sql/driver/#Valuer
-func (i Sweet) Value() (driver.Value, error) {
+func (v Sweet) Value() (driver.Value, error) {
 	switch sweetStoreRep {
 	case enum.Number:
-		return float64(i), nil
+		return float64(v), nil
 	case enum.Ordinal:
-		return int64(i.Ordinal()), nil
+		return int64(v.Ordinal()), nil
 	case enum.Tag:
-		return i.Tag(), nil
+		return v.Tag(), nil
 	default:
-		return i.String(), nil
+		return v.String(), nil
 	}
 }
 `
@@ -1065,16 +1065,16 @@ func (i Sweet) Value() (driver.Value, error) {
 const Value_struct_tags = `
 // Value converts the Sweet to a string.
 // It implements driver.Valuer, https://golang.org/pkg/database/sql/driver/#Valuer
-func (i Sweet) Value() (driver.Value, error) {
+func (v Sweet) Value() (driver.Value, error) {
 	switch sweetStoreRep {
 	case enum.Number:
-		return int64(i), nil
+		return int64(v), nil
 	case enum.Ordinal:
-		return int64(i.Ordinal()), nil
+		return int64(v.Ordinal()), nil
 	case enum.Tag:
-		return i.Tag(), nil
+		return v.Tag(), nil
 	default:
-		return i.toString(sweetSQLStrings, sweetSQLIndex[:]), nil
+		return v.toString(sweetSQLStrings, sweetSQLIndex[:]), nil
 	}
 }
 `
