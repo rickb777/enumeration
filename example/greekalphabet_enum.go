@@ -276,7 +276,7 @@ func MustParseGreekAlphabet(s string) GreekAlphabet {
 // Ordinal method. When enum.Number, the number underlying the value will be used.
 var greekalphabetMarshalTextRep = enum.Tag
 
-// MarshalText converts values to a form suitable for transmission via JSON, XML etc.
+// MarshalText converts values to a form suitable for transmission via XML etc.
 // The representation is chosen according to greekalphabetMarshalTextRep.
 func (i GreekAlphabet) MarshalText() (text []byte, err error) {
 	return i.marshalText(greekalphabetMarshalTextRep, false)
@@ -292,18 +292,18 @@ func (i GreekAlphabet) marshalText(rep enum.Representation, quoted bool) (text [
 	var bs []byte
 	switch rep {
 	case enum.Number:
-		bs = []byte(strconv.FormatInt(int64(i), 10))
+		return greekalphabetMarshalNumber(i)
 	case enum.Ordinal:
-		bs = []byte(strconv.Itoa(i.Ordinal()))
+		return i.marshalOrdinal()
 	case enum.Tag:
 		if quoted {
-			bs = i.quotedString(i.Tag())
+			bs = enum.QuotedString(i.Tag())
 		} else {
 			bs = []byte(i.Tag())
 		}
 	default:
 		if quoted {
-			bs = []byte(i.quotedString(i.String()))
+			bs = enum.QuotedString(i.String())
 		} else {
 			bs = []byte(i.String())
 		}
@@ -311,12 +311,14 @@ func (i GreekAlphabet) marshalText(rep enum.Representation, quoted bool) (text [
 	return bs, nil
 }
 
-func (i GreekAlphabet) quotedString(s string) []byte {
-	b := make([]byte, len(s)+2)
-	b[0] = '"'
-	copy(b[1:], s)
-	b[len(s)+1] = '"'
-	return b
+var greekalphabetMarshalNumber = func(i GreekAlphabet) (text []byte, err error) {
+	bs := []byte(strconv.FormatInt(int64(i), 10))
+	return bs, nil
+}
+
+func (i GreekAlphabet) marshalOrdinal() (text []byte, err error) {
+	bs := []byte(strconv.Itoa(i.Ordinal()))
+	return bs, nil
 }
 
 // UnmarshalText converts transmitted values to ordinary values.

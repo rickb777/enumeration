@@ -719,7 +719,7 @@ var sweetMarshalTextRep = enum.Identifier
 `
 
 const MarshalJSON_simple = `
-// MarshalText converts values to a form suitable for transmission via JSON, XML etc.
+// MarshalText converts values to a form suitable for transmission via XML etc.
 // The representation is chosen according to sweetMarshalTextRep.
 func (i Sweet) MarshalText() (text []byte, err error) {
 	return i.marshalText(sweetMarshalTextRep, false)
@@ -733,7 +733,7 @@ func (i Sweet) MarshalJSON() ([]byte, error) {
 `
 
 const MarshalJSON_struct_tags = `
-// MarshalText converts values to a form suitable for transmission via JSON, XML etc.
+// MarshalText converts values to a form suitable for transmission via XML etc.
 // The representation is chosen according to sweetMarshalTextRep.
 func (i Sweet) MarshalText() (text []byte, err error) {
 	return i.marshalText(sweetMarshalTextRep, false)
@@ -742,27 +742,27 @@ func (i Sweet) MarshalText() (text []byte, err error) {
 // MarshalJSON converts values to bytes suitable for transmission via JSON.
 // The representation is chosen according to sweetMarshalTextRep.
 func (i Sweet) MarshalJSON() ([]byte, error) {
-	return i.quotedString(i.toString(sweetJSONStrings, sweetJSONIndex[:])), nil
+	return enum.QuotedString(i.toString(sweetJSONStrings, sweetJSONIndex[:])), nil
 }
 `
 
-const marshalText_float = `
+const sweetMarshalText = `
 func (i Sweet) marshalText(rep enum.Representation, quoted bool) (text []byte, err error) {
 	var bs []byte
 	switch rep {
 	case enum.Number:
-		bs = []byte(strconv.FormatFloat(float64(i), 'g', 7, 64))
+		return sweetMarshalNumber(i)
 	case enum.Ordinal:
-		bs = []byte(strconv.Itoa(i.Ordinal()))
+		return i.marshalOrdinal()
 	case enum.Tag:
 		if quoted {
-			bs = i.quotedString(i.Tag())
+			bs = enum.QuotedString(i.Tag())
 		} else {
 			bs = []byte(i.Tag())
 		}
 	default:
 		if quoted {
-			bs = []byte(i.quotedString(i.String()))
+			bs = enum.QuotedString(i.String())
 		} else {
 			bs = []byte(i.String())
 		}
@@ -771,46 +771,36 @@ func (i Sweet) marshalText(rep enum.Representation, quoted bool) (text []byte, e
 }
 `
 
-const marshalText_int = `
-func (i Sweet) marshalText(rep enum.Representation, quoted bool) (text []byte, err error) {
-	var bs []byte
-	switch rep {
-	case enum.Number:
-		bs = []byte(strconv.FormatInt(int64(i), 10))
-	case enum.Ordinal:
-		bs = []byte(strconv.Itoa(i.Ordinal()))
-	case enum.Tag:
-		if quoted {
-			bs = i.quotedString(i.Tag())
-		} else {
-			bs = []byte(i.Tag())
-		}
-	default:
-		if quoted {
-			bs = []byte(i.quotedString(i.String()))
-		} else {
-			bs = []byte(i.String())
-		}
-	}
+const sweetMarshalNumber_float = `
+var sweetMarshalNumber = func(i Sweet) (text []byte, err error) {
+	bs := []byte(strconv.FormatFloat(float64(i), 'g', 7, 64))
 	return bs, nil
 }
 `
 
-const quotedString = `
-func (i Sweet) quotedString(s string) []byte {
-	b := make([]byte, len(s)+2)
-	b[0] = '"'
-	copy(b[1:], s)
-	b[len(s)+1] = '"'
-	return b
+const sweetMarshalNumber_int = `
+var sweetMarshalNumber = func(i Sweet) (text []byte, err error) {
+	bs := []byte(strconv.FormatInt(int64(i), 10))
+	return bs, nil
+}
+`
+
+const sweetMarshalOrdinal = `
+func (i Sweet) marshalOrdinal() (text []byte, err error) {
+	bs := []byte(strconv.Itoa(i.Ordinal()))
+	return bs, nil
 }
 `
 
 func TestWriteMarshalText(t *testing.T) {
-	testStage(t, basicModel().writeMarshalText, sweetMarshalTextRep+MarshalJSON_simple+marshalText_int+quotedString)
-	testStage(t, floatModelWithPrefixes().writeMarshalText, sweetMarshalTextRep+MarshalJSON_simple+marshalText_float+quotedString)
-	testStage(t, modelWithStructTags().writeMarshalText, sweetMarshalTextRep+MarshalJSON_struct_tags+marshalText_int+quotedString)
-	testStage(t, ignoreCase(modelWithStructTags()).writeMarshalText, sweetMarshalTextRep+MarshalJSON_struct_tags+marshalText_int+quotedString)
+	testStage(t, basicModel().writeMarshalText, sweetMarshalTextRep+MarshalJSON_simple+
+		sweetMarshalText+sweetMarshalNumber_int+sweetMarshalOrdinal)
+	testStage(t, floatModelWithPrefixes().writeMarshalText, sweetMarshalTextRep+MarshalJSON_simple+
+		sweetMarshalText+sweetMarshalNumber_float+sweetMarshalOrdinal)
+	testStage(t, modelWithStructTags().writeMarshalText, sweetMarshalTextRep+MarshalJSON_struct_tags+
+		sweetMarshalText+sweetMarshalNumber_int+sweetMarshalOrdinal)
+	testStage(t, ignoreCase(modelWithStructTags()).writeMarshalText, sweetMarshalTextRep+MarshalJSON_struct_tags+
+		sweetMarshalText+sweetMarshalNumber_int+sweetMarshalOrdinal)
 }
 
 //-------------------------------------------------------------------------------------------------

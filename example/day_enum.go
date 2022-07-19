@@ -192,7 +192,7 @@ func MustParseDay(s string) Day {
 // Ordinal method. When enum.Number, the number underlying the value will be used.
 var dayMarshalTextRep = enum.Identifier
 
-// MarshalText converts values to a form suitable for transmission via JSON, XML etc.
+// MarshalText converts values to a form suitable for transmission via XML etc.
 // The representation is chosen according to dayMarshalTextRep.
 func (i Day) MarshalText() (text []byte, err error) {
 	return i.marshalText(dayMarshalTextRep, false)
@@ -208,18 +208,18 @@ func (i Day) marshalText(rep enum.Representation, quoted bool) (text []byte, err
 	var bs []byte
 	switch rep {
 	case enum.Number:
-		bs = []byte(strconv.FormatInt(int64(i), 10))
+		return dayMarshalNumber(i)
 	case enum.Ordinal:
-		bs = []byte(strconv.Itoa(i.Ordinal()))
+		return i.marshalOrdinal()
 	case enum.Tag:
 		if quoted {
-			bs = i.quotedString(i.Tag())
+			bs = enum.QuotedString(i.Tag())
 		} else {
 			bs = []byte(i.Tag())
 		}
 	default:
 		if quoted {
-			bs = []byte(i.quotedString(i.String()))
+			bs = enum.QuotedString(i.String())
 		} else {
 			bs = []byte(i.String())
 		}
@@ -227,12 +227,14 @@ func (i Day) marshalText(rep enum.Representation, quoted bool) (text []byte, err
 	return bs, nil
 }
 
-func (i Day) quotedString(s string) []byte {
-	b := make([]byte, len(s)+2)
-	b[0] = '"'
-	copy(b[1:], s)
-	b[len(s)+1] = '"'
-	return b
+var dayMarshalNumber = func(i Day) (text []byte, err error) {
+	bs := []byte(strconv.FormatInt(int64(i), 10))
+	return bs, nil
+}
+
+func (i Day) marshalOrdinal() (text []byte, err error) {
+	bs := []byte(strconv.Itoa(i.Ordinal()))
+	return bs, nil
 }
 
 // UnmarshalText converts transmitted values to ordinary values.

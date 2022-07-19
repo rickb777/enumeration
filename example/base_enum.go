@@ -183,7 +183,7 @@ func MustParseBase(s string) Base {
 // Ordinal method. When enum.Number, the number underlying the value will be used.
 var baseMarshalTextRep = enum.Identifier
 
-// MarshalText converts values to a form suitable for transmission via JSON, XML etc.
+// MarshalText converts values to a form suitable for transmission via XML etc.
 // The representation is chosen according to baseMarshalTextRep.
 func (i Base) MarshalText() (text []byte, err error) {
 	return i.marshalText(baseMarshalTextRep, false)
@@ -199,18 +199,18 @@ func (i Base) marshalText(rep enum.Representation, quoted bool) (text []byte, er
 	var bs []byte
 	switch rep {
 	case enum.Number:
-		bs = []byte(strconv.FormatFloat(float64(i), 'g', 7, 64))
+		return baseMarshalNumber(i)
 	case enum.Ordinal:
-		bs = []byte(strconv.Itoa(i.Ordinal()))
+		return i.marshalOrdinal()
 	case enum.Tag:
 		if quoted {
-			bs = i.quotedString(i.Tag())
+			bs = enum.QuotedString(i.Tag())
 		} else {
 			bs = []byte(i.Tag())
 		}
 	default:
 		if quoted {
-			bs = []byte(i.quotedString(i.String()))
+			bs = enum.QuotedString(i.String())
 		} else {
 			bs = []byte(i.String())
 		}
@@ -218,12 +218,14 @@ func (i Base) marshalText(rep enum.Representation, quoted bool) (text []byte, er
 	return bs, nil
 }
 
-func (i Base) quotedString(s string) []byte {
-	b := make([]byte, len(s)+2)
-	b[0] = '"'
-	copy(b[1:], s)
-	b[len(s)+1] = '"'
-	return b
+var baseMarshalNumber = func(i Base) (text []byte, err error) {
+	bs := []byte(strconv.FormatFloat(float64(i), 'g', 7, 64))
+	return bs, nil
+}
+
+func (i Base) marshalOrdinal() (text []byte, err error) {
+	bs := []byte(strconv.Itoa(i.Ordinal()))
+	return bs, nil
 }
 
 // UnmarshalText converts transmitted values to ordinary values.

@@ -137,3 +137,11 @@ func (es FloatEnums) Floats() []float64 {
 	}
 	return vs
 }
+
+func QuotedString(s string) []byte {
+	b := make([]byte, len(s)+2)
+	b[0] = '"'
+	copy(b[1:], s)
+	b[len(s)+1] = '"'
+	return b
+}
