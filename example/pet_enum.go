@@ -246,6 +246,10 @@ func (i Pet) MarshalJSON() ([]byte, error) {
 }
 
 func (i Pet) marshalText(rep enum.Representation, quoted bool) (text []byte, err error) {
+	if petMarshalTextRep != enum.Ordinal && i.Ordinal() < 0 {
+		return petMarshalNumber(i)
+	}
+
 	var bs []byte
 	switch rep {
 	case enum.Number:
@@ -268,6 +272,9 @@ func (i Pet) marshalText(rep enum.Representation, quoted bool) (text []byte, err
 	return bs, nil
 }
 
+// petMarshalNumber handles marshaling where a number is required or where
+// the value is out of range but petMarshalTextRep != enum.Ordinal.
+// This function can be replaced with any bespoke function than matches signature.
 var petMarshalNumber = func(i Pet) (text []byte, err error) {
 	bs := []byte(strconv.FormatInt(int64(i), 10))
 	return bs, nil

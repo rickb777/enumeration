@@ -742,12 +742,24 @@ func (i Sweet) MarshalText() (text []byte, err error) {
 // MarshalJSON converts values to bytes suitable for transmission via JSON.
 // The representation is chosen according to sweetMarshalTextRep.
 func (i Sweet) MarshalJSON() ([]byte, error) {
-	return enum.QuotedString(i.toString(sweetJSONStrings, sweetJSONIndex[:])), nil
+	o := i.Ordinal()
+	if o < 0 || o >= len(AllSweets) {
+		if sweetMarshalTextRep == enum.Ordinal {
+			return nil, fmt.Errorf("%v is out of range", i)
+		}
+		return sweetMarshalNumber(i)
+	}
+	s := sweetJSONStrings[sweetJSONIndex[o]:sweetJSONIndex[o+1]]
+	return enum.QuotedString(s), nil
 }
 `
 
 const sweetMarshalText = `
 func (i Sweet) marshalText(rep enum.Representation, quoted bool) (text []byte, err error) {
+	if sweetMarshalTextRep != enum.Ordinal && i.Ordinal() < 0 {
+		return sweetMarshalNumber(i)
+	}
+
 	var bs []byte
 	switch rep {
 	case enum.Number:
@@ -772,6 +784,9 @@ func (i Sweet) marshalText(rep enum.Representation, quoted bool) (text []byte, e
 `
 
 const sweetMarshalNumber_float = `
+// sweetMarshalNumber handles marshaling where a number is required or where
+// the value is out of range but sweetMarshalTextRep != enum.Ordinal.
+// This function can be replaced with any bespoke function than matches signature.
 var sweetMarshalNumber = func(i Sweet) (text []byte, err error) {
 	bs := []byte(strconv.FormatFloat(float64(i), 'g', 7, 64))
 	return bs, nil
@@ -779,6 +794,9 @@ var sweetMarshalNumber = func(i Sweet) (text []byte, err error) {
 `
 
 const sweetMarshalNumber_int = `
+// sweetMarshalNumber handles marshaling where a number is required or where
+// the value is out of range but sweetMarshalTextRep != enum.Ordinal.
+// This function can be replaced with any bespoke function than matches signature.
 var sweetMarshalNumber = func(i Sweet) (text []byte, err error) {
 	bs := []byte(strconv.FormatInt(int64(i), 10))
 	return bs, nil

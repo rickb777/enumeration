@@ -829,6 +829,10 @@ func (i Country) MarshalJSON() ([]byte, error) {
 }
 
 func (i Country) marshalText(rep enum.Representation, quoted bool) (text []byte, err error) {
+	if countryMarshalTextRep != enum.Ordinal && i.Ordinal() < 0 {
+		return countryMarshalNumber(i)
+	}
+
 	var bs []byte
 	switch rep {
 	case enum.Number:
@@ -851,6 +855,9 @@ func (i Country) marshalText(rep enum.Representation, quoted bool) (text []byte,
 	return bs, nil
 }
 
+// countryMarshalNumber handles marshaling where a number is required or where
+// the value is out of range but countryMarshalTextRep != enum.Ordinal.
+// This function can be replaced with any bespoke function than matches signature.
 var countryMarshalNumber = func(i Country) (text []byte, err error) {
 	bs := []byte(strconv.FormatInt(int64(i), 10))
 	return bs, nil

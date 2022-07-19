@@ -557,13 +557,25 @@ func (i <<.MainType>>) MarshalText() (text []byte, err error) {
 // The representation is chosen according to <<.LcType>>MarshalTextRep.
 func (i <<.MainType>>) MarshalJSON() ([]byte, error) {
 <<- if .HasJSONTags>>
-	return enum.QuotedString(i.toString(<<.LcType>>JSONStrings, <<.LcType>>JSONIndex[:])), nil
+	o := i.Ordinal()
+	if o < 0 || o >= len(All<<.Plural>>) {
+		if <<.LcType>>MarshalTextRep == enum.Ordinal {
+			return nil, fmt.Errorf("%v is out of range", i)
+		}
+		return <<.LcType>>MarshalNumber(i)
+	}
+	s := <<.LcType>>JSONStrings[<<.LcType>>JSONIndex[o]:<<.LcType>>JSONIndex[o+1]]
+	return enum.QuotedString(s), nil
 <<- else >>
 	return i.marshalText(<<.LcType>>MarshalTextRep, true)
 <<- end >>
 }
 
 func (i <<.MainType>>) marshalText(rep enum.Representation, quoted bool) (text []byte, err error) {
+	if <<.LcType>>MarshalTextRep != enum.Ordinal && i.Ordinal() < 0 {
+		return <<.LcType>>MarshalNumber(i)
+	}
+
 	var bs []byte
 	switch rep {
 	case enum.Number:
@@ -586,6 +598,9 @@ func (i <<.MainType>>) marshalText(rep enum.Representation, quoted bool) (text [
 	return bs, nil
 }
 
+// <<.LcType>>MarshalNumber handles marshaling where a number is required or where
+// the value is out of range but <<.LcType>>MarshalTextRep != enum.Ordinal.
+// This function can be replaced with any bespoke function than matches signature.
 var <<.LcType>>MarshalNumber = func(i <<.MainType>>) (text []byte, err error) {
 <<- if .IsFloat>>
 	bs := []byte(strconv.FormatFloat(float64(i), 'g', 7, 64))

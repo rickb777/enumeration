@@ -205,6 +205,10 @@ func (i Day) MarshalJSON() ([]byte, error) {
 }
 
 func (i Day) marshalText(rep enum.Representation, quoted bool) (text []byte, err error) {
+	if dayMarshalTextRep != enum.Ordinal && i.Ordinal() < 0 {
+		return dayMarshalNumber(i)
+	}
+
 	var bs []byte
 	switch rep {
 	case enum.Number:
@@ -227,6 +231,9 @@ func (i Day) marshalText(rep enum.Representation, quoted bool) (text []byte, err
 	return bs, nil
 }
 
+// dayMarshalNumber handles marshaling where a number is required or where
+// the value is out of range but dayMarshalTextRep != enum.Ordinal.
+// This function can be replaced with any bespoke function than matches signature.
 var dayMarshalNumber = func(i Day) (text []byte, err error) {
 	bs := []byte(strconv.FormatInt(int64(i), 10))
 	return bs, nil

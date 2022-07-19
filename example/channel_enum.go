@@ -195,10 +195,22 @@ func (i SalesChannel) MarshalText() (text []byte, err error) {
 // MarshalJSON converts values to bytes suitable for transmission via JSON.
 // The representation is chosen according to saleschannelMarshalTextRep.
 func (i SalesChannel) MarshalJSON() ([]byte, error) {
-	return enum.QuotedString(i.toString(saleschannelJSONStrings, saleschannelJSONIndex[:])), nil
+	o := i.Ordinal()
+	if o < 0 || o >= len(AllSalesChannels) {
+		if saleschannelMarshalTextRep == enum.Ordinal {
+			return nil, fmt.Errorf("%v is out of range", i)
+		}
+		return saleschannelMarshalNumber(i)
+	}
+	s := saleschannelJSONStrings[saleschannelJSONIndex[o]:saleschannelJSONIndex[o+1]]
+	return enum.QuotedString(s), nil
 }
 
 func (i SalesChannel) marshalText(rep enum.Representation, quoted bool) (text []byte, err error) {
+	if saleschannelMarshalTextRep != enum.Ordinal && i.Ordinal() < 0 {
+		return saleschannelMarshalNumber(i)
+	}
+
 	var bs []byte
 	switch rep {
 	case enum.Number:
@@ -221,6 +233,9 @@ func (i SalesChannel) marshalText(rep enum.Representation, quoted bool) (text []
 	return bs, nil
 }
 
+// saleschannelMarshalNumber handles marshaling where a number is required or where
+// the value is out of range but saleschannelMarshalTextRep != enum.Ordinal.
+// This function can be replaced with any bespoke function than matches signature.
 var saleschannelMarshalNumber = func(i SalesChannel) (text []byte, err error) {
 	bs := []byte(strconv.FormatInt(int64(i), 10))
 	return bs, nil
