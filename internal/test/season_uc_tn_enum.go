@@ -32,11 +32,11 @@ var (
 // String returns the literal string representation of a Season_Uc_Tn, which is
 // the same as the const identifier but without prefix or suffix.
 func (v Season_Uc_Tn) String() string {
-	return v.toString(season_uc_tnEnumStrings, season_uc_tnEnumIndex[:])
+	o := v.Ordinal()
+	return v.toString(o, season_uc_tnEnumStrings, season_uc_tnEnumIndex[:])
 }
 
-func (v Season_Uc_Tn) toString(concats string, indexes []uint16) string {
-	o := v.Ordinal()
+func (v Season_Uc_Tn) toString(o int, concats string, indexes []uint16) string {
 	if o < 0 || o >= len(AllSeason_Uc_Tns) {
 		return fmt.Sprintf("Season_Uc_Tn(%d)", v)
 	}
@@ -156,25 +156,36 @@ func MustParseSeason_Uc_Tn(s string) Season_Uc_Tn {
 	return v
 }
 
-// MarshalText converts values to a form suitable for transmission via XML, JSON etc.
+// MarshalText converts values to bytes suitable for transmission via XML, JSON etc.
+func (v Season_Uc_Tn) MarshalText() ([]byte, error) {
+	s, err := v.marshalText()
+	return []byte(s), err
+}
+
+// marshalText converts values to a form suitable for transmission via XML, JSON etc.
 // The number representation is chosen according to -marshaltext.
-func (v Season_Uc_Tn) MarshalText() (text []byte, err error) {
+func (v Season_Uc_Tn) marshalText() (string, error) {
 	if !v.IsValid() {
-		return v.marshalNumberOrError()
+		return v.marshalNumberStringOrError()
 	}
 
-	return season_uc_tnMarshalNumber(v)
+	return season_uc_tnMarshalNumber(v), nil
 }
 
 // season_uc_tnMarshalNumber handles marshaling where a number is required or where
 // the value is out of range but season_uc_tnMarshalTextRep != enum.Ordinal.
 // This function can be replaced with any bespoke function than matches signature.
-var season_uc_tnMarshalNumber = func(v Season_Uc_Tn) (text []byte, err error) {
-	bs := []byte(strconv.FormatInt(int64(v), 10))
-	return bs, nil
+var season_uc_tnMarshalNumber = func(v Season_Uc_Tn) string {
+	return strconv.FormatInt(int64(v), 10)
+}
+
+func (v Season_Uc_Tn) marshalNumberStringOrError() (string, error) {
+	bs, err := v.marshalNumberOrError()
+	return string(bs), err
 }
 
 func (v Season_Uc_Tn) marshalNumberOrError() ([]byte, error) {
+	// disallow lenient marshaling
 	return nil, v.invalidError()
 }
 

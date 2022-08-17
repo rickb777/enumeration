@@ -13,6 +13,12 @@ import (
 func TestString(t *testing.T) {
 	g := gomega.NewWithT(t)
 	g.Expect(Spring1.String()).Should(gomega.Equal("Spring"))
+	g.Expect(Spring_Nc_Ji.String()).Should(gomega.Equal(`Spring`))
+	g.Expect(Autumn_Nc_Jj.String()).Should(gomega.Equal(`Autumn`))
+	g.Expect(Spring_Ic_Ji.String()).Should(gomega.Equal(`Spring`))
+	g.Expect(Autumn_Ic_Jj.String()).Should(gomega.Equal(`Autumn`))
+	g.Expect(Spring_Uc_Ji.String()).Should(gomega.Equal(`SPRING`))
+	g.Expect(Autumn_Uc_Jj.String()).Should(gomega.Equal(`AUTUMN`))
 }
 
 func TestOrdinal(t *testing.T) {
@@ -75,6 +81,13 @@ func TestMarshal_for_Text(t *testing.T) {
 		g.Expect(string(s)).Should(gomega.Equal(`{"A":"Spring","B":"2","C":"2","D":"Autm","E":"Autm"}`))
 		g.Expect(string(x)).Should(gomega.Equal(`<Group><A>Spring</A><B>2</B><C>2</C><D>Autm</D><E>Autm</E></Group>`), string(x))
 	}
+
+	g.Expect(Spring_Nc_Ti.Text()).Should(gomega.Equal(`Spring`))
+	g.Expect(Autumn_Nc_Tt.Text()).Should(gomega.Equal(`Autm`))
+	g.Expect(Spring_Ic_Ti.Text()).Should(gomega.Equal(`Spring`))
+	g.Expect(Autumn_Ic_Tt.Text()).Should(gomega.Equal(`Autm`))
+	g.Expect(Spring_Uc_Ti.Text()).Should(gomega.Equal(`SPRING`))
+	g.Expect(Autumn_Uc_Ta.Text()).Should(gomega.Equal(`Autm`)) // ignores UC
 }
 
 func TestMarshal_for_JSON(t *testing.T) {
@@ -93,6 +106,13 @@ func TestMarshal_for_JSON(t *testing.T) {
 		g.Expect(string(s)).Should(gomega.Equal(`{"A":"Spring","B":2,"C":2,"D":"Autm"}`))
 		g.Expect(string(x)).Should(gomega.Equal(`<Group><A>1</A><B>2</B><C>3</C><D>3</D></Group>`), string(x))
 	}
+
+	g.Expect(Spring_Nc_Ji.JSON()).Should(gomega.Equal(`Spring`))
+	g.Expect(Autumn_Nc_Jj.JSON()).Should(gomega.Equal(`Autm`))
+	g.Expect(Spring_Ic_Ji.JSON()).Should(gomega.Equal(`Spring`))
+	g.Expect(Autumn_Ic_Jj.JSON()).Should(gomega.Equal(`Autm`))
+	g.Expect(Spring_Uc_Ji.JSON()).Should(gomega.Equal(`SPRING`))
+	g.Expect(Autumn_Uc_Jj.JSON()).Should(gomega.Equal(`Autm`)) // ignores UC
 }
 
 func TestMethodScan_Nc_string_ok(t *testing.T) {

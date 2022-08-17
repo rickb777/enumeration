@@ -44,11 +44,11 @@ var (
 // String returns the literal string representation of a GreekAlphabet, which is
 // the same as the const identifier but without prefix or suffix.
 func (v GreekAlphabet) String() string {
-	return v.toString(greekalphabetEnumStrings, greekalphabetEnumIndex[:])
+	o := v.Ordinal()
+	return v.toString(o, greekalphabetEnumStrings, greekalphabetEnumIndex[:])
 }
 
-func (v GreekAlphabet) toString(concats string, indexes []uint16) string {
-	o := v.Ordinal()
+func (v GreekAlphabet) toString(o int, concats string, indexes []uint16) string {
 	if o < 0 || o >= len(AllGreekAlphabets) {
 		return fmt.Sprintf("GreekAlphabet(%d)", v)
 	}
@@ -209,17 +209,35 @@ func MustParseGreekAlphabet(s string) GreekAlphabet {
 }
 
 // MarshalText converts values to bytes suitable for transmission via XML, JSON etc.
-// The representation is chosen according to 'text' struct tags.
 func (v GreekAlphabet) MarshalText() ([]byte, error) {
+	s, err := v.marshalText()
+	return []byte(s), err
+}
+
+// Text returns the representation used for transmission via XML, JSON etc.
+func (v GreekAlphabet) Text() string {
+	s, _ := v.marshalText()
+	return s
+}
+
+// marshalText converts values to bytes suitable for transmission via XML, JSON etc.
+// The representation is chosen according to 'text' struct tags.
+func (v GreekAlphabet) marshalText() (string, error) {
 	o := v.Ordinal()
 	if o < 0 {
-		return v.marshalNumberOrError()
+		return v.marshalNumberStringOrError()
 	}
-	s := greekalphabetTextStrings[greekalphabetTextIndex[o]:greekalphabetTextIndex[o+1]]
-	return []byte(s), nil
+
+	return v.toString(o, greekalphabetTextStrings, greekalphabetTextIndex[:]), nil
+}
+
+func (v GreekAlphabet) marshalNumberStringOrError() (string, error) {
+	bs, err := v.marshalNumberOrError()
+	return string(bs), err
 }
 
 func (v GreekAlphabet) marshalNumberOrError() ([]byte, error) {
+	// disallow lenient marshaling
 	return nil, v.invalidError()
 }
 
@@ -297,9 +315,10 @@ func (v GreekAlphabet) errorIfInvalid() error {
 // The representation is chosen according to 'sql' struct tags.
 // It implements driver.Valuer, https://golang.org/pkg/database/sql/driver/#Valuer
 func (v GreekAlphabet) Value() (driver.Value, error) {
-	if !v.IsValid() {
+	o := v.Ordinal()
+	if o < 0 {
 		return nil, fmt.Errorf("%v: cannot be stored", v)
 	}
 
-	return v.toString(greekalphabetSQLStrings, greekalphabetSQLIndex[:]), nil
+	return v.toString(o, greekalphabetSQLStrings, greekalphabetSQLIndex[:]), nil
 }

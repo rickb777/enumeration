@@ -36,11 +36,11 @@ var (
 // String returns the literal string representation of a Pet, which is
 // the same as the const identifier but without prefix or suffix.
 func (v Pet) String() string {
-	return v.toString(petEnumStrings, petEnumIndex[:])
+	o := v.Ordinal()
+	return v.toString(o, petEnumStrings, petEnumIndex[:])
 }
 
-func (v Pet) toString(concats string, indexes []uint16) string {
-	o := v.Ordinal()
+func (v Pet) toString(o int, concats string, indexes []uint16) string {
 	if o < 0 || o >= len(AllPets) {
 		return fmt.Sprintf("Pet(%d)", v)
 	}
@@ -170,26 +170,43 @@ func MustParsePet(s string) Pet {
 }
 
 // MarshalText converts values to bytes suitable for transmission via XML, JSON etc.
-// The representation is chosen according to 'text' struct tags.
 func (v Pet) MarshalText() ([]byte, error) {
+	s, err := v.marshalText()
+	return []byte(s), err
+}
+
+// Text returns the representation used for transmission via XML, JSON etc.
+func (v Pet) Text() string {
+	s, _ := v.marshalText()
+	return s
+}
+
+// marshalText converts values to bytes suitable for transmission via XML, JSON etc.
+// The representation is chosen according to 'text' struct tags.
+func (v Pet) marshalText() (string, error) {
 	o := v.Ordinal()
 	if o < 0 {
-		return v.marshalNumberOrError()
+		return v.marshalNumberStringOrError()
 	}
-	s := petTextStrings[petTextIndex[o]:petTextIndex[o+1]]
-	return []byte(s), nil
+
+	return v.toString(o, petTextStrings, petTextIndex[:]), nil
+}
+
+func (v Pet) marshalNumberStringOrError() (string, error) {
+	bs, err := v.marshalNumberOrError()
+	return string(bs), err
 }
 
 func (v Pet) marshalNumberOrError() ([]byte, error) {
-	return petMarshalNumber(v)
+	// allow lenient marshaling
+	return []byte(petMarshalNumber(v)), nil
 }
 
 // petMarshalNumber handles marshaling where a number is required or where
 // the value is out of range but petMarshalTextRep != enum.Ordinal.
 // This function can be replaced with any bespoke function than matches signature.
-var petMarshalNumber = func(v Pet) (text []byte, err error) {
-	bs := []byte(strconv.FormatInt(int64(v), 10))
-	return bs, nil
+var petMarshalNumber = func(v Pet) string {
+	return strconv.FormatInt(int64(v), 10)
 }
 
 // UnmarshalText converts transmitted values to ordinary values.

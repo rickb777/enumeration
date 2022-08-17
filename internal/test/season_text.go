@@ -132,3 +132,16 @@ type Season_Uc_To uint
 const (
 	Spring_Uc_To, Summer_Uc_To, Autumn_Uc_To, Winter_Uc_To Season_Uc_To = 1, 2, 3, 4
 )
+
+//-------------------------------------------------------------------------------------------------
+//go:generate enumeration -v -f -i season_text.go -type Season_Uc_Ta -suffix _Uc_Ta -uc
+
+type Season_Uc_Ta uint
+
+const (
+	_            Season_Uc_Ta = iota
+	Spring_Uc_Ta              // all:"Sprg"
+	Summer_Uc_Ta              // all:"Sumr"
+	Autumn_Uc_Ta              // all:"Autm"
+	Winter_Uc_Ta              // all:"Wint"
+)

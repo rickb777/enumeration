@@ -141,11 +141,11 @@ var (
 // String returns the literal string representation of a Country, which is
 // the same as the const identifier but without prefix or suffix.
 func (v Country) String() string {
-	return v.toString(countryEnumStrings, countryEnumIndex[:])
+	o := v.Ordinal()
+	return v.toString(o, countryEnumStrings, countryEnumIndex[:])
 }
 
-func (v Country) toString(concats string, indexes []uint16) string {
-	o := v.Ordinal()
+func (v Country) toString(o int, concats string, indexes []uint16) string {
 	if o < 0 || o >= len(AllCountries) {
 		return fmt.Sprintf("Country(%d)", v)
 	}
@@ -755,22 +755,52 @@ func MustParseCountry(s string) Country {
 }
 
 // MarshalText converts values to bytes suitable for transmission via XML, JSON etc.
-// The representation is chosen according to 'text' struct tags.
 func (v Country) MarshalText() ([]byte, error) {
+	s, err := v.marshalText()
+	return []byte(s), err
+}
+
+// Text returns the representation used for transmission via XML, JSON etc.
+func (v Country) Text() string {
+	s, _ := v.marshalText()
+	return s
+}
+
+// marshalText converts values to bytes suitable for transmission via XML, JSON etc.
+// The representation is chosen according to 'text' struct tags.
+func (v Country) marshalText() (string, error) {
 	o := v.Ordinal()
 	if o < 0 {
-		return v.marshalNumberOrError()
+		return v.marshalNumberStringOrError()
 	}
-	s := countryTextStrings[countryTextIndex[o]:countryTextIndex[o+1]]
-	return []byte(s), nil
+
+	return v.toString(o, countryTextStrings, countryTextIndex[:]), nil
+}
+
+func (v Country) marshalNumberStringOrError() (string, error) {
+	bs, err := v.marshalNumberOrError()
+	return string(bs), err
 }
 
 func (v Country) marshalNumberOrError() ([]byte, error) {
+	// disallow lenient marshaling
 	return nil, v.invalidError()
 }
 
 func (v Country) invalidError() error {
 	return fmt.Errorf("%d is not a valid country", v)
+}
+
+// JSON returns an approximation to the representation used for transmission via JSON.
+// However, strings are not quoted.
+func (v Country) JSON() string {
+	o := v.Ordinal()
+	if o < 0 {
+		s, _ := v.marshalNumberStringOrError()
+		return s
+	}
+
+	return v.toString(o, countryJSONStrings, countryJSONIndex[:])
 }
 
 // MarshalJSON converts values to bytes suitable for transmission via JSON.
@@ -780,7 +810,8 @@ func (v Country) MarshalJSON() ([]byte, error) {
 	if o < 0 {
 		return v.marshalNumberOrError()
 	}
-	s := countryJSONStrings[countryJSONIndex[o]:countryJSONIndex[o+1]]
+
+	s := v.toString(o, countryJSONStrings, countryJSONIndex[:])
 	return enum.QuotedString(s), nil
 }
 
@@ -872,9 +903,10 @@ func (v Country) errorIfInvalid() error {
 // The representation is chosen according to 'sql' struct tags.
 // It implements driver.Valuer, https://golang.org/pkg/database/sql/driver/#Valuer
 func (v Country) Value() (driver.Value, error) {
-	if !v.IsValid() {
+	o := v.Ordinal()
+	if o < 0 {
 		return nil, fmt.Errorf("%v: cannot be stored", v)
 	}
 
-	return v.toString(countrySQLStrings, countrySQLIndex[:]), nil
+	return v.toString(o, countrySQLStrings, countrySQLIndex[:]), nil
 }

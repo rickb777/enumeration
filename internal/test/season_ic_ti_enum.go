@@ -33,11 +33,11 @@ var (
 // String returns the literal string representation of a Season_Ic_Ti, which is
 // the same as the const identifier but without prefix or suffix.
 func (v Season_Ic_Ti) String() string {
-	return v.toString(season_ic_tiEnumStrings, season_ic_tiEnumIndex[:])
+	o := v.Ordinal()
+	return v.toString(o, season_ic_tiEnumStrings, season_ic_tiEnumIndex[:])
 }
 
-func (v Season_Ic_Ti) toString(concats string, indexes []uint16) string {
-	o := v.Ordinal()
+func (v Season_Ic_Ti) toString(o int, concats string, indexes []uint16) string {
 	if o < 0 || o >= len(AllSeason_Ic_Tis) {
 		return fmt.Sprintf("Season_Ic_Ti(%d)", v)
 	}
@@ -160,17 +160,36 @@ func MustParseSeason_Ic_Ti(s string) Season_Ic_Ti {
 	return v
 }
 
-// MarshalText converts values to a form suitable for transmission via XML, JSON etc.
+// MarshalText converts values to bytes suitable for transmission via XML, JSON etc.
+func (v Season_Ic_Ti) MarshalText() ([]byte, error) {
+	s, err := v.marshalText()
+	return []byte(s), err
+}
+
+// Text returns the representation used for transmission via XML, JSON etc.
+func (v Season_Ic_Ti) Text() string {
+	s, _ := v.marshalText()
+	return s
+}
+
+// marshalText converts values to a form suitable for transmission via XML, JSON etc.
 // The identifier representation is chosen according to -marshaltext.
-func (v Season_Ic_Ti) MarshalText() (text []byte, err error) {
-	if !v.IsValid() {
-		return v.marshalNumberOrError()
+func (v Season_Ic_Ti) marshalText() (string, error) {
+	o := v.Ordinal()
+	if o < 0 {
+		return v.marshalNumberStringOrError()
 	}
 
-	return []byte(v.String()), nil
+	return v.toString(o, season_ic_tiEnumStrings, season_ic_tiEnumIndex[:]), nil
+}
+
+func (v Season_Ic_Ti) marshalNumberStringOrError() (string, error) {
+	bs, err := v.marshalNumberOrError()
+	return string(bs), err
 }
 
 func (v Season_Ic_Ti) marshalNumberOrError() ([]byte, error) {
+	// disallow lenient marshaling
 	return nil, v.invalidError()
 }
 

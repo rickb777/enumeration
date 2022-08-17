@@ -220,7 +220,7 @@ func (m Model) writeOneJoinedString(w DualWriter, table string, ov, iv []string)
 }
 
 func (m Model) writeJoinedStringAndIndexes(w DualWriter) {
-	w.WriteString("const (\n")
+	w.WriteString("\nconst (\n")
 
 	m.writeOneJoinedString(w, "Enum", m.TransformedOutputValues(), m.TransformedInputValues())
 	if m.HasTextTags() {
@@ -252,8 +252,7 @@ func (m Model) writeJoinedStringAndIndexes(w DualWriter) {
 //-------------------------------------------------------------------------------------------------
 
 const toStringMethod = `
-func (v <<.MainType>>) toString(concats string, indexes []uint16) string {
-	o := v.Ordinal()
+func (v <<.MainType>>) toString(o int, concats string, indexes []uint16) string {
 	if o < 0 || o >= len(All<<.Plural>>) {
 		return fmt.Sprintf("<<.MainType>>(<<.Placeholder>>)", v)
 	}
@@ -299,7 +298,8 @@ const stringMethod = `
 // String returns the literal string representation of a <<.MainType>>, which is
 // the same as the const identifier but without prefix or suffix.
 func (v <<.MainType>>) String() string {
-	return v.toString(<<.LcType>>EnumStrings, <<.LcType>>EnumIndex[:])
+	o := v.Ordinal()
+	return v.toString(o, <<.LcType>>EnumStrings, <<.LcType>>EnumIndex[:])
 }
 `
 
@@ -381,9 +381,8 @@ func (m Model) writeIsValidMethod(w DualWriter) {
 
 //-------------------------------------------------------------------------------------------------
 
-// no blank line so that doc comments join up
 const parse_body = `
-<< if .Extra.Doc >>
+<< if .Extra.Doc ->>
 // Parse parses a string to find the corresponding <<.MainType>>, accepting one of the string values or
 // a number. The input representation is determined by <<.MarshalTextRep>>. It is used by As<<.MainType>>.
 <<- if .IgnoreCase>>
@@ -396,7 +395,7 @@ const parse_body = `
 //    err := v.Parse(s)
 //    ...  etc
 //
-<<- end >>
+<< end ->>
 func (v *<<.MainType>>) <<.Extra.Method>>(in string) error {
 	if v.<<.Extra.parseNumber>>(in) {
 		return nil
@@ -565,85 +564,119 @@ func (m Model) writeMustParseMethod(w DualWriter) {
 
 //-------------------------------------------------------------------------------------------------
 
-const marshalText_struct_tags = `
+const marshalText_Main = `
 // MarshalText converts values to bytes suitable for transmission via XML, JSON etc.
-// The representation is chosen according to 'text' struct tags.
 func (v <<.MainType>>) MarshalText() ([]byte, error) {
+	s, err := v.marshalText()
+	return []byte(s), err
+}
+`
+
+const marshalText_struct_tags = `
+// Text returns the representation used for transmission via XML, JSON etc.
+func (v <<.MainType>>) Text() string {
+	s, _ := v.marshalText()
+	return s
+}
+
+// marshalText converts values to bytes suitable for transmission via XML, JSON etc.
+// The representation is chosen according to 'text' struct tags.
+func (v <<.MainType>>) marshalText() (string, error) {
 	o := v.Ordinal()
 	if o < 0 {
-		return v.marshalNumberOrError()
+		return v.marshalNumberStringOrError()
 	}
-	s := <<.LcType>>TextStrings[<<.LcType>>TextIndex[o]:<<.LcType>>TextIndex[o+1]]
-	return []byte(s), nil
+
+	return v.toString(o, <<.LcType>>TextStrings, <<.LcType>>TextIndex[:]), nil
 }
 `
 
 const marshalText_identifier = `
-// MarshalText converts values to a form suitable for transmission via XML, JSON etc.
+// Text returns the representation used for transmission via XML, JSON etc.
+func (v <<.MainType>>) Text() string {
+	s, _ := v.marshalText()
+	return s
+}
+
+// marshalText converts values to a form suitable for transmission via XML, JSON etc.
 // The identifier representation is chosen according to -marshaltext.
-func (v <<.MainType>>) MarshalText() (text []byte, err error) {
-	if !v.IsValid() {
-		return v.marshalNumberOrError()
+func (v <<.MainType>>) marshalText() (string, error) {
+	o := v.Ordinal()
+	if o < 0 {
+		return v.marshalNumberStringOrError()
 	}
-	<<- if .HasTextTags>>
 
-	return v.toString(<<.LcType>>TextStrings, <<.LcType>>TextIndex[:]), nil
-	<<- else >>
-
-	return []byte(v.String()), nil
-	<<- end >>
+	return v.toString(o, <<.LcType>>EnumStrings, <<.LcType>>EnumIndex[:]), nil
 }
 `
 
 const marshalText_number = `
-// MarshalText converts values to a form suitable for transmission via XML, JSON etc.
+// marshalText converts values to a form suitable for transmission via XML, JSON etc.
 // The number representation is chosen according to -marshaltext.
-func (v <<.MainType>>) MarshalText() (text []byte, err error) {
+func (v <<.MainType>>) marshalText() (string, error) {
 	if !v.IsValid() {
-		return v.marshalNumberOrError()
+		return v.marshalNumberStringOrError()
 	}
 
-	return <<.LcType>>MarshalNumber(v)
+	return <<.LcType>>MarshalNumber(v), nil
 }
 `
 
 const marshalText_ordinal = `
-// MarshalText converts values to a form suitable for transmission via XML, JSON etc.
+// marshalText converts values to a form suitable for transmission via XML, JSON etc.
 // The ordinal representation is chosen according to -marshaltext.
-func (v <<.MainType>>) MarshalText() (text []byte, err error) {
-	if !v.IsValid() {
-		return nil, v.invalidError()
+func (v <<.MainType>>) marshalText() (string, error) {
+	o := v.Ordinal()
+	if o < 0 {
+		return "", v.invalidError()
 	}
 
-	return v.marshalOrdinal()
+	return strconv.Itoa(o), nil
 }
 `
 
 func (m Model) writeMarshalText(w DualWriter) {
 	if m.HasTextTags() {
+		m.execTemplate(w, marshalText_Main)
 		m.execTemplate(w, marshalText_struct_tags)
 		m.writeMarshalNumberOrErrorMethod(w)
+		m.writeToStringMethod(w)
 		return
 	}
 
 	switch m.MarshalTextRep {
 	case enum.Identifier:
+		m.execTemplate(w, marshalText_Main)
 		m.execTemplate(w, marshalText_identifier)
 		m.writeMarshalNumberOrErrorMethod(w)
+		m.writeToStringMethod(w)
 	case enum.Number:
+		m.execTemplate(w, marshalText_Main)
 		m.execTemplate(w, marshalText_number)
 		m.writeMarshalNumberVarFunc(w)
 		m.writeMarshalNumberOrErrorMethod(w)
 	case enum.Ordinal:
+		m.execTemplate(w, marshalText_Main)
 		m.execTemplate(w, marshalText_ordinal)
 		m.writeInvalidErrorMethod(w)
-		m.writeMarshalOrdinalMethod(w)
 	}
 }
 
 //-------------------------------------------------------------------------------------------------
 
 const marshalJSON_struct_tags = `
+// JSON returns an approximation to the representation used for transmission via JSON.
+// However, strings are not quoted.
+func (v <<.MainType>>) JSON() string {
+	o := v.Ordinal()
+	if o < 0 {
+		s, _ := v.marshalNumberStringOrError()
+		return s
+	}
+
+	return v.toString(o, <<.LcType>>JSONStrings, <<.LcType>>JSONIndex[:])
+}
+
 // MarshalJSON converts values to bytes suitable for transmission via JSON.
 // The representation is chosen according to 'json' struct tags.
 func (v <<.MainType>>) MarshalJSON() ([]byte, error) {
@@ -651,25 +684,35 @@ func (v <<.MainType>>) MarshalJSON() ([]byte, error) {
 	if o < 0 {
 		return v.marshalNumberOrError()
 	}
-	s := <<.LcType>>JSONStrings[<<.LcType>>JSONIndex[o]:<<.LcType>>JSONIndex[o+1]]
+
+	s := v.toString(o, <<.LcType>>JSONStrings, <<.LcType>>JSONIndex[:])
 	return enum.QuotedString(s), nil
 }
 `
 
 const marshalJSON_identifier = `
+// JSON returns an approximation to the representation used for transmission via JSON.
+// However, strings are not quoted.
+func (v <<.MainType>>) JSON() string {
+	o := v.Ordinal()
+	if o < 0 {
+		s, _ := v.marshalNumberStringOrError()
+		return s
+	}
+
+	return v.toString(o, <<.LcType>>EnumStrings, <<.LcType>>EnumIndex[:])
+}
+
 // MarshalJSON converts values to bytes suitable for transmission via JSON.
 // The identifier representation is chosen according to -marshaljson.
 func (v <<.MainType>>) MarshalJSON() ([]byte, error) {
-	if !v.IsValid() {
+	o := v.Ordinal()
+	if o < 0 {
 		return v.marshalNumberOrError()
 	}
-<<- if .HasTextTags>>
 
-	return enum.QuotedString(v.toString(<<.LcType>>TextStrings, <<.LcType>>TextIndex[:])), nil
-<<- else >>
-
-	return enum.QuotedString(v.String()), nil
-<<- end >>
+	s := v.toString(o, <<.LcType>>EnumStrings, <<.LcType>>EnumIndex[:])
+	return enum.QuotedString(s), nil
 }
 `
 
@@ -681,7 +724,8 @@ func (v <<.MainType>>) MarshalJSON() ([]byte, error) {
 		return v.marshalNumberOrError()
 	}
 
-	return <<.LcType>>MarshalNumber(v)
+	s := <<.LcType>>MarshalNumber(v)
+	return []byte(s), nil
 }
 `
 
@@ -689,11 +733,13 @@ const marshalJSON_ordinal = `
 // MarshalJSON converts values to bytes suitable for transmission via JSON.
 // The ordinal representation is chosen according to -marshaljson.
 func (v <<.MainType>>) MarshalJSON() ([]byte, error) {
-	if !v.IsValid() {
+	o := v.Ordinal()
+	if o < 0 {
 		return nil, v.invalidError()
 	}
 
-	return v.marshalOrdinal()
+	s := strconv.Itoa(o)
+	return []byte(s), nil
 }
 `
 
@@ -714,26 +760,8 @@ func (m Model) writeMarshalJSON(w DualWriter) {
 		case enum.Ordinal:
 			m.execTemplate(w, marshalJSON_ordinal)
 			m.writeInvalidErrorMethod(w)
-			m.writeMarshalOrdinalMethod(w)
 		}
 	}
-}
-
-//-------------------------------------------------------------------------------------------------
-
-const marshalOrdinal = `
-func (v <<.MainType>>) marshalOrdinal() (text []byte, err error) {
-	o := v.Ordinal()
-	if o < 0 {
-		return nil, v.invalidError()
-	}
-	return []byte(strconv.Itoa(o)), nil
-}
-`
-
-func (m Model) writeMarshalOrdinalMethod(w DualWriter) {
-	m.writeUnexportedFunc(w, "v.marshalOrdinal", marshalOrdinal)
-	m.writeInvalidErrorMethod(w)
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -742,13 +770,12 @@ const marshalNumberVarFunc = `
 // <<.LcType>>MarshalNumber handles marshaling where a number is required or where
 // the value is out of range but <<.LcType>>MarshalTextRep != enum.Ordinal.
 // This function can be replaced with any bespoke function than matches signature.
-var <<.LcType>>MarshalNumber = func(v <<.MainType>>) (text []byte, err error) {
+var <<.LcType>>MarshalNumber = func(v <<.MainType>>) string {
 <<- if .IsFloat>>
-	bs := []byte(strconv.FormatFloat(float64(v), 'g', 7, 64))
+	return strconv.FormatFloat(float64(v), 'g', 7, 64)
 <<- else>>
-	bs := []byte(strconv.FormatInt(int64(v), 10))
+	return strconv.FormatInt(int64(v), 10)
 <<- end>>
-	return bs, nil
 }
 `
 
@@ -759,10 +786,17 @@ func (m Model) writeMarshalNumberVarFunc(w DualWriter) {
 //-------------------------------------------------------------------------------------------------
 
 const marshalNumberOrError = `
+func (v <<.MainType>>) marshalNumberStringOrError() (string, error) {
+	bs, err := v.marshalNumberOrError()
+	return string(bs), err
+}
+
 func (v <<.MainType>>) marshalNumberOrError() ([]byte, error) {
 <<- if and .Lenient (ne .MarshalTextRep.String "Ordinal") >>
-	return <<.LcType>>MarshalNumber(v)
+	// allow lenient marshaling
+	return []byte(<<.LcType>>MarshalNumber(v)), nil
 <<- else >>
+	// disallow lenient marshaling
 	return nil, v.invalidError()
 <<- end >>
 }
@@ -859,7 +893,6 @@ func (v *<<.MainType>>) UnmarshalJSON(text []byte) error {
 	s = strings.Trim(s, "\"")
 	return v.unmarshalJSON(s)
 }
-
 `
 
 const unmarshalJSON_struct_tags = `
@@ -946,7 +979,6 @@ func (v *<<.MainType>>) Scan(value interface{}) error {
 
 	return v.scanParse(s)
 }
-
 `
 
 func (m Model) writeScanMethod(w DualWriter) {
@@ -1004,11 +1036,12 @@ const value_struct_tags = `
 // The representation is chosen according to 'sql' struct tags.
 // It implements driver.Valuer, https://golang.org/pkg/database/sql/driver/#Valuer
 func (v <<.MainType>>) Value() (driver.Value, error) {
-	if !v.IsValid() {
+	o := v.Ordinal()
+	if o < 0 {
 		return nil, fmt.Errorf("%v: cannot be stored", v)
 	}
 
-	return v.toString(<<.LcType>>SQLStrings, <<.LcType>>SQLIndex[:]), nil
+	return v.toString(o, <<.LcType>>SQLStrings, <<.LcType>>SQLIndex[:]), nil
 }
 `
 

@@ -32,11 +32,11 @@ var (
 // String returns the literal string representation of a Season_Nc_Jo, which is
 // the same as the const identifier but without prefix or suffix.
 func (v Season_Nc_Jo) String() string {
-	return v.toString(season_nc_joEnumStrings, season_nc_joEnumIndex[:])
+	o := v.Ordinal()
+	return v.toString(o, season_nc_joEnumStrings, season_nc_joEnumIndex[:])
 }
 
-func (v Season_Nc_Jo) toString(concats string, indexes []uint16) string {
-	o := v.Ordinal()
+func (v Season_Nc_Jo) toString(o int, concats string, indexes []uint16) string {
 	if o < 0 || o >= len(AllSeason_Nc_Jos) {
 		return fmt.Sprintf("Season_Nc_Jo(%d)", v)
 	}
@@ -159,23 +159,17 @@ func MustParseSeason_Nc_Jo(s string) Season_Nc_Jo {
 // MarshalJSON converts values to bytes suitable for transmission via JSON.
 // The ordinal representation is chosen according to -marshaljson.
 func (v Season_Nc_Jo) MarshalJSON() ([]byte, error) {
-	if !v.IsValid() {
-		return nil, v.invalidError()
-	}
-
-	return v.marshalOrdinal()
-}
-
-func (v Season_Nc_Jo) invalidError() error {
-	return fmt.Errorf("%d is not a valid season_nc_jo", v)
-}
-
-func (v Season_Nc_Jo) marshalOrdinal() (text []byte, err error) {
 	o := v.Ordinal()
 	if o < 0 {
 		return nil, v.invalidError()
 	}
-	return []byte(strconv.Itoa(o)), nil
+
+	s := strconv.Itoa(o)
+	return []byte(s), nil
+}
+
+func (v Season_Nc_Jo) invalidError() error {
+	return fmt.Errorf("%d is not a valid season_nc_jo", v)
 }
 
 // UnmarshalJSON converts transmitted JSON values to ordinary values. It allows both

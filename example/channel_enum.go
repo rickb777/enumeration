@@ -37,11 +37,11 @@ var (
 // String returns the literal string representation of a SalesChannel, which is
 // the same as the const identifier but without prefix or suffix.
 func (v SalesChannel) String() string {
-	return v.toString(saleschannelEnumStrings, saleschannelEnumIndex[:])
+	o := v.Ordinal()
+	return v.toString(o, saleschannelEnumStrings, saleschannelEnumIndex[:])
 }
 
-func (v SalesChannel) toString(concats string, indexes []uint16) string {
-	o := v.Ordinal()
+func (v SalesChannel) toString(o int, concats string, indexes []uint16) string {
 	if o < 0 || o >= len(AllSalesChannels) {
 		return fmt.Sprintf("SalesChannel(%d)", v)
 	}
@@ -159,6 +159,18 @@ func MustParseSalesChannel(s string) SalesChannel {
 	return v
 }
 
+// JSON returns an approximation to the representation used for transmission via JSON.
+// However, strings are not quoted.
+func (v SalesChannel) JSON() string {
+	o := v.Ordinal()
+	if o < 0 {
+		s, _ := v.marshalNumberStringOrError()
+		return s
+	}
+
+	return v.toString(o, saleschannelJSONStrings, saleschannelJSONIndex[:])
+}
+
 // MarshalJSON converts values to bytes suitable for transmission via JSON.
 // The representation is chosen according to 'json' struct tags.
 func (v SalesChannel) MarshalJSON() ([]byte, error) {
@@ -166,11 +178,18 @@ func (v SalesChannel) MarshalJSON() ([]byte, error) {
 	if o < 0 {
 		return v.marshalNumberOrError()
 	}
-	s := saleschannelJSONStrings[saleschannelJSONIndex[o]:saleschannelJSONIndex[o+1]]
+
+	s := v.toString(o, saleschannelJSONStrings, saleschannelJSONIndex[:])
 	return enum.QuotedString(s), nil
 }
 
+func (v SalesChannel) marshalNumberStringOrError() (string, error) {
+	bs, err := v.marshalNumberOrError()
+	return string(bs), err
+}
+
 func (v SalesChannel) marshalNumberOrError() ([]byte, error) {
+	// disallow lenient marshaling
 	return nil, v.invalidError()
 }
 
@@ -247,9 +266,10 @@ func (v SalesChannel) errorIfInvalid() error {
 // The representation is chosen according to 'sql' struct tags.
 // It implements driver.Valuer, https://golang.org/pkg/database/sql/driver/#Valuer
 func (v SalesChannel) Value() (driver.Value, error) {
-	if !v.IsValid() {
+	o := v.Ordinal()
+	if o < 0 {
 		return nil, fmt.Errorf("%v: cannot be stored", v)
 	}
 
-	return v.toString(saleschannelSQLStrings, saleschannelSQLIndex[:]), nil
+	return v.toString(o, saleschannelSQLStrings, saleschannelSQLIndex[:]), nil
 }

@@ -33,11 +33,11 @@ var (
 // String returns the literal string representation of a Season_Uc_Sn, which is
 // the same as the const identifier but without prefix or suffix.
 func (v Season_Uc_Sn) String() string {
-	return v.toString(season_uc_snEnumStrings, season_uc_snEnumIndex[:])
+	o := v.Ordinal()
+	return v.toString(o, season_uc_snEnumStrings, season_uc_snEnumIndex[:])
 }
 
-func (v Season_Uc_Sn) toString(concats string, indexes []uint16) string {
-	o := v.Ordinal()
+func (v Season_Uc_Sn) toString(o int, concats string, indexes []uint16) string {
 	if o < 0 || o >= len(AllSeason_Uc_Sns) {
 		return fmt.Sprintf("Season_Uc_Sn(%d)", v)
 	}

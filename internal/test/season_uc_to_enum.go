@@ -32,11 +32,11 @@ var (
 // String returns the literal string representation of a Season_Uc_To, which is
 // the same as the const identifier but without prefix or suffix.
 func (v Season_Uc_To) String() string {
-	return v.toString(season_uc_toEnumStrings, season_uc_toEnumIndex[:])
+	o := v.Ordinal()
+	return v.toString(o, season_uc_toEnumStrings, season_uc_toEnumIndex[:])
 }
 
-func (v Season_Uc_To) toString(concats string, indexes []uint16) string {
-	o := v.Ordinal()
+func (v Season_Uc_To) toString(o int, concats string, indexes []uint16) string {
 	if o < 0 || o >= len(AllSeason_Uc_Tos) {
 		return fmt.Sprintf("Season_Uc_To(%d)", v)
 	}
@@ -156,26 +156,25 @@ func MustParseSeason_Uc_To(s string) Season_Uc_To {
 	return v
 }
 
-// MarshalText converts values to a form suitable for transmission via XML, JSON etc.
+// MarshalText converts values to bytes suitable for transmission via XML, JSON etc.
+func (v Season_Uc_To) MarshalText() ([]byte, error) {
+	s, err := v.marshalText()
+	return []byte(s), err
+}
+
+// marshalText converts values to a form suitable for transmission via XML, JSON etc.
 // The ordinal representation is chosen according to -marshaltext.
-func (v Season_Uc_To) MarshalText() (text []byte, err error) {
-	if !v.IsValid() {
-		return nil, v.invalidError()
+func (v Season_Uc_To) marshalText() (string, error) {
+	o := v.Ordinal()
+	if o < 0 {
+		return "", v.invalidError()
 	}
 
-	return v.marshalOrdinal()
+	return strconv.Itoa(o), nil
 }
 
 func (v Season_Uc_To) invalidError() error {
 	return fmt.Errorf("%d is not a valid season_uc_to", v)
-}
-
-func (v Season_Uc_To) marshalOrdinal() (text []byte, err error) {
-	o := v.Ordinal()
-	if o < 0 {
-		return nil, v.invalidError()
-	}
-	return []byte(strconv.Itoa(o)), nil
 }
 
 // UnmarshalText converts transmitted values to ordinary values.

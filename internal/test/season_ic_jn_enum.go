@@ -33,11 +33,11 @@ var (
 // String returns the literal string representation of a Season_Ic_Jn, which is
 // the same as the const identifier but without prefix or suffix.
 func (v Season_Ic_Jn) String() string {
-	return v.toString(season_ic_jnEnumStrings, season_ic_jnEnumIndex[:])
+	o := v.Ordinal()
+	return v.toString(o, season_ic_jnEnumStrings, season_ic_jnEnumIndex[:])
 }
 
-func (v Season_Ic_Jn) toString(concats string, indexes []uint16) string {
-	o := v.Ordinal()
+func (v Season_Ic_Jn) toString(o int, concats string, indexes []uint16) string {
 	if o < 0 || o >= len(AllSeason_Ic_Jns) {
 		return fmt.Sprintf("Season_Ic_Jn(%d)", v)
 	}
@@ -167,10 +167,17 @@ func (v Season_Ic_Jn) MarshalJSON() ([]byte, error) {
 		return v.marshalNumberOrError()
 	}
 
-	return season_ic_jnMarshalNumber(v)
+	s := season_ic_jnMarshalNumber(v)
+	return []byte(s), nil
+}
+
+func (v Season_Ic_Jn) marshalNumberStringOrError() (string, error) {
+	bs, err := v.marshalNumberOrError()
+	return string(bs), err
 }
 
 func (v Season_Ic_Jn) marshalNumberOrError() ([]byte, error) {
+	// disallow lenient marshaling
 	return nil, v.invalidError()
 }
 
@@ -181,9 +188,8 @@ func (v Season_Ic_Jn) invalidError() error {
 // season_ic_jnMarshalNumber handles marshaling where a number is required or where
 // the value is out of range but season_ic_jnMarshalTextRep != enum.Ordinal.
 // This function can be replaced with any bespoke function than matches signature.
-var season_ic_jnMarshalNumber = func(v Season_Ic_Jn) (text []byte, err error) {
-	bs := []byte(strconv.FormatInt(int64(v), 10))
-	return bs, nil
+var season_ic_jnMarshalNumber = func(v Season_Ic_Jn) string {
+	return strconv.FormatInt(int64(v), 10)
 }
 
 // UnmarshalJSON converts transmitted JSON values to ordinary values. It allows both

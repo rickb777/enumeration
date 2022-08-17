@@ -137,7 +137,7 @@ _              SalesChannel = iota
 )
 ```
 
-Structured comments are deliberately similar to Go `struct` tags. The supported tags are `text` (for MarshalText/UnmarshalText), `json` (for MarshalJSON/UnmarshalJSON) and `sql` (for Value/Scan); these can be used in any combination; also `all` sets a value for all of them. When present, these tags override the `-marshaltext`, `-marshaljson` and/or `-store` options described below.
+Structured comments are deliberately similar to Go `struct` tags. The supported tags are `text` (for MarshalText/UnmarshalText), `json` (for MarshalJSON/UnmarshalJSON) and `sql` (for Value/Scan); these can be used in any combination; also `all` sets a value for all of them. When present, these tags override the `-marshaltext`, `-marshaljson` and/or `-store` options described below. They also override the `-uc`, `-ic` and `-lc` case modifiers on the corresponding marshal methods.
 
 ## Next, Run The Tool
 
@@ -222,9 +222,6 @@ the `Day` type above. You will get:
  * `func (d Day) String() string`
     - Converts Day values to strings and satisfies the well-known `Stringer` interface. The strings are the human-readable names, as written in the list of constants.
 
- * `func (d Day) Tag() string`
-    - Returns the same as `String()` by default, but if you provide tags via `-using` it returns the corresponding tag instead.
-
  * `func (d Day) Ordinal() int`
     - Converts Day values into their ordinal numbers, i.e. the indexes indicating the order in which you declared the constants, starting from zero. These may happen to be the same as the values you chose, but need not be. For invalid Day values, `Ordinal()` returns -1.
 
@@ -260,6 +257,9 @@ the `Day` type above. You will get:
 
  * `var dayMarshalNumber`
     - This unexported `var` is a function that converts values to strings using `strconv.FormatInt` or `strconv.FormatFloat`. Within the same package, you can replace this function with your own.
+
+ * `func (d Day) Text()` and `func (d Day) JSON()`
+    - These are present whenever `MarshalText` / `MarshalJSON` methods are generated and are using the identifier or a struct tag. They return the corresponding values as string (with silent errors). Note that `JSON()` does not quote strings, unlike `MarshalJSON`.
 
 ## Other Use Options
 

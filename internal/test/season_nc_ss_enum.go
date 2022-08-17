@@ -34,11 +34,11 @@ var (
 // String returns the literal string representation of a Season_Nc_Ss, which is
 // the same as the const identifier but without prefix or suffix.
 func (v Season_Nc_Ss) String() string {
-	return v.toString(season_nc_ssEnumStrings, season_nc_ssEnumIndex[:])
+	o := v.Ordinal()
+	return v.toString(o, season_nc_ssEnumStrings, season_nc_ssEnumIndex[:])
 }
 
-func (v Season_Nc_Ss) toString(concats string, indexes []uint16) string {
-	o := v.Ordinal()
+func (v Season_Nc_Ss) toString(o int, concats string, indexes []uint16) string {
 	if o < 0 || o >= len(AllSeason_Nc_Sss) {
 		return fmt.Sprintf("Season_Nc_Ss(%d)", v)
 	}
@@ -213,9 +213,10 @@ func (v Season_Nc_Ss) invalidError() error {
 // The representation is chosen according to 'sql' struct tags.
 // It implements driver.Valuer, https://golang.org/pkg/database/sql/driver/#Valuer
 func (v Season_Nc_Ss) Value() (driver.Value, error) {
-	if !v.IsValid() {
+	o := v.Ordinal()
+	if o < 0 {
 		return nil, fmt.Errorf("%v: cannot be stored", v)
 	}
 
-	return v.toString(season_nc_ssSQLStrings, season_nc_ssSQLIndex[:]), nil
+	return v.toString(o, season_nc_ssSQLStrings, season_nc_ssSQLIndex[:]), nil
 }

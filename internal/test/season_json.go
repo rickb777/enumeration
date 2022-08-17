@@ -106,3 +106,16 @@ type Season_Uc_Jo uint
 const (
 	Spring_Uc_Jo, Summer_Uc_Jo, Autumn_Uc_Jo, Winter_Uc_Jo Season_Uc_Jo = 1, 2, 3, 4
 )
+
+//-------------------------------------------------------------------------------------------------
+//go:generate enumeration -v -f -i season_json.go -type Season_Uc_Jj -suffix _Uc_Jj -uc
+
+type Season_Uc_Jj uint
+
+const (
+	_            Season_Uc_Jj = iota
+	Spring_Uc_Jj              // json:"Sprg"
+	Summer_Uc_Jj              // json:"Sumr"
+	Autumn_Uc_Jj              // json:"Autm"
+	Winter_Uc_Jj              // json:"Wint"
+)

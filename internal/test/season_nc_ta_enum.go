@@ -38,11 +38,11 @@ var (
 // String returns the literal string representation of a Season_Nc_Ta, which is
 // the same as the const identifier but without prefix or suffix.
 func (v Season_Nc_Ta) String() string {
-	return v.toString(season_nc_taEnumStrings, season_nc_taEnumIndex[:])
+	o := v.Ordinal()
+	return v.toString(o, season_nc_taEnumStrings, season_nc_taEnumIndex[:])
 }
 
-func (v Season_Nc_Ta) toString(concats string, indexes []uint16) string {
-	o := v.Ordinal()
+func (v Season_Nc_Ta) toString(o int, concats string, indexes []uint16) string {
 	if o < 0 || o >= len(AllSeason_Nc_Tas) {
 		return fmt.Sprintf("Season_Nc_Ta(%d)", v)
 	}
@@ -163,22 +163,52 @@ func MustParseSeason_Nc_Ta(s string) Season_Nc_Ta {
 }
 
 // MarshalText converts values to bytes suitable for transmission via XML, JSON etc.
-// The representation is chosen according to 'text' struct tags.
 func (v Season_Nc_Ta) MarshalText() ([]byte, error) {
+	s, err := v.marshalText()
+	return []byte(s), err
+}
+
+// Text returns the representation used for transmission via XML, JSON etc.
+func (v Season_Nc_Ta) Text() string {
+	s, _ := v.marshalText()
+	return s
+}
+
+// marshalText converts values to bytes suitable for transmission via XML, JSON etc.
+// The representation is chosen according to 'text' struct tags.
+func (v Season_Nc_Ta) marshalText() (string, error) {
 	o := v.Ordinal()
 	if o < 0 {
-		return v.marshalNumberOrError()
+		return v.marshalNumberStringOrError()
 	}
-	s := season_nc_taTextStrings[season_nc_taTextIndex[o]:season_nc_taTextIndex[o+1]]
-	return []byte(s), nil
+
+	return v.toString(o, season_nc_taTextStrings, season_nc_taTextIndex[:]), nil
+}
+
+func (v Season_Nc_Ta) marshalNumberStringOrError() (string, error) {
+	bs, err := v.marshalNumberOrError()
+	return string(bs), err
 }
 
 func (v Season_Nc_Ta) marshalNumberOrError() ([]byte, error) {
+	// disallow lenient marshaling
 	return nil, v.invalidError()
 }
 
 func (v Season_Nc_Ta) invalidError() error {
 	return fmt.Errorf("%d is not a valid season_nc_ta", v)
+}
+
+// JSON returns an approximation to the representation used for transmission via JSON.
+// However, strings are not quoted.
+func (v Season_Nc_Ta) JSON() string {
+	o := v.Ordinal()
+	if o < 0 {
+		s, _ := v.marshalNumberStringOrError()
+		return s
+	}
+
+	return v.toString(o, season_nc_taJSONStrings, season_nc_taJSONIndex[:])
 }
 
 // MarshalJSON converts values to bytes suitable for transmission via JSON.
@@ -188,7 +218,8 @@ func (v Season_Nc_Ta) MarshalJSON() ([]byte, error) {
 	if o < 0 {
 		return v.marshalNumberOrError()
 	}
-	s := season_nc_taJSONStrings[season_nc_taJSONIndex[o]:season_nc_taJSONIndex[o+1]]
+
+	s := v.toString(o, season_nc_taJSONStrings, season_nc_taJSONIndex[:])
 	return enum.QuotedString(s), nil
 }
 
@@ -280,9 +311,10 @@ func (v Season_Nc_Ta) errorIfInvalid() error {
 // The representation is chosen according to 'sql' struct tags.
 // It implements driver.Valuer, https://golang.org/pkg/database/sql/driver/#Valuer
 func (v Season_Nc_Ta) Value() (driver.Value, error) {
-	if !v.IsValid() {
+	o := v.Ordinal()
+	if o < 0 {
 		return nil, fmt.Errorf("%v: cannot be stored", v)
 	}
 
-	return v.toString(season_nc_taSQLStrings, season_nc_taSQLIndex[:]), nil
+	return v.toString(o, season_nc_taSQLStrings, season_nc_taSQLIndex[:]), nil
 }

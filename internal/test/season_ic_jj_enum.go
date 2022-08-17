@@ -36,11 +36,11 @@ var (
 // String returns the literal string representation of a Season_Ic_Jj, which is
 // the same as the const identifier but without prefix or suffix.
 func (v Season_Ic_Jj) String() string {
-	return v.toString(season_ic_jjEnumStrings, season_ic_jjEnumIndex[:])
+	o := v.Ordinal()
+	return v.toString(o, season_ic_jjEnumStrings, season_ic_jjEnumIndex[:])
 }
 
-func (v Season_Ic_Jj) toString(concats string, indexes []uint16) string {
-	o := v.Ordinal()
+func (v Season_Ic_Jj) toString(o int, concats string, indexes []uint16) string {
 	if o < 0 || o >= len(AllSeason_Ic_Jjs) {
 		return fmt.Sprintf("Season_Ic_Jj(%d)", v)
 	}
@@ -163,6 +163,18 @@ func MustParseSeason_Ic_Jj(s string) Season_Ic_Jj {
 	return v
 }
 
+// JSON returns an approximation to the representation used for transmission via JSON.
+// However, strings are not quoted.
+func (v Season_Ic_Jj) JSON() string {
+	o := v.Ordinal()
+	if o < 0 {
+		s, _ := v.marshalNumberStringOrError()
+		return s
+	}
+
+	return v.toString(o, season_ic_jjJSONStrings, season_ic_jjJSONIndex[:])
+}
+
 // MarshalJSON converts values to bytes suitable for transmission via JSON.
 // The representation is chosen according to 'json' struct tags.
 func (v Season_Ic_Jj) MarshalJSON() ([]byte, error) {
@@ -170,11 +182,18 @@ func (v Season_Ic_Jj) MarshalJSON() ([]byte, error) {
 	if o < 0 {
 		return v.marshalNumberOrError()
 	}
-	s := season_ic_jjJSONStrings[season_ic_jjJSONIndex[o]:season_ic_jjJSONIndex[o+1]]
+
+	s := v.toString(o, season_ic_jjJSONStrings, season_ic_jjJSONIndex[:])
 	return enum.QuotedString(s), nil
 }
 
+func (v Season_Ic_Jj) marshalNumberStringOrError() (string, error) {
+	bs, err := v.marshalNumberOrError()
+	return string(bs), err
+}
+
 func (v Season_Ic_Jj) marshalNumberOrError() ([]byte, error) {
+	// disallow lenient marshaling
 	return nil, v.invalidError()
 }
 

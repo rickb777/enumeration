@@ -33,11 +33,11 @@ var (
 // String returns the literal string representation of a Day, which is
 // the same as the const identifier but without prefix or suffix.
 func (v Day) String() string {
-	return v.toString(dayEnumStrings, dayEnumIndex[:])
+	o := v.Ordinal()
+	return v.toString(o, dayEnumStrings, dayEnumIndex[:])
 }
 
-func (v Day) toString(concats string, indexes []uint16) string {
-	o := v.Ordinal()
+func (v Day) toString(o int, concats string, indexes []uint16) string {
 	if o < 0 || o >= len(AllDays) {
 		return fmt.Sprintf("Day(%d)", v)
 	}

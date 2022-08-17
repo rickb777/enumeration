@@ -37,11 +37,11 @@ var (
 // String returns the literal string representation of a Month, which is
 // the same as the const identifier but without prefix or suffix.
 func (v Month) String() string {
-	return v.toString(monthEnumStrings, monthEnumIndex[:])
+	o := v.Ordinal()
+	return v.toString(o, monthEnumStrings, monthEnumIndex[:])
 }
 
-func (v Month) toString(concats string, indexes []uint16) string {
-	o := v.Ordinal()
+func (v Month) toString(o int, concats string, indexes []uint16) string {
 	if o < 0 || o >= len(AllMonths) {
 		return fmt.Sprintf("Month(%d)", v)
 	}
@@ -180,17 +180,36 @@ func MustParseMonth(s string) Month {
 	return v
 }
 
-// MarshalText converts values to a form suitable for transmission via XML, JSON etc.
+// MarshalText converts values to bytes suitable for transmission via XML, JSON etc.
+func (v Month) MarshalText() ([]byte, error) {
+	s, err := v.marshalText()
+	return []byte(s), err
+}
+
+// Text returns the representation used for transmission via XML, JSON etc.
+func (v Month) Text() string {
+	s, _ := v.marshalText()
+	return s
+}
+
+// marshalText converts values to a form suitable for transmission via XML, JSON etc.
 // The identifier representation is chosen according to -marshaltext.
-func (v Month) MarshalText() (text []byte, err error) {
-	if !v.IsValid() {
-		return v.marshalNumberOrError()
+func (v Month) marshalText() (string, error) {
+	o := v.Ordinal()
+	if o < 0 {
+		return v.marshalNumberStringOrError()
 	}
 
-	return []byte(v.String()), nil
+	return v.toString(o, monthEnumStrings, monthEnumIndex[:]), nil
+}
+
+func (v Month) marshalNumberStringOrError() (string, error) {
+	bs, err := v.marshalNumberOrError()
+	return string(bs), err
 }
 
 func (v Month) marshalNumberOrError() ([]byte, error) {
+	// disallow lenient marshaling
 	return nil, v.invalidError()
 }
 

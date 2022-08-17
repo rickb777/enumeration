@@ -39,11 +39,11 @@ var (
 // String returns the literal string representation of a Method, which is
 // the same as the const identifier but without prefix or suffix.
 func (v Method) String() string {
-	return v.toString(methodEnumStrings, methodEnumIndex[:])
+	o := v.Ordinal()
+	return v.toString(o, methodEnumStrings, methodEnumIndex[:])
 }
 
-func (v Method) toString(concats string, indexes []uint16) string {
-	o := v.Ordinal()
+func (v Method) toString(o int, concats string, indexes []uint16) string {
 	if o < 0 || o >= len(AllMethods) {
 		return fmt.Sprintf("Method(%d)", v)
 	}
@@ -170,6 +170,18 @@ func MustParseMethod(s string) Method {
 	return v
 }
 
+// JSON returns an approximation to the representation used for transmission via JSON.
+// However, strings are not quoted.
+func (v Method) JSON() string {
+	o := v.Ordinal()
+	if o < 0 {
+		s, _ := v.marshalNumberStringOrError()
+		return s
+	}
+
+	return v.toString(o, methodJSONStrings, methodJSONIndex[:])
+}
+
 // MarshalJSON converts values to bytes suitable for transmission via JSON.
 // The representation is chosen according to 'json' struct tags.
 func (v Method) MarshalJSON() ([]byte, error) {
@@ -177,11 +189,18 @@ func (v Method) MarshalJSON() ([]byte, error) {
 	if o < 0 {
 		return v.marshalNumberOrError()
 	}
-	s := methodJSONStrings[methodJSONIndex[o]:methodJSONIndex[o+1]]
+
+	s := v.toString(o, methodJSONStrings, methodJSONIndex[:])
 	return enum.QuotedString(s), nil
 }
 
+func (v Method) marshalNumberStringOrError() (string, error) {
+	bs, err := v.marshalNumberOrError()
+	return string(bs), err
+}
+
 func (v Method) marshalNumberOrError() ([]byte, error) {
+	// disallow lenient marshaling
 	return nil, v.invalidError()
 }
 

@@ -33,11 +33,11 @@ var (
 // String returns the literal string representation of a Season_Nc_Tt, which is
 // the same as the const identifier but without prefix or suffix.
 func (v Season_Nc_Tt) String() string {
-	return v.toString(season_nc_ttEnumStrings, season_nc_ttEnumIndex[:])
+	o := v.Ordinal()
+	return v.toString(o, season_nc_ttEnumStrings, season_nc_ttEnumIndex[:])
 }
 
-func (v Season_Nc_Tt) toString(concats string, indexes []uint16) string {
-	o := v.Ordinal()
+func (v Season_Nc_Tt) toString(o int, concats string, indexes []uint16) string {
 	if o < 0 || o >= len(AllSeason_Nc_Tts) {
 		return fmt.Sprintf("Season_Nc_Tt(%d)", v)
 	}
@@ -158,17 +158,35 @@ func MustParseSeason_Nc_Tt(s string) Season_Nc_Tt {
 }
 
 // MarshalText converts values to bytes suitable for transmission via XML, JSON etc.
-// The representation is chosen according to 'text' struct tags.
 func (v Season_Nc_Tt) MarshalText() ([]byte, error) {
+	s, err := v.marshalText()
+	return []byte(s), err
+}
+
+// Text returns the representation used for transmission via XML, JSON etc.
+func (v Season_Nc_Tt) Text() string {
+	s, _ := v.marshalText()
+	return s
+}
+
+// marshalText converts values to bytes suitable for transmission via XML, JSON etc.
+// The representation is chosen according to 'text' struct tags.
+func (v Season_Nc_Tt) marshalText() (string, error) {
 	o := v.Ordinal()
 	if o < 0 {
-		return v.marshalNumberOrError()
+		return v.marshalNumberStringOrError()
 	}
-	s := season_nc_ttTextStrings[season_nc_ttTextIndex[o]:season_nc_ttTextIndex[o+1]]
-	return []byte(s), nil
+
+	return v.toString(o, season_nc_ttTextStrings, season_nc_ttTextIndex[:]), nil
+}
+
+func (v Season_Nc_Tt) marshalNumberStringOrError() (string, error) {
+	bs, err := v.marshalNumberOrError()
+	return string(bs), err
 }
 
 func (v Season_Nc_Tt) marshalNumberOrError() ([]byte, error) {
+	// disallow lenient marshaling
 	return nil, v.invalidError()
 }
 

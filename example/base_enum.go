@@ -32,11 +32,11 @@ var (
 // String returns the literal string representation of a Base, which is
 // the same as the const identifier but without prefix or suffix.
 func (v Base) String() string {
-	return v.toString(baseEnumStrings, baseEnumIndex[:])
+	o := v.Ordinal()
+	return v.toString(o, baseEnumStrings, baseEnumIndex[:])
 }
 
-func (v Base) toString(concats string, indexes []uint16) string {
-	o := v.Ordinal()
+func (v Base) toString(o int, concats string, indexes []uint16) string {
 	if o < 0 || o >= len(AllBases) {
 		return fmt.Sprintf("Base(%g)", v)
 	}
