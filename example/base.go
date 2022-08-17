@@ -1,11 +1,10 @@
 package example
 
-// This example demonstrates using floating point values instead of integers.
-// These are float32 but could be float64; the only ither restriction is that
-// no two values can be the same number.
-
 //go:generate enumeration -v -f -type Base -lc
 
+// Base: This example demonstrates using floating point values instead of integers.
+// These are float32 but could be float64; the only ither restriction is that
+// no two values can be the same number.
 type Base float32
 
 // Nucleotide Molecular Weights, g/mol

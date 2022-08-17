@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v2 v2.14.0
+// github.com/rickb777/enumeration/v3 v2.14.0
 
 package example
 
@@ -7,8 +7,7 @@ import (
 	"database/sql/driver"
 	"errors"
 	"fmt"
-	"github.com/rickb777/enumeration/v2/enum"
-	"os"
+	"github.com/rickb777/enumeration/v3/enum"
 	"strconv"
 	"strings"
 )
@@ -28,11 +27,20 @@ var AllMethodEnums = enum.IntEnums{
 const (
 	methodEnumStrings = "HEADGETPUTPOSTPATCHDELETE"
 	methodEnumInputs  = "headgetputpostpatchdelete"
+	methodJSONStrings = "HEGEPUPOPADE"
+	methodJSONInputs  = "HEGEPUPOPADE"
 )
 
 var (
 	methodEnumIndex = [...]uint16{0, 4, 7, 10, 14, 19, 25}
+	methodJSONIndex = [...]uint16{0, 2, 4, 6, 8, 10, 12}
 )
+
+// String returns the literal string representation of a Method, which is
+// the same as the const identifier but without prefix or suffix.
+func (v Method) String() string {
+	return v.toString(methodEnumStrings, methodEnumIndex[:])
+}
 
 func (v Method) toString(concats string, indexes []uint16) string {
 	o := v.Ordinal()
@@ -40,63 +48,6 @@ func (v Method) toString(concats string, indexes []uint16) string {
 		return fmt.Sprintf("Method(%d)", v)
 	}
 	return concats[indexes[o]:indexes[o+1]]
-}
-
-func (v *Method) parseString(s string, concats string, indexes []uint16) (ok bool) {
-	var i0 uint16 = 0
-
-	for j := 1; j < len(indexes); j++ {
-		i1 := indexes[j]
-		p := concats[i0:i1]
-		if s == p {
-			*v = AllMethods[j-1]
-			return true
-		}
-		i0 = i1
-	}
-	return false
-}
-
-var methodTagsInverse = map[string]Method{}
-
-func init() {
-	for _, id := range AllMethods {
-		v, exists := methodTags[id]
-		if !exists {
-			fmt.Fprintf(os.Stderr, "Warning: Method: %s is missing from methodTags\n", id)
-		} else {
-			k := methodTransformInput(v)
-			if _, exists := methodTagsInverse[k]; exists {
-				fmt.Fprintf(os.Stderr, "Warning: Method: %q is duplicated in methodTags\n", k)
-			}
-			methodTagsInverse[k] = id
-		}
-	}
-
-	if len(methodTags) != 6 {
-		panic(fmt.Sprintf("Method: methodTags has %d items but should have 6", len(methodTags)))
-	}
-
-	if len(methodTags) != len(methodTagsInverse) {
-		panic(fmt.Sprintf("Method: methodTags has %d items but there are only %d distinct items",
-			len(methodTags), len(methodTagsInverse)))
-	}
-}
-
-// Tag returns the string representation of a Method. For invalid values,
-// this returns v.String() (see IsValid).
-func (v Method) Tag() string {
-	s, ok := methodTags[v]
-	if ok {
-		return s
-	}
-	return v.String()
-}
-
-// String returns the literal string representation of a Method, which is
-// the same as the const identifier but without prefix or suffix.
-func (v Method) String() string {
-	return v.toString(methodEnumStrings, methodEnumIndex[:])
 }
 
 // Ordinal returns the ordinal number of a Method. This is an integer counting
@@ -140,46 +91,6 @@ func MethodOf(v int) Method {
 	return HEAD + GET + PUT + POST + PATCH + DELETE + 1
 }
 
-// Parse parses a string to find the corresponding Method, accepting one of the string values or
-// a number. The input representation is determined by methodMarshalTextRep. It is used by AsMethod.
-// The input case does not matter.
-//
-// Usage Example
-//
-//    v := new(Method)
-//    err := v.Parse(s)
-//    ...  etc
-//
-func (v *Method) Parse(s string) error {
-	return v.parse(s, methodMarshalTextRep)
-}
-
-func (v *Method) parse(in string, rep enum.Representation) error {
-	if rep == enum.Ordinal {
-		if v.parseOrdinal(in) {
-			return nil
-		}
-	} else {
-		if v.parseNumber(in) {
-			return nil
-		}
-	}
-
-	s := methodTransformInput(in)
-
-	if rep == enum.Identifier {
-		if v.parseString(s, methodEnumInputs, methodEnumIndex[:]) || v.parseTag(s) {
-			return nil
-		}
-	} else {
-		if v.parseTag(s) || v.parseString(s, methodEnumInputs, methodEnumIndex[:]) {
-			return nil
-		}
-	}
-
-	return errors.New(in + ": unrecognised method")
-}
-
 // parseNumber attempts to convert a decimal value.
 // Only numbers that correspond to the enumeration are valid.
 func (v *Method) parseNumber(s string) (ok bool) {
@@ -191,20 +102,31 @@ func (v *Method) parseNumber(s string) (ok bool) {
 	return false
 }
 
-// parseOrdinal attempts to convert an ordinal value.
-func (v *Method) parseOrdinal(s string) (ok bool) {
-	ord, err := strconv.Atoi(s)
-	if err == nil && 0 <= ord && ord < len(AllMethods) {
-		*v = AllMethods[ord]
-		return true
+// Parse parses a string to find the corresponding Method, accepting one of the string values or
+// a number. The input representation is determined by None. It is used by AsMethod.
+// The input case does not matter.
+//
+// Usage Example
+//
+//	v := new(Method)
+//	err := v.Parse(s)
+//	...  etc
+func (v *Method) Parse(in string) error {
+	if v.parseNumber(in) {
+		return nil
 	}
-	return false
+
+	s := methodTransformInput(in)
+
+	return v.parseFallback(in, s)
 }
 
-// parseTag attempts to match an entry in methodTagsInverse
-func (v *Method) parseTag(s string) (ok bool) {
-	*v, ok = methodTagsInverse[s]
-	return ok
+func (v *Method) parseFallback(in, s string) error {
+	if v.parseString(s, methodEnumInputs, methodEnumIndex[:]) {
+		return nil
+	}
+
+	return errors.New(in + ": unrecognised method")
 }
 
 // methodTransformInput may alter input strings before they are parsed.
@@ -212,6 +134,21 @@ func (v *Method) parseTag(s string) (ok bool) {
 // -ic -lc -uc -unsnake.
 var methodTransformInput = func(in string) string {
 	return strings.ToLower(in)
+}
+
+func (v *Method) parseString(s string, concats string, indexes []uint16) (ok bool) {
+	var i0 uint16 = 0
+
+	for j := 1; j < len(indexes); j++ {
+		i1 := indexes[j]
+		p := concats[i0:i1]
+		if s == p {
+			*v = AllMethods[j-1]
+			return true
+		}
+		i0 = i1
+	}
+	return false
 }
 
 // AsMethod parses a string to find the corresponding Method, accepting either one of the string values or
@@ -233,91 +170,42 @@ func MustParseMethod(s string) Method {
 	return v
 }
 
-// methodMarshalTextRep controls representation used for XML and other text encodings.
-// When enum.Identifier, quoted strings are used. When enum.Tag the quoted strings will use
-// the associated tag map values. When enum.Ordinal, an integer will be used based on the
-// Ordinal method. When enum.Number, the number underlying the value will be used.
-// By default, it is enum.Identifier.
-// The initial value is set using the -marshaltext command line parameter.
-var methodMarshalTextRep = enum.Identifier
-
-// MarshalText converts values to a form suitable for transmission via XML etc.
-// The representation is chosen according to methodMarshalTextRep.
-func (v Method) MarshalText() (text []byte, err error) {
-	return v.marshalText(methodMarshalTextRep, false)
-}
-
 // MarshalJSON converts values to bytes suitable for transmission via JSON.
-// The representation is chosen according to methodMarshalTextRep.
+// The representation is chosen according to 'json' struct tags.
 func (v Method) MarshalJSON() ([]byte, error) {
-	return v.marshalText(methodMarshalTextRep, true)
-}
-
-func (v Method) marshalText(rep enum.Representation, quoted bool) (text []byte, err error) {
-	if rep != enum.Ordinal && !v.IsValid() {
-		return methodMarshalNumber(v)
+	o := v.Ordinal()
+	if o < 0 {
+		return v.marshalNumberOrError()
 	}
-
-	var bs []byte
-	switch rep {
-	case enum.Number:
-		return methodMarshalNumber(v)
-	case enum.Ordinal:
-		return v.marshalOrdinal()
-	case enum.Tag:
-		if quoted {
-			bs = enum.QuotedString(v.Tag())
-		} else {
-			bs = []byte(v.Tag())
-		}
-	default:
-		if quoted {
-			bs = enum.QuotedString(v.String())
-		} else {
-			bs = []byte(v.String())
-		}
-	}
-	return bs, nil
+	s := methodJSONStrings[methodJSONIndex[o]:methodJSONIndex[o+1]]
+	return enum.QuotedString(s), nil
 }
 
-// methodMarshalNumber handles marshaling where a number is required or where
-// the value is out of range but methodMarshalTextRep != enum.Ordinal.
-// This function can be replaced with any bespoke function than matches signature.
-var methodMarshalNumber = func(v Method) (text []byte, err error) {
-	bs := []byte(strconv.FormatInt(int64(v), 10))
-	return bs, nil
+func (v Method) marshalNumberOrError() ([]byte, error) {
+	return nil, v.invalidError()
 }
 
-func (v Method) marshalOrdinal() (text []byte, err error) {
-	bs := []byte(strconv.Itoa(v.Ordinal()))
-	return bs, nil
+func (v Method) invalidError() error {
+	return fmt.Errorf("%d is not a valid method", v)
 }
 
-// UnmarshalText converts transmitted values to ordinary values.
-func (v *Method) UnmarshalText(text []byte) error {
-	return v.Parse(string(text))
-}
-
-// UnmarshalJSON converts transmitted JSON values to ordinary values. It allows both
-// ordinals and strings to represent the values.
-func (v *Method) UnmarshalJSON(text []byte) error {
-	s := string(text)
-	if s == "null" {
-		// Ignore null, like in the main JSON package.
+func (v *Method) unmarshalJSON(in string) error {
+	if v.parseNumber(in) {
 		return nil
 	}
-	s = strings.Trim(s, "\"")
-	return v.unmarshalJSON(s)
-}
 
-func (v *Method) unmarshalJSON(s string) error {
-	return v.Parse(s)
-}
+	s := methodTransformInput(in)
 
-// methodStoreRep controls database storage via the Scan and Value methods.
-// By default, it is enum.Identifier.
-// The initial value is set using the -store command line parameter.
-var methodStoreRep = enum.Identifier
+	if v.parseString(s, methodJSONInputs, methodJSONIndex[:]) {
+		return nil
+	}
+
+	if v.parseString(s, methodEnumInputs, methodEnumIndex[:]) {
+		return nil
+	}
+
+	return errors.New(in + ": unrecognised method")
+}
 
 // Scan parses some value, which can be a number, a string or []byte.
 // It implements sql.Scanner, https://golang.org/pkg/database/sql/#Scanner
@@ -329,15 +217,11 @@ func (v *Method) Scan(value interface{}) error {
 	var s string
 	switch x := value.(type) {
 	case int64:
-		if methodStoreRep == enum.Ordinal {
-			*v = MethodOf(int(x))
-		} else {
-			*v = Method(x)
-		}
-		return nil
+		*v = Method(x)
+		return v.errorIfInvalid()
 	case float64:
 		*v = Method(x)
-		return nil
+		return v.errorIfInvalid()
 	case []byte:
 		s = string(x)
 	case string:
@@ -346,24 +230,28 @@ func (v *Method) Scan(value interface{}) error {
 		return fmt.Errorf("%T %+v is not a meaningful method", value, value)
 	}
 
-	return v.parse(s, methodStoreRep)
+	return v.scanParse(s)
 }
 
-// Value converts the Method to a string.
-// It implements driver.Valuer, https://golang.org/pkg/database/sql/driver/#Valuer
-func (v Method) Value() (driver.Value, error) {
-	if methodStoreRep != enum.Number && !v.IsValid() {
-		return nil, fmt.Errorf("%v: cannot be stored", v)
+func (v *Method) scanParse(in string) error {
+	if v.parseNumber(in) {
+		return nil
 	}
 
-	switch methodStoreRep {
-	case enum.Number:
-		return int64(v), nil
-	case enum.Ordinal:
-		return int64(v.Ordinal()), nil
-	case enum.Tag:
-		return v.Tag(), nil
-	default:
-		return v.String(), nil
+	s := methodTransformInput(in)
+
+	return v.parseFallback(in, s)
+}
+
+func (v Method) errorIfInvalid() error {
+	if v.IsValid() {
+		return nil
 	}
+	return v.invalidError()
+}
+
+// Value converts the Method to a number (based on '-store number').
+// It implements driver.Valuer, https://golang.org/pkg/database/sql/driver/#Valuer
+func (v Method) Value() (driver.Value, error) {
+	return int64(v), nil
 }

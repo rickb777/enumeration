@@ -1,4 +1,4 @@
-module github.com/rickb777/enumeration/v2
+module github.com/rickb777/enumeration/v3
 
 require github.com/onsi/gomega v1.16.0
 

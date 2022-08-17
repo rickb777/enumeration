@@ -5,7 +5,6 @@ package enum
 type Enum interface {
 	Ordinal() int
 	String() string
-	Tag() string
 	IsValid() bool
 }
 
@@ -35,16 +34,6 @@ func (es Enums) Strings() []string {
 	return ss
 }
 
-// Tags gets the tag values of the enums in the same order.
-// If no tags have been defined, this returns the same as Strings.
-func (es Enums) Tags() []string {
-	ss := make([]string, len(es))
-	for i, e := range es {
-		ss[i] = e.Tag()
-	}
-	return ss
-}
-
 // Ordinals gets the ordinal values of the enums in the same order.
 func (es Enums) Ordinals() []int {
 	os := make([]int, len(es))
@@ -64,16 +53,6 @@ func (es IntEnums) Strings() []string {
 	ss := make([]string, len(es))
 	for i, e := range es {
 		ss[i] = e.String()
-	}
-	return ss
-}
-
-// Tags gets the tag values of the enums in the same order.
-// If no tags have been defined, this returns the same as Strings.
-func (es IntEnums) Tags() []string {
-	ss := make([]string, len(es))
-	for i, e := range es {
-		ss[i] = e.Tag()
 	}
 	return ss
 }
@@ -106,16 +85,6 @@ func (es FloatEnums) Strings() []string {
 	ss := make([]string, len(es))
 	for i, e := range es {
 		ss[i] = e.String()
-	}
-	return ss
-}
-
-// Tags gets the tag values of the enums in the same order.
-// If no tags have been defined, this returns the same as Strings.
-func (es FloatEnums) Tags() []string {
-	ss := make([]string, len(es))
-	for i, e := range es {
-		ss[i] = e.Tag()
 	}
 	return ss
 }

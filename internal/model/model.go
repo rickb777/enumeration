@@ -2,12 +2,13 @@ package model
 
 import (
 	"fmt"
-	"github.com/rickb777/enumeration/v2/enum"
-	"github.com/rickb777/enumeration/v2/internal/transform"
 	"go/types"
 	"reflect"
 	"strings"
 	"text/template"
+
+	"github.com/rickb777/enumeration/v3/enum"
+	"github.com/rickb777/enumeration/v3/internal/transform"
 )
 
 var Prefix, Suffix string
@@ -15,19 +16,21 @@ var Prefix, Suffix string
 // Config contains the model parameters obtained from command line options
 // (either directly or computed).
 type Config struct {
-	MainType       string
-	Plural, Pkg    string
-	MarshalTextRep enum.Representation
-	StoreRep       enum.Representation
-	IgnoreCase     bool
-	Unsnake        bool
-	Lenient        bool
+	MainType             string
+	Plural, Pkg          string
+	MarshalTextRep       enum.Representation
+	MarshalJSONRep       enum.Representation
+	StoreRep             enum.Representation
+	IgnoreCase           bool
+	Unsnake              bool
+	Lenient              bool
+	ParseNumberAsOrdinal bool
 }
 
 type Value struct {
-	Identifier string
-	Shortened  string
-	JSON, SQL  string
+	Identifier      string
+	Shortened       string
+	Text, JSON, SQL string
 }
 
 type Values []Value
@@ -44,13 +47,23 @@ func ValuesOf(ss ...string) Values {
 }
 
 func (vs Values) Append(s string, tag reflect.StructTag) Values {
-	vs = append(vs, Value{
+	all := tag.Get("all")
+	v := Value{
 		Identifier: s,
 		Shortened:  shortenIdentifier(s, Prefix, Suffix),
-		JSON:       tag.Get("json"),
-		SQL:        tag.Get("sql"),
-	})
-	return vs
+		Text:       getTag(tag, "text", all),
+		JSON:       getTag(tag, "json", all),
+		SQL:        getTag(tag, "sql", all),
+	}
+	return append(vs, v)
+}
+
+func getTag(tag reflect.StructTag, name, deflt string) string {
+	v := tag.Get(name)
+	if v != "" {
+		return v
+	}
+	return deflt
 }
 
 func shortenIdentifier(id, prefix, suffix string) string {
@@ -88,6 +101,11 @@ func (vs Values) Shortened() []string {
 
 //-------------------------------------------------------------------------------------------------
 
+type Imports struct {
+	Database bool
+	Strings  bool
+}
+
 // Model holds the information available during template evaluation.
 type Model struct {
 	Config
@@ -95,9 +113,9 @@ type Model struct {
 	Version          string
 	Values           Values
 	Case             transform.Case
-	TagTable         string
 	AliasTable       string
-	Extra            map[string]string
+	Imports          Imports
+	Extra            map[string]interface{}
 }
 
 func (m Model) CheckBadPrefixSuffix() error {
@@ -113,14 +131,14 @@ func (m Model) CheckBadPrefixSuffix() error {
 	}
 
 	if Prefix != "" {
-		any := false
+		foundAny := false
 		for _, v := range m.Values {
 			if strings.HasPrefix(v.Identifier, Prefix) {
-				any = true
+				foundAny = true
 				break
 			}
 		}
-		if any {
+		if foundAny {
 			for _, v := range m.Values {
 				if !strings.HasPrefix(v.Identifier, Prefix) {
 					return fmt.Errorf("%s %s: all identifiers must have the prefix %s (or none)", m.MainType, v, Prefix)
@@ -130,14 +148,14 @@ func (m Model) CheckBadPrefixSuffix() error {
 	}
 
 	if Suffix != "" {
-		any := false
+		foundAny := false
 		for _, v := range m.Values {
 			if strings.HasSuffix(v.Identifier, Suffix) {
-				any = true
+				foundAny = true
 				break
 			}
 		}
-		if any {
+		if foundAny {
 			for _, v := range m.Values {
 				if !strings.HasSuffix(v.Identifier, Suffix) {
 					return fmt.Errorf("%s %s: all identifiers must have the suffix %s (or none)", m.MainType, v, Suffix)
@@ -175,6 +193,15 @@ func (m Model) CheckBadTags() error {
 	return nil
 }
 
+//-------------------------------------------------------------------------------------------------
+
+func (m Model) HasTextTags() bool {
+	if len(m.Values) == 0 {
+		return false
+	}
+	return m.Values[0].Text != ""
+}
+
 func (m Model) HasJSONTags() bool {
 	if len(m.Values) == 0 {
 		return false
@@ -192,6 +219,8 @@ func (m Model) HasSQLTags() bool {
 func (m Model) Asymmetric() bool {
 	return m.IgnoreCase
 }
+
+//-------------------------------------------------------------------------------------------------
 
 func (m Model) InputCase() transform.Case {
 	c := m.Case
@@ -262,4 +291,17 @@ func (m Model) Placeholder() string {
 
 func (m Model) ValuesJoined(from int, separator string) string {
 	return strings.Join(m.Values[from:].Identifiers(), separator)
+}
+
+func (m Model) SelectImports() Model {
+	if m.StoreRep > 0 || m.HasSQLTags() {
+		m.Imports.Database = true
+	}
+	if m.MarshalJSONRep > 0 {
+		m.Imports.Strings = true
+	}
+	if strings.Contains(m.expression(""), "strings.") {
+		m.Imports.Strings = true
+	}
+	return m
 }

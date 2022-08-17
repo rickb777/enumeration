@@ -2,12 +2,13 @@ package parse
 
 import (
 	"bytes"
+	"testing"
+
 	. "github.com/benmoss/matchers"
 	. "github.com/onsi/gomega"
-	"github.com/rickb777/enumeration/v2/internal/model"
-	"github.com/rickb777/enumeration/v2/internal/transform"
-	"github.com/rickb777/enumeration/v2/internal/util"
-	"testing"
+	"github.com/rickb777/enumeration/v3/internal/model"
+	"github.com/rickb777/enumeration/v3/internal/transform"
+	"github.com/rickb777/enumeration/v3/internal/util"
 )
 
 const enumBlock1 = `
@@ -44,7 +45,7 @@ func TestConvertBlock1(t *testing.T) {
 		Version:  util.Version,
 		Values:   model.ValuesOf("Mars", "Bounty", "Snickers", "Kitkat"),
 		Case:     transform.Upper,
-		Extra:    make(map[string]string),
+		Extra:    make(map[string]interface{}),
 	}))
 }
 
@@ -88,7 +89,7 @@ func TestConvertBlock2(t *testing.T) {
 		BaseType: "int",
 		Version:  util.Version,
 		Values:   model.ValuesOf("Mars", "Bounty", "Snickers", "Kitkat"),
-		Extra:    make(map[string]string),
+		Extra:    make(map[string]interface{}),
 	}))
 }
 
@@ -126,7 +127,7 @@ func TestConvertBlock3(t *testing.T) {
 		Version:  util.Version,
 		Values:   model.ValuesOf("Mars", "Bounty", "Snickers", "Kitkat"),
 		Case:     transform.Upper,
-		Extra:    make(map[string]string),
+		Extra:    make(map[string]interface{}),
 	}))
 }
 
@@ -168,8 +169,8 @@ var sweetStrings = map[Sweet]string{
 
 func TestConvertBlock4(t *testing.T) {
 	RegisterTestingT(t)
-	UsingTable = "sweetStrings"
-	defer func() { UsingTable = "" }()
+	AliasTable = "sweetAliases"
+	defer func() { AliasTable = "" }()
 
 	util.Dbg = testing.Verbose()
 	s := bytes.NewBufferString(enumBlock4)
@@ -197,12 +198,12 @@ func TestConvertBlock4(t *testing.T) {
 			IgnoreCase: true,
 			Unsnake:    true,
 		},
-		LcType:   "sweet",
-		BaseType: "int",
-		Version:  util.Version,
-		Values:   values,
-		TagTable: "sweetStrings",
-		Extra:    make(map[string]string),
+		LcType:     "sweet",
+		BaseType:   "int",
+		Version:    util.Version,
+		Values:     values,
+		AliasTable: "sweetAliases",
+		Extra:      make(map[string]interface{}),
 	}))
 }
 
@@ -239,7 +240,7 @@ func TestConvertBlockMultiple(t *testing.T) {
 		Version:  util.Version,
 		Values:   model.ValuesOf("Mars", "Bounty", "Snickers", "Kitkat"),
 		Case:     transform.Upper,
-		Extra:    make(map[string]string),
+		Extra:    make(map[string]interface{}),
 	}))
 }
 
@@ -277,7 +278,7 @@ func TestConvertSeparate1(t *testing.T) {
 		Version:  util.Version,
 		Values:   model.ValuesOf("Mars", "Bounty", "Snickers", "Kitkat"),
 		Case:     transform.Upper,
-		Extra:    make(map[string]string),
+		Extra:    make(map[string]interface{}),
 	}))
 }
 
@@ -321,7 +322,7 @@ func TestConvertSeparate2(t *testing.T) {
 		Version:  util.Version,
 		Values:   expected,
 		Case:     transform.Upper,
-		Extra:    make(map[string]string),
+		Extra:    make(map[string]interface{}),
 	}))
 }
 
@@ -352,7 +353,7 @@ func TestConvertSeparateMultiple(t *testing.T) {
 		Version:  util.Version,
 		Values:   model.ValuesOf("Mars", "Bounty", "Snickers", "Kitkat"),
 		Case:     transform.Upper,
-		Extra:    make(map[string]string),
+		Extra:    make(map[string]interface{}),
 	}))
 }
 

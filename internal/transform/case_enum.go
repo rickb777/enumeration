@@ -3,8 +3,9 @@ package transform
 import (
 	"errors"
 	"fmt"
-	"github.com/rickb777/enumeration/v2/enum"
 	"strconv"
+
+	"github.com/rickb777/enumeration/v3/enum"
 )
 
 const caseEnumStrings = "StetUpperLower"
@@ -75,10 +76,9 @@ func (i Case) IsValid() bool {
 //
 // Usage Example
 //
-//    v := new(Case)
-//    err := v.Parse(s)
-//    ...  etc
-//
+//	v := new(Case)
+//	err := v.Parse(s)
+//	...  etc
 func (v *Case) Parse(s string) error {
 	return v.parse(s, caseMarshalTextRep)
 }

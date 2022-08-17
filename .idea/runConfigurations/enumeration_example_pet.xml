@@ -4,7 +4,7 @@
     <working_directory value="$PROJECT_DIR$/example" />
     <parameters value="-f -v -type Pet -prefix My -unsnake -lc -using petStrings -json" />
     <kind value="PACKAGE" />
-    <package value="github.com/rickb777/enumeration/v2" />
+    <package value="github.com/rickb777/enumeration/v" />
     <directory value="$PROJECT_DIR$" />
     <filePath value="$PROJECT_DIR$/enumeration.go" />
     <method v="2" />

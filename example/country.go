@@ -1,509 +1,260 @@
 package example
 
-// This example shows use of the '-plural' option to set the name of plural
+//go:generate enumeration -v -type Country -plural Countries -ic
+
+// Country: This example shows use of the '-plural' option to set the name of plural
 // collections. Because of '-ic', the parser ignores case. The '-using' option
 // provides cross-mapping between the country names and their ISO-3166 tags.
-
-//go:generate enumeration -v -type Country -plural Countries -ic -using iso3166Tags -marshaltext tag -store tag
-
+//
+// The `all` tags in comments control values used for text/JSON marshalling & SQL storage.
 type Country int
 
 const (
-	Afghanistan Country = iota
-	Aland_Islands
-	Albania
-	Algeria
-	American_Samoa
-	Andorra
-	Angola
-	Anguilla
-	Antarctica
-	Antigua_and_Barbuda
-	Argentina
-	Armenia
-	Aruba
-	Australia
-	Austria
-	Azerbaijan
-	Bahamas
-	Bahrain
-	Bangladesh
-	Barbados
-	Belarus
-	Belgium
-	Belize
-	Benin
-	Bermuda
-	Bhutan
-	Bolivia
-	Bosnia_and_Herzegovina
-	Botswana
-	Bouvet_Island
-	Brazil
-	British_Virgin_Islands
-	British_Indian_Ocean_Territory
-	Brunei_Darussalam
-	Bulgaria
-	Burkina_Faso
-	Burundi
-	Cambodia
-	Cameroon
-	Canada
-	Cape_Verde
-	Cayman_Islands
-	Central_African_Republic
-	Chad
-	Chile
-	China
-	Hong_Kong // Special Administrative Region of China
-	Macao     // Special Administrative Region of China
-	Christmas_Island
-	Cocos_Islands // Cocos (Keeling) Islands
-	Colombia
-	Comoros
-	Congo_Brazzaville // Congo (Brazzaville)
-	Congo_DRC         // Democratic Republic of the Congo
-	Cook_Islands
-	Costa_Rica
-	Côte_dIvoire // Côte_d’Ivoire
-	Croatia
-	Cuba
-	Cyprus
-	Czech_Republic
-	Denmark
-	Djibouti
-	Dominica
-	Dominican_Republic
-	Ecuador
-	Egypt
-	El_Salvador
-	Equatorial_Guinea
-	Eritrea
-	Estonia
-	Ethiopia
-	Falkland_Islands // Falkland Islands (Malvinas)
-	Faroe_Islands
-	Fiji
-	Finland
-	France
-	French_Guiana
-	French_Polynesia
-	French_Southern_Territories
-	Gabon
-	Gambia
-	Georgia
-	Germany
-	Ghana
-	Gibraltar
-	Greece
-	Greenland
-	Grenada
-	Guadeloupe
-	Guam
-	Guatemala
-	Guernsey
-	Guinea
-	Guinea_Bissau
-	Guyana
-	Haiti
-	Heard_Island_and_Mcdonald_Islands
-	Holy_See // Vatican City State
-	Honduras
-	Hungary
-	Iceland
-	India
-	Indonesia
-	Iran // Islamic Republic of Iran
-	Iraq
-	Ireland
-	Isle_of_Man
-	Israel
-	Italy
-	Jamaica
-	Japan
-	Jersey
-	Jordan
-	Kazakhstan
-	Kenya
-	Kiribati
-	Democratic_Peoples_Republic_of_Korea // Democratic People’s Republic of Korea
-	South_Korea                          // Republic of Korea
-	Kuwait
-	Kyrgyzstan
-	Lao_PDR
-	Latvia
-	Lebanon
-	Lesotho
-	Liberia
-	Libya
-	Liechtenstein
-	Lithuania
-	Luxembourg
-	Macedonia // Republic of Macedonia
-	Madagascar
-	Malawi
-	Malaysia
-	Maldives
-	Mali
-	Malta
-	Marshall_Islands
-	Martinique
-	Mauritania
-	Mauritius
-	Mayotte
-	Mexico
-	Micronesia // Federated States of Micronesia
-	Moldova
-	Monaco
-	Mongolia
-	Montenegro
-	Montserrat
-	Morocco
-	Mozambique
-	Myanmar
-	Namibia
-	Nauru
-	Nepal
-	Netherlands
-	Netherlands_Antilles
-	New_Caledonia
-	New_Zealand
-	Nicaragua
-	Niger
-	Nigeria
-	Niue
-	Norfolk_Island
-	Northern_Mariana_Islands
-	Norway
-	Oman
-	Pakistan
-	Palau
-	Palestinian_Territory // Palestinian Territory, Occupied
-	Panama
-	Papua_New_Guinea
-	Paraguay
-	Peru
-	Philippines
-	Pitcairn
-	Poland
-	Portugal
-	Puerto_Rico
-	Qatar
-	Réunion
-	Romania
-	Russian_Federation
-	Rwanda
-	Saint_Barthélemy
-	Saint_Helena
-	Saint_Kitts_and_Nevis
-	Saint_Lucia
-	Saint_Martin // Saint-Martin (French part)
-	Saint_Pierre_and_Miquelon
-	Saint_Vincent_and_Grenadines
-	Samoa
-	San_Marino
-	Sao_Tome_and_Principe
-	Saudi_Arabia
-	Senegal
-	Serbia
-	Seychelles
-	Sierra_Leone
-	Singapore
-	Slovakia
-	Slovenia
-	Solomon_Islands
-	Somalia
-	South_Africa
-	South_Georgia_and_the_South_Sandwich_Islands
-	South_Sudan
-	Spain
-	Sri_Lanka
-	Sudan
-	Suriname
-	Svalbard_and_Jan_Mayen_Islands
-	Swaziland // Eswatini
-	Sweden
-	Switzerland
-	Syria  // Syrian Arab Republic
-	Taiwan // Taiwan, Republic of China
-	Tajikistan
-	Tanzania // United Republic of Tanzania
-	Thailand
-	Timor_Leste
-	Togo
-	Tokelau
-	Tonga
-	Trinidad_and_Tobago
-	Tunisia
-	Turkey
-	Turkmenistan
-	Turks_and_Caicos_Islands
-	Tuvalu
-	Uganda
-	Ukraine
-	United_Arab_Emirates
-	United_Kingdom
-	United_States_of_America
-	United_States_Minor_Outlying_Islands
-	Uruguay
-	Uzbekistan
-	Vanuatu
-	Venezuela // Bolivarian Republic of Venezuela
-	Viet_Nam
-	Virgin_Islands
-	Wallis_and_Futuna_Islands
-	Western_Sahara
-	Yemen
-	Zambia
-	Zimbabwe
+	Afghanistan                                  Country = iota // all:"af"
+	Aland_Islands                                               // all:"ax"
+	Albania                                                     // all:"al"
+	Algeria                                                     // all:"dz"
+	American_Samoa                                              // all:"as"
+	Andorra                                                     // all:"ad"
+	Angola                                                      // all:"ao"
+	Anguilla                                                    // all:"ai"
+	Antarctica                                                  // all:"aq"
+	Antigua_and_Barbuda                                         // all:"ag"
+	Argentina                                                   // all:"ar"
+	Armenia                                                     // all:"am"
+	Aruba                                                       // all:"aw"
+	Australia                                                   // all:"au"
+	Austria                                                     // all:"at"
+	Azerbaijan                                                  // all:"az"
+	Bahamas                                                     // all:"bs"
+	Bahrain                                                     // all:"bh"
+	Bangladesh                                                  // all:"bd"
+	Barbados                                                    // all:"bb"
+	Belarus                                                     // all:"by"
+	Belgium                                                     // all:"be"
+	Belize                                                      // all:"bz"
+	Benin                                                       // all:"bj"
+	Bermuda                                                     // all:"bm"
+	Bhutan                                                      // all:"bt"
+	Bolivia                                                     // all:"bo"
+	Bosnia_and_Herzegovina                                      // all:"ba"
+	Botswana                                                    // all:"bw"
+	Bouvet_Island                                               // all:"bv"
+	Brazil                                                      // all:"br"
+	British_Virgin_Islands                                      // all:"vg"
+	British_Indian_Ocean_Territory                              // all:"io"
+	Brunei_Darussalam                                           // all:"dn"
+	Bulgaria                                                    // all:"bg"
+	Burkina_Faso                                                // all:"bf"
+	Burundi                                                     // all:"bi"
+	Cambodia                                                    // all:"kh"
+	Cameroon                                                    // all:"cm"
+	Canada                                                      // all:"ca"
+	Cape_Verde                                                  // all:"cv"
+	Cayman_Islands                                              // all:"ky"
+	Central_African_Republic                                    // all:"cf"
+	Chad                                                        // all:"td"
+	Chile                                                       // all:"cl"
+	China                                                       // all:"cn"
+	Hong_Kong                                                   // all:"hk" -- Special Administrative Region of China
+	Macao                                                       // all:"mo" -- Special Administrative Region of China
+	Christmas_Island                                            // all:"cx"
+	Cocos_Islands                                               // all:"cc" -- Cocos (Keeling) Islands
+	Colombia                                                    // all:"co"
+	Comoros                                                     // all:"km"
+	Congo_Brazzaville                                           // all:"cg" -- Congo (Brazzaville)
+	Congo_DRC                                                   // all:"cd" -- Democratic Republic of the Congo
+	Cook_Islands                                                // all:"ck"
+	Costa_Rica                                                  // all:"cr"
+	Côte_dIvoire                                                // all:"ci" -- Côte_d’Ivoire
+	Croatia                                                     // all:"hr"
+	Cuba                                                        // all:"cu"
+	Cyprus                                                      // all:"cy"
+	Czech_Republic                                              // all:"cz"
+	Denmark                                                     // all:"dk"
+	Djibouti                                                    // all:"dj"
+	Dominica                                                    // all:"dm"
+	Dominican_Republic                                          // all:"do"
+	Ecuador                                                     // all:"ec"
+	Egypt                                                       // all:"eg"
+	El_Salvador                                                 // all:"sv"
+	Equatorial_Guinea                                           // all:"gq"
+	Eritrea                                                     // all:"er"
+	Estonia                                                     // all:"ee"
+	Ethiopia                                                    // all:"et"
+	Falkland_Islands                                            // all:"fk" -- Falkland Islands (Malvinas)
+	Faroe_Islands                                               // all:"fo"
+	Fiji                                                        // all:"fj"
+	Finland                                                     // all:"fi"
+	France                                                      // all:"fr"
+	French_Guiana                                               // all:"gf"
+	French_Polynesia                                            // all:"pf"
+	French_Southern_Territories                                 // all:"tf"
+	Gabon                                                       // all:"ga"
+	Gambia                                                      // all:"gm"
+	Georgia                                                     // all:"ge"
+	Germany                                                     // all:"de"
+	Ghana                                                       // all:"gh"
+	Gibraltar                                                   // all:"gi"
+	Greece                                                      // all:"gr"
+	Greenland                                                   // all:"gl"
+	Grenada                                                     // all:"gd"
+	Guadeloupe                                                  // all:"gp"
+	Guam                                                        // all:"gu"
+	Guatemala                                                   // all:"gt"
+	Guernsey                                                    // all:"gg"
+	Guinea                                                      // all:"gn"
+	Guinea_Bissau                                               // all:"gw"
+	Guyana                                                      // all:"gy"
+	Haiti                                                       // all:"ht"
+	Heard_Island_and_Mcdonald_Islands                           // all:"hm"
+	Holy_See                                                    // all:"va" -- Vatican City State
+	Honduras                                                    // all:"hn"
+	Hungary                                                     // all:"hu"
+	Iceland                                                     // all:"is"
+	India                                                       // all:"in"
+	Indonesia                                                   // all:"id"
+	Iran                                                        // all:"ir" -- Islamic Republic of Iran
+	Iraq                                                        // all:"iq"
+	Ireland                                                     // all:"ie"
+	Isle_of_Man                                                 // all:"im"
+	Israel                                                      // all:"il"
+	Italy                                                       // all:"it"
+	Jamaica                                                     // all:"jm"
+	Japan                                                       // all:"jp"
+	Jersey                                                      // all:"je"
+	Jordan                                                      // all:"jo"
+	Kazakhstan                                                  // all:"kz"
+	Kenya                                                       // all:"ke"
+	Kiribati                                                    // all:"ki"
+	Democratic_Peoples_Republic_of_Korea                        // all:"kp" -- Democratic People’s Republic of Korea
+	South_Korea                                                 // all:"kr" -- Republic of Korea
+	Kuwait                                                      // all:"kw"
+	Kyrgyzstan                                                  // all:"kg"
+	Lao_PDR                                                     // all:"la"
+	Latvia                                                      // all:"lv"
+	Lebanon                                                     // all:"lb"
+	Lesotho                                                     // all:"ls"
+	Liberia                                                     // all:"lr"
+	Libya                                                       // all:"ly"
+	Liechtenstein                                               // all:"li"
+	Lithuania                                                   // all:"lt"
+	Luxembourg                                                  // all:"lu"
+	Macedonia                                                   // all:"mk" -- Republic of Macedonia
+	Madagascar                                                  // all:"mg"
+	Malawi                                                      // all:"mw"
+	Malaysia                                                    // all:"my"
+	Maldives                                                    // all:"mv"
+	Mali                                                        // all:"ml"
+	Malta                                                       // all:"mt"
+	Marshall_Islands                                            // all:"mh"
+	Martinique                                                  // all:"mq"
+	Mauritania                                                  // all:"mr"
+	Mauritius                                                   // all:"mu"
+	Mayotte                                                     // all:"yt"
+	Mexico                                                      // all:"mx"
+	Micronesia                                                  // all:"fm" -- Federated States of Micronesia
+	Moldova                                                     // all:"md"
+	Monaco                                                      // all:"mc"
+	Mongolia                                                    // all:"mn"
+	Montenegro                                                  // all:"me"
+	Montserrat                                                  // all:"ms"
+	Morocco                                                     // all:"ma"
+	Mozambique                                                  // all:"mz"
+	Myanmar                                                     // all:"mm"
+	Namibia                                                     // all:"na"
+	Nauru                                                       // all:"nr"
+	Nepal                                                       // all:"np"
+	Netherlands                                                 // all:"nl",
+	Netherlands_Antilles                                        // all:"an" -- obsolete
+	New_Caledonia                                               // all:"nc",
+	New_Zealand                                                 // all:"nz",
+	Nicaragua                                                   // all:"ni",
+	Niger                                                       // all:"ne",
+	Nigeria                                                     // all:"ng",
+	Niue                                                        // all:"nu",
+	Norfolk_Island                                              // all:"nf",
+	Northern_Mariana_Islands                                    // all:"mp",
+	Norway                                                      // all:"no",
+	Oman                                                        // all:"om",
+	Pakistan                                                    // all:"pk",
+	Palau                                                       // all:"pw",
+	Palestinian_Territory                                       // all:"ps", -- Palestinian Territory, Occupied
+	Panama                                                      // all:"pa",
+	Papua_New_Guinea                                            // all:"pg",
+	Paraguay                                                    // all:"py",
+	Peru                                                        // all:"pe",
+	Philippines                                                 // all:"ph",
+	Pitcairn                                                    // all:"pn",
+	Poland                                                      // all:"pl",
+	Portugal                                                    // all:"pt",
+	Puerto_Rico                                                 // all:"pr",
+	Qatar                                                       // all:"qa",
+	Réunion                                                     // all:"re",
+	Romania                                                     // all:"ro",
+	Russian_Federation                                          // all:"ru",
+	Rwanda                                                      // all:"rw",
+	Saint_Barthélemy                                            // all:"bl",
+	Saint_Helena                                                // all:"sh",
+	Saint_Kitts_and_Nevis                                       // all:"kn",
+	Saint_Lucia                                                 // all:"lc"
+	Saint_Martin                                                // all:"mf" -- Saint-Martin (French part)
+	Saint_Pierre_and_Miquelon                                   // all:"pm"
+	Saint_Vincent_and_Grenadines                                // all:"vc"
+	Samoa                                                       // all:"ws"
+	San_Marino                                                  // all:"sm"
+	Sao_Tome_and_Principe                                       // all:"st"
+	Saudi_Arabia                                                // all:"sa"
+	Senegal                                                     // all:"sn"
+	Serbia                                                      // all:"rs"
+	Seychelles                                                  // all:"sc"
+	Sierra_Leone                                                // all:"sl"
+	Singapore                                                   // all:"sg"
+	Slovakia                                                    // all:"sk"
+	Slovenia                                                    // all:"si"
+	Solomon_Islands                                             // all:"sb"
+	Somalia                                                     // all:"so"
+	South_Africa                                                // all:"za"
+	South_Georgia_and_the_South_Sandwich_Islands                // all:"gs"
+	South_Sudan                                                 // all:"ss"
+	Spain                                                       // all:"es"
+	Sri_Lanka                                                   // all:"lk"
+	Sudan                                                       // all:"sd"
+	Suriname                                                    // all:"sr"
+	Svalbard_and_Jan_Mayen_Islands                              // all:"sj"
+	Swaziland                                                   // all:"sz" -- Eswatini
+	Sweden                                                      // all:"se"
+	Switzerland                                                 // all:"ch"
+	Syria                                                       // all:"sy" -- Syrian Arab Republic
+	Taiwan                                                      // all:"tw" -- Taiwan, Republic of China
+	Tajikistan                                                  // all:"tj"
+	Tanzania                                                    // all:"tz" -- United Republic of Tanzania
+	Thailand                                                    // all:"th"
+	Timor_Leste                                                 // all:"tl"
+	Togo                                                        // all:"tg"
+	Tokelau                                                     // all:"tk"
+	Tonga                                                       // all:"to"
+	Trinidad_and_Tobago                                         // all:"tt"
+	Tunisia                                                     // all:"tn"
+	Turkey                                                      // all:"tr"
+	Turkmenistan                                                // all:"tm"
+	Turks_and_Caicos_Islands                                    // all:"tc"
+	Tuvalu                                                      // all:"tv"
+	Uganda                                                      // all:"ug"
+	Ukraine                                                     // all:"ua"
+	United_Arab_Emirates                                        // all:"ae"
+	United_Kingdom                                              // all:"gb"
+	United_States_of_America                                    // all:"us"
+	United_States_Minor_Outlying_Islands                        // all:"um"
+	Uruguay                                                     // all:"uy"
+	Uzbekistan                                                  // all:"uz"
+	Vanuatu                                                     // all:"vu"
+	Venezuela                                                   // all:"ve" -- Bolivarian Republic of Venezuela
+	Viet_Nam                                                    // all:"vn"
+	Virgin_Islands                                              // all:"vi"
+	Wallis_and_Futuna_Islands                                   // all:"wf"
+	Western_Sahara                                              // all:"eh"
+	Yemen                                                       // all:"ye"
+	Zambia                                                      // all:"zm"
+	Zimbabwe                                                    // all:"zw"
 )
-
-var iso3166Tags = map[Country]string{
-	Afghanistan:                          "af",
-	Aland_Islands:                        "ax",
-	Albania:                              "al",
-	Algeria:                              "dz",
-	American_Samoa:                       "as",
-	Andorra:                              "ad",
-	Angola:                               "ao",
-	Anguilla:                             "ai",
-	Antarctica:                           "aq",
-	Antigua_and_Barbuda:                  "ag",
-	Argentina:                            "ar",
-	Armenia:                              "am",
-	Aruba:                                "aw",
-	Australia:                            "au",
-	Austria:                              "at",
-	Azerbaijan:                           "az",
-	Bahamas:                              "bs",
-	Bahrain:                              "bh",
-	Bangladesh:                           "bd",
-	Barbados:                             "bb",
-	Belarus:                              "by",
-	Belgium:                              "be",
-	Belize:                               "bz",
-	Benin:                                "bj",
-	Bermuda:                              "bm",
-	Bhutan:                               "bt",
-	Bolivia:                              "bo",
-	Bosnia_and_Herzegovina:               "ba",
-	Botswana:                             "bw",
-	Bouvet_Island:                        "bv",
-	Brazil:                               "br",
-	British_Virgin_Islands:               "vg",
-	British_Indian_Ocean_Territory:       "io",
-	Brunei_Darussalam:                    "dn",
-	Bulgaria:                             "bg",
-	Burkina_Faso:                         "bf",
-	Burundi:                              "bi",
-	Cambodia:                             "kh",
-	Cameroon:                             "cm",
-	Canada:                               "ca",
-	Cape_Verde:                           "cv",
-	Cayman_Islands:                       "ky",
-	Central_African_Republic:             "cf",
-	Chad:                                 "td",
-	Chile:                                "cl",
-	China:                                "cn",
-	Hong_Kong:                            "hk",
-	Macao:                                "mo",
-	Christmas_Island:                     "cx",
-	Cocos_Islands:                        "cc",
-	Colombia:                             "co",
-	Comoros:                              "km",
-	Congo_Brazzaville:                    "cg",
-	Congo_DRC:                            "cd",
-	Cook_Islands:                         "ck",
-	Costa_Rica:                           "cr",
-	Côte_dIvoire:                         "ci",
-	Croatia:                              "hr",
-	Cuba:                                 "cu",
-	Cyprus:                               "cy",
-	Czech_Republic:                       "cz",
-	Denmark:                              "dk",
-	Djibouti:                             "dj",
-	Dominica:                             "dm",
-	Dominican_Republic:                   "do",
-	Ecuador:                              "ec",
-	Egypt:                                "eg",
-	El_Salvador:                          "sv",
-	Equatorial_Guinea:                    "gq",
-	Eritrea:                              "er",
-	Estonia:                              "ee",
-	Ethiopia:                             "et",
-	Falkland_Islands:                     "fk",
-	Faroe_Islands:                        "fo",
-	Fiji:                                 "fj",
-	Finland:                              "fi",
-	France:                               "fr",
-	French_Guiana:                        "gf",
-	French_Polynesia:                     "pf",
-	French_Southern_Territories:          "tf",
-	Gabon:                                "ga",
-	Gambia:                               "gm",
-	Georgia:                              "ge",
-	Germany:                              "de",
-	Ghana:                                "gh",
-	Gibraltar:                            "gi",
-	Greece:                               "gr",
-	Greenland:                            "gl",
-	Grenada:                              "gd",
-	Guadeloupe:                           "gp",
-	Guam:                                 "gu",
-	Guatemala:                            "gt",
-	Guernsey:                             "gg",
-	Guinea:                               "gn",
-	Guinea_Bissau:                        "gw",
-	Guyana:                               "gy",
-	Haiti:                                "ht",
-	Heard_Island_and_Mcdonald_Islands:    "hm",
-	Holy_See:                             "va",
-	Honduras:                             "hn",
-	Hungary:                              "hu",
-	Iceland:                              "is",
-	India:                                "in",
-	Indonesia:                            "id",
-	Iran:                                 "ir",
-	Iraq:                                 "iq",
-	Ireland:                              "ie",
-	Isle_of_Man:                          "im",
-	Israel:                               "il",
-	Italy:                                "it",
-	Jamaica:                              "jm",
-	Japan:                                "jp",
-	Jersey:                               "je",
-	Jordan:                               "jo",
-	Kazakhstan:                           "kz",
-	Kenya:                                "ke",
-	Kiribati:                             "ki",
-	Democratic_Peoples_Republic_of_Korea: "kp",
-	South_Korea:                          "kr",
-	Kuwait:                               "kw",
-	Kyrgyzstan:                           "kg",
-	Lao_PDR:                              "la",
-	Latvia:                               "lv",
-	Lebanon:                              "lb",
-	Lesotho:                              "ls",
-	Liberia:                              "lr",
-	Libya:                                "ly",
-	Liechtenstein:                        "li",
-	Lithuania:                            "lt",
-	Luxembourg:                           "lu",
-	Macedonia:                            "mk",
-	Madagascar:                           "mg",
-	Malawi:                               "mw",
-	Malaysia:                             "my",
-	Maldives:                             "mv",
-	Mali:                                 "ml",
-	Malta:                                "mt",
-	Marshall_Islands:                     "mh",
-	Martinique:                           "mq",
-	Mauritania:                           "mr",
-	Mauritius:                            "mu",
-	Mayotte:                              "yt",
-	Mexico:                               "mx",
-	Micronesia:                           "fm",
-	Moldova:                              "md",
-	Monaco:                               "mc",
-	Mongolia:                             "mn",
-	Montenegro:                           "me",
-	Montserrat:                           "ms",
-	Morocco:                              "ma",
-	Mozambique:                           "mz",
-	Myanmar:                              "mm",
-	Namibia:                              "na",
-	Nauru:                                "nr",
-	Nepal:                                "np",
-	Netherlands:                          "nl",
-	Netherlands_Antilles:                 "an", // obsolete
-	New_Caledonia:                        "nc",
-	New_Zealand:                          "nz",
-	Nicaragua:                            "ni",
-	Niger:                                "ne",
-	Nigeria:                              "ng",
-	Niue:                                 "nu",
-	Norfolk_Island:                       "nf",
-	Northern_Mariana_Islands:             "mp",
-	Norway:                               "no",
-	Oman:                                 "om",
-	Pakistan:                             "pk",
-	Palau:                                "pw",
-	Palestinian_Territory:                "ps",
-	Panama:                               "pa",
-	Papua_New_Guinea:                     "pg",
-	Paraguay:                             "py",
-	Peru:                                 "pe",
-	Philippines:                          "ph",
-	Pitcairn:                             "pn",
-	Poland:                               "pl",
-	Portugal:                             "pt",
-	Puerto_Rico:                          "pr",
-	Qatar:                                "qa",
-	Réunion:                              "re",
-	Romania:                              "ro",
-	Russian_Federation:                   "ru",
-	Rwanda:                               "rw",
-	Saint_Barthélemy:                     "bl",
-	Saint_Helena:                         "sh",
-	Saint_Kitts_and_Nevis:                "kn",
-	Saint_Lucia:                          "lc",
-	Saint_Martin:                         "mf",
-	Saint_Pierre_and_Miquelon:            "pm",
-	Saint_Vincent_and_Grenadines:         "vc",
-	Samoa:                                "ws",
-	San_Marino:                           "sm",
-	Sao_Tome_and_Principe:                "st",
-	Saudi_Arabia:                         "sa",
-	Senegal:                              "sn",
-	Serbia:                               "rs",
-	Seychelles:                           "sc",
-	Sierra_Leone:                         "sl",
-	Singapore:                            "sg",
-	Slovakia:                             "sk",
-	Slovenia:                             "si",
-	Solomon_Islands:                      "sb",
-	Somalia:                              "so",
-	South_Africa:                         "za",
-	South_Georgia_and_the_South_Sandwich_Islands: "gs",
-	South_Sudan:                          "ss",
-	Spain:                                "es",
-	Sri_Lanka:                            "lk",
-	Sudan:                                "sd",
-	Suriname:                             "sr",
-	Svalbard_and_Jan_Mayen_Islands:       "sj",
-	Swaziland:                            "sz",
-	Sweden:                               "se",
-	Switzerland:                          "ch",
-	Syria:                                "sy",
-	Taiwan:                               "tw",
-	Tajikistan:                           "tj",
-	Tanzania:                             "tz",
-	Thailand:                             "th",
-	Timor_Leste:                          "tl",
-	Togo:                                 "tg",
-	Tokelau:                              "tk",
-	Tonga:                                "to",
-	Trinidad_and_Tobago:                  "tt",
-	Tunisia:                              "tn",
-	Turkey:                               "tr",
-	Turkmenistan:                         "tm",
-	Turks_and_Caicos_Islands:             "tc",
-	Tuvalu:                               "tv",
-	Uganda:                               "ug",
-	Ukraine:                              "ua",
-	United_Arab_Emirates:                 "ae",
-	United_Kingdom:                       "gb",
-	United_States_of_America:             "us",
-	United_States_Minor_Outlying_Islands: "um",
-	Uruguay:                              "uy",
-	Uzbekistan:                           "uz",
-	Vanuatu:                              "vu",
-	Venezuela:                            "ve",
-	Viet_Nam:                             "vn",
-	Virgin_Islands:                       "vi",
-	Wallis_and_Futuna_Islands:            "wf",
-	Western_Sahara:                       "eh",
-	Yemen:                                "ye",
-	Zambia:                               "zm",
-	Zimbabwe:                             "zw",
-}

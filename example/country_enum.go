@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v2 v2.14.0
+// github.com/rickb777/enumeration/v3 v2.14.0
 
 package example
 
@@ -7,8 +7,7 @@ import (
 	"database/sql/driver"
 	"errors"
 	"fmt"
-	"github.com/rickb777/enumeration/v2/enum"
-	"os"
+	"github.com/rickb777/enumeration/v3/enum"
 	"strconv"
 	"strings"
 )
@@ -124,11 +123,26 @@ var AllCountryEnums = enum.IntEnums{
 const (
 	countryEnumStrings = "AfghanistanAland_IslandsAlbaniaAlgeriaAmerican_SamoaAndorraAngolaAnguillaAntarcticaAntigua_and_BarbudaArgentinaArmeniaArubaAustraliaAustriaAzerbaijanBahamasBahrainBangladeshBarbadosBelarusBelgiumBelizeBeninBermudaBhutanBoliviaBosnia_and_HerzegovinaBotswanaBouvet_IslandBrazilBritish_Virgin_IslandsBritish_Indian_Ocean_TerritoryBrunei_DarussalamBulgariaBurkina_FasoBurundiCambodiaCameroonCanadaCape_VerdeCayman_IslandsCentral_African_RepublicChadChileChinaHong_KongMacaoChristmas_IslandCocos_IslandsColombiaComorosCongo_BrazzavilleCongo_DRCCook_IslandsCosta_RicaCôte_dIvoireCroatiaCubaCyprusCzech_RepublicDenmarkDjiboutiDominicaDominican_RepublicEcuadorEgyptEl_SalvadorEquatorial_GuineaEritreaEstoniaEthiopiaFalkland_IslandsFaroe_IslandsFijiFinlandFranceFrench_GuianaFrench_PolynesiaFrench_Southern_TerritoriesGabonGambiaGeorgiaGermanyGhanaGibraltarGreeceGreenlandGrenadaGuadeloupeGuamGuatemalaGuernseyGuineaGuinea_BissauGuyanaHaitiHeard_Island_and_Mcdonald_IslandsHoly_SeeHondurasHungaryIcelandIndiaIndonesiaIranIraqIrelandIsle_of_ManIsraelItalyJamaicaJapanJerseyJordanKazakhstanKenyaKiribatiDemocratic_Peoples_Republic_of_KoreaSouth_KoreaKuwaitKyrgyzstanLao_PDRLatviaLebanonLesothoLiberiaLibyaLiechtensteinLithuaniaLuxembourgMacedoniaMadagascarMalawiMalaysiaMaldivesMaliMaltaMarshall_IslandsMartiniqueMauritaniaMauritiusMayotteMexicoMicronesiaMoldovaMonacoMongoliaMontenegroMontserratMoroccoMozambiqueMyanmarNamibiaNauruNepalNetherlandsNetherlands_AntillesNew_CaledoniaNew_ZealandNicaraguaNigerNigeriaNiueNorfolk_IslandNorthern_Mariana_IslandsNorwayOmanPakistanPalauPalestinian_TerritoryPanamaPapua_New_GuineaParaguayPeruPhilippinesPitcairnPolandPortugalPuerto_RicoQatarRéunionRomaniaRussian_FederationRwandaSaint_BarthélemySaint_HelenaSaint_Kitts_and_NevisSaint_LuciaSaint_MartinSaint_Pierre_and_MiquelonSaint_Vincent_and_GrenadinesSamoaSan_MarinoSao_Tome_and_PrincipeSaudi_ArabiaSenegalSerbiaSeychellesSierra_LeoneSingaporeSlovakiaSloveniaSolomon_IslandsSomaliaSouth_AfricaSouth_Georgia_and_the_South_Sandwich_IslandsSouth_SudanSpainSri_LankaSudanSurinameSvalbard_and_Jan_Mayen_IslandsSwazilandSwedenSwitzerlandSyriaTaiwanTajikistanTanzaniaThailandTimor_LesteTogoTokelauTongaTrinidad_and_TobagoTunisiaTurkeyTurkmenistanTurks_and_Caicos_IslandsTuvaluUgandaUkraineUnited_Arab_EmiratesUnited_KingdomUnited_States_of_AmericaUnited_States_Minor_Outlying_IslandsUruguayUzbekistanVanuatuVenezuelaViet_NamVirgin_IslandsWallis_and_Futuna_IslandsWestern_SaharaYemenZambiaZimbabwe"
 	countryEnumInputs  = "afghanistanaland_islandsalbaniaalgeriaamerican_samoaandorraangolaanguillaantarcticaantigua_and_barbudaargentinaarmeniaarubaaustraliaaustriaazerbaijanbahamasbahrainbangladeshbarbadosbelarusbelgiumbelizebeninbermudabhutanboliviabosnia_and_herzegovinabotswanabouvet_islandbrazilbritish_virgin_islandsbritish_indian_ocean_territorybrunei_darussalambulgariaburkina_fasoburundicambodiacamerooncanadacape_verdecayman_islandscentral_african_republicchadchilechinahong_kongmacaochristmas_islandcocos_islandscolombiacomoroscongo_brazzavillecongo_drccook_islandscosta_ricacôte_divoirecroatiacubacyprusczech_republicdenmarkdjiboutidominicadominican_republicecuadoregyptel_salvadorequatorial_guineaeritreaestoniaethiopiafalkland_islandsfaroe_islandsfijifinlandfrancefrench_guianafrench_polynesiafrench_southern_territoriesgabongambiageorgiagermanyghanagibraltargreecegreenlandgrenadaguadeloupeguamguatemalaguernseyguineaguinea_bissauguyanahaitiheard_island_and_mcdonald_islandsholy_seehondurashungaryicelandindiaindonesiairaniraqirelandisle_of_manisraelitalyjamaicajapanjerseyjordankazakhstankenyakiribatidemocratic_peoples_republic_of_koreasouth_koreakuwaitkyrgyzstanlao_pdrlatvialebanonlesotholiberialibyaliechtensteinlithuanialuxembourgmacedoniamadagascarmalawimalaysiamaldivesmalimaltamarshall_islandsmartiniquemauritaniamauritiusmayottemexicomicronesiamoldovamonacomongoliamontenegromontserratmoroccomozambiquemyanmarnamibianaurunepalnetherlandsnetherlands_antillesnew_caledonianew_zealandnicaraguanigernigerianiuenorfolk_islandnorthern_mariana_islandsnorwayomanpakistanpalaupalestinian_territorypanamapapua_new_guineaparaguayperuphilippinespitcairnpolandportugalpuerto_ricoqatarréunionromaniarussian_federationrwandasaint_barthélemysaint_helenasaint_kitts_and_nevissaint_luciasaint_martinsaint_pierre_and_miquelonsaint_vincent_and_grenadinessamoasan_marinosao_tome_and_principesaudi_arabiasenegalserbiaseychellessierra_leonesingaporeslovakiasloveniasolomon_islandssomaliasouth_africasouth_georgia_and_the_south_sandwich_islandssouth_sudanspainsri_lankasudansurinamesvalbard_and_jan_mayen_islandsswazilandswedenswitzerlandsyriataiwantajikistantanzaniathailandtimor_lestetogotokelautongatrinidad_and_tobagotunisiaturkeyturkmenistanturks_and_caicos_islandstuvaluugandaukraineunited_arab_emiratesunited_kingdomunited_states_of_americaunited_states_minor_outlying_islandsuruguayuzbekistanvanuatuvenezuelaviet_namvirgin_islandswallis_and_futuna_islandswestern_saharayemenzambiazimbabwe"
+	countryTextStrings = "afaxaldzasadaoaiaqagaramawauatazbsbhbdbbbybebzbjbmbtbobabwbvbrvgiodnbgbfbikhcmcacvkycftdclcnhkmocxcccokmcgcdckcrcihrcucyczdkdjdmdoecegsvgqereeetfkfofjfifrgfpftfgagmgedeghgigrglgdgpgugtgggngwgyhthmvahnhuisinidiriqieimilitjmjpjejokzkekikpkrkwkglalvlblslrlyliltlumkmgmwmymvmlmtmhmqmrmuytmxfmmdmcmnmemsmamzmmnanrnpnlanncnzninengnunfmpnoompkpwpspapgpypephpnplptprqarerorurwblshknlcmfpmvcwssmstsasnrsscslsgsksisbsozagssseslksdsrsjszsechsytwtjtzthtltgtktotttntrtmtctvuguaaegbusumuyuzvuvevnviwfehyezmzw"
+	countryTextInputs  = "afaxaldzasadaoaiaqagaramawauatazbsbhbdbbbybebzbjbmbtbobabwbvbrvgiodnbgbfbikhcmcacvkycftdclcnhkmocxcccokmcgcdckcrcihrcucyczdkdjdmdoecegsvgqereeetfkfofjfifrgfpftfgagmgedeghgigrglgdgpgugtgggngwgyhthmvahnhuisinidiriqieimilitjmjpjejokzkekikpkrkwkglalvlblslrlyliltlumkmgmwmymvmlmtmhmqmrmuytmxfmmdmcmnmemsmamzmmnanrnpnlanncnzninengnunfmpnoompkpwpspapgpypephpnplptprqarerorurwblshknlcmfpmvcwssmstsasnrsscslsgsksisbsozagssseslksdsrsjszsechsytwtjtzthtltgtktotttntrtmtctvuguaaegbusumuyuzvuvevnviwfehyezmzw"
+	countryJSONStrings = "afaxaldzasadaoaiaqagaramawauatazbsbhbdbbbybebzbjbmbtbobabwbvbrvgiodnbgbfbikhcmcacvkycftdclcnhkmocxcccokmcgcdckcrcihrcucyczdkdjdmdoecegsvgqereeetfkfofjfifrgfpftfgagmgedeghgigrglgdgpgugtgggngwgyhthmvahnhuisinidiriqieimilitjmjpjejokzkekikpkrkwkglalvlblslrlyliltlumkmgmwmymvmlmtmhmqmrmuytmxfmmdmcmnmemsmamzmmnanrnpnlanncnzninengnunfmpnoompkpwpspapgpypephpnplptprqarerorurwblshknlcmfpmvcwssmstsasnrsscslsgsksisbsozagssseslksdsrsjszsechsytwtjtzthtltgtktotttntrtmtctvuguaaegbusumuyuzvuvevnviwfehyezmzw"
+	countryJSONInputs  = "afaxaldzasadaoaiaqagaramawauatazbsbhbdbbbybebzbjbmbtbobabwbvbrvgiodnbgbfbikhcmcacvkycftdclcnhkmocxcccokmcgcdckcrcihrcucyczdkdjdmdoecegsvgqereeetfkfofjfifrgfpftfgagmgedeghgigrglgdgpgugtgggngwgyhthmvahnhuisinidiriqieimilitjmjpjejokzkekikpkrkwkglalvlblslrlyliltlumkmgmwmymvmlmtmhmqmrmuytmxfmmdmcmnmemsmamzmmnanrnpnlanncnzninengnunfmpnoompkpwpspapgpypephpnplptprqarerorurwblshknlcmfpmvcwssmstsasnrsscslsgsksisbsozagssseslksdsrsjszsechsytwtjtzthtltgtktotttntrtmtctvuguaaegbusumuyuzvuvevnviwfehyezmzw"
+	countrySQLStrings  = "afaxaldzasadaoaiaqagaramawauatazbsbhbdbbbybebzbjbmbtbobabwbvbrvgiodnbgbfbikhcmcacvkycftdclcnhkmocxcccokmcgcdckcrcihrcucyczdkdjdmdoecegsvgqereeetfkfofjfifrgfpftfgagmgedeghgigrglgdgpgugtgggngwgyhthmvahnhuisinidiriqieimilitjmjpjejokzkekikpkrkwkglalvlblslrlyliltlumkmgmwmymvmlmtmhmqmrmuytmxfmmdmcmnmemsmamzmmnanrnpnlanncnzninengnunfmpnoompkpwpspapgpypephpnplptprqarerorurwblshknlcmfpmvcwssmstsasnrsscslsgsksisbsozagssseslksdsrsjszsechsytwtjtzthtltgtktotttntrtmtctvuguaaegbusumuyuzvuvevnviwfehyezmzw"
+	countrySQLInputs   = "afaxaldzasadaoaiaqagaramawauatazbsbhbdbbbybebzbjbmbtbobabwbvbrvgiodnbgbfbikhcmcacvkycftdclcnhkmocxcccokmcgcdckcrcihrcucyczdkdjdmdoecegsvgqereeetfkfofjfifrgfpftfgagmgedeghgigrglgdgpgugtgggngwgyhthmvahnhuisinidiriqieimilitjmjpjejokzkekikpkrkwkglalvlblslrlyliltlumkmgmwmymvmlmtmhmqmrmuytmxfmmdmcmnmemsmamzmmnanrnpnlanncnzninengnunfmpnoompkpwpspapgpypephpnplptprqarerorurwblshknlcmfpmvcwssmstsasnrsscslsgsksisbsozagssseslksdsrsjszsechsytwtjtzthtltgtktotttntrtmtctvuguaaegbusumuyuzvuvevnviwfehyezmzw"
 )
 
 var (
 	countryEnumIndex = [...]uint16{0, 11, 24, 31, 38, 52, 59, 65, 73, 83, 102, 111, 118, 123, 132, 139, 149, 156, 163, 173, 181, 188, 195, 201, 206, 213, 219, 226, 248, 256, 269, 275, 297, 327, 344, 352, 364, 371, 379, 387, 393, 403, 417, 441, 445, 450, 455, 464, 469, 485, 498, 506, 513, 530, 539, 551, 561, 574, 581, 585, 591, 605, 612, 620, 628, 646, 653, 658, 669, 686, 693, 700, 708, 724, 737, 741, 748, 754, 767, 783, 810, 815, 821, 828, 835, 840, 849, 855, 864, 871, 881, 885, 894, 902, 908, 921, 927, 932, 965, 973, 981, 988, 995, 1000, 1009, 1013, 1017, 1024, 1035, 1041, 1046, 1053, 1058, 1064, 1070, 1080, 1085, 1093, 1129, 1140, 1146, 1156, 1163, 1169, 1176, 1183, 1190, 1195, 1208, 1217, 1227, 1236, 1246, 1252, 1260, 1268, 1272, 1277, 1293, 1303, 1313, 1322, 1329, 1335, 1345, 1352, 1358, 1366, 1376, 1386, 1393, 1403, 1410, 1417, 1422, 1427, 1438, 1458, 1471, 1482, 1491, 1496, 1503, 1507, 1521, 1545, 1551, 1555, 1563, 1568, 1589, 1595, 1611, 1619, 1623, 1634, 1642, 1648, 1656, 1667, 1672, 1680, 1687, 1705, 1711, 1728, 1740, 1761, 1772, 1784, 1809, 1837, 1842, 1852, 1873, 1885, 1892, 1898, 1908, 1920, 1929, 1937, 1945, 1960, 1967, 1979, 2023, 2034, 2039, 2048, 2053, 2061, 2091, 2100, 2106, 2117, 2122, 2128, 2138, 2146, 2154, 2165, 2169, 2176, 2181, 2200, 2207, 2213, 2225, 2249, 2255, 2261, 2268, 2288, 2302, 2326, 2362, 2369, 2379, 2386, 2395, 2403, 2417, 2442, 2456, 2461, 2467, 2475}
+	countryTextIndex = [...]uint16{0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 44, 46, 48, 50, 52, 54, 56, 58, 60, 62, 64, 66, 68, 70, 72, 74, 76, 78, 80, 82, 84, 86, 88, 90, 92, 94, 96, 98, 100, 102, 104, 106, 108, 110, 112, 114, 116, 118, 120, 122, 124, 126, 128, 130, 132, 134, 136, 138, 140, 142, 144, 146, 148, 150, 152, 154, 156, 158, 160, 162, 164, 166, 168, 170, 172, 174, 176, 178, 180, 182, 184, 186, 188, 190, 192, 194, 196, 198, 200, 202, 204, 206, 208, 210, 212, 214, 216, 218, 220, 222, 224, 226, 228, 230, 232, 234, 236, 238, 240, 242, 244, 246, 248, 250, 252, 254, 256, 258, 260, 262, 264, 266, 268, 270, 272, 274, 276, 278, 280, 282, 284, 286, 288, 290, 292, 294, 296, 298, 300, 302, 304, 306, 308, 310, 312, 314, 316, 318, 320, 322, 324, 326, 328, 330, 332, 334, 336, 338, 340, 342, 344, 346, 348, 350, 352, 354, 356, 358, 360, 362, 364, 366, 368, 370, 372, 374, 376, 378, 380, 382, 384, 386, 388, 390, 392, 394, 396, 398, 400, 402, 404, 406, 408, 410, 412, 414, 416, 418, 420, 422, 424, 426, 428, 430, 432, 434, 436, 438, 440, 442, 444, 446, 448, 450, 452, 454, 456, 458, 460, 462, 464, 466, 468, 470, 472, 474, 476, 478, 480, 482, 484, 486, 488, 490, 492, 494}
+	countryJSONIndex = [...]uint16{0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 44, 46, 48, 50, 52, 54, 56, 58, 60, 62, 64, 66, 68, 70, 72, 74, 76, 78, 80, 82, 84, 86, 88, 90, 92, 94, 96, 98, 100, 102, 104, 106, 108, 110, 112, 114, 116, 118, 120, 122, 124, 126, 128, 130, 132, 134, 136, 138, 140, 142, 144, 146, 148, 150, 152, 154, 156, 158, 160, 162, 164, 166, 168, 170, 172, 174, 176, 178, 180, 182, 184, 186, 188, 190, 192, 194, 196, 198, 200, 202, 204, 206, 208, 210, 212, 214, 216, 218, 220, 222, 224, 226, 228, 230, 232, 234, 236, 238, 240, 242, 244, 246, 248, 250, 252, 254, 256, 258, 260, 262, 264, 266, 268, 270, 272, 274, 276, 278, 280, 282, 284, 286, 288, 290, 292, 294, 296, 298, 300, 302, 304, 306, 308, 310, 312, 314, 316, 318, 320, 322, 324, 326, 328, 330, 332, 334, 336, 338, 340, 342, 344, 346, 348, 350, 352, 354, 356, 358, 360, 362, 364, 366, 368, 370, 372, 374, 376, 378, 380, 382, 384, 386, 388, 390, 392, 394, 396, 398, 400, 402, 404, 406, 408, 410, 412, 414, 416, 418, 420, 422, 424, 426, 428, 430, 432, 434, 436, 438, 440, 442, 444, 446, 448, 450, 452, 454, 456, 458, 460, 462, 464, 466, 468, 470, 472, 474, 476, 478, 480, 482, 484, 486, 488, 490, 492, 494}
+	countrySQLIndex  = [...]uint16{0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 44, 46, 48, 50, 52, 54, 56, 58, 60, 62, 64, 66, 68, 70, 72, 74, 76, 78, 80, 82, 84, 86, 88, 90, 92, 94, 96, 98, 100, 102, 104, 106, 108, 110, 112, 114, 116, 118, 120, 122, 124, 126, 128, 130, 132, 134, 136, 138, 140, 142, 144, 146, 148, 150, 152, 154, 156, 158, 160, 162, 164, 166, 168, 170, 172, 174, 176, 178, 180, 182, 184, 186, 188, 190, 192, 194, 196, 198, 200, 202, 204, 206, 208, 210, 212, 214, 216, 218, 220, 222, 224, 226, 228, 230, 232, 234, 236, 238, 240, 242, 244, 246, 248, 250, 252, 254, 256, 258, 260, 262, 264, 266, 268, 270, 272, 274, 276, 278, 280, 282, 284, 286, 288, 290, 292, 294, 296, 298, 300, 302, 304, 306, 308, 310, 312, 314, 316, 318, 320, 322, 324, 326, 328, 330, 332, 334, 336, 338, 340, 342, 344, 346, 348, 350, 352, 354, 356, 358, 360, 362, 364, 366, 368, 370, 372, 374, 376, 378, 380, 382, 384, 386, 388, 390, 392, 394, 396, 398, 400, 402, 404, 406, 408, 410, 412, 414, 416, 418, 420, 422, 424, 426, 428, 430, 432, 434, 436, 438, 440, 442, 444, 446, 448, 450, 452, 454, 456, 458, 460, 462, 464, 466, 468, 470, 472, 474, 476, 478, 480, 482, 484, 486, 488, 490, 492, 494}
 )
+
+// String returns the literal string representation of a Country, which is
+// the same as the const identifier but without prefix or suffix.
+func (v Country) String() string {
+	return v.toString(countryEnumStrings, countryEnumIndex[:])
+}
 
 func (v Country) toString(concats string, indexes []uint16) string {
 	o := v.Ordinal()
@@ -136,63 +150,6 @@ func (v Country) toString(concats string, indexes []uint16) string {
 		return fmt.Sprintf("Country(%d)", v)
 	}
 	return concats[indexes[o]:indexes[o+1]]
-}
-
-func (v *Country) parseString(s string, concats string, indexes []uint16) (ok bool) {
-	var i0 uint16 = 0
-
-	for j := 1; j < len(indexes); j++ {
-		i1 := indexes[j]
-		p := concats[i0:i1]
-		if s == p {
-			*v = AllCountries[j-1]
-			return true
-		}
-		i0 = i1
-	}
-	return false
-}
-
-var iso3166TagsInverse = map[string]Country{}
-
-func init() {
-	for _, id := range AllCountries {
-		v, exists := iso3166Tags[id]
-		if !exists {
-			fmt.Fprintf(os.Stderr, "Warning: Country: %s is missing from iso3166Tags\n", id)
-		} else {
-			k := countryTransformInput(v)
-			if _, exists := iso3166TagsInverse[k]; exists {
-				fmt.Fprintf(os.Stderr, "Warning: Country: %q is duplicated in iso3166Tags\n", k)
-			}
-			iso3166TagsInverse[k] = id
-		}
-	}
-
-	if len(iso3166Tags) != 247 {
-		panic(fmt.Sprintf("Country: iso3166Tags has %d items but should have 247", len(iso3166Tags)))
-	}
-
-	if len(iso3166Tags) != len(iso3166TagsInverse) {
-		panic(fmt.Sprintf("Country: iso3166Tags has %d items but there are only %d distinct items",
-			len(iso3166Tags), len(iso3166TagsInverse)))
-	}
-}
-
-// Tag returns the string representation of a Country. For invalid values,
-// this returns v.String() (see IsValid).
-func (v Country) Tag() string {
-	s, ok := iso3166Tags[v]
-	if ok {
-		return s
-	}
-	return v.String()
-}
-
-// String returns the literal string representation of a Country, which is
-// the same as the const identifier but without prefix or suffix.
-func (v Country) String() string {
-	return v.toString(countryEnumStrings, countryEnumIndex[:])
 }
 
 // Ordinal returns the ordinal number of a Country. This is an integer counting
@@ -718,46 +675,6 @@ func CountryOf(v int) Country {
 	return Afghanistan + Aland_Islands + Albania + Algeria + American_Samoa + Andorra + Angola + Anguilla + Antarctica + Antigua_and_Barbuda + Argentina + Armenia + Aruba + Australia + Austria + Azerbaijan + Bahamas + Bahrain + Bangladesh + Barbados + Belarus + Belgium + Belize + Benin + Bermuda + Bhutan + Bolivia + Bosnia_and_Herzegovina + Botswana + Bouvet_Island + Brazil + British_Virgin_Islands + British_Indian_Ocean_Territory + Brunei_Darussalam + Bulgaria + Burkina_Faso + Burundi + Cambodia + Cameroon + Canada + Cape_Verde + Cayman_Islands + Central_African_Republic + Chad + Chile + China + Hong_Kong + Macao + Christmas_Island + Cocos_Islands + Colombia + Comoros + Congo_Brazzaville + Congo_DRC + Cook_Islands + Costa_Rica + Côte_dIvoire + Croatia + Cuba + Cyprus + Czech_Republic + Denmark + Djibouti + Dominica + Dominican_Republic + Ecuador + Egypt + El_Salvador + Equatorial_Guinea + Eritrea + Estonia + Ethiopia + Falkland_Islands + Faroe_Islands + Fiji + Finland + France + French_Guiana + French_Polynesia + French_Southern_Territories + Gabon + Gambia + Georgia + Germany + Ghana + Gibraltar + Greece + Greenland + Grenada + Guadeloupe + Guam + Guatemala + Guernsey + Guinea + Guinea_Bissau + Guyana + Haiti + Heard_Island_and_Mcdonald_Islands + Holy_See + Honduras + Hungary + Iceland + India + Indonesia + Iran + Iraq + Ireland + Isle_of_Man + Israel + Italy + Jamaica + Japan + Jersey + Jordan + Kazakhstan + Kenya + Kiribati + Democratic_Peoples_Republic_of_Korea + South_Korea + Kuwait + Kyrgyzstan + Lao_PDR + Latvia + Lebanon + Lesotho + Liberia + Libya + Liechtenstein + Lithuania + Luxembourg + Macedonia + Madagascar + Malawi + Malaysia + Maldives + Mali + Malta + Marshall_Islands + Martinique + Mauritania + Mauritius + Mayotte + Mexico + Micronesia + Moldova + Monaco + Mongolia + Montenegro + Montserrat + Morocco + Mozambique + Myanmar + Namibia + Nauru + Nepal + Netherlands + Netherlands_Antilles + New_Caledonia + New_Zealand + Nicaragua + Niger + Nigeria + Niue + Norfolk_Island + Northern_Mariana_Islands + Norway + Oman + Pakistan + Palau + Palestinian_Territory + Panama + Papua_New_Guinea + Paraguay + Peru + Philippines + Pitcairn + Poland + Portugal + Puerto_Rico + Qatar + Réunion + Romania + Russian_Federation + Rwanda + Saint_Barthélemy + Saint_Helena + Saint_Kitts_and_Nevis + Saint_Lucia + Saint_Martin + Saint_Pierre_and_Miquelon + Saint_Vincent_and_Grenadines + Samoa + San_Marino + Sao_Tome_and_Principe + Saudi_Arabia + Senegal + Serbia + Seychelles + Sierra_Leone + Singapore + Slovakia + Slovenia + Solomon_Islands + Somalia + South_Africa + South_Georgia_and_the_South_Sandwich_Islands + South_Sudan + Spain + Sri_Lanka + Sudan + Suriname + Svalbard_and_Jan_Mayen_Islands + Swaziland + Sweden + Switzerland + Syria + Taiwan + Tajikistan + Tanzania + Thailand + Timor_Leste + Togo + Tokelau + Tonga + Trinidad_and_Tobago + Tunisia + Turkey + Turkmenistan + Turks_and_Caicos_Islands + Tuvalu + Uganda + Ukraine + United_Arab_Emirates + United_Kingdom + United_States_of_America + United_States_Minor_Outlying_Islands + Uruguay + Uzbekistan + Vanuatu + Venezuela + Viet_Nam + Virgin_Islands + Wallis_and_Futuna_Islands + Western_Sahara + Yemen + Zambia + Zimbabwe + 1
 }
 
-// Parse parses a string to find the corresponding Country, accepting one of the string values or
-// a number. The input representation is determined by countryMarshalTextRep. It is used by AsCountry.
-// The input case does not matter.
-//
-// Usage Example
-//
-//    v := new(Country)
-//    err := v.Parse(s)
-//    ...  etc
-//
-func (v *Country) Parse(s string) error {
-	return v.parse(s, countryMarshalTextRep)
-}
-
-func (v *Country) parse(in string, rep enum.Representation) error {
-	if rep == enum.Ordinal {
-		if v.parseOrdinal(in) {
-			return nil
-		}
-	} else {
-		if v.parseNumber(in) {
-			return nil
-		}
-	}
-
-	s := countryTransformInput(in)
-
-	if rep == enum.Identifier {
-		if v.parseString(s, countryEnumInputs, countryEnumIndex[:]) || v.parseTag(s) {
-			return nil
-		}
-	} else {
-		if v.parseTag(s) || v.parseString(s, countryEnumInputs, countryEnumIndex[:]) {
-			return nil
-		}
-	}
-
-	return errors.New(in + ": unrecognised country")
-}
-
 // parseNumber attempts to convert a decimal value.
 // Only numbers that correspond to the enumeration are valid.
 func (v *Country) parseNumber(s string) (ok bool) {
@@ -769,20 +686,31 @@ func (v *Country) parseNumber(s string) (ok bool) {
 	return false
 }
 
-// parseOrdinal attempts to convert an ordinal value.
-func (v *Country) parseOrdinal(s string) (ok bool) {
-	ord, err := strconv.Atoi(s)
-	if err == nil && 0 <= ord && ord < len(AllCountries) {
-		*v = AllCountries[ord]
-		return true
+// Parse parses a string to find the corresponding Country, accepting one of the string values or
+// a number. The input representation is determined by None. It is used by AsCountry.
+// The input case does not matter.
+//
+// Usage Example
+//
+//	v := new(Country)
+//	err := v.Parse(s)
+//	...  etc
+func (v *Country) Parse(in string) error {
+	if v.parseNumber(in) {
+		return nil
 	}
-	return false
+
+	s := countryTransformInput(in)
+
+	return v.parseFallback(in, s)
 }
 
-// parseTag attempts to match an entry in iso3166TagsInverse
-func (v *Country) parseTag(s string) (ok bool) {
-	*v, ok = iso3166TagsInverse[s]
-	return ok
+func (v *Country) parseFallback(in, s string) error {
+	if v.parseString(s, countryEnumInputs, countryEnumIndex[:]) {
+		return nil
+	}
+
+	return errors.New(in + ": unrecognised country")
 }
 
 // countryTransformInput may alter input strings before they are parsed.
@@ -790,6 +718,21 @@ func (v *Country) parseTag(s string) (ok bool) {
 // -ic -lc -uc -unsnake.
 var countryTransformInput = func(in string) string {
 	return strings.ToLower(in)
+}
+
+func (v *Country) parseString(s string, concats string, indexes []uint16) (ok bool) {
+	var i0 uint16 = 0
+
+	for j := 1; j < len(indexes); j++ {
+		i1 := indexes[j]
+		p := concats[i0:i1]
+		if s == p {
+			*v = AllCountries[j-1]
+			return true
+		}
+		i0 = i1
+	}
+	return false
 }
 
 // AsCountry parses a string to find the corresponding Country, accepting either one of the string values or
@@ -811,91 +754,72 @@ func MustParseCountry(s string) Country {
 	return v
 }
 
-// countryMarshalTextRep controls representation used for XML and other text encodings.
-// When enum.Identifier, quoted strings are used. When enum.Tag the quoted strings will use
-// the associated tag map values. When enum.Ordinal, an integer will be used based on the
-// Ordinal method. When enum.Number, the number underlying the value will be used.
-// By default, it is enum.Tag.
-// The initial value is set using the -marshaltext command line parameter.
-var countryMarshalTextRep = enum.Tag
+// MarshalText converts values to bytes suitable for transmission via XML, JSON etc.
+// The representation is chosen according to 'text' struct tags.
+func (v Country) MarshalText() ([]byte, error) {
+	o := v.Ordinal()
+	if o < 0 {
+		return v.marshalNumberOrError()
+	}
+	s := countryTextStrings[countryTextIndex[o]:countryTextIndex[o+1]]
+	return []byte(s), nil
+}
 
-// MarshalText converts values to a form suitable for transmission via XML etc.
-// The representation is chosen according to countryMarshalTextRep.
-func (v Country) MarshalText() (text []byte, err error) {
-	return v.marshalText(countryMarshalTextRep, false)
+func (v Country) marshalNumberOrError() ([]byte, error) {
+	return nil, v.invalidError()
+}
+
+func (v Country) invalidError() error {
+	return fmt.Errorf("%d is not a valid country", v)
 }
 
 // MarshalJSON converts values to bytes suitable for transmission via JSON.
-// The representation is chosen according to countryMarshalTextRep.
+// The representation is chosen according to 'json' struct tags.
 func (v Country) MarshalJSON() ([]byte, error) {
-	return v.marshalText(countryMarshalTextRep, true)
-}
-
-func (v Country) marshalText(rep enum.Representation, quoted bool) (text []byte, err error) {
-	if rep != enum.Ordinal && !v.IsValid() {
-		return countryMarshalNumber(v)
+	o := v.Ordinal()
+	if o < 0 {
+		return v.marshalNumberOrError()
 	}
-
-	var bs []byte
-	switch rep {
-	case enum.Number:
-		return countryMarshalNumber(v)
-	case enum.Ordinal:
-		return v.marshalOrdinal()
-	case enum.Tag:
-		if quoted {
-			bs = enum.QuotedString(v.Tag())
-		} else {
-			bs = []byte(v.Tag())
-		}
-	default:
-		if quoted {
-			bs = enum.QuotedString(v.String())
-		} else {
-			bs = []byte(v.String())
-		}
-	}
-	return bs, nil
-}
-
-// countryMarshalNumber handles marshaling where a number is required or where
-// the value is out of range but countryMarshalTextRep != enum.Ordinal.
-// This function can be replaced with any bespoke function than matches signature.
-var countryMarshalNumber = func(v Country) (text []byte, err error) {
-	bs := []byte(strconv.FormatInt(int64(v), 10))
-	return bs, nil
-}
-
-func (v Country) marshalOrdinal() (text []byte, err error) {
-	bs := []byte(strconv.Itoa(v.Ordinal()))
-	return bs, nil
+	s := countryJSONStrings[countryJSONIndex[o]:countryJSONIndex[o+1]]
+	return enum.QuotedString(s), nil
 }
 
 // UnmarshalText converts transmitted values to ordinary values.
-func (v *Country) UnmarshalText(text []byte) error {
-	return v.Parse(string(text))
+func (v *Country) UnmarshalText(bs []byte) error {
+	return v.unmarshalText(string(bs))
 }
 
-// UnmarshalJSON converts transmitted JSON values to ordinary values. It allows both
-// ordinals and strings to represent the values.
-func (v *Country) UnmarshalJSON(text []byte) error {
-	s := string(text)
-	if s == "null" {
-		// Ignore null, like in the main JSON package.
+func (v *Country) unmarshalText(in string) error {
+	if v.parseNumber(in) {
 		return nil
 	}
-	s = strings.Trim(s, "\"")
-	return v.unmarshalJSON(s)
+
+	s := countryTransformInput(in)
+
+	if v.parseString(s, countryTextInputs, countryTextIndex[:]) {
+		return nil
+	}
+
+	return v.parseFallback(in, s)
 }
 
-func (v *Country) unmarshalJSON(s string) error {
-	return v.Parse(s)
-}
+func (v *Country) unmarshalJSON(in string) error {
+	if v.parseNumber(in) {
+		return nil
+	}
 
-// countryStoreRep controls database storage via the Scan and Value methods.
-// By default, it is enum.Tag.
-// The initial value is set using the -store command line parameter.
-var countryStoreRep = enum.Tag
+	s := countryTransformInput(in)
+
+	if v.parseString(s, countryJSONInputs, countryJSONIndex[:]) {
+		return nil
+	}
+
+	if v.parseString(s, countryEnumInputs, countryEnumIndex[:]) {
+		return nil
+	}
+
+	return errors.New(in + ": unrecognised country")
+}
 
 // Scan parses some value, which can be a number, a string or []byte.
 // It implements sql.Scanner, https://golang.org/pkg/database/sql/#Scanner
@@ -907,15 +831,11 @@ func (v *Country) Scan(value interface{}) error {
 	var s string
 	switch x := value.(type) {
 	case int64:
-		if countryStoreRep == enum.Ordinal {
-			*v = CountryOf(int(x))
-		} else {
-			*v = Country(x)
-		}
-		return nil
+		*v = Country(x)
+		return v.errorIfInvalid()
 	case float64:
 		*v = Country(x)
-		return nil
+		return v.errorIfInvalid()
 	case []byte:
 		s = string(x)
 	case string:
@@ -924,24 +844,37 @@ func (v *Country) Scan(value interface{}) error {
 		return fmt.Errorf("%T %+v is not a meaningful country", value, value)
 	}
 
-	return v.parse(s, countryStoreRep)
+	return v.scanParse(s)
+}
+
+func (v *Country) scanParse(in string) error {
+	if v.parseNumber(in) {
+		return nil
+	}
+
+	s := countryTransformInput(in)
+
+	if v.parseString(s, countrySQLInputs, countrySQLIndex[:]) {
+		return nil
+	}
+
+	return v.parseFallback(in, s)
+}
+
+func (v Country) errorIfInvalid() error {
+	if v.IsValid() {
+		return nil
+	}
+	return v.invalidError()
 }
 
 // Value converts the Country to a string.
+// The representation is chosen according to 'sql' struct tags.
 // It implements driver.Valuer, https://golang.org/pkg/database/sql/driver/#Valuer
 func (v Country) Value() (driver.Value, error) {
-	if countryStoreRep != enum.Number && !v.IsValid() {
+	if !v.IsValid() {
 		return nil, fmt.Errorf("%v: cannot be stored", v)
 	}
 
-	switch countryStoreRep {
-	case enum.Number:
-		return int64(v), nil
-	case enum.Ordinal:
-		return int64(v.Ordinal()), nil
-	case enum.Tag:
-		return v.Tag(), nil
-	default:
-		return v.String(), nil
-	}
+	return v.toString(countrySQLStrings, countrySQLIndex[:]), nil
 }

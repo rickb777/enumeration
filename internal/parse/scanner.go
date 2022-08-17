@@ -1,9 +1,10 @@
 package parse
 
 import (
-	"github.com/rickb777/enumeration/v2/internal/util"
 	goscanner "go/scanner"
 	"go/token"
+
+	"github.com/rickb777/enumeration/v3/internal/util"
 )
 
 // scanner implements a one-place lookahead wrapper around the Go scanner.

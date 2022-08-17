@@ -13,8 +13,12 @@ v go mod download
 v go install .
 v gofmt -l -w -s *.go
 
+v ./internal/test/generate.sh
+
 v ./example/generate.sh
 
 v go clean -testcache
+
+sleep 0.25s # wait for the files to be stable
 
 v go test ./...

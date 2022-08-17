@@ -2,16 +2,16 @@ package parse
 
 import (
 	"fmt"
-	"github.com/rickb777/enumeration/v2/internal/model"
-	"github.com/rickb777/enumeration/v2/internal/transform"
-	"github.com/rickb777/enumeration/v2/internal/util"
 	"go/token"
 	"io"
 	"regexp"
 	"strings"
+
+	"github.com/rickb777/enumeration/v3/internal/model"
+	"github.com/rickb777/enumeration/v3/internal/transform"
+	"github.com/rickb777/enumeration/v3/internal/util"
 )
 
-var UsingTable string
 var AliasTable string
 var MainType string
 var fset *token.FileSet
@@ -42,9 +42,8 @@ func Convert(in io.Reader, input string, xCase transform.Case, config model.Conf
 		BaseType:   "int",
 		Version:    util.Version,
 		Case:       xCase,
-		TagTable:   UsingTable,
 		AliasTable: AliasTable,
-		Extra:      make(map[string]string),
+		Extra:      make(map[string]interface{}),
 	}
 
 	s := newFileScanner(input, src)

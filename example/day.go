@@ -1,10 +1,9 @@
 package example
 
-// This simple example also shows that more than one 'const' block can be used
-// provided that the integer values are all distinct.
-
 //go:generate enumeration -v -type Day
 
+// Day: This simple example also shows that more than one 'const' block can be used
+// provided that the integer values are all distinct.
 type Day uint
 
 const (

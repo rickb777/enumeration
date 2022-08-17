@@ -3,19 +3,20 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/rickb777/enumeration/v2/enum"
-	"github.com/rickb777/enumeration/v2/internal/model"
-	"github.com/rickb777/enumeration/v2/internal/parse"
-	"github.com/rickb777/enumeration/v2/internal/transform"
-	"github.com/rickb777/enumeration/v2/internal/util"
 	"io"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/rickb777/enumeration/v3/enum"
+	"github.com/rickb777/enumeration/v3/internal/model"
+	"github.com/rickb777/enumeration/v3/internal/parse"
+	"github.com/rickb777/enumeration/v3/internal/transform"
+	"github.com/rickb777/enumeration/v3/internal/util"
 )
 
 var config model.Config
-var inputGo, outputGo, outputJSON, marshalTextRep, storeRep string
+var inputGo, outputGo, outputJSON, marshalTextRep, marshalJSONRep, storeRep string
 var force, lowercase, uppercase, showVersion bool
 
 func defineFlags() {
@@ -25,12 +26,13 @@ func defineFlags() {
 	flag.StringVar(&inputGo, "i", "", "Name of the input file. May be '-' for stdin. Default is enumeration type in lower case.")
 	flag.StringVar(&outputGo, "o", "", "Name of the output file. May be '-' for stdout. Default is enumeration type in lower case plus '_enum'.")
 	flag.StringVar(&config.Plural, "plural", "", "Plural name of the enumeration type (optional).")
-	flag.StringVar(&parse.UsingTable, "using", "", "Uses your own map[Type]string instead of generating one.")
 	flag.StringVar(&parse.AliasTable, "alias", "", "Uses your own map[string]Type as aliases during parsing.")
 	flag.StringVar(&config.Pkg, "package", "", "Name of the output package (optional). Defaults to the output directory.")
-	flag.StringVar(&marshalTextRep, "marshaltext", "Identifier", "Marshal values using Identifier, Tag, Number or Ordinal")
-	flag.StringVar(&storeRep, "store", "Identifier", "Store values in a DB using Identifier, Tag, Number or Ordinal")
+	flag.StringVar(&marshalTextRep, "marshaltext", "None", "Marshal text values using Identifier, Number or Ordinal")
+	flag.StringVar(&marshalJSONRep, "marshaljson", "None", "Marshal JSON values using Identifier, Number or Ordinal")
+	flag.StringVar(&storeRep, "store", "None", "Store values in a DB using Identifier, Number or Ordinal")
 
+	flag.BoolVar(&config.ParseNumberAsOrdinal, "parseordinal", false, "Parse method presumes numbers to be ordinals (default is numbers).")
 	flag.BoolVar(&config.Lenient, "lenient", false, "Allow parsing to yield invalid values.")
 	flag.BoolVar(&force, "f", false, "Force writing the output file even if up to date (not used when piping stdin or stdout).")
 	flag.BoolVar(&lowercase, "lc", false, "Convert strings to lowercase and ignore case when parsing")
@@ -77,6 +79,9 @@ func generate() {
 	config.MarshalTextRep, err = enum.AsRepresentation(marshalTextRep)
 	util.Must(err, "(-marshaltext)")
 
+	config.MarshalJSONRep, err = enum.AsRepresentation(marshalJSONRep)
+	util.Must(err, "(-marshaljson)")
+
 	config.StoreRep, err = enum.AsRepresentation(storeRep)
 	util.Must(err, "(-store)")
 
@@ -88,7 +93,7 @@ func generate() {
 		in = inf
 	}
 
-	var out io.Writer = os.Stdout
+	var out model.DualWriter = os.Stdout
 	if outputGo == "-" {
 		if config.Pkg == "" {
 			util.Fail("-pkg is required when piping the output.")
@@ -108,7 +113,7 @@ func generate() {
 	m, err := parse.Convert(in, inputGo, xCase, config)
 	util.Must(err)
 
-	m.WriteGo(out)
+	m.SelectImports().WriteGo(out)
 	util.Info("Generated %s.\n", outputGo)
 }
 

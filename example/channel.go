@@ -1,13 +1,12 @@
 package example
 
-// The example demonstrates the removing of a suffix string from the identifiers
+//go:generate enumeration -v -i channel.go -o channel_enum.go -lc -type SalesChannel -suffix Sales
+
+// SalesChannel: The example demonstrates the removing of a suffix string from the identifiers
 // when their string equivalent is accessed.
 //
 // The `json` tags in comments control values used for JSON marshalling.
 // The `sql` tags in comments control values used for SQL storage.
-
-//go:generate enumeration -v -i channel.go -o channel_enum.go -lc -type SalesChannel -suffix Sales
-
 type SalesChannel int
 
 const (
