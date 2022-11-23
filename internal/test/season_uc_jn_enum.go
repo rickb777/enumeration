@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v3 v2.14.0
+// github.com/rickb777/enumeration/v3 v3.0.2
 
 package test
 
@@ -182,7 +182,7 @@ func (v Season_Uc_Jn) invalidError() error {
 }
 
 // season_uc_jnMarshalNumber handles marshaling where a number is required or where
-// the value is out of range but season_uc_jnMarshalTextRep != enum.Ordinal.
+// the value is out of range.
 // This function can be replaced with any bespoke function than matches signature.
 var season_uc_jnMarshalNumber = func(v Season_Uc_Jn) string {
 	return strconv.FormatInt(int64(v), 10)
@@ -207,5 +207,9 @@ func (v *Season_Uc_Jn) unmarshalJSON(in string) error {
 
 	s := season_uc_jnTransformInput(in)
 
-	return v.parseFallback(in, s)
+	if v.parseString(s, season_uc_jnEnumStrings, season_uc_jnEnumIndex[:]) {
+		return nil
+	}
+
+	return errors.New(in + ": unrecognised season_uc_jn")
 }

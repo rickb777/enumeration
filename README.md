@@ -125,15 +125,15 @@ const (
 If you want more control of the strings used for JSON and for SQL marshaling, structured comments can be used. In this example, the `String()` method, the JSON string and the SQL value will all be different values.
 
 ```Go
-//go:generate enumeration -lc -type SalesChannel -suffix Sales
+//go:generate enumeration -lc -type SalesChannel
 
 type SalesChannel int
 
 const (
 _              SalesChannel = iota
-    OnlineSales                 // json:"webshop" sql:"o" -- String() is "online"
-    InstoreSales                // json:"store"   sql:"s" -- String() is "instore"
-    TelephoneSales              // json:"phone"   sql:"t" -- String() is "telephone"
+    Online                  // json:"webshop" sql:"o" -- String() is "online"
+    Instore                 // json:"store"   sql:"s" -- String() is "instore"
+    Telephone               // json:"phone"   sql:"t" -- String() is "telephone"
 )
 ```
 
@@ -186,13 +186,13 @@ Options are:
     - declare a `var <map-name> = map[string]Type{ ... }` that gives aliases to be recognised during parsing. Each value of `Type` can have as many aliases as you need.
 
  * `-marshaltext <as>`
-    - changes the way that text is marshaled (in JSON or XML) to be one of `identifier`, `number` or `ordinal`.
+    - changes the way that text is marshaled (in JSON or XML) to be one of `identifier`, `number` or `ordinal` (can be overridden by the `text` struct tab, above).
 
  * `-marshaljson <as>`
-    - changes the way that JSON is marshaled (not XML) to be one of `identifier`, `number` or `ordinal`.
+    - changes the way that JSON is marshaled (not XML) to be one of `identifier`, `number` or `ordinal` (can be overridden by the `json` struct tab, above).
 
  * `-store <as>`
-    - changes the way that values are stored in a DB to be one of `identifier`, `number` or `ordinal`.
+    - changes the way that values are stored in a DB to be one of `identifier`, `number` or `ordinal` (can be overridden by the `sql` struct tab, above).
 
  * `-lenient`
     - when the Parse method is given a number, this allows parsing to yield invalid values (normally parsing an unrecognised number will yield an error). Using this with `-marshaltext number` means the enumeration is an open set of which some values have names.
@@ -249,11 +249,22 @@ the `Day` type above. You will get:
  * `var AllDayEnums = enum.IntEnums{ ... }`
     - Provides all the `Day` values in a single slice, held using an interface for polymorphism. The slice type would instead be `enum.FloatEnums` if the base type is `float32` or `float64`.
 
- * `encoding.TextMarshaler`, `encoding.TextUnmarshaler`, `json.Marshaler`, `json.Unmarshaler`
-    - Provides methods to satisfy these interfaces so that your enumeration can be easily used by JSON, XML and other codecs in the standard Go library. Writes depend on `dayMarshalTextRep`.
+If you used the `-marshaltext` option or `text` struct tags, you will also get:
+
+ * `encoding.TextMarshaler`, `encoding.TextUnmarshaler`
+    - Provides methods to satisfy these interfaces so that your enumeration can be easily used by XML and other codecs in the standard Go library.
+
+If you used the `-marshaljson` option or `json` struct tags, you will also get:
+
+ * `json.Marshaler`, `json.Unmarshaler`
+    - Provides methods to satisfy these interfaces so that your enumeration can be easily used by JSON codecs in the standard Go library.
+
+If you used the `-store` option or `sql` struct tags, you will also get:
 
  * `sql.Scanner`, `driver.Valuer`
-    - Provides methods to satisfy these two interfaces so that your enumeration can be easily used by SQL drivers in the standard Go library. Note that `driver.Valuer` is provided as a template for you to copy if you need it; otherwise the SQL driver will automatically make use of the numeric values of enumerations. Writes depend on `dayStoreRep`.
+    - Provides methods to satisfy these two interfaces so that your enumeration can be easily used by SQL drivers in the standard Go library. Note that `driver.Valuer` is provided as a template for you to copy if you need it; otherwise the SQL driver will automatically make use of the numeric values of enumerations.
+
+Other items generated:
 
  * `var dayMarshalNumber`
     - This unexported `var` is a function that converts values to strings using `strconv.FormatInt` or `strconv.FormatFloat`. Within the same package, you can replace this function with your own.

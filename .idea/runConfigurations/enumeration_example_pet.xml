@@ -2,9 +2,9 @@
   <configuration default="false" name="enumeration example/pet" type="GoApplicationRunConfiguration" factoryName="Go Application">
     <module name="enumeration" />
     <working_directory value="$PROJECT_DIR$/example" />
-    <parameters value="-f -v -type Pet -prefix My -unsnake -lc -using petStrings -json" />
+    <parameters value="-f -v -type Pet -prefix My -unsnake -lc -using petStrings -marshaljson identifier" />
     <kind value="PACKAGE" />
-    <package value="github.com/rickb777/enumeration/v" />
+    <package value="github.com/rickb777/enumeration/v3" />
     <directory value="$PROJECT_DIR$" />
     <filePath value="$PROJECT_DIR$/enumeration.go" />
     <method v="2" />

@@ -397,7 +397,7 @@ const parse_body = `
 //
 << end ->>
 func (v *<<.MainType>>) <<.Extra.Method>>(in string) error {
-	if v.<<.Extra.parseNumber>>(in) {
+	if v.parseNumber(in) {
 		return nil
 	}
 
@@ -420,7 +420,7 @@ func (v *<<.MainType>>) <<.Extra.Method>>(in string) error {
 }
 `
 
-func (m Model) writeParseHelperMethod(w DualWriter, method, table string, parseNumberAsOrdinal bool) {
+func (m Model) writeParseHelperMethod(w DualWriter, method, table string) {
 	if !done.Contains("v." + method) {
 		done.Add("v." + method)
 
@@ -432,13 +432,7 @@ func (m Model) writeParseHelperMethod(w DualWriter, method, table string, parseN
 			m.Extra["Enum"] = true
 		}
 
-		if parseNumberAsOrdinal {
-			m.Extra["parseNumber"] = "parseOrdinal"
-			m.writeParseOrdinalMethod(w)
-		} else {
-			m.Extra["parseNumber"] = "parseNumber"
-			m.writeParseNumberMethod(w)
-		}
+		m.writeParseNumberMethod(w)
 		m.execTemplate(w, parse_body)
 
 		m.writeParseFallback(w)
@@ -448,7 +442,7 @@ func (m Model) writeParseHelperMethod(w DualWriter, method, table string, parseN
 }
 
 func (m Model) writeParseMethod(w DualWriter) {
-	m.writeParseHelperMethod(w, "Parse", "Enum", m.ParseNumberAsOrdinal)
+	m.writeParseHelperMethod(w, "Parse", "Enum")
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -503,24 +497,6 @@ func (v *<<.MainType>>) parseNumber(s string) (ok bool) {
 
 func (m Model) writeParseNumberMethod(w DualWriter) {
 	m.writeUnexportedFunc(w, "v.parseNumber", parseNumberMethod)
-}
-
-//-------------------------------------------------------------------------------------------------
-
-const parseOrdinalMethod = `
-// parseOrdinal attempts to convert an ordinal value.
-func (v *<<.MainType>>) parseOrdinal(s string) (ok bool) {
-	ord, err := strconv.Atoi(s)
-	if err == nil && 0 <= ord && ord < len(All<<.Plural>>) {
-		*v = All<<.Plural>>[ord]
-		return true
-	}
-	return false
-}
-`
-
-func (m Model) writeParseOrdinalMethod(w DualWriter) {
-	m.writeUnexportedFunc(w, "v.parseOrdinal", parseOrdinalMethod)
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -622,19 +598,6 @@ func (v <<.MainType>>) marshalText() (string, error) {
 }
 `
 
-const marshalText_ordinal = `
-// marshalText converts values to a form suitable for transmission via XML, JSON etc.
-// The ordinal representation is chosen according to -marshaltext.
-func (v <<.MainType>>) marshalText() (string, error) {
-	o := v.Ordinal()
-	if o < 0 {
-		return "", v.invalidError()
-	}
-
-	return strconv.Itoa(o), nil
-}
-`
-
 func (m Model) writeMarshalText(w DualWriter) {
 	if m.HasTextTags() {
 		m.execTemplate(w, marshalText_Main)
@@ -655,10 +618,6 @@ func (m Model) writeMarshalText(w DualWriter) {
 		m.execTemplate(w, marshalText_number)
 		m.writeMarshalNumberVarFunc(w)
 		m.writeMarshalNumberOrErrorMethod(w)
-	case enum.Ordinal:
-		m.execTemplate(w, marshalText_Main)
-		m.execTemplate(w, marshalText_ordinal)
-		m.writeInvalidErrorMethod(w)
 	}
 }
 
@@ -729,20 +688,6 @@ func (v <<.MainType>>) MarshalJSON() ([]byte, error) {
 }
 `
 
-const marshalJSON_ordinal = `
-// MarshalJSON converts values to bytes suitable for transmission via JSON.
-// The ordinal representation is chosen according to -marshaljson.
-func (v <<.MainType>>) MarshalJSON() ([]byte, error) {
-	o := v.Ordinal()
-	if o < 0 {
-		return nil, v.invalidError()
-	}
-
-	s := strconv.Itoa(o)
-	return []byte(s), nil
-}
-`
-
 func (m Model) writeMarshalJSON(w DualWriter) {
 	if m.HasJSONTags() {
 		m.execTemplate(w, marshalJSON_struct_tags)
@@ -757,9 +702,6 @@ func (m Model) writeMarshalJSON(w DualWriter) {
 			m.execTemplate(w, marshalJSON_number)
 			m.writeMarshalNumberOrErrorMethod(w)
 			m.writeMarshalNumberVarFunc(w)
-		case enum.Ordinal:
-			m.execTemplate(w, marshalJSON_ordinal)
-			m.writeInvalidErrorMethod(w)
 		}
 	}
 }
@@ -768,7 +710,7 @@ func (m Model) writeMarshalJSON(w DualWriter) {
 
 const marshalNumberVarFunc = `
 // <<.LcType>>MarshalNumber handles marshaling where a number is required or where
-// the value is out of range but <<.LcType>>MarshalTextRep != enum.Ordinal.
+// the value is out of range.
 // This function can be replaced with any bespoke function than matches signature.
 var <<.LcType>>MarshalNumber = func(v <<.MainType>>) string {
 <<- if .IsFloat>>
@@ -792,7 +734,7 @@ func (v <<.MainType>>) marshalNumberStringOrError() (string, error) {
 }
 
 func (v <<.MainType>>) marshalNumberOrError() ([]byte, error) {
-<<- if and .Lenient (ne .MarshalTextRep.String "Ordinal") >>
+<<- if .Lenient >>
 	// allow lenient marshaling
 	return []byte(<<.LcType>>MarshalNumber(v)), nil
 <<- else >>
@@ -804,7 +746,7 @@ func (v <<.MainType>>) marshalNumberOrError() ([]byte, error) {
 
 func (m Model) writeMarshalNumberOrErrorMethod(w DualWriter) {
 	m.writeUnexportedFunc(w, "v.marshalNumberOrError", marshalNumberOrError)
-	if m.Lenient && m.MarshalTextRep != enum.Ordinal {
+	if m.Lenient {
 		m.writeMarshalNumberVarFunc(w)
 	} else {
 		m.writeInvalidErrorMethod(w)
@@ -857,9 +799,9 @@ func (m Model) writeUnmarshalText(w DualWriter) {
 	if m.MarshalTextRep > 0 || m.HasTextTags() {
 		m.execTemplate(w, unmarshalText)
 		if m.HasTextTags() {
-			m.writeParseHelperMethod(w, "unmarshalText", "Text", m.MarshalTextRep == enum.Ordinal)
+			m.writeParseHelperMethod(w, "unmarshalText", "Text")
 		} else {
-			m.writeParseHelperMethod(w, "unmarshalText", "Enum", m.MarshalTextRep == enum.Ordinal)
+			m.writeParseHelperMethod(w, "unmarshalText", "Enum")
 		}
 	}
 }
@@ -893,33 +835,37 @@ func (v *<<.MainType>>) UnmarshalJSON(text []byte) error {
 	s = strings.Trim(s, "\"")
 	return v.unmarshalJSON(s)
 }
-`
 
-const unmarshalJSON_struct_tags = `
 func (v *<<.MainType>>) unmarshalJSON(in string) error {
 	if v.parseNumber(in) {
 		return nil
 	}
 
 	s := <<.LcType>>TransformInput(in)
+<<- if .HasJSONTags>>
 <<- if .Asymmetric>>
 
 	if v.parseString(s, <<.LcType>>JSONInputs, <<.LcType>>JSONIndex[:]) {
+		return nil
+	}
 <<- else >>
 
 	if v.parseString(s, <<.LcType>>JSONStrings, <<.LcType>>JSONIndex[:]) {
-<<- end >>
 		return nil
 	}
+<<- end >>
+<<- end >>
 <<- if .Asymmetric>>
 
 	if v.parseString(s, <<.LcType>>EnumInputs, <<.LcType>>EnumIndex[:]) {
+		return nil
+	}
 <<- else >>
 
 	if v.parseString(s, <<.LcType>>EnumStrings, <<.LcType>>EnumIndex[:]) {
-<<- end >>
 		return nil
 	}
+<<- end >>
 <<- if .AliasTable>>
 
 	var ok bool
@@ -934,11 +880,8 @@ func (v *<<.MainType>>) unmarshalJSON(in string) error {
 `
 
 func (m Model) writeUnmarshalJSON(w DualWriter) {
-	if m.HasJSONTags() {
-		m.execTemplate(w, unmarshalJSON_struct_tags)
-	} else if m.MarshalJSONRep > 0 {
+	if m.MarshalJSONRep > 0 || m.HasJSONTags() {
 		m.execTemplate(w, unmarshalJSON_plain)
-		m.writeParseHelperMethod(w, "unmarshalJSON", "Enum", m.MarshalJSONRep == enum.Ordinal)
 		m.writeParseStringMethod(w)
 	}
 }
@@ -956,18 +899,10 @@ func (v *<<.MainType>>) Scan(value interface{}) error {
 	var s string
 	switch x := value.(type) {
 	case int64:
-<<- if eq .StoreRep.String "Ordinal" >>
-		*v = <<.MainType>>Of(int(x))
-<<- else >>
 		*v = <<.MainType>>(x)
-<<- end >>
 		return v.errorIfInvalid()
 	case float64:
-<<- if eq .StoreRep.String "Ordinal" >>
-		*v = <<.MainType>>Of(int(x))
-<<- else >>
 		*v = <<.MainType>>(x)
-<<- end >>
 		return v.errorIfInvalid()
 	case []byte:
 		s = string(x)
@@ -985,9 +920,9 @@ func (m Model) writeScanMethod(w DualWriter) {
 	if m.StoreRep > 0 || m.HasSQLTags() {
 		m.execTemplate(w, scan_all)
 		if m.HasSQLTags() {
-			m.writeParseHelperMethod(w, "scanParse", "SQL", m.StoreRep == enum.Ordinal)
+			m.writeParseHelperMethod(w, "scanParse", "SQL")
 		} else {
-			m.writeParseHelperMethod(w, "scanParse", "Enum", m.StoreRep == enum.Ordinal)
+			m.writeParseHelperMethod(w, "scanParse", "Enum")
 		}
 		m.writeErrorIfInvalid(w)
 	}
@@ -1019,18 +954,6 @@ func (v <<.MainType>>) Value() (driver.Value, error) {
 }
 `
 
-const value_ordinal = `
-// Value converts the <<.MainType>> to a string.
-// It implements driver.Valuer, https://golang.org/pkg/database/sql/driver/#Valuer
-func (v <<.MainType>>) Value() (driver.Value, error) {
-	if !v.IsValid() {
-		return nil, fmt.Errorf("%v: cannot be stored", v)
-	}
-
-	return int64(v.Ordinal()), nil
-}
-`
-
 const value_struct_tags = `
 // Value converts the <<.MainType>> to a string.
 // The representation is chosen according to 'sql' struct tags.
@@ -1056,9 +979,6 @@ func (m Model) writeValueMethod(w DualWriter) {
 		m.execTemplate(w, value_identifier)
 	case enum.Number:
 		m.execTemplate(w, value_number)
-	case enum.Ordinal:
-		m.execTemplate(w, value_ordinal)
-		m.writeToStringMethod(w)
 	}
 }
 

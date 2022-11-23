@@ -19,15 +19,6 @@ const (
 )
 
 //-------------------------------------------------------------------------------------------------
-//go:generate enumeration -v -f -i season_text.go -type Season_Nc_To -suffix _Nc_To -marshaltext ordinal
-
-type Season_Nc_To uint
-
-const (
-	Spring_Nc_To, Summer_Nc_To, Autumn_Nc_To, Winter_Nc_To Season_Nc_To = 1, 2, 3, 4
-)
-
-//-------------------------------------------------------------------------------------------------
 //go:generate enumeration -v -f -i season_text.go -type Season_Nc_Tt -suffix _Nc_Tt
 
 type Season_Nc_Tt uint
@@ -72,15 +63,6 @@ const (
 )
 
 //-------------------------------------------------------------------------------------------------
-//go:generate enumeration -v -f -i season_text.go -type Season_Ic_To -suffix _Ic_To -ic -marshaltext ordinal
-
-type Season_Ic_To uint
-
-const (
-	Spring_Ic_To, Summer_Ic_To, Autumn_Ic_To, Winter_Ic_To Season_Ic_To = 1, 2, 3, 4
-)
-
-//-------------------------------------------------------------------------------------------------
 //go:generate enumeration -v -f -i season_text.go -type Season_Ic_Tt -suffix _Ic_Tt -ic
 
 type Season_Ic_Tt uint
@@ -122,15 +104,6 @@ type Season_Uc_Tn uint
 
 const (
 	Spring_Uc_Tn, Summer_Uc_Tn, Autumn_Uc_Tn, Winter_Uc_Tn Season_Uc_Tn = 1, 2, 3, 4
-)
-
-//-------------------------------------------------------------------------------------------------
-//go:generate enumeration -v -f -i season_text.go -type Season_Uc_To -suffix _Uc_To -uc -marshaltext ordinal
-
-type Season_Uc_To uint
-
-const (
-	Spring_Uc_To, Summer_Uc_To, Autumn_Uc_To, Winter_Uc_To Season_Uc_To = 1, 2, 3, 4
 )
 
 //-------------------------------------------------------------------------------------------------

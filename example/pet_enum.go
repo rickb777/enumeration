@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v3 v2.14.0
+// github.com/rickb777/enumeration/v3 v3.0.2
 
 package example
 
@@ -203,7 +203,7 @@ func (v Pet) marshalNumberOrError() ([]byte, error) {
 }
 
 // petMarshalNumber handles marshaling where a number is required or where
-// the value is out of range but petMarshalTextRep != enum.Ordinal.
+// the value is out of range.
 // This function can be replaced with any bespoke function than matches signature.
 var petMarshalNumber = func(v Pet) string {
 	return strconv.FormatInt(int64(v), 10)

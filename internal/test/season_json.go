@@ -19,15 +19,6 @@ const (
 )
 
 //-------------------------------------------------------------------------------------------------
-//go:generate enumeration -v -f -i season_json.go -type Season_Nc_Jo -suffix _Nc_Jo -marshaljson ordinal
-
-type Season_Nc_Jo uint
-
-const (
-	Spring_Nc_Jo, Summer_Nc_Jo, Autumn_Nc_Jo, Winter_Nc_Jo Season_Nc_Jo = 1, 2, 3, 4
-)
-
-//-------------------------------------------------------------------------------------------------
 //go:generate enumeration -v -f -i season_json.go -type Season_Nc_Jj -suffix _Nc_Jj
 
 type Season_Nc_Jj uint
@@ -59,15 +50,6 @@ const (
 )
 
 //-------------------------------------------------------------------------------------------------
-//go:generate enumeration -v -f -i season_json.go -type Season_Ic_Jo -suffix _Ic_Jo -ic -marshaljson ordinal
-
-type Season_Ic_Jo uint
-
-const (
-	Spring_Ic_Jo, Summer_Ic_Jo, Autumn_Ic_Jo, Winter_Ic_Jo Season_Ic_Jo = 1, 2, 3, 4
-)
-
-//-------------------------------------------------------------------------------------------------
 //go:generate enumeration -v -f -i season_json.go -type Season_Ic_Jj -suffix _Ic_Jj -ic
 
 type Season_Ic_Jj uint
@@ -96,15 +78,6 @@ type Season_Uc_Jn uint
 
 const (
 	Spring_Uc_Jn, Summer_Uc_Jn, Autumn_Uc_Jn, Winter_Uc_Jn Season_Uc_Jn = 1, 2, 3, 4
-)
-
-//-------------------------------------------------------------------------------------------------
-//go:generate enumeration -v -f -i season_json.go -type Season_Uc_Jo -suffix _Uc_Jo -uc -marshaljson ordinal
-
-type Season_Uc_Jo uint
-
-const (
-	Spring_Uc_Jo, Summer_Uc_Jo, Autumn_Uc_Jo, Winter_Uc_Jo Season_Uc_Jo = 1, 2, 3, 4
 )
 
 //-------------------------------------------------------------------------------------------------

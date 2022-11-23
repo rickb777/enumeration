@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v3 v2.14.0
+// github.com/rickb777/enumeration/v3 v3.0.2
 
 package example
 
@@ -832,6 +832,18 @@ func (v *Country) unmarshalText(in string) error {
 	}
 
 	return v.parseFallback(in, s)
+}
+
+// UnmarshalJSON converts transmitted JSON values to ordinary values. It allows both
+// ordinals and strings to represent the values.
+func (v *Country) UnmarshalJSON(text []byte) error {
+	s := string(text)
+	if s == "null" {
+		// Ignore null, like in the main JSON package.
+		return nil
+	}
+	s = strings.Trim(s, "\"")
+	return v.unmarshalJSON(s)
 }
 
 func (v *Country) unmarshalJSON(in string) error {

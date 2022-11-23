@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v3 v2.14.0
+// github.com/rickb777/enumeration/v3 v3.0.2
 
 package test
 
@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"github.com/rickb777/enumeration/v3/enum"
 	"strconv"
+	"strings"
 )
 
 // AllSeason_Nc_Jjs lists all 4 values in order.
@@ -193,6 +194,18 @@ func (v Season_Nc_Jj) marshalNumberOrError() ([]byte, error) {
 
 func (v Season_Nc_Jj) invalidError() error {
 	return fmt.Errorf("%d is not a valid season_nc_jj", v)
+}
+
+// UnmarshalJSON converts transmitted JSON values to ordinary values. It allows both
+// ordinals and strings to represent the values.
+func (v *Season_Nc_Jj) UnmarshalJSON(text []byte) error {
+	s := string(text)
+	if s == "null" {
+		// Ignore null, like in the main JSON package.
+		return nil
+	}
+	s = strings.Trim(s, "\"")
+	return v.unmarshalJSON(s)
 }
 
 func (v *Season_Nc_Jj) unmarshalJSON(in string) error {

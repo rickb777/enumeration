@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v3 v2.14.0
+// github.com/rickb777/enumeration/v3 v3.0.2
 
 package test
 
@@ -217,5 +217,9 @@ func (v *Season_Ic_Ji) unmarshalJSON(in string) error {
 
 	s := season_ic_jiTransformInput(in)
 
-	return v.parseFallback(in, s)
+	if v.parseString(s, season_ic_jiEnumInputs, season_ic_jiEnumIndex[:]) {
+		return nil
+	}
+
+	return errors.New(in + ": unrecognised season_ic_ji")
 }

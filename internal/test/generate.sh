@@ -1,6 +1,12 @@
 #!/bin/bash -e
 cd "$(dirname $0)"
 
+D=$(dirname $PWD)
+D=$(dirname $D)
+
+export PATH=$D/bin:$PATH
+#type enumeration
+
 function v
 {
   echo "$@"

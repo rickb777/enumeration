@@ -2,6 +2,9 @@
 cd "$(dirname $0)"
 unset GOPATH
 
+mkdir -p bin
+export PATH=$PWD/bin:$PATH
+
 function v
 {
   echo "$@"
@@ -10,7 +13,9 @@ function v
 
 v go mod download
 #v go test .
-v go install .
+v go build -o bin/enumeration .
+#type enumeration
+
 v gofmt -l -w -s *.go
 
 v ./internal/test/generate.sh

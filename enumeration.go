@@ -28,11 +28,10 @@ func defineFlags() {
 	flag.StringVar(&config.Plural, "plural", "", "Plural name of the enumeration type (optional).")
 	flag.StringVar(&parse.AliasTable, "alias", "", "Uses your own map[string]Type as aliases during parsing.")
 	flag.StringVar(&config.Pkg, "package", "", "Name of the output package (optional). Defaults to the output directory.")
-	flag.StringVar(&marshalTextRep, "marshaltext", "None", "Marshal text values using Identifier, Number or Ordinal")
-	flag.StringVar(&marshalJSONRep, "marshaljson", "None", "Marshal JSON values using Identifier, Number or Ordinal")
+	flag.StringVar(&marshalTextRep, "marshaltext", "None", "Marshal text values using Identifier or Number")
+	flag.StringVar(&marshalJSONRep, "marshaljson", "None", "Marshal JSON values using Identifier or Number")
 	flag.StringVar(&storeRep, "store", "None", "Store values in a DB using Identifier, Number or Ordinal")
 
-	flag.BoolVar(&config.ParseNumberAsOrdinal, "parseordinal", false, "Parse method presumes numbers to be ordinals (default is numbers).")
 	flag.BoolVar(&config.Lenient, "lenient", false, "Allow parsing to yield invalid values.")
 	flag.BoolVar(&force, "f", false, "Force writing the output file even if up to date (not used when piping stdin or stdout).")
 	flag.BoolVar(&lowercase, "lc", false, "Convert strings to lowercase and ignore case when parsing")

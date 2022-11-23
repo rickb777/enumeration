@@ -16,15 +16,14 @@ var Prefix, Suffix string
 // Config contains the model parameters obtained from command line options
 // (either directly or computed).
 type Config struct {
-	MainType             string
-	Plural, Pkg          string
-	MarshalTextRep       enum.Representation
-	MarshalJSONRep       enum.Representation
-	StoreRep             enum.Representation
-	IgnoreCase           bool
-	Unsnake              bool
-	Lenient              bool
-	ParseNumberAsOrdinal bool
+	MainType       string
+	Plural, Pkg    string
+	MarshalTextRep enum.Representation
+	MarshalJSONRep enum.Representation
+	StoreRep       enum.Representation
+	IgnoreCase     bool
+	Unsnake        bool
+	Lenient        bool
 }
 
 type Value struct {
@@ -297,7 +296,7 @@ func (m Model) SelectImports() Model {
 	if m.StoreRep > 0 || m.HasSQLTags() {
 		m.Imports.Database = true
 	}
-	if m.MarshalJSONRep > 0 {
+	if m.MarshalJSONRep > 0 || m.HasJSONTags() {
 		m.Imports.Strings = true
 	}
 	if strings.Contains(m.expression(""), "strings.") {

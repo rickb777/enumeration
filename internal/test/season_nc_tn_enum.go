@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v3 v2.14.0
+// github.com/rickb777/enumeration/v3 v3.0.2
 
 package test
 
@@ -172,7 +172,7 @@ func (v Season_Nc_Tn) marshalText() (string, error) {
 }
 
 // season_nc_tnMarshalNumber handles marshaling where a number is required or where
-// the value is out of range but season_nc_tnMarshalTextRep != enum.Ordinal.
+// the value is out of range.
 // This function can be replaced with any bespoke function than matches signature.
 var season_nc_tnMarshalNumber = func(v Season_Nc_Tn) string {
 	return strconv.FormatInt(int64(v), 10)
