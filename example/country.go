@@ -1,17 +1,21 @@
 package example
 
-//go:generate enumeration -v -type Country -plural Countries -ic
+//go:generate enumeration -v -type Country -plural Countries -ic -unsnake -alias iso3166_3LetterCodes
 
 // Country: This example shows use of the '-plural' option to set the name of plural
-// collections. Because of '-ic', the parser ignores case. The '-using' option
-// provides cross-mapping between the country names and their ISO-3166 tags.
+// collections. Because of '-ic', the parser ignores case. Because of '-unsnake', the parser
+// treats underscores and spaces alike.
 //
-// The `all` tags in comments control values used for text/JSON marshalling & SQL storage.
+// When generating JSON & SQL values, the 2-letter ISO-3166 country codes are used. This is
+// determined by the `all` tags in comments. The 2-letter codes are also accepted when parsing.
+//
+// The '-alias' option also allows 3-letter ISO-3166 tags to be parsed as their corresponding
+// country using the map iso3166_3LetterCodes.
 type Country int
 
 const (
 	Afghanistan                                  Country = iota // all:"af"
-	Aland_Islands                                               // all:"ax"
+	Åland_Islands                                               // all:"ax"
 	Albania                                                     // all:"al"
 	Algeria                                                     // all:"dz"
 	American_Samoa                                              // all:"as"
@@ -70,7 +74,7 @@ const (
 	Croatia                                                     // all:"hr"
 	Cuba                                                        // all:"cu"
 	Cyprus                                                      // all:"cy"
-	Czech_Republic                                              // all:"cz"
+	Czechia                                                     // all:"cz"
 	Denmark                                                     // all:"dk"
 	Djibouti                                                    // all:"dj"
 	Dominica                                                    // all:"dm"
@@ -140,7 +144,7 @@ const (
 	Liechtenstein                                               // all:"li"
 	Lithuania                                                   // all:"lt"
 	Luxembourg                                                  // all:"lu"
-	Macedonia                                                   // all:"mk" -- Republic of Macedonia
+	North_Macedonia                                             // all:"mk" -- Republic of North_Macedonia
 	Madagascar                                                  // all:"mg"
 	Malawi                                                      // all:"mw"
 	Malaysia                                                    // all:"my"
@@ -236,7 +240,7 @@ const (
 	Tonga                                                       // all:"to"
 	Trinidad_and_Tobago                                         // all:"tt"
 	Tunisia                                                     // all:"tn"
-	Turkey                                                      // all:"tr"
+	Türkiye                                                     // all:"tr"
 	Turkmenistan                                                // all:"tm"
 	Turks_and_Caicos_Islands                                    // all:"tc"
 	Tuvalu                                                      // all:"tv"
@@ -258,3 +262,253 @@ const (
 	Zambia                                                      // all:"zm"
 	Zimbabwe                                                    // all:"zw"
 )
+
+var iso3166_3LetterCodes = map[string]Country{
+	"afg": Afghanistan,
+	"axa": Åland_Islands,
+	"alb": Albania,
+	"dza": Algeria,
+	"asm": American_Samoa,
+	"and": Andorra,
+	"ago": Angola,
+	"aia": Anguilla,
+	"ata": Antarctica,
+	"atg": Antigua_and_Barbuda,
+	"arg": Argentina,
+	"arm": Armenia,
+	"abw": Aruba,
+	"aus": Australia,
+	"aut": Austria,
+	"aze": Azerbaijan,
+	"bhs": Bahamas,
+	"bhr": Bahrain,
+	"bgd": Bangladesh,
+	"brb": Barbados,
+	"blr": Belarus,
+	"bel": Belgium,
+	"blz": Belize,
+	"ben": Benin,
+	"bmu": Bermuda,
+	"btn": Bhutan,
+	"bol": Bolivia,
+	"bih": Bosnia_and_Herzegovina,
+	"bwa": Botswana,
+	"bvt": Bouvet_Island,
+	"bra": Brazil,
+	"vgb": British_Virgin_Islands,
+	"iot": British_Indian_Ocean_Territory,
+	"brn": Brunei_Darussalam,
+	"bgr": Bulgaria,
+	"bfa": Burkina_Faso,
+	"boi": Burundi,
+	"khh": Cambodia,
+	"cmr": Cameroon,
+	"can": Canada,
+	"cpv": Cape_Verde,
+	"cym": Cayman_Islands,
+	"caf": Central_African_Republic,
+	"tcd": Chad,
+	"chl": Chile,
+	"chn": China,
+	"hkg": Hong_Kong,
+	"mac": Macao,
+	"cxr": Christmas_Island,
+	"cck": Cocos_Islands,
+	"col": Colombia,
+	"com": Comoros,
+	"cog": Congo_Brazzaville,
+	"cod": Congo_DRC,
+	"cok": Cook_Islands,
+	"cri": Costa_Rica,
+	"civ": Côte_dIvoire,
+	"hrv": Croatia,
+	"cub": Cuba,
+	"cyp": Cyprus,
+	"cze": Czechia,
+	"dnk": Denmark,
+	"dji": Djibouti,
+	"dma": Dominica,
+	"dom": Dominican_Republic,
+	"ecu": Ecuador,
+	"egy": Egypt,
+	"slv": El_Salvador,
+	"gnq": Equatorial_Guinea,
+	"eri": Eritrea,
+	"est": Estonia,
+	"eth": Ethiopia,
+	"flk": Falkland_Islands,
+	"fro": Faroe_Islands,
+	"fji": Fiji,
+	"fin": Finland,
+	"fra": France,
+	"guf": French_Guiana,
+	"pyf": French_Polynesia,
+	"atf": French_Southern_Territories,
+	"gab": Gabon,
+	"gmb": Gambia,
+	"geo": Georgia,
+	"deu": Germany,
+	"gha": Ghana,
+	"gib": Gibraltar,
+	"grc": Greece,
+	"grl": Greenland,
+	"grd": Grenada,
+	"glp": Guadeloupe,
+	"gum": Guam,
+	"gtm": Guatemala,
+	"ggy": Guernsey,
+	"gin": Guinea,
+	"gnb": Guinea_Bissau,
+	"guy": Guyana,
+	"hti": Haiti,
+	"hmd": Heard_Island_and_Mcdonald_Islands,
+	"vat": Holy_See,
+	"hnd": Honduras,
+	"hun": Hungary,
+	"isl": Iceland,
+	"ind": India,
+	"idn": Indonesia,
+	"irn": Iran,
+	"irq": Iraq,
+	"irl": Ireland,
+	"imn": Isle_of_Man,
+	"isr": Israel,
+	"ita": Italy,
+	"jam": Jamaica,
+	"jpn": Japan,
+	"jey": Jersey,
+	"jor": Jordan,
+	"kaz": Kazakhstan,
+	"ken": Kenya,
+	"kir": Kiribati,
+	"prk": Democratic_Peoples_Republic_of_Korea,
+	"kor": South_Korea,
+	"kwt": Kuwait,
+	"kgz": Kyrgyzstan,
+	"lao": Lao_PDR,
+	"lva": Latvia,
+	"lbn": Lebanon,
+	"lso": Lesotho,
+	"lbr": Liberia,
+	"lby": Libya,
+	"lie": Liechtenstein,
+	"ltu": Lithuania,
+	"lux": Luxembourg,
+	"mkd": North_Macedonia,
+	"mdg": Madagascar,
+	"mwi": Malawi,
+	"mys": Malaysia,
+	"mdv": Maldives,
+	"mli": Mali,
+	"mlt": Malta,
+	"mhl": Marshall_Islands,
+	"mtq": Martinique,
+	"mrt": Mauritania,
+	"mus": Mauritius,
+	"myt": Mayotte,
+	"mex": Mexico,
+	"fsm": Micronesia,
+	"mda": Moldova,
+	"mco": Monaco,
+	"mng": Mongolia,
+	"mne": Montenegro,
+	"msr": Montserrat,
+	"mar": Morocco,
+	"moz": Mozambique,
+	"mmr": Myanmar,
+	"nam": Namibia,
+	"nru": Nauru,
+	"npl": Nepal,
+	"nld": Netherlands,
+	"ant": Netherlands_Antilles,
+	"ncl": New_Caledonia,
+	"nzl": New_Zealand,
+	"nic": Nicaragua,
+	"ner": Niger,
+	"nga": Nigeria,
+	"niu": Niue,
+	"nfk": Norfolk_Island,
+	"mnp": Northern_Mariana_Islands,
+	"nor": Norway,
+	"omn": Oman,
+	"pak": Pakistan,
+	"plw": Palau,
+	"pse": Palestinian_Territory,
+	"pan": Panama,
+	"png": Papua_New_Guinea,
+	"pry": Paraguay,
+	"per": Peru,
+	"phl": Philippines,
+	"pcn": Pitcairn,
+	"pol": Poland,
+	"prt": Portugal,
+	"pri": Puerto_Rico,
+	"qat": Qatar,
+	"reu": Réunion,
+	"rou": Romania,
+	"rus": Russian_Federation,
+	"rwa": Rwanda,
+	"blm": Saint_Barthélemy,
+	"shn": Saint_Helena,
+	"kna": Saint_Kitts_and_Nevis,
+	"lca": Saint_Lucia,
+	"mfa": Saint_Martin,
+	"ppm": Saint_Pierre_and_Miquelon,
+	"vct": Saint_Vincent_and_Grenadines,
+	"wsm": Samoa,
+	"smr": San_Marino,
+	"stp": Sao_Tome_and_Principe,
+	"sau": Saudi_Arabia,
+	"sen": Senegal,
+	"srb": Serbia,
+	"syc": Seychelles,
+	"sle": Sierra_Leone,
+	"sgp": Singapore,
+	"svk": Slovakia,
+	"svn": Slovenia,
+	"slb": Solomon_Islands,
+	"som": Somalia,
+	"zaf": South_Africa,
+	"sgs": South_Georgia_and_the_South_Sandwich_Islands,
+	"ssd": South_Sudan,
+	"esp": Spain,
+	"lka": Sri_Lanka,
+	"sdn": Sudan,
+	"sur": Suriname,
+	"sjm": Svalbard_and_Jan_Mayen_Islands,
+	"swz": Swaziland,
+	"swe": Sweden,
+	"che": Switzerland,
+	"syr": Syria,
+	"twn": Taiwan,
+	"tjk": Tajikistan,
+	"tza": Tanzania,
+	"tha": Thailand,
+	"tls": Timor_Leste,
+	"tgo": Togo,
+	"tkl": Tokelau,
+	"ton": Tonga,
+	"ttd": Trinidad_and_Tobago,
+	"tun": Tunisia,
+	"tur": Türkiye,
+	"tkm": Turkmenistan,
+	"tca": Turks_and_Caicos_Islands,
+	"tuv": Tuvalu,
+	"uga": Uganda,
+	"ukr": Ukraine,
+	"are": United_Arab_Emirates,
+	"gbr": United_Kingdom,
+	"usa": United_States_of_America,
+	"umi": United_States_Minor_Outlying_Islands,
+	"ury": Uruguay,
+	"uzb": Uzbekistan,
+	"vut": Vanuatu,
+	"ven": Venezuela,
+	"vnm": Viet_Nam,
+	"vir": Virgin_Islands,
+	"wlf": Wallis_and_Futuna_Islands,
+	"esh": Western_Sahara,
+	"yem": Yemen,
+	"zmb": Zambia,
+	"zwe": Zimbabwe,
+}

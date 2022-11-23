@@ -14,7 +14,7 @@ import (
 
 // AllCountries lists all 247 values in order.
 var AllCountries = []Country{
-	Afghanistan, Aland_Islands, Albania, Algeria,
+	Afghanistan, Åland_Islands, Albania, Algeria,
 	American_Samoa, Andorra, Angola, Anguilla, Antarctica,
 	Antigua_and_Barbuda, Argentina, Armenia, Aruba, Australia,
 	Austria, Azerbaijan, Bahamas, Bahrain, Bangladesh,
@@ -26,7 +26,7 @@ var AllCountries = []Country{
 	Chile, China, Hong_Kong, Macao, Christmas_Island,
 	Cocos_Islands, Colombia, Comoros, Congo_Brazzaville, Congo_DRC,
 	Cook_Islands, Costa_Rica, Côte_dIvoire, Croatia, Cuba,
-	Cyprus, Czech_Republic, Denmark, Djibouti, Dominica,
+	Cyprus, Czechia, Denmark, Djibouti, Dominica,
 	Dominican_Republic, Ecuador, Egypt, El_Salvador, Equatorial_Guinea,
 	Eritrea, Estonia, Ethiopia, Falkland_Islands, Faroe_Islands,
 	Fiji, Finland, France, French_Guiana, French_Polynesia,
@@ -40,7 +40,7 @@ var AllCountries = []Country{
 	Kazakhstan, Kenya, Kiribati, Democratic_Peoples_Republic_of_Korea, South_Korea,
 	Kuwait, Kyrgyzstan, Lao_PDR, Latvia, Lebanon,
 	Lesotho, Liberia, Libya, Liechtenstein, Lithuania,
-	Luxembourg, Macedonia, Madagascar, Malawi, Malaysia,
+	Luxembourg, North_Macedonia, Madagascar, Malawi, Malaysia,
 	Maldives, Mali, Malta, Marshall_Islands, Martinique,
 	Mauritania, Mauritius, Mayotte, Mexico, Micronesia,
 	Moldova, Monaco, Mongolia, Montenegro, Montserrat,
@@ -59,7 +59,7 @@ var AllCountries = []Country{
 	Sudan, Suriname, Svalbard_and_Jan_Mayen_Islands, Swaziland, Sweden,
 	Switzerland, Syria, Taiwan, Tajikistan, Tanzania,
 	Thailand, Timor_Leste, Togo, Tokelau, Tonga,
-	Trinidad_and_Tobago, Tunisia, Turkey, Turkmenistan, Turks_and_Caicos_Islands,
+	Trinidad_and_Tobago, Tunisia, Türkiye, Turkmenistan, Turks_and_Caicos_Islands,
 	Tuvalu, Uganda, Ukraine, United_Arab_Emirates, United_Kingdom,
 	United_States_of_America, United_States_Minor_Outlying_Islands, Uruguay, Uzbekistan, Vanuatu,
 	Venezuela, Viet_Nam, Virgin_Islands, Wallis_and_Futuna_Islands, Western_Sahara,
@@ -68,7 +68,7 @@ var AllCountries = []Country{
 
 // AllCountryEnums lists all 247 values in order.
 var AllCountryEnums = enum.IntEnums{
-	Afghanistan, Aland_Islands, Albania, Algeria,
+	Afghanistan, Åland_Islands, Albania, Algeria,
 	American_Samoa, Andorra, Angola, Anguilla, Antarctica,
 	Antigua_and_Barbuda, Argentina, Armenia, Aruba, Australia,
 	Austria, Azerbaijan, Bahamas, Bahrain, Bangladesh,
@@ -80,7 +80,7 @@ var AllCountryEnums = enum.IntEnums{
 	Chile, China, Hong_Kong, Macao, Christmas_Island,
 	Cocos_Islands, Colombia, Comoros, Congo_Brazzaville, Congo_DRC,
 	Cook_Islands, Costa_Rica, Côte_dIvoire, Croatia, Cuba,
-	Cyprus, Czech_Republic, Denmark, Djibouti, Dominica,
+	Cyprus, Czechia, Denmark, Djibouti, Dominica,
 	Dominican_Republic, Ecuador, Egypt, El_Salvador, Equatorial_Guinea,
 	Eritrea, Estonia, Ethiopia, Falkland_Islands, Faroe_Islands,
 	Fiji, Finland, France, French_Guiana, French_Polynesia,
@@ -94,7 +94,7 @@ var AllCountryEnums = enum.IntEnums{
 	Kazakhstan, Kenya, Kiribati, Democratic_Peoples_Republic_of_Korea, South_Korea,
 	Kuwait, Kyrgyzstan, Lao_PDR, Latvia, Lebanon,
 	Lesotho, Liberia, Libya, Liechtenstein, Lithuania,
-	Luxembourg, Macedonia, Madagascar, Malawi, Malaysia,
+	Luxembourg, North_Macedonia, Madagascar, Malawi, Malaysia,
 	Maldives, Mali, Malta, Marshall_Islands, Martinique,
 	Mauritania, Mauritius, Mayotte, Mexico, Micronesia,
 	Moldova, Monaco, Mongolia, Montenegro, Montserrat,
@@ -113,7 +113,7 @@ var AllCountryEnums = enum.IntEnums{
 	Sudan, Suriname, Svalbard_and_Jan_Mayen_Islands, Swaziland, Sweden,
 	Switzerland, Syria, Taiwan, Tajikistan, Tanzania,
 	Thailand, Timor_Leste, Togo, Tokelau, Tonga,
-	Trinidad_and_Tobago, Tunisia, Turkey, Turkmenistan, Turks_and_Caicos_Islands,
+	Trinidad_and_Tobago, Tunisia, Türkiye, Turkmenistan, Turks_and_Caicos_Islands,
 	Tuvalu, Uganda, Ukraine, United_Arab_Emirates, United_Kingdom,
 	United_States_of_America, United_States_Minor_Outlying_Islands, Uruguay, Uzbekistan, Vanuatu,
 	Venezuela, Viet_Nam, Virgin_Islands, Wallis_and_Futuna_Islands, Western_Sahara,
@@ -121,8 +121,8 @@ var AllCountryEnums = enum.IntEnums{
 }
 
 const (
-	countryEnumStrings = "AfghanistanAland_IslandsAlbaniaAlgeriaAmerican_SamoaAndorraAngolaAnguillaAntarcticaAntigua_and_BarbudaArgentinaArmeniaArubaAustraliaAustriaAzerbaijanBahamasBahrainBangladeshBarbadosBelarusBelgiumBelizeBeninBermudaBhutanBoliviaBosnia_and_HerzegovinaBotswanaBouvet_IslandBrazilBritish_Virgin_IslandsBritish_Indian_Ocean_TerritoryBrunei_DarussalamBulgariaBurkina_FasoBurundiCambodiaCameroonCanadaCape_VerdeCayman_IslandsCentral_African_RepublicChadChileChinaHong_KongMacaoChristmas_IslandCocos_IslandsColombiaComorosCongo_BrazzavilleCongo_DRCCook_IslandsCosta_RicaCôte_dIvoireCroatiaCubaCyprusCzech_RepublicDenmarkDjiboutiDominicaDominican_RepublicEcuadorEgyptEl_SalvadorEquatorial_GuineaEritreaEstoniaEthiopiaFalkland_IslandsFaroe_IslandsFijiFinlandFranceFrench_GuianaFrench_PolynesiaFrench_Southern_TerritoriesGabonGambiaGeorgiaGermanyGhanaGibraltarGreeceGreenlandGrenadaGuadeloupeGuamGuatemalaGuernseyGuineaGuinea_BissauGuyanaHaitiHeard_Island_and_Mcdonald_IslandsHoly_SeeHondurasHungaryIcelandIndiaIndonesiaIranIraqIrelandIsle_of_ManIsraelItalyJamaicaJapanJerseyJordanKazakhstanKenyaKiribatiDemocratic_Peoples_Republic_of_KoreaSouth_KoreaKuwaitKyrgyzstanLao_PDRLatviaLebanonLesothoLiberiaLibyaLiechtensteinLithuaniaLuxembourgMacedoniaMadagascarMalawiMalaysiaMaldivesMaliMaltaMarshall_IslandsMartiniqueMauritaniaMauritiusMayotteMexicoMicronesiaMoldovaMonacoMongoliaMontenegroMontserratMoroccoMozambiqueMyanmarNamibiaNauruNepalNetherlandsNetherlands_AntillesNew_CaledoniaNew_ZealandNicaraguaNigerNigeriaNiueNorfolk_IslandNorthern_Mariana_IslandsNorwayOmanPakistanPalauPalestinian_TerritoryPanamaPapua_New_GuineaParaguayPeruPhilippinesPitcairnPolandPortugalPuerto_RicoQatarRéunionRomaniaRussian_FederationRwandaSaint_BarthélemySaint_HelenaSaint_Kitts_and_NevisSaint_LuciaSaint_MartinSaint_Pierre_and_MiquelonSaint_Vincent_and_GrenadinesSamoaSan_MarinoSao_Tome_and_PrincipeSaudi_ArabiaSenegalSerbiaSeychellesSierra_LeoneSingaporeSlovakiaSloveniaSolomon_IslandsSomaliaSouth_AfricaSouth_Georgia_and_the_South_Sandwich_IslandsSouth_SudanSpainSri_LankaSudanSurinameSvalbard_and_Jan_Mayen_IslandsSwazilandSwedenSwitzerlandSyriaTaiwanTajikistanTanzaniaThailandTimor_LesteTogoTokelauTongaTrinidad_and_TobagoTunisiaTurkeyTurkmenistanTurks_and_Caicos_IslandsTuvaluUgandaUkraineUnited_Arab_EmiratesUnited_KingdomUnited_States_of_AmericaUnited_States_Minor_Outlying_IslandsUruguayUzbekistanVanuatuVenezuelaViet_NamVirgin_IslandsWallis_and_Futuna_IslandsWestern_SaharaYemenZambiaZimbabwe"
-	countryEnumInputs  = "afghanistanaland_islandsalbaniaalgeriaamerican_samoaandorraangolaanguillaantarcticaantigua_and_barbudaargentinaarmeniaarubaaustraliaaustriaazerbaijanbahamasbahrainbangladeshbarbadosbelarusbelgiumbelizebeninbermudabhutanboliviabosnia_and_herzegovinabotswanabouvet_islandbrazilbritish_virgin_islandsbritish_indian_ocean_territorybrunei_darussalambulgariaburkina_fasoburundicambodiacamerooncanadacape_verdecayman_islandscentral_african_republicchadchilechinahong_kongmacaochristmas_islandcocos_islandscolombiacomoroscongo_brazzavillecongo_drccook_islandscosta_ricacôte_divoirecroatiacubacyprusczech_republicdenmarkdjiboutidominicadominican_republicecuadoregyptel_salvadorequatorial_guineaeritreaestoniaethiopiafalkland_islandsfaroe_islandsfijifinlandfrancefrench_guianafrench_polynesiafrench_southern_territoriesgabongambiageorgiagermanyghanagibraltargreecegreenlandgrenadaguadeloupeguamguatemalaguernseyguineaguinea_bissauguyanahaitiheard_island_and_mcdonald_islandsholy_seehondurashungaryicelandindiaindonesiairaniraqirelandisle_of_manisraelitalyjamaicajapanjerseyjordankazakhstankenyakiribatidemocratic_peoples_republic_of_koreasouth_koreakuwaitkyrgyzstanlao_pdrlatvialebanonlesotholiberialibyaliechtensteinlithuanialuxembourgmacedoniamadagascarmalawimalaysiamaldivesmalimaltamarshall_islandsmartiniquemauritaniamauritiusmayottemexicomicronesiamoldovamonacomongoliamontenegromontserratmoroccomozambiquemyanmarnamibianaurunepalnetherlandsnetherlands_antillesnew_caledonianew_zealandnicaraguanigernigerianiuenorfolk_islandnorthern_mariana_islandsnorwayomanpakistanpalaupalestinian_territorypanamapapua_new_guineaparaguayperuphilippinespitcairnpolandportugalpuerto_ricoqatarréunionromaniarussian_federationrwandasaint_barthélemysaint_helenasaint_kitts_and_nevissaint_luciasaint_martinsaint_pierre_and_miquelonsaint_vincent_and_grenadinessamoasan_marinosao_tome_and_principesaudi_arabiasenegalserbiaseychellessierra_leonesingaporeslovakiasloveniasolomon_islandssomaliasouth_africasouth_georgia_and_the_south_sandwich_islandssouth_sudanspainsri_lankasudansurinamesvalbard_and_jan_mayen_islandsswazilandswedenswitzerlandsyriataiwantajikistantanzaniathailandtimor_lestetogotokelautongatrinidad_and_tobagotunisiaturkeyturkmenistanturks_and_caicos_islandstuvaluugandaukraineunited_arab_emiratesunited_kingdomunited_states_of_americaunited_states_minor_outlying_islandsuruguayuzbekistanvanuatuvenezuelaviet_namvirgin_islandswallis_and_futuna_islandswestern_saharayemenzambiazimbabwe"
+	countryEnumStrings = "AfghanistanÅland IslandsAlbaniaAlgeriaAmerican SamoaAndorraAngolaAnguillaAntarcticaAntigua and BarbudaArgentinaArmeniaArubaAustraliaAustriaAzerbaijanBahamasBahrainBangladeshBarbadosBelarusBelgiumBelizeBeninBermudaBhutanBoliviaBosnia and HerzegovinaBotswanaBouvet IslandBrazilBritish Virgin IslandsBritish Indian Ocean TerritoryBrunei DarussalamBulgariaBurkina FasoBurundiCambodiaCameroonCanadaCape VerdeCayman IslandsCentral African RepublicChadChileChinaHong KongMacaoChristmas IslandCocos IslandsColombiaComorosCongo BrazzavilleCongo DRCCook IslandsCosta RicaCôte dIvoireCroatiaCubaCyprusCzechiaDenmarkDjiboutiDominicaDominican RepublicEcuadorEgyptEl SalvadorEquatorial GuineaEritreaEstoniaEthiopiaFalkland IslandsFaroe IslandsFijiFinlandFranceFrench GuianaFrench PolynesiaFrench Southern TerritoriesGabonGambiaGeorgiaGermanyGhanaGibraltarGreeceGreenlandGrenadaGuadeloupeGuamGuatemalaGuernseyGuineaGuinea BissauGuyanaHaitiHeard Island and Mcdonald IslandsHoly SeeHondurasHungaryIcelandIndiaIndonesiaIranIraqIrelandIsle of ManIsraelItalyJamaicaJapanJerseyJordanKazakhstanKenyaKiribatiDemocratic Peoples Republic of KoreaSouth KoreaKuwaitKyrgyzstanLao PDRLatviaLebanonLesothoLiberiaLibyaLiechtensteinLithuaniaLuxembourgNorth MacedoniaMadagascarMalawiMalaysiaMaldivesMaliMaltaMarshall IslandsMartiniqueMauritaniaMauritiusMayotteMexicoMicronesiaMoldovaMonacoMongoliaMontenegroMontserratMoroccoMozambiqueMyanmarNamibiaNauruNepalNetherlandsNetherlands AntillesNew CaledoniaNew ZealandNicaraguaNigerNigeriaNiueNorfolk IslandNorthern Mariana IslandsNorwayOmanPakistanPalauPalestinian TerritoryPanamaPapua New GuineaParaguayPeruPhilippinesPitcairnPolandPortugalPuerto RicoQatarRéunionRomaniaRussian FederationRwandaSaint BarthélemySaint HelenaSaint Kitts and NevisSaint LuciaSaint MartinSaint Pierre and MiquelonSaint Vincent and GrenadinesSamoaSan MarinoSao Tome and PrincipeSaudi ArabiaSenegalSerbiaSeychellesSierra LeoneSingaporeSlovakiaSloveniaSolomon IslandsSomaliaSouth AfricaSouth Georgia and the South Sandwich IslandsSouth SudanSpainSri LankaSudanSurinameSvalbard and Jan Mayen IslandsSwazilandSwedenSwitzerlandSyriaTaiwanTajikistanTanzaniaThailandTimor LesteTogoTokelauTongaTrinidad and TobagoTunisiaTürkiyeTurkmenistanTurks and Caicos IslandsTuvaluUgandaUkraineUnited Arab EmiratesUnited KingdomUnited States of AmericaUnited States Minor Outlying IslandsUruguayUzbekistanVanuatuVenezuelaViet NamVirgin IslandsWallis and Futuna IslandsWestern SaharaYemenZambiaZimbabwe"
+	countryEnumInputs  = "afghanistanåland islandsalbaniaalgeriaamerican samoaandorraangolaanguillaantarcticaantigua and barbudaargentinaarmeniaarubaaustraliaaustriaazerbaijanbahamasbahrainbangladeshbarbadosbelarusbelgiumbelizebeninbermudabhutanboliviabosnia and herzegovinabotswanabouvet islandbrazilbritish virgin islandsbritish indian ocean territorybrunei darussalambulgariaburkina fasoburundicambodiacamerooncanadacape verdecayman islandscentral african republicchadchilechinahong kongmacaochristmas islandcocos islandscolombiacomoroscongo brazzavillecongo drccook islandscosta ricacôte divoirecroatiacubacyprusczechiadenmarkdjiboutidominicadominican republicecuadoregyptel salvadorequatorial guineaeritreaestoniaethiopiafalkland islandsfaroe islandsfijifinlandfrancefrench guianafrench polynesiafrench southern territoriesgabongambiageorgiagermanyghanagibraltargreecegreenlandgrenadaguadeloupeguamguatemalaguernseyguineaguinea bissauguyanahaitiheard island and mcdonald islandsholy seehondurashungaryicelandindiaindonesiairaniraqirelandisle of manisraelitalyjamaicajapanjerseyjordankazakhstankenyakiribatidemocratic peoples republic of koreasouth koreakuwaitkyrgyzstanlao pdrlatvialebanonlesotholiberialibyaliechtensteinlithuanialuxembourgnorth macedoniamadagascarmalawimalaysiamaldivesmalimaltamarshall islandsmartiniquemauritaniamauritiusmayottemexicomicronesiamoldovamonacomongoliamontenegromontserratmoroccomozambiquemyanmarnamibianaurunepalnetherlandsnetherlands antillesnew caledonianew zealandnicaraguanigernigerianiuenorfolk islandnorthern mariana islandsnorwayomanpakistanpalaupalestinian territorypanamapapua new guineaparaguayperuphilippinespitcairnpolandportugalpuerto ricoqatarréunionromaniarussian federationrwandasaint barthélemysaint helenasaint kitts and nevissaint luciasaint martinsaint pierre and miquelonsaint vincent and grenadinessamoasan marinosao tome and principesaudi arabiasenegalserbiaseychellessierra leonesingaporeslovakiasloveniasolomon islandssomaliasouth africasouth georgia and the south sandwich islandssouth sudanspainsri lankasudansurinamesvalbard and jan mayen islandsswazilandswedenswitzerlandsyriataiwantajikistantanzaniathailandtimor lestetogotokelautongatrinidad and tobagotunisiatürkiyeturkmenistanturks and caicos islandstuvaluugandaukraineunited arab emiratesunited kingdomunited states of americaunited states minor outlying islandsuruguayuzbekistanvanuatuvenezuelaviet namvirgin islandswallis and futuna islandswestern saharayemenzambiazimbabwe"
 	countryTextStrings = "afaxaldzasadaoaiaqagaramawauatazbsbhbdbbbybebzbjbmbtbobabwbvbrvgiodnbgbfbikhcmcacvkycftdclcnhkmocxcccokmcgcdckcrcihrcucyczdkdjdmdoecegsvgqereeetfkfofjfifrgfpftfgagmgedeghgigrglgdgpgugtgggngwgyhthmvahnhuisinidiriqieimilitjmjpjejokzkekikpkrkwkglalvlblslrlyliltlumkmgmwmymvmlmtmhmqmrmuytmxfmmdmcmnmemsmamzmmnanrnpnlanncnzninengnunfmpnoompkpwpspapgpypephpnplptprqarerorurwblshknlcmfpmvcwssmstsasnrsscslsgsksisbsozagssseslksdsrsjszsechsytwtjtzthtltgtktotttntrtmtctvuguaaegbusumuyuzvuvevnviwfehyezmzw"
 	countryTextInputs  = "afaxaldzasadaoaiaqagaramawauatazbsbhbdbbbybebzbjbmbtbobabwbvbrvgiodnbgbfbikhcmcacvkycftdclcnhkmocxcccokmcgcdckcrcihrcucyczdkdjdmdoecegsvgqereeetfkfofjfifrgfpftfgagmgedeghgigrglgdgpgugtgggngwgyhthmvahnhuisinidiriqieimilitjmjpjejokzkekikpkrkwkglalvlblslrlyliltlumkmgmwmymvmlmtmhmqmrmuytmxfmmdmcmnmemsmamzmmnanrnpnlanncnzninengnunfmpnoompkpwpspapgpypephpnplptprqarerorurwblshknlcmfpmvcwssmstsasnrsscslsgsksisbsozagssseslksdsrsjszsechsytwtjtzthtltgtktotttntrtmtctvuguaaegbusumuyuzvuvevnviwfehyezmzw"
 	countryJSONStrings = "afaxaldzasadaoaiaqagaramawauatazbsbhbdbbbybebzbjbmbtbobabwbvbrvgiodnbgbfbikhcmcacvkycftdclcnhkmocxcccokmcgcdckcrcihrcucyczdkdjdmdoecegsvgqereeetfkfofjfifrgfpftfgagmgedeghgigrglgdgpgugtgggngwgyhthmvahnhuisinidiriqieimilitjmjpjejokzkekikpkrkwkglalvlblslrlyliltlumkmgmwmymvmlmtmhmqmrmuytmxfmmdmcmnmemsmamzmmnanrnpnlanncnzninengnunfmpnoompkpwpspapgpypephpnplptprqarerorurwblshknlcmfpmvcwssmstsasnrsscslsgsksisbsozagssseslksdsrsjszsechsytwtjtzthtltgtktotttntrtmtctvuguaaegbusumuyuzvuvevnviwfehyezmzw"
@@ -132,7 +132,7 @@ const (
 )
 
 var (
-	countryEnumIndex = [...]uint16{0, 11, 24, 31, 38, 52, 59, 65, 73, 83, 102, 111, 118, 123, 132, 139, 149, 156, 163, 173, 181, 188, 195, 201, 206, 213, 219, 226, 248, 256, 269, 275, 297, 327, 344, 352, 364, 371, 379, 387, 393, 403, 417, 441, 445, 450, 455, 464, 469, 485, 498, 506, 513, 530, 539, 551, 561, 574, 581, 585, 591, 605, 612, 620, 628, 646, 653, 658, 669, 686, 693, 700, 708, 724, 737, 741, 748, 754, 767, 783, 810, 815, 821, 828, 835, 840, 849, 855, 864, 871, 881, 885, 894, 902, 908, 921, 927, 932, 965, 973, 981, 988, 995, 1000, 1009, 1013, 1017, 1024, 1035, 1041, 1046, 1053, 1058, 1064, 1070, 1080, 1085, 1093, 1129, 1140, 1146, 1156, 1163, 1169, 1176, 1183, 1190, 1195, 1208, 1217, 1227, 1236, 1246, 1252, 1260, 1268, 1272, 1277, 1293, 1303, 1313, 1322, 1329, 1335, 1345, 1352, 1358, 1366, 1376, 1386, 1393, 1403, 1410, 1417, 1422, 1427, 1438, 1458, 1471, 1482, 1491, 1496, 1503, 1507, 1521, 1545, 1551, 1555, 1563, 1568, 1589, 1595, 1611, 1619, 1623, 1634, 1642, 1648, 1656, 1667, 1672, 1680, 1687, 1705, 1711, 1728, 1740, 1761, 1772, 1784, 1809, 1837, 1842, 1852, 1873, 1885, 1892, 1898, 1908, 1920, 1929, 1937, 1945, 1960, 1967, 1979, 2023, 2034, 2039, 2048, 2053, 2061, 2091, 2100, 2106, 2117, 2122, 2128, 2138, 2146, 2154, 2165, 2169, 2176, 2181, 2200, 2207, 2213, 2225, 2249, 2255, 2261, 2268, 2288, 2302, 2326, 2362, 2369, 2379, 2386, 2395, 2403, 2417, 2442, 2456, 2461, 2467, 2475}
+	countryEnumIndex = [...]uint16{0, 11, 25, 32, 39, 53, 60, 66, 74, 84, 103, 112, 119, 124, 133, 140, 150, 157, 164, 174, 182, 189, 196, 202, 207, 214, 220, 227, 249, 257, 270, 276, 298, 328, 345, 353, 365, 372, 380, 388, 394, 404, 418, 442, 446, 451, 456, 465, 470, 486, 499, 507, 514, 531, 540, 552, 562, 575, 582, 586, 592, 599, 606, 614, 622, 640, 647, 652, 663, 680, 687, 694, 702, 718, 731, 735, 742, 748, 761, 777, 804, 809, 815, 822, 829, 834, 843, 849, 858, 865, 875, 879, 888, 896, 902, 915, 921, 926, 959, 967, 975, 982, 989, 994, 1003, 1007, 1011, 1018, 1029, 1035, 1040, 1047, 1052, 1058, 1064, 1074, 1079, 1087, 1123, 1134, 1140, 1150, 1157, 1163, 1170, 1177, 1184, 1189, 1202, 1211, 1221, 1236, 1246, 1252, 1260, 1268, 1272, 1277, 1293, 1303, 1313, 1322, 1329, 1335, 1345, 1352, 1358, 1366, 1376, 1386, 1393, 1403, 1410, 1417, 1422, 1427, 1438, 1458, 1471, 1482, 1491, 1496, 1503, 1507, 1521, 1545, 1551, 1555, 1563, 1568, 1589, 1595, 1611, 1619, 1623, 1634, 1642, 1648, 1656, 1667, 1672, 1680, 1687, 1705, 1711, 1728, 1740, 1761, 1772, 1784, 1809, 1837, 1842, 1852, 1873, 1885, 1892, 1898, 1908, 1920, 1929, 1937, 1945, 1960, 1967, 1979, 2023, 2034, 2039, 2048, 2053, 2061, 2091, 2100, 2106, 2117, 2122, 2128, 2138, 2146, 2154, 2165, 2169, 2176, 2181, 2200, 2207, 2215, 2227, 2251, 2257, 2263, 2270, 2290, 2304, 2328, 2364, 2371, 2381, 2388, 2397, 2405, 2419, 2444, 2458, 2463, 2469, 2477}
 	countryTextIndex = [...]uint16{0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 44, 46, 48, 50, 52, 54, 56, 58, 60, 62, 64, 66, 68, 70, 72, 74, 76, 78, 80, 82, 84, 86, 88, 90, 92, 94, 96, 98, 100, 102, 104, 106, 108, 110, 112, 114, 116, 118, 120, 122, 124, 126, 128, 130, 132, 134, 136, 138, 140, 142, 144, 146, 148, 150, 152, 154, 156, 158, 160, 162, 164, 166, 168, 170, 172, 174, 176, 178, 180, 182, 184, 186, 188, 190, 192, 194, 196, 198, 200, 202, 204, 206, 208, 210, 212, 214, 216, 218, 220, 222, 224, 226, 228, 230, 232, 234, 236, 238, 240, 242, 244, 246, 248, 250, 252, 254, 256, 258, 260, 262, 264, 266, 268, 270, 272, 274, 276, 278, 280, 282, 284, 286, 288, 290, 292, 294, 296, 298, 300, 302, 304, 306, 308, 310, 312, 314, 316, 318, 320, 322, 324, 326, 328, 330, 332, 334, 336, 338, 340, 342, 344, 346, 348, 350, 352, 354, 356, 358, 360, 362, 364, 366, 368, 370, 372, 374, 376, 378, 380, 382, 384, 386, 388, 390, 392, 394, 396, 398, 400, 402, 404, 406, 408, 410, 412, 414, 416, 418, 420, 422, 424, 426, 428, 430, 432, 434, 436, 438, 440, 442, 444, 446, 448, 450, 452, 454, 456, 458, 460, 462, 464, 466, 468, 470, 472, 474, 476, 478, 480, 482, 484, 486, 488, 490, 492, 494}
 	countryJSONIndex = [...]uint16{0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 44, 46, 48, 50, 52, 54, 56, 58, 60, 62, 64, 66, 68, 70, 72, 74, 76, 78, 80, 82, 84, 86, 88, 90, 92, 94, 96, 98, 100, 102, 104, 106, 108, 110, 112, 114, 116, 118, 120, 122, 124, 126, 128, 130, 132, 134, 136, 138, 140, 142, 144, 146, 148, 150, 152, 154, 156, 158, 160, 162, 164, 166, 168, 170, 172, 174, 176, 178, 180, 182, 184, 186, 188, 190, 192, 194, 196, 198, 200, 202, 204, 206, 208, 210, 212, 214, 216, 218, 220, 222, 224, 226, 228, 230, 232, 234, 236, 238, 240, 242, 244, 246, 248, 250, 252, 254, 256, 258, 260, 262, 264, 266, 268, 270, 272, 274, 276, 278, 280, 282, 284, 286, 288, 290, 292, 294, 296, 298, 300, 302, 304, 306, 308, 310, 312, 314, 316, 318, 320, 322, 324, 326, 328, 330, 332, 334, 336, 338, 340, 342, 344, 346, 348, 350, 352, 354, 356, 358, 360, 362, 364, 366, 368, 370, 372, 374, 376, 378, 380, 382, 384, 386, 388, 390, 392, 394, 396, 398, 400, 402, 404, 406, 408, 410, 412, 414, 416, 418, 420, 422, 424, 426, 428, 430, 432, 434, 436, 438, 440, 442, 444, 446, 448, 450, 452, 454, 456, 458, 460, 462, 464, 466, 468, 470, 472, 474, 476, 478, 480, 482, 484, 486, 488, 490, 492, 494}
 	countrySQLIndex  = [...]uint16{0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 44, 46, 48, 50, 52, 54, 56, 58, 60, 62, 64, 66, 68, 70, 72, 74, 76, 78, 80, 82, 84, 86, 88, 90, 92, 94, 96, 98, 100, 102, 104, 106, 108, 110, 112, 114, 116, 118, 120, 122, 124, 126, 128, 130, 132, 134, 136, 138, 140, 142, 144, 146, 148, 150, 152, 154, 156, 158, 160, 162, 164, 166, 168, 170, 172, 174, 176, 178, 180, 182, 184, 186, 188, 190, 192, 194, 196, 198, 200, 202, 204, 206, 208, 210, 212, 214, 216, 218, 220, 222, 224, 226, 228, 230, 232, 234, 236, 238, 240, 242, 244, 246, 248, 250, 252, 254, 256, 258, 260, 262, 264, 266, 268, 270, 272, 274, 276, 278, 280, 282, 284, 286, 288, 290, 292, 294, 296, 298, 300, 302, 304, 306, 308, 310, 312, 314, 316, 318, 320, 322, 324, 326, 328, 330, 332, 334, 336, 338, 340, 342, 344, 346, 348, 350, 352, 354, 356, 358, 360, 362, 364, 366, 368, 370, 372, 374, 376, 378, 380, 382, 384, 386, 388, 390, 392, 394, 396, 398, 400, 402, 404, 406, 408, 410, 412, 414, 416, 418, 420, 422, 424, 426, 428, 430, 432, 434, 436, 438, 440, 442, 444, 446, 448, 450, 452, 454, 456, 458, 460, 462, 464, 466, 468, 470, 472, 474, 476, 478, 480, 482, 484, 486, 488, 490, 492, 494}
@@ -158,7 +158,7 @@ func (v Country) Ordinal() int {
 	switch v {
 	case Afghanistan:
 		return 0
-	case Aland_Islands:
+	case Åland_Islands:
 		return 1
 	case Albania:
 		return 2
@@ -276,7 +276,7 @@ func (v Country) Ordinal() int {
 		return 58
 	case Cyprus:
 		return 59
-	case Czech_Republic:
+	case Czechia:
 		return 60
 	case Denmark:
 		return 61
@@ -416,7 +416,7 @@ func (v Country) Ordinal() int {
 		return 128
 	case Luxembourg:
 		return 129
-	case Macedonia:
+	case North_Macedonia:
 		return 130
 	case Madagascar:
 		return 131
@@ -608,7 +608,7 @@ func (v Country) Ordinal() int {
 		return 224
 	case Tunisia:
 		return 225
-	case Turkey:
+	case Türkiye:
 		return 226
 	case Turkmenistan:
 		return 227
@@ -672,7 +672,7 @@ func CountryOf(v int) Country {
 		return AllCountries[v]
 	}
 	// an invalid result
-	return Afghanistan + Aland_Islands + Albania + Algeria + American_Samoa + Andorra + Angola + Anguilla + Antarctica + Antigua_and_Barbuda + Argentina + Armenia + Aruba + Australia + Austria + Azerbaijan + Bahamas + Bahrain + Bangladesh + Barbados + Belarus + Belgium + Belize + Benin + Bermuda + Bhutan + Bolivia + Bosnia_and_Herzegovina + Botswana + Bouvet_Island + Brazil + British_Virgin_Islands + British_Indian_Ocean_Territory + Brunei_Darussalam + Bulgaria + Burkina_Faso + Burundi + Cambodia + Cameroon + Canada + Cape_Verde + Cayman_Islands + Central_African_Republic + Chad + Chile + China + Hong_Kong + Macao + Christmas_Island + Cocos_Islands + Colombia + Comoros + Congo_Brazzaville + Congo_DRC + Cook_Islands + Costa_Rica + Côte_dIvoire + Croatia + Cuba + Cyprus + Czech_Republic + Denmark + Djibouti + Dominica + Dominican_Republic + Ecuador + Egypt + El_Salvador + Equatorial_Guinea + Eritrea + Estonia + Ethiopia + Falkland_Islands + Faroe_Islands + Fiji + Finland + France + French_Guiana + French_Polynesia + French_Southern_Territories + Gabon + Gambia + Georgia + Germany + Ghana + Gibraltar + Greece + Greenland + Grenada + Guadeloupe + Guam + Guatemala + Guernsey + Guinea + Guinea_Bissau + Guyana + Haiti + Heard_Island_and_Mcdonald_Islands + Holy_See + Honduras + Hungary + Iceland + India + Indonesia + Iran + Iraq + Ireland + Isle_of_Man + Israel + Italy + Jamaica + Japan + Jersey + Jordan + Kazakhstan + Kenya + Kiribati + Democratic_Peoples_Republic_of_Korea + South_Korea + Kuwait + Kyrgyzstan + Lao_PDR + Latvia + Lebanon + Lesotho + Liberia + Libya + Liechtenstein + Lithuania + Luxembourg + Macedonia + Madagascar + Malawi + Malaysia + Maldives + Mali + Malta + Marshall_Islands + Martinique + Mauritania + Mauritius + Mayotte + Mexico + Micronesia + Moldova + Monaco + Mongolia + Montenegro + Montserrat + Morocco + Mozambique + Myanmar + Namibia + Nauru + Nepal + Netherlands + Netherlands_Antilles + New_Caledonia + New_Zealand + Nicaragua + Niger + Nigeria + Niue + Norfolk_Island + Northern_Mariana_Islands + Norway + Oman + Pakistan + Palau + Palestinian_Territory + Panama + Papua_New_Guinea + Paraguay + Peru + Philippines + Pitcairn + Poland + Portugal + Puerto_Rico + Qatar + Réunion + Romania + Russian_Federation + Rwanda + Saint_Barthélemy + Saint_Helena + Saint_Kitts_and_Nevis + Saint_Lucia + Saint_Martin + Saint_Pierre_and_Miquelon + Saint_Vincent_and_Grenadines + Samoa + San_Marino + Sao_Tome_and_Principe + Saudi_Arabia + Senegal + Serbia + Seychelles + Sierra_Leone + Singapore + Slovakia + Slovenia + Solomon_Islands + Somalia + South_Africa + South_Georgia_and_the_South_Sandwich_Islands + South_Sudan + Spain + Sri_Lanka + Sudan + Suriname + Svalbard_and_Jan_Mayen_Islands + Swaziland + Sweden + Switzerland + Syria + Taiwan + Tajikistan + Tanzania + Thailand + Timor_Leste + Togo + Tokelau + Tonga + Trinidad_and_Tobago + Tunisia + Turkey + Turkmenistan + Turks_and_Caicos_Islands + Tuvalu + Uganda + Ukraine + United_Arab_Emirates + United_Kingdom + United_States_of_America + United_States_Minor_Outlying_Islands + Uruguay + Uzbekistan + Vanuatu + Venezuela + Viet_Nam + Virgin_Islands + Wallis_and_Futuna_Islands + Western_Sahara + Yemen + Zambia + Zimbabwe + 1
+	return Afghanistan + Åland_Islands + Albania + Algeria + American_Samoa + Andorra + Angola + Anguilla + Antarctica + Antigua_and_Barbuda + Argentina + Armenia + Aruba + Australia + Austria + Azerbaijan + Bahamas + Bahrain + Bangladesh + Barbados + Belarus + Belgium + Belize + Benin + Bermuda + Bhutan + Bolivia + Bosnia_and_Herzegovina + Botswana + Bouvet_Island + Brazil + British_Virgin_Islands + British_Indian_Ocean_Territory + Brunei_Darussalam + Bulgaria + Burkina_Faso + Burundi + Cambodia + Cameroon + Canada + Cape_Verde + Cayman_Islands + Central_African_Republic + Chad + Chile + China + Hong_Kong + Macao + Christmas_Island + Cocos_Islands + Colombia + Comoros + Congo_Brazzaville + Congo_DRC + Cook_Islands + Costa_Rica + Côte_dIvoire + Croatia + Cuba + Cyprus + Czechia + Denmark + Djibouti + Dominica + Dominican_Republic + Ecuador + Egypt + El_Salvador + Equatorial_Guinea + Eritrea + Estonia + Ethiopia + Falkland_Islands + Faroe_Islands + Fiji + Finland + France + French_Guiana + French_Polynesia + French_Southern_Territories + Gabon + Gambia + Georgia + Germany + Ghana + Gibraltar + Greece + Greenland + Grenada + Guadeloupe + Guam + Guatemala + Guernsey + Guinea + Guinea_Bissau + Guyana + Haiti + Heard_Island_and_Mcdonald_Islands + Holy_See + Honduras + Hungary + Iceland + India + Indonesia + Iran + Iraq + Ireland + Isle_of_Man + Israel + Italy + Jamaica + Japan + Jersey + Jordan + Kazakhstan + Kenya + Kiribati + Democratic_Peoples_Republic_of_Korea + South_Korea + Kuwait + Kyrgyzstan + Lao_PDR + Latvia + Lebanon + Lesotho + Liberia + Libya + Liechtenstein + Lithuania + Luxembourg + North_Macedonia + Madagascar + Malawi + Malaysia + Maldives + Mali + Malta + Marshall_Islands + Martinique + Mauritania + Mauritius + Mayotte + Mexico + Micronesia + Moldova + Monaco + Mongolia + Montenegro + Montserrat + Morocco + Mozambique + Myanmar + Namibia + Nauru + Nepal + Netherlands + Netherlands_Antilles + New_Caledonia + New_Zealand + Nicaragua + Niger + Nigeria + Niue + Norfolk_Island + Northern_Mariana_Islands + Norway + Oman + Pakistan + Palau + Palestinian_Territory + Panama + Papua_New_Guinea + Paraguay + Peru + Philippines + Pitcairn + Poland + Portugal + Puerto_Rico + Qatar + Réunion + Romania + Russian_Federation + Rwanda + Saint_Barthélemy + Saint_Helena + Saint_Kitts_and_Nevis + Saint_Lucia + Saint_Martin + Saint_Pierre_and_Miquelon + Saint_Vincent_and_Grenadines + Samoa + San_Marino + Sao_Tome_and_Principe + Saudi_Arabia + Senegal + Serbia + Seychelles + Sierra_Leone + Singapore + Slovakia + Slovenia + Solomon_Islands + Somalia + South_Africa + South_Georgia_and_the_South_Sandwich_Islands + South_Sudan + Spain + Sri_Lanka + Sudan + Suriname + Svalbard_and_Jan_Mayen_Islands + Swaziland + Sweden + Switzerland + Syria + Taiwan + Tajikistan + Tanzania + Thailand + Timor_Leste + Togo + Tokelau + Tonga + Trinidad_and_Tobago + Tunisia + Türkiye + Turkmenistan + Turks_and_Caicos_Islands + Tuvalu + Uganda + Ukraine + United_Arab_Emirates + United_Kingdom + United_States_of_America + United_States_Minor_Outlying_Islands + Uruguay + Uzbekistan + Vanuatu + Venezuela + Viet_Nam + Virgin_Islands + Wallis_and_Futuna_Islands + Western_Sahara + Yemen + Zambia + Zimbabwe + 1
 }
 
 // parseNumber attempts to convert a decimal value.
@@ -710,6 +710,12 @@ func (v *Country) parseFallback(in, s string) error {
 		return nil
 	}
 
+	var ok bool
+	*v, ok = iso3166_3LetterCodes[s]
+	if ok {
+		return nil
+	}
+
 	return errors.New(in + ": unrecognised country")
 }
 
@@ -717,7 +723,7 @@ func (v *Country) parseFallback(in, s string) error {
 // This function is pluggable and is initialised using command-line flags
 // -ic -lc -uc -unsnake.
 var countryTransformInput = func(in string) string {
-	return strings.ToLower(in)
+	return strings.ToLower(strings.ReplaceAll(in, "_", " "))
 }
 
 func (v *Country) parseString(s string, concats string, indexes []uint16) (ok bool) {
@@ -732,7 +738,8 @@ func (v *Country) parseString(s string, concats string, indexes []uint16) (ok bo
 		}
 		i0 = i1
 	}
-	return false
+	*v, ok = iso3166_3LetterCodes[s]
+	return ok
 }
 
 // AsCountry parses a string to find the corresponding Country, accepting either one of the string values or
@@ -858,6 +865,12 @@ func (v *Country) unmarshalJSON(in string) error {
 	}
 
 	if v.parseString(s, countryEnumInputs, countryEnumIndex[:]) {
+		return nil
+	}
+
+	var ok bool
+	*v, ok = iso3166_3LetterCodes[s]
+	if ok {
 		return nil
 	}
 
