@@ -72,12 +72,16 @@ const (
 )
 
 //-------------------------------------------------------------------------------------------------
-//go:generate enumeration -v -f -i season_json.go -type Season_Uc_Jn -suffix _Uc_Jn -uc -marshaljson number
+//go:generate enumeration -v -f -i season_json.go -type Season_Uc_Jn -suffix _Uc_Jn -uc -marshaljson number -z
 
 type Season_Uc_Jn uint
 
 const (
-	Spring_Uc_Jn, Summer_Uc_Jn, Autumn_Uc_Jn, Winter_Uc_Jn Season_Uc_Jn = 1, 2, 3, 4
+	_ Season_Uc_Jn = iota
+	Spring_Uc_Jn
+	Summer_Uc_Jn
+	Autumn_Uc_Jn // 3
+	Winter_Uc_Jn
 )
 
 //-------------------------------------------------------------------------------------------------

@@ -18,7 +18,9 @@ v go build -o bin/enumeration .
 
 v go clean -testcache
 
-v go test ./internal/...
+v rm -f internal/test/*_enum.go
+
+v go test ./internal/parse
 
 v ./internal/test/generate.sh
 
