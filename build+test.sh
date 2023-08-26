@@ -16,13 +16,15 @@ v go mod download
 v go build -o bin/enumeration .
 #type enumeration
 
-v gofmt -l -w -s *.go
+v go clean -testcache
+
+v go test ./internal/...
 
 v ./internal/test/generate.sh
 
 v ./example/generate.sh
 
-v go clean -testcache
+v gofmt -l -w -s *.go
 
 sleep 0.25s # wait for the files to be stable
 

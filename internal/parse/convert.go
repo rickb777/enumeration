@@ -77,7 +77,7 @@ func Convert(in io.Reader, input string, xCase transform.Case, config model.Conf
 	debugValues(m.Values)
 
 	if s.gs.ErrorCount > 0 {
-		return model.Model{}, fmt.Errorf("Syntax error in %s", input)
+		return model.Model{}, fmt.Errorf("Syntax error in %s\n%s", input, strings.Join(s.errs, "\n"))
 	}
 
 	if !foundMainType {

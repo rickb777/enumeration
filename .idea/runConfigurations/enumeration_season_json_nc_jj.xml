@@ -2,7 +2,7 @@
   <configuration default="false" name="enumeration season_json nc_jj" type="GoApplicationRunConfiguration" factoryName="Go Application">
     <module name="enumeration" />
     <working_directory value="$PROJECT_DIR$/internal/test" />
-    <parameters value="-v -f -i season_json.go -type Season_Nc_Jj -suffix _Nc_Jj" />
+    <parameters value="-v -z -f -i season_json.go -type Season_Nc_Jj -suffix _Nc_Jj" />
     <kind value="PACKAGE" />
     <package value="github.com/rickb777/enumeration/v3" />
     <directory value="$PROJECT_DIR$" />

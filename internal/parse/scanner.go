@@ -1,10 +1,10 @@
 package parse
 
 import (
+	"fmt"
+	"github.com/rickb777/enumeration/v3/internal/util"
 	goscanner "go/scanner"
 	"go/token"
-
-	"github.com/rickb777/enumeration/v3/internal/util"
 )
 
 // scanner implements a one-place lookahead wrapper around the Go scanner.
@@ -12,8 +12,11 @@ import (
 // with the literal from the COMMENT.
 type scanner struct {
 	gs      *goscanner.Scanner
+	errs    []string
+	Pos     token.Pos
 	Tok     token.Token
 	Lit     string
+	nextPos token.Pos
 	nextTok token.Token
 	nextLit string
 }
@@ -23,12 +26,15 @@ func (s *scanner) Peek() token.Token {
 }
 
 func (s *scanner) doScan() {
-	var pos token.Pos
-	pos, s.nextTok, s.nextLit = s.gs.Scan()
+	s.nextPos, s.nextTok, s.nextLit = s.gs.Scan()
+	s.debug()
+}
+
+func (s *scanner) debug() {
 	if s.Lit == "" {
-		util.Debug("%-18s %s\n", fset.Position(pos), s.Tok)
+		util.Debug("%-18s %s\n", fset.Position(s.Pos), s.Tok)
 	} else {
-		util.Debug("%-18s %-8s %q\n", fset.Position(pos), s.Tok, s.Lit)
+		util.Debug("%-18s %-8s %q\n", fset.Position(s.Pos), s.Tok, s.Lit)
 	}
 }
 
@@ -38,23 +44,24 @@ func (s *scanner) Scan() token.Token {
 		return token.EOF
 	}
 
+	s.Pos = s.nextPos
 	s.Tok = s.nextTok
 	s.Lit = s.nextLit
 
 	s.doScan()
 
-	switch s.nextTok {
-	case token.COMMENT:
-		s.Lit = s.nextLit
-		s.doScan()
-	}
 	return s.Tok
 }
 
 func newFileScanner(input string, src []byte) *scanner {
 	gs := new(goscanner.Scanner)
+	sc := &scanner{gs: gs}
+	eh := func(pos token.Position, msg string) {
+		sc.errs = append(sc.errs, fmt.Sprintf("%s: %s", pos, msg))
+	}
+
 	fset = token.NewFileSet()                          // positions are relative to fset
 	file := fset.AddFile(input, fset.Base(), len(src)) // register input "file"
-	gs.Init(file, src, nil /* no error handler */, goscanner.ScanComments)
-	return &scanner{gs: gs}
+	gs.Init(file, src, eh, goscanner.ScanComments)
+	return sc
 }

@@ -2,6 +2,8 @@ package parse
 
 import (
 	"bytes"
+	"flag"
+	"os"
 	"testing"
 
 	. "github.com/benmoss/matchers"
@@ -385,4 +387,11 @@ func TestConvertError1(t *testing.T) {
 			Pkg:      "confectionary",
 		})
 	Ω(err.Error()).Should(Equal("Failed to find Sweet in filename.go"))
+}
+
+func TestMain(m *testing.M) {
+	flag.Parse()
+	util.Verbose = testing.Verbose()
+	util.Dbg = testing.Verbose()
+	os.Exit(m.Run())
 }

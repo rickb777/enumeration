@@ -1,6 +1,7 @@
 package parse
 
 import (
+	"github.com/rickb777/enumeration/v3/internal/util"
 	"go/token"
 	"reflect"
 	"strings"
@@ -101,6 +102,11 @@ func parseConstBlock(s *scanner, items []constItem) []constItem {
 					readToEndOfLine(s) // discard likely compilation error
 				}
 
+			case token.COMMENT:
+				_, tag := readToEndOfLine(s)
+				items = appendConstItems(items, ids, "", "", tag)
+				ids = nil
+
 			case token.SEMICOLON:
 				restOfLine, tag := readToEndOfLine(s)
 				items = appendConstItems(items, ids, "", restOfLine, tag)
@@ -118,12 +124,11 @@ func parseConstBlock(s *scanner, items []constItem) []constItem {
 	return items
 }
 
-func readToEndOfLine(s *scanner) (string, reflect.StructTag) {
+func readToEndOfLine(s *scanner) (rest string, commentTag reflect.StructTag) {
 	if s.Tok == token.ASSIGN {
 		s.Scan()
 	}
 
-	var rest string
 	for s.Tok != token.SEMICOLON && s.Tok != token.EOF {
 		if rest != "" {
 			rest += " "
@@ -133,18 +138,27 @@ func readToEndOfLine(s *scanner) (string, reflect.StructTag) {
 		} else {
 			rest += s.Tok.String()
 		}
+
+		if s.Tok == token.COMMENT {
+			comment := strings.TrimSpace(s.Lit)
+			if strings.HasPrefix(comment, "//") {
+				comment = strings.TrimSpace(comment[2:])
+				if tagRE.MatchString(comment) {
+					commentTag = reflect.StructTag(comment)
+				}
+
+				// COMMENT is optionally followed by SEMICOLON/EOF
+				// but if not, then we've reached the end of the line anyway
+				if s.nextTok != token.SEMICOLON && s.nextTok != token.EOF {
+					util.Debug("%s  ----- comment return %q %s\n", fset.Position(s.Pos), rest, commentTag)
+					return rest, commentTag
+				}
+			}
+		}
+
 		s.Scan()
 	}
 
-	comment := strings.TrimSpace(s.Lit)
-	if strings.HasPrefix(comment, "//") {
-		comment = strings.TrimSpace(comment[2:])
-	}
-
-	var commentTag reflect.StructTag
-	if tagRE.MatchString(comment) {
-		commentTag = reflect.StructTag(comment)
-	}
-
+	util.Debug("%s ----- return %q %s\n", fset.Position(s.Pos), rest, commentTag)
 	return rest, commentTag
 }
