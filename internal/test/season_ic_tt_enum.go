@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v3 v3.0.2
+// github.com/rickb777/enumeration/v3 v3.1.1
 
 package test
 
@@ -23,9 +23,9 @@ var AllSeason_Ic_TtEnums = enum.IntEnums{
 
 const (
 	season_ic_ttEnumStrings = "SpringSummerAutumnWinter"
-	season_ic_ttEnumInputs  = "springsummerautumnwinter"
+	season_ic_ttEnumInputs = "springsummerautumnwinter"
 	season_ic_ttTextStrings = "SprgSumrAutmWint"
-	season_ic_ttTextInputs  = "sprgsumrautmwint"
+	season_ic_ttTextInputs = "sprgsumrautmwint"
 )
 
 var (
@@ -101,9 +101,10 @@ func (v *Season_Ic_Tt) parseNumber(s string) (ok bool) {
 //
 // Usage Example
 //
-//	v := new(Season_Ic_Tt)
-//	err := v.Parse(s)
-//	...  etc
+//    v := new(Season_Ic_Tt)
+//    err := v.Parse(s)
+//    ...  etc
+//
 func (v *Season_Ic_Tt) Parse(in string) error {
 	if v.parseNumber(in) {
 		return nil
@@ -204,6 +205,7 @@ func (v Season_Ic_Tt) invalidError() error {
 func (v *Season_Ic_Tt) UnmarshalText(bs []byte) error {
 	return v.unmarshalText(string(bs))
 }
+
 
 func (v *Season_Ic_Tt) unmarshalText(in string) error {
 	if v.parseNumber(in) {

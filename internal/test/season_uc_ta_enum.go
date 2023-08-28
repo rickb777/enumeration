@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v3 v3.0.2
+// github.com/rickb777/enumeration/v3 v3.1.1
 
 package test
 
@@ -26,14 +26,14 @@ const (
 	season_uc_taEnumStrings = "SPRINGSUMMERAUTUMNWINTER"
 	season_uc_taTextStrings = "SprgSumrAutmWint"
 	season_uc_taJSONStrings = "SprgSumrAutmWint"
-	season_uc_taSQLStrings  = "SprgSumrAutmWint"
+	season_uc_taSQLStrings = "SprgSumrAutmWint"
 )
 
 var (
 	season_uc_taEnumIndex = [...]uint16{0, 6, 12, 18, 24}
 	season_uc_taTextIndex = [...]uint16{0, 4, 8, 12, 16}
 	season_uc_taJSONIndex = [...]uint16{0, 4, 8, 12, 16}
-	season_uc_taSQLIndex  = [...]uint16{0, 4, 8, 12, 16}
+	season_uc_taSQLIndex = [...]uint16{0, 4, 8, 12, 16}
 )
 
 // String returns the literal string representation of a Season_Uc_Ta, which is
@@ -103,9 +103,10 @@ func (v *Season_Uc_Ta) parseNumber(s string) (ok bool) {
 //
 // Usage Example
 //
-//	v := new(Season_Uc_Ta)
-//	err := v.Parse(s)
-//	...  etc
+//    v := new(Season_Uc_Ta)
+//    err := v.Parse(s)
+//    ...  etc
+//
 func (v *Season_Uc_Ta) Parse(in string) error {
 	if v.parseNumber(in) {
 		return nil
@@ -228,6 +229,7 @@ func (v Season_Uc_Ta) MarshalJSON() ([]byte, error) {
 func (v *Season_Uc_Ta) UnmarshalText(bs []byte) error {
 	return v.unmarshalText(string(bs))
 }
+
 
 func (v *Season_Uc_Ta) unmarshalText(in string) error {
 	if v.parseNumber(in) {

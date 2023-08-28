@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v3 v3.0.2
+// github.com/rickb777/enumeration/v3 v3.1.1
 
 package test
 
@@ -23,9 +23,9 @@ var AllSeason_Ic_JjEnums = enum.IntEnums{
 
 const (
 	season_ic_jjEnumStrings = "SpringSummerAutumnWinter"
-	season_ic_jjEnumInputs  = "springsummerautumnwinter"
+	season_ic_jjEnumInputs = "springsummerautumnwinter"
 	season_ic_jjJSONStrings = "SprgSumrAutmWint"
-	season_ic_jjJSONInputs  = "SprgSumrAutmWint"
+	season_ic_jjJSONInputs = "SprgSumrAutmWint"
 )
 
 var (
@@ -101,9 +101,10 @@ func (v *Season_Ic_Jj) parseNumber(s string) (ok bool) {
 //
 // Usage Example
 //
-//	v := new(Season_Ic_Jj)
-//	err := v.Parse(s)
-//	...  etc
+//    v := new(Season_Ic_Jj)
+//    err := v.Parse(s)
+//    ...  etc
+//
 func (v *Season_Ic_Jj) Parse(in string) error {
 	if v.parseNumber(in) {
 		return nil

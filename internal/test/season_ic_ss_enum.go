@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v3 v3.0.2
+// github.com/rickb777/enumeration/v3 v3.1.1
 
 package test
 
@@ -24,14 +24,14 @@ var AllSeason_Ic_SsEnums = enum.IntEnums{
 
 const (
 	season_ic_ssEnumStrings = "SpringSummerAutumnWinter"
-	season_ic_ssEnumInputs  = "springsummerautumnwinter"
-	season_ic_ssSQLStrings  = "SprgSumrAutmWint"
-	season_ic_ssSQLInputs   = "sprgsumrautmwint"
+	season_ic_ssEnumInputs = "springsummerautumnwinter"
+	season_ic_ssSQLStrings = "SprgSumrAutmWint"
+	season_ic_ssSQLInputs = "sprgsumrautmwint"
 )
 
 var (
 	season_ic_ssEnumIndex = [...]uint16{0, 6, 12, 18, 24}
-	season_ic_ssSQLIndex  = [...]uint16{0, 4, 8, 12, 16}
+	season_ic_ssSQLIndex = [...]uint16{0, 4, 8, 12, 16}
 )
 
 // String returns the literal string representation of a Season_Ic_Ss, which is
@@ -102,9 +102,10 @@ func (v *Season_Ic_Ss) parseNumber(s string) (ok bool) {
 //
 // Usage Example
 //
-//	v := new(Season_Ic_Ss)
-//	err := v.Parse(s)
-//	...  etc
+//    v := new(Season_Ic_Ss)
+//    err := v.Parse(s)
+//    ...  etc
+//
 func (v *Season_Ic_Ss) Parse(in string) error {
 	if v.parseNumber(in) {
 		return nil

@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v3 v3.0.2
+// github.com/rickb777/enumeration/v3 v3.1.1
 
 package example
 
@@ -95,9 +95,10 @@ func (v *Base) parseNumber(s string) (ok bool) {
 //
 // Usage Example
 //
-//	v := new(Base)
-//	err := v.Parse(s)
-//	...  etc
+//    v := new(Base)
+//    err := v.Parse(s)
+//    ...  etc
+//
 func (v *Base) Parse(in string) error {
 	if v.parseNumber(in) {
 		return nil

@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v3 v3.0.2
+// github.com/rickb777/enumeration/v3 v3.1.1
 
 package test
 
@@ -96,9 +96,10 @@ func (v *Season_Uc_Tn) parseNumber(s string) (ok bool) {
 //
 // Usage Example
 //
-//	v := new(Season_Uc_Tn)
-//	err := v.Parse(s)
-//	...  etc
+//    v := new(Season_Uc_Tn)
+//    err := v.Parse(s)
+//    ...  etc
+//
 func (v *Season_Uc_Tn) Parse(in string) error {
 	if v.parseNumber(in) {
 		return nil
@@ -197,6 +198,7 @@ func (v Season_Uc_Tn) invalidError() error {
 func (v *Season_Uc_Tn) UnmarshalText(bs []byte) error {
 	return v.unmarshalText(string(bs))
 }
+
 
 func (v *Season_Uc_Tn) unmarshalText(in string) error {
 	if v.parseNumber(in) {

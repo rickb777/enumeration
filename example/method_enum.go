@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v3 v3.0.2
+// github.com/rickb777/enumeration/v3 v3.1.1
 
 package example
 
@@ -26,9 +26,9 @@ var AllMethodEnums = enum.IntEnums{
 
 const (
 	methodEnumStrings = "HEADGETPUTPOSTPATCHDELETE"
-	methodEnumInputs  = "headgetputpostpatchdelete"
+	methodEnumInputs = "headgetputpostpatchdelete"
 	methodJSONStrings = "HEGEPUPOPADE"
-	methodJSONInputs  = "HEGEPUPOPADE"
+	methodJSONInputs = "HEGEPUPOPADE"
 )
 
 var (
@@ -108,9 +108,10 @@ func (v *Method) parseNumber(s string) (ok bool) {
 //
 // Usage Example
 //
-//	v := new(Method)
-//	err := v.Parse(s)
-//	...  etc
+//    v := new(Method)
+//    err := v.Parse(s)
+//    ...  etc
+//
 func (v *Method) Parse(in string) error {
 	if v.parseNumber(in) {
 		return nil
