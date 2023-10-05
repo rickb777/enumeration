@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v3 v3.1.1
+// github.com/rickb777/enumeration/v3 v3.1.2
 
 package example
 
@@ -32,13 +32,13 @@ var AllGreekAlphabetEnums = enum.IntEnums{
 const (
 	greekalphabetEnumStrings = "ΑλφαΒήταΓάμμαΔέλταΕψιλονΖήταΗταΘήταΙώταΚάππαΛάμβδαΜυΝυΞιΟμικρονΠιΡώΣίγμαΤαυΥψιλονΦιΧιΨιΩμέγα"
 	greekalphabetTextStrings = "alphabetagammadeltaepsilonzetaetathetaiotakappalambdamunuxiomicronpirhosigmatauupsilonphichipsiomega"
-	greekalphabetSQLStrings = "ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ"
+	greekalphabetSQLStrings  = "ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ"
 )
 
 var (
 	greekalphabetEnumIndex = [...]uint16{0, 8, 16, 26, 36, 48, 56, 62, 70, 78, 88, 100, 104, 108, 112, 126, 130, 134, 144, 150, 162, 166, 170, 174, 184}
 	greekalphabetTextIndex = [...]uint16{0, 5, 9, 14, 19, 26, 30, 33, 38, 42, 47, 53, 55, 57, 59, 66, 68, 71, 76, 79, 86, 89, 92, 95, 100}
-	greekalphabetSQLIndex = [...]uint16{0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 44, 46, 48}
+	greekalphabetSQLIndex  = [...]uint16{0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 44, 46, 48}
 )
 
 // String returns the literal string representation of a GreekAlphabet, which is
@@ -148,10 +148,9 @@ func (v *GreekAlphabet) parseNumber(s string) (ok bool) {
 //
 // Usage Example
 //
-//    v := new(GreekAlphabet)
-//    err := v.Parse(s)
-//    ...  etc
-//
+//	v := new(GreekAlphabet)
+//	err := v.Parse(s)
+//	...  etc
 func (v *GreekAlphabet) Parse(in string) error {
 	if v.parseNumber(in) {
 		return nil
@@ -250,7 +249,6 @@ func (v GreekAlphabet) invalidError() error {
 func (v *GreekAlphabet) UnmarshalText(bs []byte) error {
 	return v.unmarshalText(string(bs))
 }
-
 
 func (v *GreekAlphabet) unmarshalText(in string) error {
 	if v.parseNumber(in) {

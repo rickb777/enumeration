@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v3 v3.1.1
+// github.com/rickb777/enumeration/v3 v3.1.2
 
 package example
 
@@ -25,13 +25,13 @@ var AllSalesChannelEnums = enum.IntEnums{
 const (
 	saleschannelEnumStrings = "onlineinstoretelephone"
 	saleschannelJSONStrings = "webshopstorephone"
-	saleschannelSQLStrings = "ost"
+	saleschannelSQLStrings  = "ost"
 )
 
 var (
 	saleschannelEnumIndex = [...]uint16{0, 6, 13, 22}
 	saleschannelJSONIndex = [...]uint16{0, 7, 12, 17}
-	saleschannelSQLIndex = [...]uint16{0, 1, 2, 3}
+	saleschannelSQLIndex  = [...]uint16{0, 1, 2, 3}
 )
 
 // String returns the literal string representation of a SalesChannel, which is
@@ -99,10 +99,9 @@ func (v *SalesChannel) parseNumber(s string) (ok bool) {
 //
 // Usage Example
 //
-//    v := new(SalesChannel)
-//    err := v.Parse(s)
-//    ...  etc
-//
+//	v := new(SalesChannel)
+//	err := v.Parse(s)
+//	...  etc
 func (v *SalesChannel) Parse(in string) error {
 	if v.parseNumber(in) {
 		return nil

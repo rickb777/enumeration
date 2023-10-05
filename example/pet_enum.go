@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v3 v3.1.1
+// github.com/rickb777/enumeration/v3 v3.1.2
 
 package example
 
@@ -102,10 +102,9 @@ func (v *Pet) parseNumber(s string) (ok bool) {
 //
 // Usage Example
 //
-//    v := new(Pet)
-//    err := v.Parse(s)
-//    ...  etc
-//
+//	v := new(Pet)
+//	err := v.Parse(s)
+//	...  etc
 func (v *Pet) Parse(in string) error {
 	if v.parseNumber(in) {
 		return nil
@@ -214,7 +213,6 @@ var petMarshalNumber = func(v Pet) string {
 func (v *Pet) UnmarshalText(bs []byte) error {
 	return v.unmarshalText(string(bs))
 }
-
 
 func (v *Pet) unmarshalText(in string) error {
 	if v.parseNumber(in) {

@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v3 v3.1.1
+// github.com/rickb777/enumeration/v3 v3.1.2
 
 package test
 
@@ -24,20 +24,20 @@ var AllSeason_Ic_TaEnums = enum.IntEnums{
 
 const (
 	season_ic_taEnumStrings = "SpringSummerAutumnWinter"
-	season_ic_taEnumInputs = "springsummerautumnwinter"
+	season_ic_taEnumInputs  = "springsummerautumnwinter"
 	season_ic_taTextStrings = "SprgSumrAutmWint"
-	season_ic_taTextInputs = "sprgsumrautmwint"
+	season_ic_taTextInputs  = "sprgsumrautmwint"
 	season_ic_taJSONStrings = "SprgSumrAutmWint"
-	season_ic_taJSONInputs = "SprgSumrAutmWint"
-	season_ic_taSQLStrings = "SprgSumrAutmWint"
-	season_ic_taSQLInputs = "sprgsumrautmwint"
+	season_ic_taJSONInputs  = "SprgSumrAutmWint"
+	season_ic_taSQLStrings  = "SprgSumrAutmWint"
+	season_ic_taSQLInputs   = "sprgsumrautmwint"
 )
 
 var (
 	season_ic_taEnumIndex = [...]uint16{0, 6, 12, 18, 24}
 	season_ic_taTextIndex = [...]uint16{0, 4, 8, 12, 16}
 	season_ic_taJSONIndex = [...]uint16{0, 4, 8, 12, 16}
-	season_ic_taSQLIndex = [...]uint16{0, 4, 8, 12, 16}
+	season_ic_taSQLIndex  = [...]uint16{0, 4, 8, 12, 16}
 )
 
 // String returns the literal string representation of a Season_Ic_Ta, which is
@@ -108,10 +108,9 @@ func (v *Season_Ic_Ta) parseNumber(s string) (ok bool) {
 //
 // Usage Example
 //
-//    v := new(Season_Ic_Ta)
-//    err := v.Parse(s)
-//    ...  etc
-//
+//	v := new(Season_Ic_Ta)
+//	err := v.Parse(s)
+//	...  etc
 func (v *Season_Ic_Ta) Parse(in string) error {
 	if v.parseNumber(in) {
 		return nil
@@ -236,7 +235,6 @@ func (v Season_Ic_Ta) MarshalJSON() ([]byte, error) {
 func (v *Season_Ic_Ta) UnmarshalText(bs []byte) error {
 	return v.unmarshalText(string(bs))
 }
-
 
 func (v *Season_Ic_Ta) unmarshalText(in string) error {
 	if v.parseNumber(in) {
