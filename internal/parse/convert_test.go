@@ -8,6 +8,7 @@ import (
 
 	. "github.com/benmoss/matchers"
 	. "github.com/onsi/gomega"
+	"github.com/rickb777/enumeration/v3/internal/collection"
 	"github.com/rickb777/enumeration/v3/internal/model"
 	"github.com/rickb777/enumeration/v3/internal/transform"
 	"github.com/rickb777/enumeration/v3/internal/util"
@@ -48,6 +49,7 @@ func TestConvertBlock1(t *testing.T) {
 		Values:   model.ValuesOf("Mars", "Bounty", "Snickers", "Kitkat"),
 		Case:     transform.Upper,
 		Extra:    make(map[string]interface{}),
+		Imports:  collection.NewStringSet().AddAll(basicImports...),
 	}))
 }
 
@@ -92,6 +94,7 @@ func TestConvertBlock2(t *testing.T) {
 		Version:  util.Version,
 		Values:   model.ValuesOf("Mars", "Bounty", "Snickers", "Kitkat"),
 		Extra:    make(map[string]interface{}),
+		Imports:  collection.NewStringSet().AddAll(basicImports...),
 	}))
 }
 
@@ -130,6 +133,7 @@ func TestConvertBlock3(t *testing.T) {
 		Values:   model.ValuesOf("Mars", "Bounty", "Snickers", "Kitkat"),
 		Case:     transform.Upper,
 		Extra:    make(map[string]interface{}),
+		Imports:  collection.NewStringSet().AddAll(basicImports...),
 	}))
 }
 
@@ -206,6 +210,7 @@ func TestConvertBlock4(t *testing.T) {
 		Values:     values,
 		AliasTable: "sweetAliases",
 		Extra:      make(map[string]interface{}),
+		Imports:    collection.NewStringSet().AddAll(basicImports...),
 	}))
 }
 
@@ -243,6 +248,7 @@ func TestConvertBlockMultiple(t *testing.T) {
 		Values:   model.ValuesOf("Mars", "Bounty", "Snickers", "Kitkat"),
 		Case:     transform.Upper,
 		Extra:    make(map[string]interface{}),
+		Imports:  collection.NewStringSet().AddAll(basicImports...),
 	}))
 }
 
@@ -281,6 +287,7 @@ func TestConvertSeparate1(t *testing.T) {
 		Values:   model.ValuesOf("Mars", "Bounty", "Snickers", "Kitkat"),
 		Case:     transform.Upper,
 		Extra:    make(map[string]interface{}),
+		Imports:  collection.NewStringSet().AddAll(basicImports...),
 	}))
 }
 
@@ -325,6 +332,7 @@ func TestConvertSeparate2(t *testing.T) {
 		Values:   expected,
 		Case:     transform.Upper,
 		Extra:    make(map[string]interface{}),
+		Imports:  collection.NewStringSet().AddAll(basicImports...),
 	}))
 }
 
@@ -356,6 +364,7 @@ func TestConvertSeparateMultiple(t *testing.T) {
 		Values:   model.ValuesOf("Mars", "Bounty", "Snickers", "Kitkat"),
 		Case:     transform.Upper,
 		Extra:    make(map[string]interface{}),
+		Imports:  collection.NewStringSet().AddAll(basicImports...),
 	}))
 }
 

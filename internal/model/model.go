@@ -8,6 +8,7 @@ import (
 	"text/template"
 
 	"github.com/rickb777/enumeration/v3/enum"
+	"github.com/rickb777/enumeration/v3/internal/collection"
 	"github.com/rickb777/enumeration/v3/internal/transform"
 )
 
@@ -113,7 +114,7 @@ type Model struct {
 	Values           Values
 	Case             transform.Case
 	AliasTable       string
-	Imports          Imports
+	Imports          collection.StringSet
 	Extra            map[string]interface{}
 }
 
@@ -294,13 +295,13 @@ func (m Model) ValuesJoined(from int, separator string) string {
 
 func (m Model) SelectImports() Model {
 	if m.StoreRep > 0 || m.HasSQLTags() {
-		m.Imports.Database = true
+		m.Imports.Add("database/sql/driver")
 	}
 	if m.MarshalJSONRep > 0 || m.HasJSONTags() {
-		m.Imports.Strings = true
+		m.Imports.Add("strings")
 	}
 	if strings.Contains(m.expression(""), "strings.") {
-		m.Imports.Strings = true
+		m.Imports.Add("strings")
 	}
 	return m
 }

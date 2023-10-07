@@ -129,7 +129,7 @@ If you want more control of the strings used for JSON and for SQL marshaling, st
 type SalesChannel int
 
 const (
-_              SalesChannel = iota
+    _              SalesChannel = iota
     Online                  // json:"webshop" sql:"o" -- String() is "online"
     Instore                 // json:"store"   sql:"s" -- String() is "instore"
     Telephone               // json:"phone"   sql:"t" -- String() is "telephone"
