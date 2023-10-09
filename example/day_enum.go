@@ -30,20 +30,6 @@ var (
 	dayEnumIndex = [...]uint16{0, 6, 12, 19, 28, 36, 42, 50}
 )
 
-// String returns the literal string representation of a Day, which is
-// the same as the const identifier but without prefix or suffix.
-func (v Day) String() string {
-	o := v.Ordinal()
-	return v.toString(o, dayEnumStrings, dayEnumIndex[:])
-}
-
-func (v Day) toString(o int, concats string, indexes []uint16) string {
-	if o < 0 || o >= len(AllDays) {
-		return fmt.Sprintf("Day(%d)", v)
-	}
-	return concats[indexes[o]:indexes[o+1]]
-}
-
 // Ordinal returns the ordinal number of a Day. This is an integer counting
 // from zero. It is *not* the same as the const number assigned to the value.
 func (v Day) Ordinal() int {
@@ -64,6 +50,20 @@ func (v Day) Ordinal() int {
 		return 6
 	}
 	return -1
+}
+
+// String returns the literal string representation of a Day, which is
+// the same as the const identifier but without prefix or suffix.
+func (v Day) String() string {
+	o := v.Ordinal()
+	return v.toString(o, dayEnumStrings, dayEnumIndex[:])
+}
+
+func (v Day) toString(o int, concats string, indexes []uint16) string {
+	if o < 0 || o >= len(AllDays) {
+		return fmt.Sprintf("Day(%d)", v)
+	}
+	return concats[indexes[o]:indexes[o+1]]
 }
 
 // IsValid determines whether a Day is one of the defined constants.
@@ -87,6 +87,25 @@ func DayOf(v int) Day {
 	return Sunday + Monday + Tuesday + Wednesday + Thursday + Friday + Saturday + 1
 }
 
+// Parse parses a string to find the corresponding Day, accepting one of the string values or
+// a number. The input representation is determined by None. It is used by AsDay.
+//
+// Usage Example
+//
+//    v := new(Day)
+//    err := v.Parse(s)
+//    ...  etc
+//
+func (v *Day) Parse(in string) error {
+	if v.parseNumber(in) {
+		return nil
+	}
+
+	s := dayTransformInput(in)
+
+	return v.parseFallback(in, s)
+}
+
 // parseNumber attempts to convert a decimal value.
 // Only numbers that correspond to the enumeration are valid.
 func (v *Day) parseNumber(s string) (ok bool) {
@@ -98,37 +117,12 @@ func (v *Day) parseNumber(s string) (ok bool) {
 	return false
 }
 
-// Parse parses a string to find the corresponding Day, accepting one of the string values or
-// a number. The input representation is determined by None. It is used by AsDay.
-//
-// Usage Example
-//
-//	v := new(Day)
-//	err := v.Parse(s)
-//	...  etc
-func (v *Day) Parse(in string) error {
-	if v.parseNumber(in) {
-		return nil
-	}
-
-	s := dayTransformInput(in)
-
-	return v.parseFallback(in, s)
-}
-
 func (v *Day) parseFallback(in, s string) error {
 	if v.parseString(s, dayEnumStrings, dayEnumIndex[:]) {
 		return nil
 	}
 
 	return errors.New(in + ": unrecognised day")
-}
-
-// dayTransformInput may alter input strings before they are parsed.
-// This function is pluggable and is initialised using command-line flags
-// -ic -lc -uc -unsnake.
-var dayTransformInput = func(in string) string {
-	return in
 }
 
 func (v *Day) parseString(s string, concats string, indexes []uint16) (ok bool) {
@@ -144,6 +138,13 @@ func (v *Day) parseString(s string, concats string, indexes []uint16) (ok bool) 
 		i0 = i1
 	}
 	return false
+}
+
+// dayTransformInput may alter input strings before they are parsed.
+// This function is pluggable and is initialised using command-line flags
+// -ic -lc -uc -unsnake.
+var dayTransformInput = func(in string) string {
+	return in
 }
 
 // AsDay parses a string to find the corresponding Day, accepting either one of the string values or

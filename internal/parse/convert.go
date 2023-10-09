@@ -50,7 +50,7 @@ func Convert(in io.Reader, input string, xCase transform.Case, config model.Conf
 		Case:       xCase,
 		AliasTable: AliasTable,
 		Extra:      make(map[string]interface{}),
-		Imports:    collection.NewStringSet().AddAll(basicImports...),
+		Imports:    collection.NewStringSet(basicImports...),
 	}
 
 	s := newFileScanner(input, src)

@@ -31,20 +31,6 @@ var (
 	season_nc_jjJSONIndex = [...]uint16{0, 4, 8, 12, 16}
 )
 
-// String returns the literal string representation of a Season_Nc_Jj, which is
-// the same as the const identifier but without prefix or suffix.
-func (v Season_Nc_Jj) String() string {
-	o := v.Ordinal()
-	return v.toString(o, season_nc_jjEnumStrings, season_nc_jjEnumIndex[:])
-}
-
-func (v Season_Nc_Jj) toString(o int, concats string, indexes []uint16) string {
-	if o < 0 || o >= len(AllSeason_Nc_Jjs) {
-		return fmt.Sprintf("Season_Nc_Jj(%d)", v)
-	}
-	return concats[indexes[o]:indexes[o+1]]
-}
-
 // Ordinal returns the ordinal number of a Season_Nc_Jj. This is an integer counting
 // from zero. It is *not* the same as the const number assigned to the value.
 func (v Season_Nc_Jj) Ordinal() int {
@@ -59,6 +45,20 @@ func (v Season_Nc_Jj) Ordinal() int {
 		return 3
 	}
 	return -1
+}
+
+// String returns the literal string representation of a Season_Nc_Jj, which is
+// the same as the const identifier but without prefix or suffix.
+func (v Season_Nc_Jj) String() string {
+	o := v.Ordinal()
+	return v.toString(o, season_nc_jjEnumStrings, season_nc_jjEnumIndex[:])
+}
+
+func (v Season_Nc_Jj) toString(o int, concats string, indexes []uint16) string {
+	if o < 0 || o >= len(AllSeason_Nc_Jjs) {
+		return fmt.Sprintf("Season_Nc_Jj(%d)", v)
+	}
+	return concats[indexes[o]:indexes[o+1]]
 }
 
 // IsValid determines whether a Season_Nc_Jj is one of the defined constants.
@@ -82,6 +82,25 @@ func Season_Nc_JjOf(v int) Season_Nc_Jj {
 	return Spring_Nc_Jj + Summer_Nc_Jj + Autumn_Nc_Jj + Winter_Nc_Jj + 1
 }
 
+// Parse parses a string to find the corresponding Season_Nc_Jj, accepting one of the string values or
+// a number. The input representation is determined by None. It is used by AsSeason_Nc_Jj.
+//
+// Usage Example
+//
+//    v := new(Season_Nc_Jj)
+//    err := v.Parse(s)
+//    ...  etc
+//
+func (v *Season_Nc_Jj) Parse(in string) error {
+	if v.parseNumber(in) {
+		return nil
+	}
+
+	s := season_nc_jjTransformInput(in)
+
+	return v.parseFallback(in, s)
+}
+
 // parseNumber attempts to convert a decimal value.
 // Only numbers that correspond to the enumeration are valid.
 func (v *Season_Nc_Jj) parseNumber(s string) (ok bool) {
@@ -93,37 +112,12 @@ func (v *Season_Nc_Jj) parseNumber(s string) (ok bool) {
 	return false
 }
 
-// Parse parses a string to find the corresponding Season_Nc_Jj, accepting one of the string values or
-// a number. The input representation is determined by None. It is used by AsSeason_Nc_Jj.
-//
-// Usage Example
-//
-//	v := new(Season_Nc_Jj)
-//	err := v.Parse(s)
-//	...  etc
-func (v *Season_Nc_Jj) Parse(in string) error {
-	if v.parseNumber(in) {
-		return nil
-	}
-
-	s := season_nc_jjTransformInput(in)
-
-	return v.parseFallback(in, s)
-}
-
 func (v *Season_Nc_Jj) parseFallback(in, s string) error {
 	if v.parseString(s, season_nc_jjEnumStrings, season_nc_jjEnumIndex[:]) {
 		return nil
 	}
 
 	return errors.New(in + ": unrecognised season_nc_jj")
-}
-
-// season_nc_jjTransformInput may alter input strings before they are parsed.
-// This function is pluggable and is initialised using command-line flags
-// -ic -lc -uc -unsnake.
-var season_nc_jjTransformInput = func(in string) string {
-	return in
 }
 
 func (v *Season_Nc_Jj) parseString(s string, concats string, indexes []uint16) (ok bool) {
@@ -139,6 +133,13 @@ func (v *Season_Nc_Jj) parseString(s string, concats string, indexes []uint16) (
 		i0 = i1
 	}
 	return false
+}
+
+// season_nc_jjTransformInput may alter input strings before they are parsed.
+// This function is pluggable and is initialised using command-line flags
+// -ic -lc -uc -unsnake.
+var season_nc_jjTransformInput = func(in string) string {
+	return in
 }
 
 // AsSeason_Nc_Jj parses a string to find the corresponding Season_Nc_Jj, accepting either one of the string values or
@@ -170,18 +171,6 @@ func (v Season_Nc_Jj) JSON() string {
 	return v.toString(o, season_nc_jjJSONStrings, season_nc_jjJSONIndex[:])
 }
 
-// MarshalJSON converts values to bytes suitable for transmission via JSON.
-// The representation is chosen according to 'json' struct tags.
-func (v Season_Nc_Jj) MarshalJSON() ([]byte, error) {
-	o := v.Ordinal()
-	if o < 0 {
-		return v.marshalNumberOrError()
-	}
-
-	s := v.toString(o, season_nc_jjJSONStrings, season_nc_jjJSONIndex[:])
-	return enum.QuotedString(s), nil
-}
-
 func (v Season_Nc_Jj) marshalNumberStringOrError() (string, error) {
 	bs, err := v.marshalNumberOrError()
 	return string(bs), err
@@ -194,6 +183,18 @@ func (v Season_Nc_Jj) marshalNumberOrError() ([]byte, error) {
 
 func (v Season_Nc_Jj) invalidError() error {
 	return fmt.Errorf("%d is not a valid season_nc_jj", v)
+}
+
+// MarshalJSON converts values to bytes suitable for transmission via JSON.
+// The representation is chosen according to 'json' struct tags.
+func (v Season_Nc_Jj) MarshalJSON() ([]byte, error) {
+	o := v.Ordinal()
+	if o < 0 {
+		return v.marshalNumberOrError()
+	}
+
+	s := v.toString(o, season_nc_jjJSONStrings, season_nc_jjJSONIndex[:])
+	return enum.QuotedString(s), nil
 }
 
 // UnmarshalJSON converts transmitted JSON values to ordinary values. It allows both
@@ -224,4 +225,11 @@ func (v *Season_Nc_Jj) unmarshalJSON(in string) error {
 	}
 
 	return errors.New(in + ": unrecognised season_nc_jj")
+}
+
+// season_nc_jjMarshalNumber handles marshaling where a number is required or where
+// the value is out of range.
+// This function can be replaced with any bespoke function than matches signature.
+var season_nc_jjMarshalNumber = func(v Season_Nc_Jj) string {
+	return strconv.FormatInt(int64(v), 10)
 }

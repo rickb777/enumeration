@@ -7,5 +7,7 @@ function v
   "$@"
 }
 
+type enumeration
+
 v rm -f *_enum.go
 v go generate .

@@ -33,20 +33,6 @@ var (
 	petTextIndex = [...]uint16{0, 11, 22, 34, 52, 74}
 )
 
-// String returns the literal string representation of a Pet, which is
-// the same as the const identifier but without prefix or suffix.
-func (v Pet) String() string {
-	o := v.Ordinal()
-	return v.toString(o, petEnumStrings, petEnumIndex[:])
-}
-
-func (v Pet) toString(o int, concats string, indexes []uint16) string {
-	if o < 0 || o >= len(AllPets) {
-		return fmt.Sprintf("Pet(%d)", v)
-	}
-	return concats[indexes[o]:indexes[o+1]]
-}
-
 // Ordinal returns the ordinal number of a Pet. This is an integer counting
 // from zero. It is *not* the same as the const number assigned to the value.
 func (v Pet) Ordinal() int {
@@ -63,6 +49,20 @@ func (v Pet) Ordinal() int {
 		return 4
 	}
 	return -1
+}
+
+// String returns the literal string representation of a Pet, which is
+// the same as the const identifier but without prefix or suffix.
+func (v Pet) String() string {
+	o := v.Ordinal()
+	return v.toString(o, petEnumStrings, petEnumIndex[:])
+}
+
+func (v Pet) toString(o int, concats string, indexes []uint16) string {
+	if o < 0 || o >= len(AllPets) {
+		return fmt.Sprintf("Pet(%d)", v)
+	}
+	return concats[indexes[o]:indexes[o+1]]
 }
 
 // IsValid determines whether a Pet is one of the defined constants.
@@ -86,6 +86,25 @@ func PetOf(v int) Pet {
 	return MyCat + MyDog + MyMouse + MyElephant + MyKoala_Bear + 1
 }
 
+// Parse parses a string to find the corresponding Pet, accepting one of the string values or
+// a number. The input representation is determined by None. It is used by AsPet.
+//
+// Usage Example
+//
+//    v := new(Pet)
+//    err := v.Parse(s)
+//    ...  etc
+//
+func (v *Pet) Parse(in string) error {
+	if v.parseNumber(in) {
+		return nil
+	}
+
+	s := petTransformInput(in)
+
+	return v.parseFallback(in, s)
+}
+
 // parseNumber attempts to convert a decimal value.
 // Any number is allowed, even if the result is invalid.
 func (v *Pet) parseNumber(s string) (ok bool) {
@@ -95,24 +114,6 @@ func (v *Pet) parseNumber(s string) (ok bool) {
 		return true
 	}
 	return false
-}
-
-// Parse parses a string to find the corresponding Pet, accepting one of the string values or
-// a number. The input representation is determined by None. It is used by AsPet.
-//
-// Usage Example
-//
-//	v := new(Pet)
-//	err := v.Parse(s)
-//	...  etc
-func (v *Pet) Parse(in string) error {
-	if v.parseNumber(in) {
-		return nil
-	}
-
-	s := petTransformInput(in)
-
-	return v.parseFallback(in, s)
 }
 
 func (v *Pet) parseFallback(in, s string) error {
@@ -129,13 +130,6 @@ func (v *Pet) parseFallback(in, s string) error {
 	return errors.New(in + ": unrecognised pet")
 }
 
-// petTransformInput may alter input strings before they are parsed.
-// This function is pluggable and is initialised using command-line flags
-// -ic -lc -uc -unsnake.
-var petTransformInput = func(in string) string {
-	return strings.ToLower(strings.ReplaceAll(in, "_", " "))
-}
-
 func (v *Pet) parseString(s string, concats string, indexes []uint16) (ok bool) {
 	var i0 uint16 = 0
 
@@ -150,6 +144,13 @@ func (v *Pet) parseString(s string, concats string, indexes []uint16) (ok bool) 
 	}
 	*v, ok = petAliases[s]
 	return ok
+}
+
+// petTransformInput may alter input strings before they are parsed.
+// This function is pluggable and is initialised using command-line flags
+// -ic -lc -uc -unsnake.
+var petTransformInput = func(in string) string {
+	return strings.ToLower(strings.ReplaceAll(in, "_", " "))
 }
 
 // AsPet parses a string to find the corresponding Pet, accepting either one of the string values or

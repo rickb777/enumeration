@@ -41,20 +41,6 @@ var (
 	greekalphabetSQLIndex  = [...]uint16{0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 44, 46, 48}
 )
 
-// String returns the literal string representation of a GreekAlphabet, which is
-// the same as the const identifier but without prefix or suffix.
-func (v GreekAlphabet) String() string {
-	o := v.Ordinal()
-	return v.toString(o, greekalphabetEnumStrings, greekalphabetEnumIndex[:])
-}
-
-func (v GreekAlphabet) toString(o int, concats string, indexes []uint16) string {
-	if o < 0 || o >= len(AllGreekAlphabets) {
-		return fmt.Sprintf("GreekAlphabet(%d)", v)
-	}
-	return concats[indexes[o]:indexes[o+1]]
-}
-
 // Ordinal returns the ordinal number of a GreekAlphabet. This is an integer counting
 // from zero. It is *not* the same as the const number assigned to the value.
 func (v GreekAlphabet) Ordinal() int {
@@ -111,6 +97,20 @@ func (v GreekAlphabet) Ordinal() int {
 	return -1
 }
 
+// String returns the literal string representation of a GreekAlphabet, which is
+// the same as the const identifier but without prefix or suffix.
+func (v GreekAlphabet) String() string {
+	o := v.Ordinal()
+	return v.toString(o, greekalphabetEnumStrings, greekalphabetEnumIndex[:])
+}
+
+func (v GreekAlphabet) toString(o int, concats string, indexes []uint16) string {
+	if o < 0 || o >= len(AllGreekAlphabets) {
+		return fmt.Sprintf("GreekAlphabet(%d)", v)
+	}
+	return concats[indexes[o]:indexes[o+1]]
+}
+
 // IsValid determines whether a GreekAlphabet is one of the defined constants.
 func (v GreekAlphabet) IsValid() bool {
 	return v.Ordinal() >= 0
@@ -132,6 +132,25 @@ func GreekAlphabetOf(v int) GreekAlphabet {
 	return Αλφα + Βήτα + Γάμμα + Δέλτα + Εψιλον + Ζήτα + Ητα + Θήτα + Ιώτα + Κάππα + Λάμβδα + Μυ + Νυ + Ξι + Ομικρον + Πι + Ρώ + Σίγμα + Ταυ + Υψιλον + Φι + Χι + Ψι + Ωμέγα + 1
 }
 
+// Parse parses a string to find the corresponding GreekAlphabet, accepting one of the string values or
+// a number. The input representation is determined by None. It is used by AsGreekAlphabet.
+//
+// Usage Example
+//
+//    v := new(GreekAlphabet)
+//    err := v.Parse(s)
+//    ...  etc
+//
+func (v *GreekAlphabet) Parse(in string) error {
+	if v.parseNumber(in) {
+		return nil
+	}
+
+	s := greekalphabetTransformInput(in)
+
+	return v.parseFallback(in, s)
+}
+
 // parseNumber attempts to convert a decimal value.
 // Only numbers that correspond to the enumeration are valid.
 func (v *GreekAlphabet) parseNumber(s string) (ok bool) {
@@ -143,37 +162,12 @@ func (v *GreekAlphabet) parseNumber(s string) (ok bool) {
 	return false
 }
 
-// Parse parses a string to find the corresponding GreekAlphabet, accepting one of the string values or
-// a number. The input representation is determined by None. It is used by AsGreekAlphabet.
-//
-// Usage Example
-//
-//	v := new(GreekAlphabet)
-//	err := v.Parse(s)
-//	...  etc
-func (v *GreekAlphabet) Parse(in string) error {
-	if v.parseNumber(in) {
-		return nil
-	}
-
-	s := greekalphabetTransformInput(in)
-
-	return v.parseFallback(in, s)
-}
-
 func (v *GreekAlphabet) parseFallback(in, s string) error {
 	if v.parseString(s, greekalphabetEnumStrings, greekalphabetEnumIndex[:]) {
 		return nil
 	}
 
 	return errors.New(in + ": unrecognised greekalphabet")
-}
-
-// greekalphabetTransformInput may alter input strings before they are parsed.
-// This function is pluggable and is initialised using command-line flags
-// -ic -lc -uc -unsnake.
-var greekalphabetTransformInput = func(in string) string {
-	return in
 }
 
 func (v *GreekAlphabet) parseString(s string, concats string, indexes []uint16) (ok bool) {
@@ -189,6 +183,13 @@ func (v *GreekAlphabet) parseString(s string, concats string, indexes []uint16) 
 		i0 = i1
 	}
 	return false
+}
+
+// greekalphabetTransformInput may alter input strings before they are parsed.
+// This function is pluggable and is initialised using command-line flags
+// -ic -lc -uc -unsnake.
+var greekalphabetTransformInput = func(in string) string {
+	return in
 }
 
 // AsGreekAlphabet parses a string to find the corresponding GreekAlphabet, accepting either one of the string values or
@@ -290,6 +291,13 @@ func (v *GreekAlphabet) Scan(value interface{}) error {
 	return v.scanParse(s)
 }
 
+func (v GreekAlphabet) errorIfInvalid() error {
+	if v.IsValid() {
+		return nil
+	}
+	return v.invalidError()
+}
+
 func (v *GreekAlphabet) scanParse(in string) error {
 	if v.parseNumber(in) {
 		return nil
@@ -302,13 +310,6 @@ func (v *GreekAlphabet) scanParse(in string) error {
 	}
 
 	return v.parseFallback(in, s)
-}
-
-func (v GreekAlphabet) errorIfInvalid() error {
-	if v.IsValid() {
-		return nil
-	}
-	return v.invalidError()
 }
 
 // Value converts the GreekAlphabet to a string.

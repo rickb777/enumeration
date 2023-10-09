@@ -294,12 +294,6 @@ func (m Model) ValuesJoined(from int, separator string) string {
 }
 
 func (m Model) SelectImports() Model {
-	if m.StoreRep > 0 || m.HasSQLTags() {
-		m.Imports.Add("database/sql/driver")
-	}
-	if m.MarshalJSONRep > 0 || m.HasJSONTags() {
-		m.Imports.Add("strings")
-	}
 	if strings.Contains(m.expression(""), "strings.") {
 		m.Imports.Add("strings")
 	}

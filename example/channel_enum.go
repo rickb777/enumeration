@@ -23,7 +23,7 @@ var AllSalesChannelEnums = enum.IntEnums{
 }
 
 const (
-	saleschannelEnumStrings = "onlineinstoretelephone"
+	saleschannelEnumStrings = "OnlineInstoreTelephone"
 	saleschannelJSONStrings = "webshopstorephone"
 	saleschannelSQLStrings  = "ost"
 )
@@ -33,20 +33,6 @@ var (
 	saleschannelJSONIndex = [...]uint16{0, 7, 12, 17}
 	saleschannelSQLIndex  = [...]uint16{0, 1, 2, 3}
 )
-
-// String returns the literal string representation of a SalesChannel, which is
-// the same as the const identifier but without prefix or suffix.
-func (v SalesChannel) String() string {
-	o := v.Ordinal()
-	return v.toString(o, saleschannelEnumStrings, saleschannelEnumIndex[:])
-}
-
-func (v SalesChannel) toString(o int, concats string, indexes []uint16) string {
-	if o < 0 || o >= len(AllSalesChannels) {
-		return fmt.Sprintf("SalesChannel(%d)", v)
-	}
-	return concats[indexes[o]:indexes[o+1]]
-}
 
 // Ordinal returns the ordinal number of a SalesChannel. This is an integer counting
 // from zero. It is *not* the same as the const number assigned to the value.
@@ -60,6 +46,20 @@ func (v SalesChannel) Ordinal() int {
 		return 2
 	}
 	return -1
+}
+
+// String returns the literal string representation of a SalesChannel, which is
+// the same as the const identifier but without prefix or suffix.
+func (v SalesChannel) String() string {
+	o := v.Ordinal()
+	return v.toString(o, saleschannelEnumStrings, saleschannelEnumIndex[:])
+}
+
+func (v SalesChannel) toString(o int, concats string, indexes []uint16) string {
+	if o < 0 || o >= len(AllSalesChannels) {
+		return fmt.Sprintf("SalesChannel(%d)", v)
+	}
+	return concats[indexes[o]:indexes[o+1]]
 }
 
 // IsValid determines whether a SalesChannel is one of the defined constants.
@@ -83,6 +83,25 @@ func SalesChannelOf(v int) SalesChannel {
 	return OnlineSales + InstoreSales + TelephoneSales + 1
 }
 
+// Parse parses a string to find the corresponding SalesChannel, accepting one of the string values or
+// a number. The input representation is determined by None. It is used by AsSalesChannel.
+//
+// Usage Example
+//
+//    v := new(SalesChannel)
+//    err := v.Parse(s)
+//    ...  etc
+//
+func (v *SalesChannel) Parse(in string) error {
+	if v.parseNumber(in) {
+		return nil
+	}
+
+	s := saleschannelTransformInput(in)
+
+	return v.parseFallback(in, s)
+}
+
 // parseNumber attempts to convert a decimal value.
 // Only numbers that correspond to the enumeration are valid.
 func (v *SalesChannel) parseNumber(s string) (ok bool) {
@@ -94,37 +113,12 @@ func (v *SalesChannel) parseNumber(s string) (ok bool) {
 	return false
 }
 
-// Parse parses a string to find the corresponding SalesChannel, accepting one of the string values or
-// a number. The input representation is determined by None. It is used by AsSalesChannel.
-//
-// Usage Example
-//
-//	v := new(SalesChannel)
-//	err := v.Parse(s)
-//	...  etc
-func (v *SalesChannel) Parse(in string) error {
-	if v.parseNumber(in) {
-		return nil
-	}
-
-	s := saleschannelTransformInput(in)
-
-	return v.parseFallback(in, s)
-}
-
 func (v *SalesChannel) parseFallback(in, s string) error {
 	if v.parseString(s, saleschannelEnumStrings, saleschannelEnumIndex[:]) {
 		return nil
 	}
 
 	return errors.New(in + ": unrecognised saleschannel")
-}
-
-// saleschannelTransformInput may alter input strings before they are parsed.
-// This function is pluggable and is initialised using command-line flags
-// -ic -lc -uc -unsnake.
-var saleschannelTransformInput = func(in string) string {
-	return strings.ToLower(in)
 }
 
 func (v *SalesChannel) parseString(s string, concats string, indexes []uint16) (ok bool) {
@@ -140,6 +134,13 @@ func (v *SalesChannel) parseString(s string, concats string, indexes []uint16) (
 		i0 = i1
 	}
 	return false
+}
+
+// saleschannelTransformInput may alter input strings before they are parsed.
+// This function is pluggable and is initialised using command-line flags
+// -ic -lc -uc -unsnake.
+var saleschannelTransformInput = func(in string) string {
+	return in
 }
 
 // AsSalesChannel parses a string to find the corresponding SalesChannel, accepting either one of the string values or
@@ -171,18 +172,6 @@ func (v SalesChannel) JSON() string {
 	return v.toString(o, saleschannelJSONStrings, saleschannelJSONIndex[:])
 }
 
-// MarshalJSON converts values to bytes suitable for transmission via JSON.
-// The representation is chosen according to 'json' struct tags.
-func (v SalesChannel) MarshalJSON() ([]byte, error) {
-	o := v.Ordinal()
-	if o < 0 {
-		return v.marshalNumberOrError()
-	}
-
-	s := v.toString(o, saleschannelJSONStrings, saleschannelJSONIndex[:])
-	return enum.QuotedString(s), nil
-}
-
 func (v SalesChannel) marshalNumberStringOrError() (string, error) {
 	bs, err := v.marshalNumberOrError()
 	return string(bs), err
@@ -195,6 +184,18 @@ func (v SalesChannel) marshalNumberOrError() ([]byte, error) {
 
 func (v SalesChannel) invalidError() error {
 	return fmt.Errorf("%d is not a valid saleschannel", v)
+}
+
+// MarshalJSON converts values to bytes suitable for transmission via JSON.
+// The representation is chosen according to 'json' struct tags.
+func (v SalesChannel) MarshalJSON() ([]byte, error) {
+	o := v.Ordinal()
+	if o < 0 {
+		return v.marshalNumberOrError()
+	}
+
+	s := v.toString(o, saleschannelJSONStrings, saleschannelJSONIndex[:])
+	return enum.QuotedString(s), nil
 }
 
 // UnmarshalJSON converts transmitted JSON values to ordinary values. It allows both
@@ -227,6 +228,13 @@ func (v *SalesChannel) unmarshalJSON(in string) error {
 	return errors.New(in + ": unrecognised saleschannel")
 }
 
+// saleschannelMarshalNumber handles marshaling where a number is required or where
+// the value is out of range.
+// This function can be replaced with any bespoke function than matches signature.
+var saleschannelMarshalNumber = func(v SalesChannel) string {
+	return strconv.FormatInt(int64(v), 10)
+}
+
 // Scan parses some value, which can be a number, a string or []byte.
 // It implements sql.Scanner, https://golang.org/pkg/database/sql/#Scanner
 func (v *SalesChannel) Scan(value interface{}) error {
@@ -253,6 +261,13 @@ func (v *SalesChannel) Scan(value interface{}) error {
 	return v.scanParse(s)
 }
 
+func (v SalesChannel) errorIfInvalid() error {
+	if v.IsValid() {
+		return nil
+	}
+	return v.invalidError()
+}
+
 func (v *SalesChannel) scanParse(in string) error {
 	if v.parseNumber(in) {
 		return nil
@@ -265,13 +280,6 @@ func (v *SalesChannel) scanParse(in string) error {
 	}
 
 	return v.parseFallback(in, s)
-}
-
-func (v SalesChannel) errorIfInvalid() error {
-	if v.IsValid() {
-		return nil
-	}
-	return v.invalidError()
 }
 
 // Value converts the SalesChannel to a string.

@@ -3,30 +3,94 @@ package main
 import (
 	"fmt"
 	"github.com/onsi/gomega"
+	"github.com/rickb777/enumeration/v3/internal/model"
 	"go/scanner"
 	"go/token"
-	"io/ioutil"
+	"io"
 	"os"
 	"strings"
 	"testing"
 )
 
-func TestMainApp(t *testing.T) {
+func TestMainApp_Day(t *testing.T) {
 	g := gomega.NewWithT(t)
-	err := os.Remove("example/day_enum.go")
+	outputFile := "example/day_enum.go"
+	err := os.Remove(outputFile)
 	if err != nil {
-		t.Logf("rm example/day_enum.go: %s", err.Error())
+		t.Logf("rm %s: %s", outputFile, err.Error())
 		// continue anyway
 	}
 
-	os.Args = []string{"", "-f", "-type", "Day", "-i", "example/day.go", "-o", "example/day_enum.go"}
+	os.Args = []string{"", "-f", "-type", "Day", "-i", "example/day.go", "-o", outputFile}
+
 	main()
 
-	f, err := os.Open("example/day_enum.go")
+	compareGeneratedFile(g, outputFile)
+}
+
+func TestMainApp_SalesChannel(t *testing.T) {
+	g := gomega.NewWithT(t)
+
+	inputGo = "example/channel.go"
+	outputGo = "example/channel_enum.go"
+
+	err := os.Remove("example/channel_enum.go")
+	if err != nil {
+		t.Logf("rm %s: %s", "example/channel_enum.go", err.Error())
+		// continue anyway
+	}
+
+	force = true
+	lowercase, uppercase, showVersion = false, false, false
+	outputJSON, marshalTextRep, marshalJSONRep, storeRep = "", "None", "None", "None"
+
+	model.Prefix = ""
+	model.Suffix = "Sales"
+
+	config = model.Config{
+		MainType: "SalesChannel",
+	}
+
+	doMain()
+
+	compareGeneratedFile(g, "example/channel_enum.go")
+}
+
+func TestMainApp_Method(t *testing.T) {
+	g := gomega.NewWithT(t)
+
+	inputGo = "example/method.go"
+	outputGo = "example/method_enum.go"
+
+	err := os.Remove("example/method_enum.go")
+	if err != nil {
+		t.Logf("rm %s: %s", "example/method_enum.go", err.Error())
+		// continue anyway
+	}
+
+	force = true
+	lowercase, uppercase, showVersion = false, false, false
+	outputJSON, marshalTextRep, marshalJSONRep, storeRep = "", "None", "None", "Number"
+
+	model.Prefix = ""
+	model.Suffix = ""
+
+	config = model.Config{
+		MainType:   "Method",
+		IgnoreCase: true,
+	}
+
+	doMain()
+
+	compareGeneratedFile(g, "example/method_enum.go")
+}
+
+func compareGeneratedFile(g *gomega.WithT, fileName string) {
+	f, err := os.Open(fileName)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 	defer f.Close()
 
-	src, err := ioutil.ReadAll(f)
+	src, err := io.ReadAll(f)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 
 	var s scanner.Scanner
@@ -70,7 +134,7 @@ func TestScannerTryOut(t *testing.T) {
 			defer f.Close()
 
 			fmt.Printf("-- %s\n", n)
-			src, err := ioutil.ReadAll(f)
+			src, err := io.ReadAll(f)
 			g.Expect(err).NotTo(gomega.HaveOccurred())
 
 			var s scanner.Scanner

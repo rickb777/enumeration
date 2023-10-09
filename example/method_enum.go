@@ -36,20 +36,6 @@ var (
 	methodJSONIndex = [...]uint16{0, 2, 4, 6, 8, 10, 12}
 )
 
-// String returns the literal string representation of a Method, which is
-// the same as the const identifier but without prefix or suffix.
-func (v Method) String() string {
-	o := v.Ordinal()
-	return v.toString(o, methodEnumStrings, methodEnumIndex[:])
-}
-
-func (v Method) toString(o int, concats string, indexes []uint16) string {
-	if o < 0 || o >= len(AllMethods) {
-		return fmt.Sprintf("Method(%d)", v)
-	}
-	return concats[indexes[o]:indexes[o+1]]
-}
-
 // Ordinal returns the ordinal number of a Method. This is an integer counting
 // from zero. It is *not* the same as the const number assigned to the value.
 func (v Method) Ordinal() int {
@@ -68,6 +54,20 @@ func (v Method) Ordinal() int {
 		return 5
 	}
 	return -1
+}
+
+// String returns the literal string representation of a Method, which is
+// the same as the const identifier but without prefix or suffix.
+func (v Method) String() string {
+	o := v.Ordinal()
+	return v.toString(o, methodEnumStrings, methodEnumIndex[:])
+}
+
+func (v Method) toString(o int, concats string, indexes []uint16) string {
+	if o < 0 || o >= len(AllMethods) {
+		return fmt.Sprintf("Method(%d)", v)
+	}
+	return concats[indexes[o]:indexes[o+1]]
 }
 
 // IsValid determines whether a Method is one of the defined constants.
@@ -91,6 +91,26 @@ func MethodOf(v int) Method {
 	return HEAD + GET + PUT + POST + PATCH + DELETE + 1
 }
 
+// Parse parses a string to find the corresponding Method, accepting one of the string values or
+// a number. The input representation is determined by None. It is used by AsMethod.
+// The input case does not matter.
+//
+// Usage Example
+//
+//    v := new(Method)
+//    err := v.Parse(s)
+//    ...  etc
+//
+func (v *Method) Parse(in string) error {
+	if v.parseNumber(in) {
+		return nil
+	}
+
+	s := methodTransformInput(in)
+
+	return v.parseFallback(in, s)
+}
+
 // parseNumber attempts to convert a decimal value.
 // Only numbers that correspond to the enumeration are valid.
 func (v *Method) parseNumber(s string) (ok bool) {
@@ -102,38 +122,12 @@ func (v *Method) parseNumber(s string) (ok bool) {
 	return false
 }
 
-// Parse parses a string to find the corresponding Method, accepting one of the string values or
-// a number. The input representation is determined by None. It is used by AsMethod.
-// The input case does not matter.
-//
-// Usage Example
-//
-//	v := new(Method)
-//	err := v.Parse(s)
-//	...  etc
-func (v *Method) Parse(in string) error {
-	if v.parseNumber(in) {
-		return nil
-	}
-
-	s := methodTransformInput(in)
-
-	return v.parseFallback(in, s)
-}
-
 func (v *Method) parseFallback(in, s string) error {
 	if v.parseString(s, methodEnumInputs, methodEnumIndex[:]) {
 		return nil
 	}
 
 	return errors.New(in + ": unrecognised method")
-}
-
-// methodTransformInput may alter input strings before they are parsed.
-// This function is pluggable and is initialised using command-line flags
-// -ic -lc -uc -unsnake.
-var methodTransformInput = func(in string) string {
-	return strings.ToLower(in)
 }
 
 func (v *Method) parseString(s string, concats string, indexes []uint16) (ok bool) {
@@ -149,6 +143,13 @@ func (v *Method) parseString(s string, concats string, indexes []uint16) (ok boo
 		i0 = i1
 	}
 	return false
+}
+
+// methodTransformInput may alter input strings before they are parsed.
+// This function is pluggable and is initialised using command-line flags
+// -ic -lc -uc -unsnake.
+var methodTransformInput = func(in string) string {
+	return strings.ToLower(in)
 }
 
 // AsMethod parses a string to find the corresponding Method, accepting either one of the string values or
@@ -182,18 +183,6 @@ func (v Method) JSON() string {
 	return v.toString(o, methodJSONStrings, methodJSONIndex[:])
 }
 
-// MarshalJSON converts values to bytes suitable for transmission via JSON.
-// The representation is chosen according to 'json' struct tags.
-func (v Method) MarshalJSON() ([]byte, error) {
-	o := v.Ordinal()
-	if o < 0 {
-		return v.marshalNumberOrError()
-	}
-
-	s := v.toString(o, methodJSONStrings, methodJSONIndex[:])
-	return enum.QuotedString(s), nil
-}
-
 func (v Method) marshalNumberStringOrError() (string, error) {
 	bs, err := v.marshalNumberOrError()
 	return string(bs), err
@@ -206,6 +195,18 @@ func (v Method) marshalNumberOrError() ([]byte, error) {
 
 func (v Method) invalidError() error {
 	return fmt.Errorf("%d is not a valid method", v)
+}
+
+// MarshalJSON converts values to bytes suitable for transmission via JSON.
+// The representation is chosen according to 'json' struct tags.
+func (v Method) MarshalJSON() ([]byte, error) {
+	o := v.Ordinal()
+	if o < 0 {
+		return v.marshalNumberOrError()
+	}
+
+	s := v.toString(o, methodJSONStrings, methodJSONIndex[:])
+	return enum.QuotedString(s), nil
 }
 
 // UnmarshalJSON converts transmitted JSON values to ordinary values. It allows both
@@ -238,6 +239,13 @@ func (v *Method) unmarshalJSON(in string) error {
 	return errors.New(in + ": unrecognised method")
 }
 
+// methodMarshalNumber handles marshaling where a number is required or where
+// the value is out of range.
+// This function can be replaced with any bespoke function than matches signature.
+var methodMarshalNumber = func(v Method) string {
+	return strconv.FormatInt(int64(v), 10)
+}
+
 // Scan parses some value, which can be a number, a string or []byte.
 // It implements sql.Scanner, https://golang.org/pkg/database/sql/#Scanner
 func (v *Method) Scan(value interface{}) error {
@@ -264,6 +272,13 @@ func (v *Method) Scan(value interface{}) error {
 	return v.scanParse(s)
 }
 
+func (v Method) errorIfInvalid() error {
+	if v.IsValid() {
+		return nil
+	}
+	return v.invalidError()
+}
+
 func (v *Method) scanParse(in string) error {
 	if v.parseNumber(in) {
 		return nil
@@ -272,13 +287,6 @@ func (v *Method) scanParse(in string) error {
 	s := methodTransformInput(in)
 
 	return v.parseFallback(in, s)
-}
-
-func (v Method) errorIfInvalid() error {
-	if v.IsValid() {
-		return nil
-	}
-	return v.invalidError()
 }
 
 // Value converts the Method to a number (based on '-store number').

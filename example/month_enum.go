@@ -34,20 +34,6 @@ var (
 	monthEnumIndex = [...]uint16{0, 7, 15, 20, 25, 28, 32, 36, 42, 51, 58, 66, 74}
 )
 
-// String returns the literal string representation of a Month, which is
-// the same as the const identifier but without prefix or suffix.
-func (v Month) String() string {
-	o := v.Ordinal()
-	return v.toString(o, monthEnumStrings, monthEnumIndex[:])
-}
-
-func (v Month) toString(o int, concats string, indexes []uint16) string {
-	if o < 0 || o >= len(AllMonths) {
-		return fmt.Sprintf("Month(%d)", v)
-	}
-	return concats[indexes[o]:indexes[o+1]]
-}
-
 // Ordinal returns the ordinal number of a Month. This is an integer counting
 // from zero. It is *not* the same as the const number assigned to the value.
 func (v Month) Ordinal() int {
@@ -80,6 +66,20 @@ func (v Month) Ordinal() int {
 	return -1
 }
 
+// String returns the literal string representation of a Month, which is
+// the same as the const identifier but without prefix or suffix.
+func (v Month) String() string {
+	o := v.Ordinal()
+	return v.toString(o, monthEnumStrings, monthEnumIndex[:])
+}
+
+func (v Month) toString(o int, concats string, indexes []uint16) string {
+	if o < 0 || o >= len(AllMonths) {
+		return fmt.Sprintf("Month(%d)", v)
+	}
+	return concats[indexes[o]:indexes[o+1]]
+}
+
 // IsValid determines whether a Month is one of the defined constants.
 func (v Month) IsValid() bool {
 	return v.Ordinal() >= 0
@@ -101,6 +101,26 @@ func MonthOf(v int) Month {
 	return January + February + March + April + May + June + July + August + September + October + November + December + 1
 }
 
+// Parse parses a string to find the corresponding Month, accepting one of the string values or
+// a number. The input representation is determined by Identifier. It is used by AsMonth.
+// The input case does not matter.
+//
+// Usage Example
+//
+//    v := new(Month)
+//    err := v.Parse(s)
+//    ...  etc
+//
+func (v *Month) Parse(in string) error {
+	if v.parseNumber(in) {
+		return nil
+	}
+
+	s := monthTransformInput(in)
+
+	return v.parseFallback(in, s)
+}
+
 // parseNumber attempts to convert a decimal value.
 // Only numbers that correspond to the enumeration are valid.
 func (v *Month) parseNumber(s string) (ok bool) {
@@ -112,38 +132,12 @@ func (v *Month) parseNumber(s string) (ok bool) {
 	return false
 }
 
-// Parse parses a string to find the corresponding Month, accepting one of the string values or
-// a number. The input representation is determined by Identifier. It is used by AsMonth.
-// The input case does not matter.
-//
-// Usage Example
-//
-//	v := new(Month)
-//	err := v.Parse(s)
-//	...  etc
-func (v *Month) Parse(in string) error {
-	if v.parseNumber(in) {
-		return nil
-	}
-
-	s := monthTransformInput(in)
-
-	return v.parseFallback(in, s)
-}
-
 func (v *Month) parseFallback(in, s string) error {
 	if v.parseString(s, monthEnumInputs, monthEnumIndex[:]) {
 		return nil
 	}
 
 	return errors.New(in + ": unrecognised month")
-}
-
-// monthTransformInput may alter input strings before they are parsed.
-// This function is pluggable and is initialised using command-line flags
-// -ic -lc -uc -unsnake.
-var monthTransformInput = func(in string) string {
-	return strings.ToLower(in)
 }
 
 func (v *Month) parseString(s string, concats string, indexes []uint16) (ok bool) {
@@ -159,6 +153,13 @@ func (v *Month) parseString(s string, concats string, indexes []uint16) (ok bool
 		i0 = i1
 	}
 	return false
+}
+
+// monthTransformInput may alter input strings before they are parsed.
+// This function is pluggable and is initialised using command-line flags
+// -ic -lc -uc -unsnake.
+var monthTransformInput = func(in string) string {
+	return strings.ToLower(in)
 }
 
 // AsMonth parses a string to find the corresponding Month, accepting either one of the string values or

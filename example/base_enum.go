@@ -29,20 +29,6 @@ var (
 	baseEnumIndex = [...]uint16{0, 1, 2, 3, 4}
 )
 
-// String returns the literal string representation of a Base, which is
-// the same as the const identifier but without prefix or suffix.
-func (v Base) String() string {
-	o := v.Ordinal()
-	return v.toString(o, baseEnumStrings, baseEnumIndex[:])
-}
-
-func (v Base) toString(o int, concats string, indexes []uint16) string {
-	if o < 0 || o >= len(AllBases) {
-		return fmt.Sprintf("Base(%g)", v)
-	}
-	return concats[indexes[o]:indexes[o+1]]
-}
-
 // Ordinal returns the ordinal number of a Base. This is an integer counting
 // from zero. It is *not* the same as the const number assigned to the value.
 func (v Base) Ordinal() int {
@@ -57,6 +43,20 @@ func (v Base) Ordinal() int {
 		return 3
 	}
 	return -1
+}
+
+// String returns the literal string representation of a Base, which is
+// the same as the const identifier but without prefix or suffix.
+func (v Base) String() string {
+	o := v.Ordinal()
+	return v.toString(o, baseEnumStrings, baseEnumIndex[:])
+}
+
+func (v Base) toString(o int, concats string, indexes []uint16) string {
+	if o < 0 || o >= len(AllBases) {
+		return fmt.Sprintf("Base(%g)", v)
+	}
+	return concats[indexes[o]:indexes[o+1]]
 }
 
 // IsValid determines whether a Base is one of the defined constants.
@@ -79,6 +79,25 @@ func BaseOf(v int) Base {
 	return A + C + G + T + 1
 }
 
+// Parse parses a string to find the corresponding Base, accepting one of the string values or
+// a number. The input representation is determined by None. It is used by AsBase.
+//
+// Usage Example
+//
+//    v := new(Base)
+//    err := v.Parse(s)
+//    ...  etc
+//
+func (v *Base) Parse(in string) error {
+	if v.parseNumber(in) {
+		return nil
+	}
+
+	s := baseTransformInput(in)
+
+	return v.parseFallback(in, s)
+}
+
 // parseNumber attempts to convert a decimal value.
 // Only numbers that correspond to the enumeration are valid.
 func (v *Base) parseNumber(s string) (ok bool) {
@@ -90,37 +109,12 @@ func (v *Base) parseNumber(s string) (ok bool) {
 	return false
 }
 
-// Parse parses a string to find the corresponding Base, accepting one of the string values or
-// a number. The input representation is determined by None. It is used by AsBase.
-//
-// Usage Example
-//
-//	v := new(Base)
-//	err := v.Parse(s)
-//	...  etc
-func (v *Base) Parse(in string) error {
-	if v.parseNumber(in) {
-		return nil
-	}
-
-	s := baseTransformInput(in)
-
-	return v.parseFallback(in, s)
-}
-
 func (v *Base) parseFallback(in, s string) error {
 	if v.parseString(s, baseEnumStrings, baseEnumIndex[:]) {
 		return nil
 	}
 
 	return errors.New(in + ": unrecognised base")
-}
-
-// baseTransformInput may alter input strings before they are parsed.
-// This function is pluggable and is initialised using command-line flags
-// -ic -lc -uc -unsnake.
-var baseTransformInput = func(in string) string {
-	return strings.ToLower(in)
 }
 
 func (v *Base) parseString(s string, concats string, indexes []uint16) (ok bool) {
@@ -136,6 +130,13 @@ func (v *Base) parseString(s string, concats string, indexes []uint16) (ok bool)
 		i0 = i1
 	}
 	return false
+}
+
+// baseTransformInput may alter input strings before they are parsed.
+// This function is pluggable and is initialised using command-line flags
+// -ic -lc -uc -unsnake.
+var baseTransformInput = func(in string) string {
+	return strings.ToLower(in)
 }
 
 // AsBase parses a string to find the corresponding Base, accepting either one of the string values or

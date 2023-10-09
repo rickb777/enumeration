@@ -30,20 +30,6 @@ var (
 	season_nc_ttTextIndex = [...]uint16{0, 4, 8, 12, 16}
 )
 
-// String returns the literal string representation of a Season_Nc_Tt, which is
-// the same as the const identifier but without prefix or suffix.
-func (v Season_Nc_Tt) String() string {
-	o := v.Ordinal()
-	return v.toString(o, season_nc_ttEnumStrings, season_nc_ttEnumIndex[:])
-}
-
-func (v Season_Nc_Tt) toString(o int, concats string, indexes []uint16) string {
-	if o < 0 || o >= len(AllSeason_Nc_Tts) {
-		return fmt.Sprintf("Season_Nc_Tt(%d)", v)
-	}
-	return concats[indexes[o]:indexes[o+1]]
-}
-
 // Ordinal returns the ordinal number of a Season_Nc_Tt. This is an integer counting
 // from zero. It is *not* the same as the const number assigned to the value.
 func (v Season_Nc_Tt) Ordinal() int {
@@ -58,6 +44,20 @@ func (v Season_Nc_Tt) Ordinal() int {
 		return 3
 	}
 	return -1
+}
+
+// String returns the literal string representation of a Season_Nc_Tt, which is
+// the same as the const identifier but without prefix or suffix.
+func (v Season_Nc_Tt) String() string {
+	o := v.Ordinal()
+	return v.toString(o, season_nc_ttEnumStrings, season_nc_ttEnumIndex[:])
+}
+
+func (v Season_Nc_Tt) toString(o int, concats string, indexes []uint16) string {
+	if o < 0 || o >= len(AllSeason_Nc_Tts) {
+		return fmt.Sprintf("Season_Nc_Tt(%d)", v)
+	}
+	return concats[indexes[o]:indexes[o+1]]
 }
 
 // IsValid determines whether a Season_Nc_Tt is one of the defined constants.
@@ -81,6 +81,25 @@ func Season_Nc_TtOf(v int) Season_Nc_Tt {
 	return Spring_Nc_Tt + Summer_Nc_Tt + Autumn_Nc_Tt + Winter_Nc_Tt + 1
 }
 
+// Parse parses a string to find the corresponding Season_Nc_Tt, accepting one of the string values or
+// a number. The input representation is determined by None. It is used by AsSeason_Nc_Tt.
+//
+// Usage Example
+//
+//    v := new(Season_Nc_Tt)
+//    err := v.Parse(s)
+//    ...  etc
+//
+func (v *Season_Nc_Tt) Parse(in string) error {
+	if v.parseNumber(in) {
+		return nil
+	}
+
+	s := season_nc_ttTransformInput(in)
+
+	return v.parseFallback(in, s)
+}
+
 // parseNumber attempts to convert a decimal value.
 // Only numbers that correspond to the enumeration are valid.
 func (v *Season_Nc_Tt) parseNumber(s string) (ok bool) {
@@ -92,37 +111,12 @@ func (v *Season_Nc_Tt) parseNumber(s string) (ok bool) {
 	return false
 }
 
-// Parse parses a string to find the corresponding Season_Nc_Tt, accepting one of the string values or
-// a number. The input representation is determined by None. It is used by AsSeason_Nc_Tt.
-//
-// Usage Example
-//
-//	v := new(Season_Nc_Tt)
-//	err := v.Parse(s)
-//	...  etc
-func (v *Season_Nc_Tt) Parse(in string) error {
-	if v.parseNumber(in) {
-		return nil
-	}
-
-	s := season_nc_ttTransformInput(in)
-
-	return v.parseFallback(in, s)
-}
-
 func (v *Season_Nc_Tt) parseFallback(in, s string) error {
 	if v.parseString(s, season_nc_ttEnumStrings, season_nc_ttEnumIndex[:]) {
 		return nil
 	}
 
 	return errors.New(in + ": unrecognised season_nc_tt")
-}
-
-// season_nc_ttTransformInput may alter input strings before they are parsed.
-// This function is pluggable and is initialised using command-line flags
-// -ic -lc -uc -unsnake.
-var season_nc_ttTransformInput = func(in string) string {
-	return in
 }
 
 func (v *Season_Nc_Tt) parseString(s string, concats string, indexes []uint16) (ok bool) {
@@ -138,6 +132,13 @@ func (v *Season_Nc_Tt) parseString(s string, concats string, indexes []uint16) (
 		i0 = i1
 	}
 	return false
+}
+
+// season_nc_ttTransformInput may alter input strings before they are parsed.
+// This function is pluggable and is initialised using command-line flags
+// -ic -lc -uc -unsnake.
+var season_nc_ttTransformInput = func(in string) string {
+	return in
 }
 
 // AsSeason_Nc_Tt parses a string to find the corresponding Season_Nc_Tt, accepting either one of the string values or

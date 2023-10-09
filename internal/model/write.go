@@ -3,34 +3,32 @@ package model
 import (
 	"fmt"
 	"github.com/rickb777/enumeration/v3/enum"
+	"github.com/rickb777/enumeration/v3/internal/codegen"
+	"github.com/rickb777/enumeration/v3/internal/collection"
 	"text/template"
 )
 
-const toStringMethod = `
+var vtoStringUnit = codegen.Unit{
+	Declares: "v.toString",
+	Template: `
 func (v <<.MainType>>) toString(o int, concats string, indexes []uint16) string {
 	if o < 0 || o >= len(All<<.Plural>>) {
 		return fmt.Sprintf("<<.MainType>>(<<.Placeholder>>)", v)
 	}
 	return concats[indexes[o]:indexes[o+1]]
 }
-`
-
-var vtoStringUnit = Unit{
-	Declares: "v.toString",
-	Template: toStringMethod,
+`,
 }
 
-func buildToStringMethod(units Units) {
-	units.Add(vtoStringUnit)
-}
-
-func (m Model) writeToStringMethod(w DualWriter) {
-	m.writeUnexportedFunc(w, "v.toString", toStringMethod)
+func buildToStringMethod(codegen *codegen.Units) {
+	codegen.Add(vtoStringUnit)
 }
 
 //-------------------------------------------------------------------------------------------------
 
-const parseStringMethod = `
+var vparseStringUnit = codegen.Unit{
+	Declares: "v.parseString",
+	Template: `
 func (v *<<.MainType>>) parseString(s string, concats string, indexes []uint16) (ok bool) {
 	var i0 uint16 = 0
 
@@ -50,50 +48,18 @@ func (v *<<.MainType>>) parseString(s string, concats string, indexes []uint16) 
 	return false
 <<- end>>
 }
-`
-
-var vparseStringUnit = Unit{
-	Declares: "v.parseString",
-	Template: parseStringMethod,
+`,
 }
 
-func buildParseStringMethod(units Units) {
+func buildParseStringMethod(units *codegen.Units) {
 	units.Add(vparseStringUnit)
 }
 
-func (m Model) writeParseStringMethod(w DualWriter) {
-	m.writeUnexportedFunc(w, "v.parseString", parseStringMethod)
-}
-
 //-------------------------------------------------------------------------------------------------
 
-const stringMethod = `
-// String returns the literal string representation of a <<.MainType>>, which is
-// the same as the const identifier but without prefix or suffix.
-func (v <<.MainType>>) String() string {
-	o := v.Ordinal()
-	return v.toString(o, <<.LcType>>EnumStrings, <<.LcType>>EnumIndex[:])
-}
-`
-
-var vStringUnit = Unit{
-	Declares: "v.String",
-	Requires: []string{"v.Ordinal", "v.toString"},
-	Template: stringMethod,
-}
-
-func buildStringMethod(units Units) {
-	units.Add(vStringUnit)
-}
-
-func (m Model) writeStringMethod(w DualWriter) {
-	m.execTemplate(w, stringMethod)
-	m.writeToStringMethod(w)
-}
-
-//-------------------------------------------------------------------------------------------------
-
-const ordinalMethod = `
+var vOrdinalUnit = codegen.Unit{
+	Declares: "v.Ordinal",
+	Template: `
 // Ordinal returns the ordinal number of a <<.MainType>>. This is an integer counting
 // from zero. It is *not* the same as the const number assigned to the value.
 func (v <<.MainType>>) Ordinal() int {
@@ -105,49 +71,58 @@ func (v <<.MainType>>) Ordinal() int {
 	}
 	return -1
 }
-`
-
-var vOrdinalUnit = Unit{
-	Declares: "v.Ordinal",
-	Template: ordinalMethod,
+`,
 }
 
-func buildOrdinalMethod(units Units) {
+func buildOrdinalMethod(units *codegen.Units) {
 	units.Add(vOrdinalUnit)
-}
-
-func (m Model) writeOrdinalMethod(w DualWriter) {
-	m.execTemplate(w, ordinalMethod)
 }
 
 //-------------------------------------------------------------------------------------------------
 
-const intMethod = `
+var vStringUnit = codegen.Unit{
+	Declares: "v.String",
+	Requires: []string{"v.Ordinal", "v.toString"},
+	Template: `
+// String returns the literal string representation of a <<.MainType>>, which is
+// the same as the const identifier but without prefix or suffix.
+func (v <<.MainType>>) String() string {
+	o := v.Ordinal()
+	return v.toString(o, <<.LcType>>EnumStrings, <<.LcType>>EnumIndex[:])
+}
+`,
+}
+
+func buildStringMethod(units *codegen.Units) {
+	units.Add(vStringUnit)
+	units.Add(vtoStringUnit)
+	buildOrdinalMethod(units)
+}
+
+//-------------------------------------------------------------------------------------------------
+
+var vIntUnit = codegen.Unit{
+	Declares: "v.Number",
+	Template: `
 // Int returns the int value, which is not necessarily the same as the ordinal.
 // This facilitates polymorphism (see enum.IntEnum).
 func (v <<.MainType>>) Int() int {
 	return int(v)
 }
-`
-
-var vIntUnit = Unit{
-	Declares: "v.Int",
-	Template: intMethod,
+`,
 }
 
-const floatMethod = `
+var vFloatUnit = codegen.Unit{
+	Declares: "v.Number",
+	Template: `
 // Float returns the float64 value. It serves to facilitate polymorphism (see enum.FloatEnum).
 func (v <<.MainType>>) Float() float64 {
 	return float64(v)
 }
-`
-
-var vFloatUnit = Unit{
-	Declares: "v.Float",
-	Template: floatMethod,
+`,
 }
 
-func buildBaseMethod(units Units, m Model) {
+func buildNumberMethod(units *codegen.Units, m Model) {
 	if m.IsFloat() {
 		units.Add(vFloatUnit)
 	} else {
@@ -155,17 +130,11 @@ func buildBaseMethod(units Units, m Model) {
 	}
 }
 
-func (m Model) writeBaseMethod(w DualWriter) {
-	if m.IsFloat() {
-		m.execTemplate(w, floatMethod)
-	} else {
-		m.execTemplate(w, intMethod)
-	}
-}
-
 //-------------------------------------------------------------------------------------------------
 
-const mainTypeOfFunction = `
+var mainTypeOfUnit = codegen.Unit{
+	Declares: "OfFunction",
+	Template: `
 // <<.MainType>>Of returns a <<.MainType>> based on an ordinal number. This is the inverse of Ordinal.
 // If the ordinal is out of range, an invalid <<.MainType>> is returned.
 func <<.MainType>>Of(v int) <<.MainType>> {
@@ -175,42 +144,29 @@ func <<.MainType>>Of(v int) <<.MainType>> {
 	// an invalid result
 	return <<.ValuesJoined 0 " + ">> + 1
 }
-`
-
-var mainTypeOfUnit = Unit{
-	Declares: "OfFunction",
-	Template: mainTypeOfFunction,
+`,
 }
 
-func buildOfMethod(units Units) {
+func buildOfMethod(units *codegen.Units) {
 	units.Add(mainTypeOfUnit)
-}
-
-func (m Model) writeOfMethod(w DualWriter) {
-	m.execTemplate(w, mainTypeOfFunction)
 }
 
 //-------------------------------------------------------------------------------------------------
 
-const isValidMethod = `
+var vIsValidUnit = codegen.Unit{
+	Declares: "v.IsValid",
+	Requires: []string{"v.Ordinal"},
+	Template: `
 // IsValid determines whether a <<.MainType>> is one of the defined constants.
 func (v <<.MainType>>) IsValid() bool {
 	return v.Ordinal() >= 0
 }
-`
-
-var vIsValidUnit = Unit{
-	Declares: "v.IsValid",
-	Requires: []string{"v.Ordinal"},
-	Template: isValidMethod,
+`,
 }
 
-func buildIsValidMethod(units Units) {
+func buildIsValidMethod(units *codegen.Units) {
 	units.Add(vIsValidUnit)
-}
-
-func (m Model) writeIsValidMethod(w DualWriter) {
-	m.execTemplate(w, isValidMethod)
+	units.Add(vOrdinalUnit)
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -254,13 +210,19 @@ func (v *<<.MainType>>) <<.Extra.Method>>(in string) error {
 }
 `
 
-func buildParseHelperMethod(units Units, method, table string) {
-	required := []string{"v.parseNumber", "parseFallback", "lctypeTransformInput"}
+func buildParseHelperMethod(units *codegen.Units, method, table string) {
+	required := []string{"v.parseNumber", "v.parseFallback", "lctypeTransformInput"}
+	buildParseFallback(units)
+	units.Add(vparseNumberUnit)
+	units.Add(lctypeTransformInputUnit)
+
 	if table != "Enum" {
 		required = append(required, "v.parseString")
+		units.Add(vparseStringUnit)
 	}
+
 	units.Add(
-		Unit{
+		codegen.Unit{
 			Declares: "v." + method,
 			Requires: required,
 			Template: parse_body,
@@ -274,34 +236,12 @@ func buildParseHelperMethod(units Units, method, table string) {
 	)
 }
 
-func (m Model) writeParseHelperMethod(w DualWriter, method, table string) {
-	if !done.Contains("v." + method) {
-		done.Add("v." + method)
-
-		m.Extra["Method"] = method
-		m.Extra["Table"] = table
-		m.Extra["Doc"] = method == "Parse"
-
-		if table != "Enum" {
-			m.Extra["Enum"] = true
-		}
-
-		m.writeParseNumberMethod(w)
-		m.execTemplate(w, parse_body)
-
-		m.writeParseFallback(w)
-		m.writeTransformInputFunction(w)
-		m.writeParseStringMethod(w)
-	}
-}
-
-func (m Model) writeParseMethod(w DualWriter) {
-	m.writeParseHelperMethod(w, "Parse", "Enum")
-}
-
 //-------------------------------------------------------------------------------------------------
 
-const parseFallbackMethod = `
+var vparseFallbackUnit = codegen.Unit{
+	Declares: "v.parseFallback",
+	Requires: []string{"v.parseString"},
+	Template: `
 func (v *<<.MainType>>) parseFallback(in, s string) error {
 	<<- if .Asymmetric>>
 	if v.parseString(s, <<.LcType>>EnumInputs, <<.LcType>>EnumIndex[:]) {
@@ -323,25 +263,20 @@ func (v *<<.MainType>>) parseFallback(in, s string) error {
 
 	return errors.New(in + ": unrecognised <<.LcType>>")
 }
-`
-
-var vparseFallbackUnit = Unit{
-	Declares: "v.parseFallback",
-	Requires: []string{"v.parseString"},
-	Template: parseFallbackMethod,
+`,
 }
 
-func buildParseFallback(units Units) {
+func buildParseFallback(units *codegen.Units) {
 	units.Add(vparseFallbackUnit)
-}
-
-func (m Model) writeParseFallback(w DualWriter) {
-	m.writeUnexportedFunc(w, "v.parseFallback", parseFallbackMethod)
+	units.Add(vparseStringUnit)
 }
 
 //-------------------------------------------------------------------------------------------------
 
-const parseNumberMethod = `
+var vparseNumberUnit = codegen.Unit{
+	Declares: "v.parseNumber",
+	Imports:  collection.NewStringSet("strconv"),
+	Template: `
 // parseNumber attempts to convert a decimal value.
 // << if .Lenient >>Any number is allowed, even if the result is invalid.<< else ->>
 Only numbers that correspond to the enumeration are valid.<< end >>
@@ -357,24 +292,19 @@ func (v *<<.MainType>>) parseNumber(s string) (ok bool) {
 	}
 	return false
 }
-`
-
-var vparseNumberUnit = Unit{
-	Declares: "v.parseNumber",
-	Template: parseNumberMethod,
+`,
 }
 
-func buildParseNumberMethod(units Units) {
-	units.Add(vparseNumberUnit)
-}
-
-func (m Model) writeParseNumberMethod(w DualWriter) {
-	m.writeUnexportedFunc(w, "v.parseNumber", parseNumberMethod)
-}
+//func buildParseNumberMethod(codegen *codegen.Units) {
+//	codegen.Add(vparseNumberUnit)
+//}
 
 //-------------------------------------------------------------------------------------------------
 
-const asFunction = `
+var asFunctionUnit = codegen.Unit{
+	Declares: "AsFunction",
+	Requires: []string{"v.Parse"},
+	Template: `
 // As<<.MainType>> parses a string to find the corresponding <<.MainType>>, accepting either one of the string values or
 // a number. The input representation is determined by <<.LcType>>MarshalTextRep. It wraps Parse.
 <<- if .IgnoreCase>>
@@ -385,25 +315,19 @@ func As<<.MainType>>(s string) (<<.MainType>>, error) {
 	err := v.Parse(s)
 	return *v, err
 }
-`
-
-var asFunctionUnit = Unit{
-	Declares: "AsFunction",
-	Requires: []string{"v.Parse"},
-	Template: asFunction,
+`,
 }
 
-func buildAsMethod(units Units) {
+func buildAsMethod(units *codegen.Units) {
 	units.Add(asFunctionUnit)
-}
-
-func (m Model) writeAsMethod(w DualWriter) {
-	m.execTemplate(w, asFunction)
 }
 
 //-------------------------------------------------------------------------------------------------
 
-const mustParseFunction = `
+var mustParseFunctionUnit = codegen.Unit{
+	Declares: "MustParseFunction",
+	Requires: []string{"AsFunction"},
+	Template: `
 // MustParse<<.MainType>> is similar to As<<.MainType>> except that it panics on error.
 <<- if .IgnoreCase>>
 // The input case does not matter.
@@ -415,39 +339,32 @@ func MustParse<<.MainType>>(s string) <<.MainType>> {
 	}
 	return v
 }
-`
-
-var mustParseFunctionUnit = Unit{
-	Declares: "MustParseFunction",
-	Requires: []string{"AsFunction"},
-	Template: mustParseFunction,
+`,
 }
 
-func buildMustParseMethod(units Units) {
+func buildMustParseMethod(units *codegen.Units) {
 	units.Add(mustParseFunctionUnit)
-}
-
-func (m Model) writeMustParseMethod(w DualWriter) {
-	m.execTemplate(w, mustParseFunction)
+	units.Add(asFunctionUnit)
 }
 
 //-------------------------------------------------------------------------------------------------
 
-const marshalText_Main = `
+var vmarshalText_Main_Unit = codegen.Unit{
+	Declares: "v.MarshalText",
+	Requires: []string{"v.marshalText"},
+	Template: `
 // MarshalText converts values to bytes suitable for transmission via XML, JSON etc.
 func (v <<.MainType>>) MarshalText() ([]byte, error) {
 	s, err := v.marshalText()
 	return []byte(s), err
 }
-`
-
-var vmarshalText_Main_Unit = Unit{
-	Declares: "v.MarshalText",
-	Requires: []string{"v.marshalText"},
-	Template: marshalText_Main,
+`,
 }
 
-const marshalText_struct_tags = `
+var vmarshalText_struct_tags_Unit = codegen.Unit{
+	Declares: "v.marshalText",
+	Requires: []string{"v.Ordinal", "v.marshalNumberStringOrError", "v.toString"},
+	Template: `
 // Text returns the representation used for transmission via XML, JSON etc.
 func (v <<.MainType>>) Text() string {
 	s, _ := v.marshalText()
@@ -464,15 +381,13 @@ func (v <<.MainType>>) marshalText() (string, error) {
 
 	return v.toString(o, <<.LcType>>TextStrings, <<.LcType>>TextIndex[:]), nil
 }
-`
-
-var vmarshalText_struct_tags_Unit = Unit{
-	Declares: "v.marshalText",
-	Requires: []string{"v.Ordinal", "v.marshalNumberStringOrError", "v.toString"},
-	Template: marshalText_struct_tags,
+`,
 }
 
-const marshalText_identifier = `
+var vmarshalText_identifier_Unit = codegen.Unit{
+	Declares: "v.marshalText",
+	Requires: []string{"v.Ordinal", "v.marshalNumberStringOrError", "v.toString"},
+	Template: `
 // Text returns the representation used for transmission via XML, JSON etc.
 func (v <<.MainType>>) Text() string {
 	s, _ := v.marshalText()
@@ -489,15 +404,13 @@ func (v <<.MainType>>) marshalText() (string, error) {
 
 	return v.toString(o, <<.LcType>>EnumStrings, <<.LcType>>EnumIndex[:]), nil
 }
-`
-
-var vmarshalText_identifier_Unit = Unit{
-	Declares: "v.marshalText",
-	Requires: []string{"v.Ordinal", "v.marshalNumberStringOrError", "v.toString"},
-	Template: marshalText_identifier,
+`,
 }
 
-const marshalText_number = `
+var vmarshalText_number_Unit = codegen.Unit{
+	Declares: "v.marshalText",
+	Requires: []string{"v.IsValid", "v.marshalNumberStringOrError", "v.toString"},
+	Template: `
 // marshalText converts values to a form suitable for transmission via XML, JSON etc.
 // The number representation is chosen according to -marshaltext.
 func (v <<.MainType>>) marshalText() (string, error) {
@@ -507,20 +420,16 @@ func (v <<.MainType>>) marshalText() (string, error) {
 
 	return <<.LcType>>MarshalNumber(v), nil
 }
-`
-
-var vmarshalText_number_Unit = Unit{
-	Declares: "v.marshalText",
-	Requires: []string{"v.IsValid", "v.marshalNumberStringOrError", "v.toString"},
-	Template: marshalText_number,
+`,
 }
 
-func buildMarshalText(units Units, m Model) {
+func buildMarshalText(units *codegen.Units, m Model) {
+	units.Add(vtoStringUnit)
+
 	if m.HasTextTags() {
 		units.Add(vmarshalText_Main_Unit)
 		units.Add(vmarshalText_struct_tags_Unit)
 		buildMarshalNumberOrErrorMethod(units, m)
-		buildToStringMethod(units)
 		return
 	}
 
@@ -529,7 +438,6 @@ func buildMarshalText(units Units, m Model) {
 		units.Add(vmarshalText_Main_Unit)
 		units.Add(vmarshalText_identifier_Unit)
 		buildMarshalNumberOrErrorMethod(units, m)
-		buildToStringMethod(units)
 	case enum.Number:
 		units.Add(vmarshalText_Main_Unit)
 		units.Add(vmarshalText_number_Unit)
@@ -538,32 +446,12 @@ func buildMarshalText(units Units, m Model) {
 	}
 }
 
-func (m Model) writeMarshalText(w DualWriter) {
-	if m.HasTextTags() {
-		m.execTemplate(w, marshalText_Main)
-		m.execTemplate(w, marshalText_struct_tags)
-		m.writeMarshalNumberOrErrorMethod(w)
-		m.writeToStringMethod(w)
-		return
-	}
-
-	switch m.MarshalTextRep {
-	case enum.Identifier:
-		m.execTemplate(w, marshalText_Main)
-		m.execTemplate(w, marshalText_identifier)
-		m.writeMarshalNumberOrErrorMethod(w)
-		m.writeToStringMethod(w)
-	case enum.Number:
-		m.execTemplate(w, marshalText_Main)
-		m.execTemplate(w, marshalText_number)
-		m.writeMarshalNumberVarFunc(w)
-		m.writeMarshalNumberOrErrorMethod(w)
-	}
-}
-
 //-------------------------------------------------------------------------------------------------
 
-const json_struct_tags = `
+var vJSON_struct_tags_Unit = codegen.Unit{
+	Declares: "v.JSON",
+	Requires: []string{"v.Ordinal", "v.marshalNumberStringOrError", "v.toString"},
+	Template: `
 // JSON returns an approximation to the representation used for transmission via JSON.
 // However, strings are not quoted.
 func (v <<.MainType>>) JSON() string {
@@ -575,15 +463,16 @@ func (v <<.MainType>>) JSON() string {
 
 	return v.toString(o, <<.LcType>>JSONStrings, <<.LcType>>JSONIndex[:])
 }
-`
-
-var vJSON_struct_tags_Unit = Unit{
-	Declares: "v.JSON",
-	Requires: []string{"v.Ordinal", "v.marshalNumberStringOrError", "v.toString"},
-	Template: json_struct_tags,
+`,
 }
 
-const marshalJSON_struct_tags = `
+const enumImportPath = "github.com/rickb777/enumeration/v3/enum"
+
+var vMarshalJSON_struct_tags_Unit = codegen.Unit{
+	Declares: "v.MarshalJSON",
+	Requires: []string{"v.Ordinal", "v.marshalNumberOrError", "v.toString"},
+	Imports:  collection.NewStringSet(enumImportPath),
+	Template: `
 // MarshalJSON converts values to bytes suitable for transmission via JSON.
 // The representation is chosen according to 'json' struct tags.
 func (v <<.MainType>>) MarshalJSON() ([]byte, error) {
@@ -595,15 +484,13 @@ func (v <<.MainType>>) MarshalJSON() ([]byte, error) {
 	s := v.toString(o, <<.LcType>>JSONStrings, <<.LcType>>JSONIndex[:])
 	return enum.QuotedString(s), nil
 }
-`
-
-var vMarshalJSON_struct_tags_Unit = Unit{
-	Declares: "v.MarshalJSON",
-	Requires: []string{"v.Ordinal", "v.marshalNumberOrError", "v.toString"},
-	Template: marshalJSON_struct_tags,
+`,
 }
 
-const json_identifier = `
+var vJSON_identifier_Unit = codegen.Unit{
+	Declares: "v.JSON",
+	Requires: []string{"v.Ordinal", "v.marshalNumberStringOrError", "v.toString"},
+	Template: `
 // JSON returns an approximation to the representation used for transmission via JSON.
 // However, strings are not quoted.
 func (v <<.MainType>>) JSON() string {
@@ -615,15 +502,14 @@ func (v <<.MainType>>) JSON() string {
 
 	return v.toString(o, <<.LcType>>EnumStrings, <<.LcType>>EnumIndex[:])
 }
-`
-
-var vJSON_identifier_Unit = Unit{
-	Declares: "v.JSON",
-	Requires: []string{"v.Ordinal", "v.marshalNumberStringOrError", "v.toString"},
-	Template: json_identifier,
+`,
 }
 
-const marshalJSON_identifier = `
+var vMarshalJSON_identifier_Unit = codegen.Unit{
+	Declares: "v.MarshalJSON",
+	Requires: []string{"v.Ordinal", "v.marshalNumberOrError", "v.toString"},
+	Imports:  collection.NewStringSet(enumImportPath),
+	Template: `
 // MarshalJSON converts values to bytes suitable for transmission via JSON.
 // The identifier representation is chosen according to -marshaljson.
 func (v <<.MainType>>) MarshalJSON() ([]byte, error) {
@@ -635,15 +521,13 @@ func (v <<.MainType>>) MarshalJSON() ([]byte, error) {
 	s := v.toString(o, <<.LcType>>EnumStrings, <<.LcType>>EnumIndex[:])
 	return enum.QuotedString(s), nil
 }
-`
-
-var vMarshalJSON_identifier_Unit = Unit{
-	Declares: "v.MarshalJSON",
-	Requires: []string{"v.Ordinal", "v.marshalNumberOrError", "v.toString"},
-	Template: marshalJSON_identifier,
+`,
 }
 
-const marshalJSON_number = `
+var vMarshalJSON_number_Unit = codegen.Unit{
+	Declares: "v.MarshalJSON",
+	Requires: []string{"v.IsValid", "v.marshalNumberOrError", "lctypeMarshalNumber"},
+	Template: `
 // MarshalJSON converts values to bytes suitable for transmission via JSON.
 // The number representation is chosen according to -marshaljson.
 func (v <<.MainType>>) MarshalJSON() ([]byte, error) {
@@ -654,15 +538,12 @@ func (v <<.MainType>>) MarshalJSON() ([]byte, error) {
 	s := <<.LcType>>MarshalNumber(v)
 	return []byte(s), nil
 }
-`
-
-var vMarshalJSON_number_Unit = Unit{
-	Declares: "v.MarshalJSON",
-	Requires: []string{"v.IsValid", "v.marshalNumberOrError", "lctypeMarshalNumber"},
-	Template: marshalJSON_number,
+`,
 }
 
-func buildMarshalJSON(units Units, m Model) {
+func buildMarshalJSON(units *codegen.Units, m Model) {
+	units.Add(vtoStringUnit)
+
 	if m.HasJSONTags() {
 		units.Add(vJSON_struct_tags_Unit)
 		units.Add(vMarshalJSON_struct_tags_Unit)
@@ -682,29 +563,12 @@ func buildMarshalJSON(units Units, m Model) {
 	}
 }
 
-func (m Model) writeMarshalJSON(w DualWriter) {
-	if m.HasJSONTags() {
-		m.execTemplate(w, json_struct_tags)
-		m.execTemplate(w, marshalJSON_struct_tags)
-		m.writeMarshalNumberOrErrorMethod(w)
-
-	} else {
-		switch m.MarshalJSONRep {
-		case enum.Identifier:
-			m.execTemplate(w, json_identifier)
-			m.execTemplate(w, marshalJSON_identifier)
-			m.writeMarshalNumberOrErrorMethod(w)
-		case enum.Number:
-			m.execTemplate(w, marshalJSON_number)
-			m.writeMarshalNumberOrErrorMethod(w)
-			m.writeMarshalNumberVarFunc(w)
-		}
-	}
-}
-
 //-------------------------------------------------------------------------------------------------
 
-const marshalNumberVarFunc = `
+var lctypeMarshalNumberUnit = codegen.Unit{
+	Declares: "lctypeMarshalNumber",
+	Imports:  collection.NewStringSet("strconv"),
+	Template: `
 // <<.LcType>>MarshalNumber handles marshaling where a number is required or where
 // the value is out of range.
 // This function can be replaced with any bespoke function than matches signature.
@@ -715,63 +579,49 @@ var <<.LcType>>MarshalNumber = func(v <<.MainType>>) string {
 	return strconv.FormatInt(int64(v), 10)
 <<- end>>
 }
-`
-
-var lctypeMarshalNumberUnit = Unit{
-	Declares: "lctypeMarshalNumber",
-	Template: marshalNumberVarFunc,
+`,
 }
 
-func buildMarshalNumberVarFunc(units Units) {
+func buildMarshalNumberVarFunc(units *codegen.Units) {
 	units.Add(lctypeMarshalNumberUnit)
-}
-
-func (m Model) writeMarshalNumberVarFunc(w DualWriter) {
-	m.writeUnexportedFunc(w, "marshalNumberVarFunc", marshalNumberVarFunc)
 }
 
 //-------------------------------------------------------------------------------------------------
 
-const marshalNumberStringOrError = `
+var vmarshalNumberStringOrErrorUnit = codegen.Unit{
+	Declares: "v.marshalNumberStringOrError",
+	Requires: []string{"v.marshalNumberOrError"},
+	Template: `
 func (v <<.MainType>>) marshalNumberStringOrError() (string, error) {
 	bs, err := v.marshalNumberOrError()
 	return string(bs), err
 }
-`
-
-var vmarshalNumberStringOrErrorUnit = Unit{
-	Declares: "v.marshalNumberStringOrError",
-	Requires: []string{"v.marshalNumberOrError"},
-	Template: marshalNumberStringOrError,
+`,
 }
 
-const marshalNumberOrError_strict = `
+var vmarshalNumberOrError_strict_Unit = codegen.Unit{
+	Declares: "v.marshalNumberOrError",
+	Requires: []string{"v.invalidError"},
+	Template: `
 func (v <<.MainType>>) marshalNumberOrError() ([]byte, error) {
 	// disallow lenient marshaling
 	return nil, v.invalidError()
 }
-`
-
-var vmarshalNumberOrError_strict_Unit = Unit{
-	Declares: "v.marshalNumberOrError",
-	Requires: []string{"v.invalidError"},
-	Template: marshalNumberOrError_strict,
+`,
 }
 
-const marshalNumberOrError_lenient = `
+var vmarshalNumberOrError_lenient_Unit = codegen.Unit{
+	Declares: "v.marshalNumberOrError",
+	Requires: []string{"lctypeMarshalNumber"},
+	Template: `
 func (v <<.MainType>>) marshalNumberOrError() ([]byte, error) {
 	// allow lenient marshaling
 	return []byte(<<.LcType>>MarshalNumber(v)), nil
 }
-`
-
-var vmarshalNumberOrError_lenient_Unit = Unit{
-	Declares: "v.marshalNumberOrError",
-	Requires: []string{"lctypeMarshalNumber"},
-	Template: marshalNumberOrError_lenient,
+`,
 }
 
-func buildMarshalNumberOrErrorMethod(units Units, m Model) {
+func buildMarshalNumberOrErrorMethod(units *codegen.Units, m Model) {
 	units.Add(vmarshalNumberStringOrErrorUnit)
 	if m.Lenient {
 		units.Add(vmarshalNumberOrError_lenient_Unit)
@@ -782,20 +632,11 @@ func buildMarshalNumberOrErrorMethod(units Units, m Model) {
 	}
 }
 
-func (m Model) writeMarshalNumberOrErrorMethod(w DualWriter) {
-	m.writeUnexportedFunc(w, "v.marshalNumberStringOrError", marshalNumberStringOrError)
-	if m.Lenient {
-		m.writeUnexportedFunc(w, "v.marshalNumberOrError", marshalNumberOrError_lenient)
-		m.writeMarshalNumberVarFunc(w)
-	} else {
-		m.writeUnexportedFunc(w, "v.marshalNumberOrError", marshalNumberOrError_strict)
-		m.writeInvalidErrorMethod(w)
-	}
-}
-
 //-------------------------------------------------------------------------------------------------
 
-const invalidError = `
+var vinvalidErrorUnit = codegen.Unit{
+	Declares: "v.invalidError",
+	Template: `
 func (v <<.MainType>>) invalidError() error {
 <<- if .IsFloat>>
 	return fmt.Errorf("%g is not a valid <<.LcType>>", v)
@@ -803,64 +644,47 @@ func (v <<.MainType>>) invalidError() error {
 	return fmt.Errorf("%d is not a valid <<.LcType>>", v)
 <<- end>>
 }
-`
-
-var vinvalidErrorUnit = Unit{
-	Declares: "v.invalidError",
-	Template: invalidError,
+`,
 }
 
-func buildInvalidErrorMethod(units Units) {
+func buildInvalidErrorMethod(units *codegen.Units) {
 	units.Add(vinvalidErrorUnit)
-}
-
-func (m Model) writeInvalidErrorMethod(w DualWriter) {
-	m.writeUnexportedFunc(w, "v.invalidError", invalidError)
 }
 
 //-------------------------------------------------------------------------------------------------
 
-const errorIfInvalid = `
+var verrorIfInvalidUnit = codegen.Unit{
+	Declares: "v.errorIfInvalid",
+	Requires: []string{"v.IsValid", "v.invalidError"},
+	Template: `
 func (v <<.MainType>>) errorIfInvalid() error {
 	if v.IsValid() {
 		return nil
 	}
 	return v.invalidError()
 }
-`
-
-var verrorIfInvalidUnit = Unit{
-	Declares: "v.errorIfInvalid",
-	Requires: []string{"v.IsValid", "v.invalidError"},
-	Template: errorIfInvalid,
+`,
 }
 
-func buildErrorIfInvalid(units Units) {
+func buildErrorIfInvalid(units *codegen.Units) {
 	units.Add(verrorIfInvalidUnit)
 	buildInvalidErrorMethod(units)
 }
 
-func (m Model) writeErrorIfInvalid(w DualWriter) {
-	m.writeUnexportedFunc(w, "v.errorIfInvalid", errorIfInvalid)
-	m.writeInvalidErrorMethod(w)
-}
-
 //-------------------------------------------------------------------------------------------------
 
-const unmarshalText = `
+var vUnmarshalTextUnit = codegen.Unit{
+	Declares: "v.UnmarshalText",
+	Requires: []string{"v.unmarshalText"},
+	Template: `
 // UnmarshalText converts transmitted values to ordinary values.
 func (v *<<.MainType>>) UnmarshalText(bs []byte) error {
 	return v.unmarshalText(string(bs))
 }
-`
-
-var vUnmarshalTextUnit = Unit{
-	Declares: "v.UnmarshalText",
-	Requires: []string{"v.unmarshalText"},
-	Template: unmarshalText,
+`,
 }
 
-func buildUnmarshalText(units Units, m Model) {
+func buildUnmarshalText(units *codegen.Units, m Model) {
 	if m.MarshalTextRep > 0 || m.HasTextTags() {
 		units.Add(vUnmarshalTextUnit)
 		if m.HasTextTags() {
@@ -871,40 +695,23 @@ func buildUnmarshalText(units Units, m Model) {
 	}
 }
 
-func (m Model) writeUnmarshalText(w DualWriter) {
-	if m.MarshalTextRep > 0 || m.HasTextTags() {
-		m.execTemplate(w, unmarshalText)
-		if m.HasTextTags() {
-			m.writeParseHelperMethod(w, "unmarshalText", "Text")
-		} else {
-			m.writeParseHelperMethod(w, "unmarshalText", "Enum")
-		}
-	}
-}
-
 //-------------------------------------------------------------------------------------------------
 
-const transformFunction = `
+var lctypeTransformInputUnit = codegen.Unit{
+	Declares: "lctypeTransformInput",
+	Template: `
 // <<.LcType>>TransformInput may alter input strings before they are parsed.
 // This function is pluggable and is initialised using command-line flags
 // -ic -lc -uc -unsnake.
 var <<.LcType>>TransformInput = func(in string) string {
 	return << transform "in" >>
 }
-`
-
-var transformFunctionUnit = Unit{
-	Declares: "lctypeTransformInput",
-	Template: transformFunction,
+`,
 }
 
-func buildTransformInputFunction(units Units) {
-	units.Add(transformFunctionUnit)
-}
-
-func (m Model) writeTransformInputFunction(w DualWriter) {
-	m.writeUnexportedFunc(w, "xTransformInput", transformFunction)
-}
+//func buildTransformInputFunction(codegen *codegen.Units) {
+//	codegen.Add(lctypeTransformInputUnit)
+//}
 
 //-------------------------------------------------------------------------------------------------
 
@@ -964,23 +771,21 @@ func (v *<<.MainType>>) unmarshalJSON(in string) error {
 }
 `
 
-var vunmarshalJSON_plain_Unit = Unit{
+var vunmarshalJSON_plain_Unit = codegen.Unit{
 	Declares: "v.UnmarshalJSON",
 	Requires: []string{"v.parseNumber", "v.parseString", "lctypeTransformInput"},
 	Template: unmarshalJSON_plain,
+	Imports:  collection.NewStringSet("strings", "errors"),
 }
 
-func buildUnmarshalJSON(units Units, m Model) {
+func buildUnmarshalJSON(units *codegen.Units, m Model) {
 	if m.MarshalJSONRep > 0 || m.HasJSONTags() {
 		units.Add(vunmarshalJSON_plain_Unit)
+		units.Add(vparseNumberUnit)
+		units.Add(vparseStringUnit)
+		units.Add(lctypeMarshalNumberUnit)
+		units.Add(lctypeTransformInputUnit)
 		buildParseStringMethod(units)
-	}
-}
-
-func (m Model) writeUnmarshalJSON(w DualWriter) {
-	if m.MarshalJSONRep > 0 || m.HasJSONTags() {
-		m.execTemplate(w, unmarshalJSON_plain)
-		m.writeParseStringMethod(w)
 	}
 }
 
@@ -1014,13 +819,13 @@ func (v *<<.MainType>>) Scan(value interface{}) error {
 }
 `
 
-var vScanUnit = Unit{
+var vScanUnit = codegen.Unit{
 	Declares: "v.Scan",
 	Requires: []string{"v.errorIfInvalid", "v.scanParse"},
 	Template: scan_all,
 }
 
-func buildScanMethod(units Units, m Model) {
+func buildScanMethod(units *codegen.Units, m Model) {
 	if m.StoreRep > 0 || m.HasSQLTags() {
 		units.Add(vScanUnit)
 		if m.HasSQLTags() {
@@ -1029,18 +834,6 @@ func buildScanMethod(units Units, m Model) {
 			buildParseHelperMethod(units, "scanParse", "Enum")
 		}
 		buildErrorIfInvalid(units)
-	}
-}
-
-func (m Model) writeScanMethod(w DualWriter) {
-	if m.StoreRep > 0 || m.HasSQLTags() {
-		m.execTemplate(w, scan_all)
-		if m.HasSQLTags() {
-			m.writeParseHelperMethod(w, "scanParse", "SQL")
-		} else {
-			m.writeParseHelperMethod(w, "scanParse", "Enum")
-		}
-		m.writeErrorIfInvalid(w)
 	}
 }
 
@@ -1058,10 +851,11 @@ func (v <<.MainType>>) Value() (driver.Value, error) {
 }
 `
 
-var vValue_identifier_Unit = Unit{
+var vValue_identifier_Unit = codegen.Unit{
 	Declares: "v.Value",
 	Requires: []string{"v.IsValid", "v.String"},
 	Template: value_identifier,
+	Imports:  collection.NewStringSet("database/sql/driver"),
 }
 
 const value_number = `
@@ -1076,10 +870,11 @@ func (v <<.MainType>>) Value() (driver.Value, error) {
 }
 `
 
-var vValue_number_Unit = Unit{
+var vValue_number_Unit = codegen.Unit{
 	Declares: "v.Value",
 	Requires: []string{"v.IsValid", "v.String"},
 	Template: value_number,
+	Imports:  collection.NewStringSet("database/sql/driver"),
 }
 
 const value_struct_tags = `
@@ -1096,13 +891,14 @@ func (v <<.MainType>>) Value() (driver.Value, error) {
 }
 `
 
-var vValue_struct_tags_Unit = Unit{
+var vValue_struct_tags_Unit = codegen.Unit{
 	Declares: "v.Value",
 	Requires: []string{"v.Ordinal", "v.toString"},
 	Template: value_struct_tags,
+	Imports:  collection.NewStringSet("database/sql/driver"),
 }
 
-func buildValueMethod(units Units, m Model) {
+func buildValueMethod(units *codegen.Units, m Model) {
 	if m.HasSQLTags() {
 		units.Add(vValue_struct_tags_Unit)
 		return
@@ -1116,50 +912,20 @@ func buildValueMethod(units Units, m Model) {
 	}
 }
 
-func (m Model) writeValueMethod(w DualWriter) {
-	if m.HasSQLTags() {
-		m.execTemplate(w, value_struct_tags)
-		return
-	}
-
-	switch m.StoreRep {
-	case enum.Identifier:
-		m.execTemplate(w, value_identifier)
-	case enum.Number:
-		m.execTemplate(w, value_number)
-	}
-}
-
 //-------------------------------------------------------------------------------------------------
 
-type Unit struct {
-	Declares string
-	Requires []string
-	Template string
-	Extra    map[string]any
-}
-
-type Units map[string]Unit
-
-func (units Units) Add(unit Unit) Units {
-	if _, exists := units[unit.Declares]; exists {
-		panic(unit.Declares + " already exists")
-	}
-	units[unit.Declares] = unit
-	return units
-}
-
-func (units Units) writeUnit(w DualWriter, m Model, identifier string, unit Unit) {
+func writeUnit(w DualWriter, units *codegen.Units, done collection.StringSet, m Model, identifier, parent string) {
 	if !done.Contains(identifier) {
+		unit, ok := units.Take(identifier)
+		if !ok {
+			panic(fmt.Sprintf("Missing dependency %s required by %s", identifier, parent))
+		}
 		done.Add(identifier)
+		m.Extra = unit.Extra
 		m.execTemplate(w, unit.Template)
 
 		for _, req := range unit.Requires {
-			dep, ok := units[req]
-			if !ok {
-				panic(fmt.Sprintf("Missing dependency %s required by %s", req, identifier))
-			}
-			units.writeUnit(w, m, req, dep)
+			writeUnit(w, units, done, m, req, identifier)
 		}
 	}
 }

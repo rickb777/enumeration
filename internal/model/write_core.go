@@ -2,6 +2,7 @@ package model
 
 import (
 	"fmt"
+	"github.com/rickb777/enumeration/v3/internal/codegen"
 	"github.com/rickb777/enumeration/v3/internal/collection"
 	"go/types"
 	"io"
@@ -203,9 +204,10 @@ func (m Model) ValuesWithWrapping(nTabs int) string {
 //-------------------------------------------------------------------------------------------------
 
 func (m Model) writeOneJoinedString(w DualWriter, table string, ov, iv []string) {
-	fmt.Fprintf(w, "\t%s%sStrings = \"%s\"\n", m.LcType, table, strings.Join(ov, ""))
+	spaces := strings.Repeat(" ", 4-len(table))
+	fmt.Fprintf(w, "\t%s%sStrings%s = \"%s\"\n", m.LcType, table, spaces, strings.Join(ov, ""))
 	if m.Asymmetric() {
-		fmt.Fprintf(w, "\t%s%sInputs = \"%s\"\n", m.LcType, table, strings.Join(iv, ""))
+		fmt.Fprintf(w, "\t%s%sInputs%s  = \"%s\"\n", m.LcType, table, spaces, strings.Join(iv, ""))
 	}
 }
 
@@ -233,7 +235,7 @@ func (m Model) writeJoinedStringAndIndexes(w DualWriter) {
 		fmt.Fprintf(w, "\t%sJSONIndex = [...]uint16{%s}\n", m.LcType, m.JSONIndexes())
 	}
 	if m.HasSQLTags() {
-		fmt.Fprintf(w, "\t%sSQLIndex = [...]uint16{%s}\n", m.LcType, m.SQLIndexes())
+		fmt.Fprintf(w, "\t%sSQLIndex  = [...]uint16{%s}\n", m.LcType, m.SQLIndexes())
 	}
 
 	w.WriteString(")\n")
@@ -241,45 +243,48 @@ func (m Model) writeJoinedStringAndIndexes(w DualWriter) {
 
 //-------------------------------------------------------------------------------------------------
 
-//func (m Model) buildUnits() {
-//	units := make(Units)
-//	buildHead(units)
-//	buildAllItems(units)
-//	buildJoinedStringAndIndexes(units)
-//	buildStringMethod(units)
-//	buildOrdinalMethod(units)
-//	buildIsValidMethod(units)
-//	buildBaseMethod(units, m)
-//	buildOfMethod(units)
-//	buildParseMethod(units)
-//	buildAsMethod(units)
-//	buildMustParseMethod(units)
-//	buildMarshalText(units, m)
-//	buildMarshalJSON(units, m)
-//	buildUnmarshalText(units, m)
-//	buildUnmarshalJSON(units, m)
-//	buildScanMethod(units, m)
-//	buildValueMethod(units, m)
-//}
+func (m Model) BuildUnits() *codegen.Units {
+	units := codegen.New()
+	buildStringMethod(units)
+	buildOrdinalMethod(units)
+	buildIsValidMethod(units)
+	buildNumberMethod(units, m)
+	buildOfMethod(units)
+	buildParseHelperMethod(units, "Parse", "Enum")
+	buildAsMethod(units)
+	buildMustParseMethod(units)
+	buildMarshalText(units, m)
+	buildMarshalJSON(units, m)
+	buildUnmarshalText(units, m)
+	buildUnmarshalJSON(units, m)
+	buildScanMethod(units, m)
+	buildValueMethod(units, m)
+	return units
+}
 
-func (m Model) WriteGo(w DualWriter) {
+func WriteGo(units *codegen.Units, m Model, w DualWriter) {
+	for _, u := range units.Slice() {
+		m.Imports = m.Imports.Union(u.Imports)
+	}
+
+	done := collection.NewStringSet()
+
 	m.writeHead(w)
 	m.writeAllItems(w)
 	m.writeJoinedStringAndIndexes(w)
-	m.writeStringMethod(w)
-	m.writeOrdinalMethod(w)
-	m.writeIsValidMethod(w)
-	m.writeBaseMethod(w)
-	m.writeOfMethod(w)
-	m.writeParseMethod(w)
-	m.writeAsMethod(w)
-	m.writeMustParseMethod(w)
-	m.writeMarshalText(w)
-	m.writeMarshalJSON(w)
-	m.writeUnmarshalText(w)
-	m.writeUnmarshalJSON(w)
-	m.writeScanMethod(w)
-	m.writeValueMethod(w)
+
+	writeUnit(w, units, done, m, "v.Ordinal", "root")
+	writeUnit(w, units, done, m, "v.String", "root")
+	writeUnit(w, units, done, m, "v.IsValid", "root")
+	writeUnit(w, units, done, m, "v.Number", "root")
+	writeUnit(w, units, done, m, "OfFunction", "root")
+	writeUnit(w, units, done, m, "v.Parse", "root")
+	writeUnit(w, units, done, m, "AsFunction", "root")
+	writeUnit(w, units, done, m, "MustParseFunction", "root")
+
+	for _, u := range units.Slice() {
+		writeUnit(w, units, done, m, u.Declares, "root")
+	}
 
 	if c, ok := w.(io.Closer); ok {
 		checkErr(c.Close())

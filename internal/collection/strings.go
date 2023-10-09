@@ -4,13 +4,20 @@ import "sort"
 
 type StringSet map[string]struct{}
 
-func NewStringSet() StringSet {
-	return make(StringSet)
+func NewStringSet(vs ...string) StringSet {
+	return make(StringSet).AddAll(vs...)
 }
 
 func (s StringSet) AddAll(vs ...string) StringSet {
 	for _, v := range vs {
 		s[v] = struct{}{}
+	}
+	return s
+}
+
+func (s StringSet) Union(other StringSet) StringSet {
+	for k := range other {
+		s[k] = struct{}{}
 	}
 	return s
 }

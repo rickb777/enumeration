@@ -29,20 +29,6 @@ var (
 	season_uc_tnEnumIndex = [...]uint16{0, 6, 12, 18, 24}
 )
 
-// String returns the literal string representation of a Season_Uc_Tn, which is
-// the same as the const identifier but without prefix or suffix.
-func (v Season_Uc_Tn) String() string {
-	o := v.Ordinal()
-	return v.toString(o, season_uc_tnEnumStrings, season_uc_tnEnumIndex[:])
-}
-
-func (v Season_Uc_Tn) toString(o int, concats string, indexes []uint16) string {
-	if o < 0 || o >= len(AllSeason_Uc_Tns) {
-		return fmt.Sprintf("Season_Uc_Tn(%d)", v)
-	}
-	return concats[indexes[o]:indexes[o+1]]
-}
-
 // Ordinal returns the ordinal number of a Season_Uc_Tn. This is an integer counting
 // from zero. It is *not* the same as the const number assigned to the value.
 func (v Season_Uc_Tn) Ordinal() int {
@@ -57,6 +43,20 @@ func (v Season_Uc_Tn) Ordinal() int {
 		return 3
 	}
 	return -1
+}
+
+// String returns the literal string representation of a Season_Uc_Tn, which is
+// the same as the const identifier but without prefix or suffix.
+func (v Season_Uc_Tn) String() string {
+	o := v.Ordinal()
+	return v.toString(o, season_uc_tnEnumStrings, season_uc_tnEnumIndex[:])
+}
+
+func (v Season_Uc_Tn) toString(o int, concats string, indexes []uint16) string {
+	if o < 0 || o >= len(AllSeason_Uc_Tns) {
+		return fmt.Sprintf("Season_Uc_Tn(%d)", v)
+	}
+	return concats[indexes[o]:indexes[o+1]]
 }
 
 // IsValid determines whether a Season_Uc_Tn is one of the defined constants.
@@ -80,6 +80,25 @@ func Season_Uc_TnOf(v int) Season_Uc_Tn {
 	return Spring_Uc_Tn + Summer_Uc_Tn + Autumn_Uc_Tn + Winter_Uc_Tn + 1
 }
 
+// Parse parses a string to find the corresponding Season_Uc_Tn, accepting one of the string values or
+// a number. The input representation is determined by Number. It is used by AsSeason_Uc_Tn.
+//
+// Usage Example
+//
+//    v := new(Season_Uc_Tn)
+//    err := v.Parse(s)
+//    ...  etc
+//
+func (v *Season_Uc_Tn) Parse(in string) error {
+	if v.parseNumber(in) {
+		return nil
+	}
+
+	s := season_uc_tnTransformInput(in)
+
+	return v.parseFallback(in, s)
+}
+
 // parseNumber attempts to convert a decimal value.
 // Only numbers that correspond to the enumeration are valid.
 func (v *Season_Uc_Tn) parseNumber(s string) (ok bool) {
@@ -91,37 +110,12 @@ func (v *Season_Uc_Tn) parseNumber(s string) (ok bool) {
 	return false
 }
 
-// Parse parses a string to find the corresponding Season_Uc_Tn, accepting one of the string values or
-// a number. The input representation is determined by Number. It is used by AsSeason_Uc_Tn.
-//
-// Usage Example
-//
-//	v := new(Season_Uc_Tn)
-//	err := v.Parse(s)
-//	...  etc
-func (v *Season_Uc_Tn) Parse(in string) error {
-	if v.parseNumber(in) {
-		return nil
-	}
-
-	s := season_uc_tnTransformInput(in)
-
-	return v.parseFallback(in, s)
-}
-
 func (v *Season_Uc_Tn) parseFallback(in, s string) error {
 	if v.parseString(s, season_uc_tnEnumStrings, season_uc_tnEnumIndex[:]) {
 		return nil
 	}
 
 	return errors.New(in + ": unrecognised season_uc_tn")
-}
-
-// season_uc_tnTransformInput may alter input strings before they are parsed.
-// This function is pluggable and is initialised using command-line flags
-// -ic -lc -uc -unsnake.
-var season_uc_tnTransformInput = func(in string) string {
-	return strings.ToUpper(in)
 }
 
 func (v *Season_Uc_Tn) parseString(s string, concats string, indexes []uint16) (ok bool) {
@@ -137,6 +131,13 @@ func (v *Season_Uc_Tn) parseString(s string, concats string, indexes []uint16) (
 		i0 = i1
 	}
 	return false
+}
+
+// season_uc_tnTransformInput may alter input strings before they are parsed.
+// This function is pluggable and is initialised using command-line flags
+// -ic -lc -uc -unsnake.
+var season_uc_tnTransformInput = func(in string) string {
+	return strings.ToUpper(in)
 }
 
 // AsSeason_Uc_Tn parses a string to find the corresponding Season_Uc_Tn, accepting either one of the string values or
@@ -172,13 +173,6 @@ func (v Season_Uc_Tn) marshalText() (string, error) {
 	return season_uc_tnMarshalNumber(v), nil
 }
 
-// season_uc_tnMarshalNumber handles marshaling where a number is required or where
-// the value is out of range.
-// This function can be replaced with any bespoke function than matches signature.
-var season_uc_tnMarshalNumber = func(v Season_Uc_Tn) string {
-	return strconv.FormatInt(int64(v), 10)
-}
-
 func (v Season_Uc_Tn) marshalNumberStringOrError() (string, error) {
 	bs, err := v.marshalNumberOrError()
 	return string(bs), err
@@ -191,6 +185,13 @@ func (v Season_Uc_Tn) marshalNumberOrError() ([]byte, error) {
 
 func (v Season_Uc_Tn) invalidError() error {
 	return fmt.Errorf("%d is not a valid season_uc_tn", v)
+}
+
+// season_uc_tnMarshalNumber handles marshaling where a number is required or where
+// the value is out of range.
+// This function can be replaced with any bespoke function than matches signature.
+var season_uc_tnMarshalNumber = func(v Season_Uc_Tn) string {
+	return strconv.FormatInt(int64(v), 10)
 }
 
 // UnmarshalText converts transmitted values to ordinary values.

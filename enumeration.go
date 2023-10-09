@@ -112,14 +112,18 @@ func generate() {
 	m, err := parse.Convert(in, inputGo, xCase, config)
 	util.Must(err)
 
-	m.SelectImports().WriteGo(out)
+	units := m.BuildUnits()
+	model.WriteGo(units, m.SelectImports(), out)
 	util.Info("Generated %s.\n", outputGo)
 }
 
 func main() {
 	defineFlags()
 	flag.Parse()
+	doMain()
+}
 
+func doMain() {
 	if showVersion {
 		fmt.Fprintln(os.Stderr, util.Version)
 		os.Exit(1)

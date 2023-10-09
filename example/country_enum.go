@@ -138,20 +138,6 @@ var (
 	countrySQLIndex  = [...]uint16{0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 44, 46, 48, 50, 52, 54, 56, 58, 60, 62, 64, 66, 68, 70, 72, 74, 76, 78, 80, 82, 84, 86, 88, 90, 92, 94, 96, 98, 100, 102, 104, 106, 108, 110, 112, 114, 116, 118, 120, 122, 124, 126, 128, 130, 132, 134, 136, 138, 140, 142, 144, 146, 148, 150, 152, 154, 156, 158, 160, 162, 164, 166, 168, 170, 172, 174, 176, 178, 180, 182, 184, 186, 188, 190, 192, 194, 196, 198, 200, 202, 204, 206, 208, 210, 212, 214, 216, 218, 220, 222, 224, 226, 228, 230, 232, 234, 236, 238, 240, 242, 244, 246, 248, 250, 252, 254, 256, 258, 260, 262, 264, 266, 268, 270, 272, 274, 276, 278, 280, 282, 284, 286, 288, 290, 292, 294, 296, 298, 300, 302, 304, 306, 308, 310, 312, 314, 316, 318, 320, 322, 324, 326, 328, 330, 332, 334, 336, 338, 340, 342, 344, 346, 348, 350, 352, 354, 356, 358, 360, 362, 364, 366, 368, 370, 372, 374, 376, 378, 380, 382, 384, 386, 388, 390, 392, 394, 396, 398, 400, 402, 404, 406, 408, 410, 412, 414, 416, 418, 420, 422, 424, 426, 428, 430, 432, 434, 436, 438, 440, 442, 444, 446, 448, 450, 452, 454, 456, 458, 460, 462, 464, 466, 468, 470, 472, 474, 476, 478, 480, 482, 484, 486, 488, 490, 492, 494}
 )
 
-// String returns the literal string representation of a Country, which is
-// the same as the const identifier but without prefix or suffix.
-func (v Country) String() string {
-	o := v.Ordinal()
-	return v.toString(o, countryEnumStrings, countryEnumIndex[:])
-}
-
-func (v Country) toString(o int, concats string, indexes []uint16) string {
-	if o < 0 || o >= len(AllCountries) {
-		return fmt.Sprintf("Country(%d)", v)
-	}
-	return concats[indexes[o]:indexes[o+1]]
-}
-
 // Ordinal returns the ordinal number of a Country. This is an integer counting
 // from zero. It is *not* the same as the const number assigned to the value.
 func (v Country) Ordinal() int {
@@ -654,6 +640,20 @@ func (v Country) Ordinal() int {
 	return -1
 }
 
+// String returns the literal string representation of a Country, which is
+// the same as the const identifier but without prefix or suffix.
+func (v Country) String() string {
+	o := v.Ordinal()
+	return v.toString(o, countryEnumStrings, countryEnumIndex[:])
+}
+
+func (v Country) toString(o int, concats string, indexes []uint16) string {
+	if o < 0 || o >= len(AllCountries) {
+		return fmt.Sprintf("Country(%d)", v)
+	}
+	return concats[indexes[o]:indexes[o+1]]
+}
+
 // IsValid determines whether a Country is one of the defined constants.
 func (v Country) IsValid() bool {
 	return v.Ordinal() >= 0
@@ -675,6 +675,26 @@ func CountryOf(v int) Country {
 	return Afghanistan + Åland_Islands + Albania + Algeria + American_Samoa + Andorra + Angola + Anguilla + Antarctica + Antigua_and_Barbuda + Argentina + Armenia + Aruba + Australia + Austria + Azerbaijan + Bahamas + Bahrain + Bangladesh + Barbados + Belarus + Belgium + Belize + Benin + Bermuda + Bhutan + Bolivia + Bosnia_and_Herzegovina + Botswana + Bouvet_Island + Brazil + British_Virgin_Islands + British_Indian_Ocean_Territory + Brunei_Darussalam + Bulgaria + Burkina_Faso + Burundi + Cambodia + Cameroon + Canada + Cape_Verde + Cayman_Islands + Central_African_Republic + Chad + Chile + China + Hong_Kong + Macao + Christmas_Island + Cocos_Islands + Colombia + Comoros + Congo_Brazzaville + Congo_DRC + Cook_Islands + Costa_Rica + Côte_dIvoire + Croatia + Cuba + Cyprus + Czechia + Denmark + Djibouti + Dominica + Dominican_Republic + Ecuador + Egypt + El_Salvador + Equatorial_Guinea + Eritrea + Estonia + Ethiopia + Falkland_Islands + Faroe_Islands + Fiji + Finland + France + French_Guiana + French_Polynesia + French_Southern_Territories + Gabon + Gambia + Georgia + Germany + Ghana + Gibraltar + Greece + Greenland + Grenada + Guadeloupe + Guam + Guatemala + Guernsey + Guinea + Guinea_Bissau + Guyana + Haiti + Heard_Island_and_Mcdonald_Islands + Holy_See + Honduras + Hungary + Iceland + India + Indonesia + Iran + Iraq + Ireland + Isle_of_Man + Israel + Italy + Jamaica + Japan + Jersey + Jordan + Kazakhstan + Kenya + Kiribati + Democratic_Peoples_Republic_of_Korea + South_Korea + Kuwait + Kyrgyzstan + Lao_PDR + Latvia + Lebanon + Lesotho + Liberia + Libya + Liechtenstein + Lithuania + Luxembourg + North_Macedonia + Madagascar + Malawi + Malaysia + Maldives + Mali + Malta + Marshall_Islands + Martinique + Mauritania + Mauritius + Mayotte + Mexico + Micronesia + Moldova + Monaco + Mongolia + Montenegro + Montserrat + Morocco + Mozambique + Myanmar + Namibia + Nauru + Nepal + Netherlands + Netherlands_Antilles + New_Caledonia + New_Zealand + Nicaragua + Niger + Nigeria + Niue + Norfolk_Island + Northern_Mariana_Islands + Norway + Oman + Pakistan + Palau + Palestinian_Territory + Panama + Papua_New_Guinea + Paraguay + Peru + Philippines + Pitcairn + Poland + Portugal + Puerto_Rico + Qatar + Réunion + Romania + Russian_Federation + Rwanda + Saint_Barthélemy + Saint_Helena + Saint_Kitts_and_Nevis + Saint_Lucia + Saint_Martin + Saint_Pierre_and_Miquelon + Saint_Vincent_and_Grenadines + Samoa + San_Marino + Sao_Tome_and_Principe + Saudi_Arabia + Senegal + Serbia + Seychelles + Sierra_Leone + Singapore + Slovakia + Slovenia + Solomon_Islands + Somalia + South_Africa + South_Georgia_and_the_South_Sandwich_Islands + South_Sudan + Spain + Sri_Lanka + Sudan + Suriname + Svalbard_and_Jan_Mayen_Islands + Swaziland + Sweden + Switzerland + Syria + Taiwan + Tajikistan + Tanzania + Thailand + Timor_Leste + Togo + Tokelau + Tonga + Trinidad_and_Tobago + Tunisia + Türkiye + Turkmenistan + Turks_and_Caicos_Islands + Tuvalu + Uganda + Ukraine + United_Arab_Emirates + United_Kingdom + United_States_of_America + United_States_Minor_Outlying_Islands + Uruguay + Uzbekistan + Vanuatu + Venezuela + Viet_Nam + Virgin_Islands + Wallis_and_Futuna_Islands + Western_Sahara + Yemen + Zambia + Zimbabwe + 1
 }
 
+// Parse parses a string to find the corresponding Country, accepting one of the string values or
+// a number. The input representation is determined by None. It is used by AsCountry.
+// The input case does not matter.
+//
+// Usage Example
+//
+//    v := new(Country)
+//    err := v.Parse(s)
+//    ...  etc
+//
+func (v *Country) Parse(in string) error {
+	if v.parseNumber(in) {
+		return nil
+	}
+
+	s := countryTransformInput(in)
+
+	return v.parseFallback(in, s)
+}
+
 // parseNumber attempts to convert a decimal value.
 // Only numbers that correspond to the enumeration are valid.
 func (v *Country) parseNumber(s string) (ok bool) {
@@ -684,25 +704,6 @@ func (v *Country) parseNumber(s string) (ok bool) {
 		return v.IsValid()
 	}
 	return false
-}
-
-// Parse parses a string to find the corresponding Country, accepting one of the string values or
-// a number. The input representation is determined by None. It is used by AsCountry.
-// The input case does not matter.
-//
-// Usage Example
-//
-//	v := new(Country)
-//	err := v.Parse(s)
-//	...  etc
-func (v *Country) Parse(in string) error {
-	if v.parseNumber(in) {
-		return nil
-	}
-
-	s := countryTransformInput(in)
-
-	return v.parseFallback(in, s)
 }
 
 func (v *Country) parseFallback(in, s string) error {
@@ -719,13 +720,6 @@ func (v *Country) parseFallback(in, s string) error {
 	return errors.New(in + ": unrecognised country")
 }
 
-// countryTransformInput may alter input strings before they are parsed.
-// This function is pluggable and is initialised using command-line flags
-// -ic -lc -uc -unsnake.
-var countryTransformInput = func(in string) string {
-	return strings.ToLower(strings.ReplaceAll(in, "_", " "))
-}
-
 func (v *Country) parseString(s string, concats string, indexes []uint16) (ok bool) {
 	var i0 uint16 = 0
 
@@ -740,6 +734,13 @@ func (v *Country) parseString(s string, concats string, indexes []uint16) (ok bo
 	}
 	*v, ok = iso3166_3LetterCodes[s]
 	return ok
+}
+
+// countryTransformInput may alter input strings before they are parsed.
+// This function is pluggable and is initialised using command-line flags
+// -ic -lc -uc -unsnake.
+var countryTransformInput = func(in string) string {
+	return strings.ToLower(strings.ReplaceAll(in, "_", " "))
 }
 
 // AsCountry parses a string to find the corresponding Country, accepting either one of the string values or
@@ -877,6 +878,13 @@ func (v *Country) unmarshalJSON(in string) error {
 	return errors.New(in + ": unrecognised country")
 }
 
+// countryMarshalNumber handles marshaling where a number is required or where
+// the value is out of range.
+// This function can be replaced with any bespoke function than matches signature.
+var countryMarshalNumber = func(v Country) string {
+	return strconv.FormatInt(int64(v), 10)
+}
+
 // Scan parses some value, which can be a number, a string or []byte.
 // It implements sql.Scanner, https://golang.org/pkg/database/sql/#Scanner
 func (v *Country) Scan(value interface{}) error {
@@ -903,6 +911,13 @@ func (v *Country) Scan(value interface{}) error {
 	return v.scanParse(s)
 }
 
+func (v Country) errorIfInvalid() error {
+	if v.IsValid() {
+		return nil
+	}
+	return v.invalidError()
+}
+
 func (v *Country) scanParse(in string) error {
 	if v.parseNumber(in) {
 		return nil
@@ -915,13 +930,6 @@ func (v *Country) scanParse(in string) error {
 	}
 
 	return v.parseFallback(in, s)
-}
-
-func (v Country) errorIfInvalid() error {
-	if v.IsValid() {
-		return nil
-	}
-	return v.invalidError()
 }
 
 // Value converts the Country to a string.
