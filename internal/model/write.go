@@ -20,8 +20,8 @@ func (v <<.MainType>>) toString(o int, concats string, indexes []uint16) string 
 `,
 }
 
-func buildToStringMethod(codegen *codegen.Units) {
-	codegen.Add(vtoStringUnit)
+func buildToStringMethod(units *codegen.Units) {
+	units.Add(vtoStringUnit)
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -95,7 +95,7 @@ func (v <<.MainType>>) String() string {
 
 func buildStringMethod(units *codegen.Units) {
 	units.Add(vStringUnit)
-	units.Add(vtoStringUnit)
+	buildToStringMethod(units)
 	buildOrdinalMethod(units)
 }
 
@@ -424,7 +424,7 @@ func (v <<.MainType>>) marshalText() (string, error) {
 }
 
 func buildMarshalText(units *codegen.Units, m Model) {
-	units.Add(vtoStringUnit)
+	buildToStringMethod(units)
 
 	if m.HasTextTags() {
 		units.Add(vmarshalText_Main_Unit)
@@ -542,7 +542,7 @@ func (v <<.MainType>>) MarshalJSON() ([]byte, error) {
 }
 
 func buildMarshalJSON(units *codegen.Units, m Model) {
-	units.Add(vtoStringUnit)
+	buildToStringMethod(units)
 
 	if m.HasJSONTags() {
 		units.Add(vJSON_struct_tags_Unit)
@@ -787,6 +787,40 @@ func buildUnmarshalJSON(units *codegen.Units, m Model) {
 		units.Add(lctypeTransformInputUnit)
 		buildParseStringMethod(units)
 	}
+}
+
+//-------------------------------------------------------------------------------------------------
+
+const awsDynamoDBImportPath = "github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
+
+var vMarshalDynamoDBAttributeValueUnit = codegen.Unit{
+	Declares: "v.JSON",
+	Requires: []string{"v.toString"},
+	Imports:  collection.NewStringSet(awsDynamoDBImportPath),
+	Template: `
+// MarshalDynamoDBAttributeValue handles writing dates as DynamoDB attributes.
+func (v <<.MainType>>) MarshalDynamoDBAttributeValue() (types.AttributeValue, error) {
+	return &types.AttributeValueMemberS{
+		Value: v.String(),
+	}, nil
+}`,
+}
+
+var vUnmarshalDynamoDBAttributeValueUnit = codegen.Unit{
+	Declares: "v.JSON",
+	Requires: []string{"v.Parse"},
+	Imports:  collection.NewStringSet(awsDynamoDBImportPath),
+	Template: `
+// UnmarshalDynamoDBAttributeValue handles reading dates from DynamoDB attributes.
+func (v <<.MainType>>) UnmarshalDynamoDBAttributeValue(av types.AttributeValue) (err error) {
+	avS, ok := av.(*types.AttributeValueMemberS)
+	if !ok {
+		return fmt.Errorf("wrong data type %T for a date; expecting types.AttributeValueMemberS", av)
+	}
+
+	*v, err = Parse<<.MainType>>(avS.Value)
+	return err
+}`,
 }
 
 //-------------------------------------------------------------------------------------------------

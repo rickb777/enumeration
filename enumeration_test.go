@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/onsi/gomega"
 	"github.com/rickb777/enumeration/v3/internal/model"
+	"github.com/rickb777/enumeration/v3/internal/parse"
 	"go/scanner"
 	"go/token"
 	"io"
@@ -28,13 +29,13 @@ func TestMainApp_Day(t *testing.T) {
 	compareGeneratedFile(g, outputFile)
 }
 
-func TestMainApp_SalesChannel(t *testing.T) {
+func TestMainApp_Channel(t *testing.T) {
 	g := gomega.NewWithT(t)
 
 	inputGo = "example/channel.go"
 	outputGo = "example/channel_enum.go"
 
-	err := os.Remove("example/channel_enum.go")
+	err := os.Remove(outputGo)
 	if err != nil {
 		t.Logf("rm %s: %s", "example/channel_enum.go", err.Error())
 		// continue anyway
@@ -46,6 +47,7 @@ func TestMainApp_SalesChannel(t *testing.T) {
 
 	model.Prefix = ""
 	model.Suffix = "Sales"
+	parse.AliasTable = ""
 
 	config = model.Config{
 		MainType: "SalesChannel",
@@ -53,7 +55,39 @@ func TestMainApp_SalesChannel(t *testing.T) {
 
 	doMain()
 
-	compareGeneratedFile(g, "example/channel_enum.go")
+	compareGeneratedFile(g, outputGo)
+}
+
+func TestMainApp_Country(t *testing.T) {
+	g := gomega.NewWithT(t)
+
+	inputGo = "example/country.go"
+	outputGo = "example/country_enum.go"
+
+	err := os.Remove(outputGo)
+	if err != nil {
+		t.Logf("rm %s: %s", outputGo, err.Error())
+		// continue anyway
+	}
+
+	force = true
+	lowercase, uppercase, showVersion = false, false, false
+	outputJSON, marshalTextRep, marshalJSONRep, storeRep = "", "None", "None", "Number"
+
+	model.Prefix = ""
+	model.Suffix = ""
+	parse.AliasTable = "iso3166_3LetterCodes"
+
+	config = model.Config{
+		MainType:   "Country",
+		Plural:     "Countries",
+		IgnoreCase: true,
+		Unsnake:    true,
+	}
+
+	doMain()
+
+	compareGeneratedFile(g, outputGo)
 }
 
 func TestMainApp_Method(t *testing.T) {
@@ -62,7 +96,7 @@ func TestMainApp_Method(t *testing.T) {
 	inputGo = "example/method.go"
 	outputGo = "example/method_enum.go"
 
-	err := os.Remove("example/method_enum.go")
+	err := os.Remove(outputGo)
 	if err != nil {
 		t.Logf("rm %s: %s", "example/method_enum.go", err.Error())
 		// continue anyway
@@ -74,6 +108,7 @@ func TestMainApp_Method(t *testing.T) {
 
 	model.Prefix = ""
 	model.Suffix = ""
+	parse.AliasTable = ""
 
 	config = model.Config{
 		MainType:   "Method",
@@ -82,7 +117,7 @@ func TestMainApp_Method(t *testing.T) {
 
 	doMain()
 
-	compareGeneratedFile(g, "example/method_enum.go")
+	compareGeneratedFile(g, outputGo)
 }
 
 func compareGeneratedFile(g *gomega.WithT, fileName string) {
@@ -128,7 +163,7 @@ func TestScannerTryOut(t *testing.T) {
 	g := gomega.NewWithT(t)
 
 	if testing.Verbose() {
-		for _, n := range []string{"example/base.go", "example/day.go", "example/month.go"} {
+		for _, n := range []string{"example/base.go", "example/day.go", "example/country.go", "example/month.go"} {
 			f, err := os.Open(n)
 			g.Expect(err).NotTo(gomega.HaveOccurred())
 			defer f.Close()
