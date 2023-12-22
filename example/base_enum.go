@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v3 v3.1.2
+// github.com/rickb777/enumeration/v3 v3.1.4
 
 package example
 
@@ -84,10 +84,9 @@ func BaseOf(v int) Base {
 //
 // Usage Example
 //
-//    v := new(Base)
-//    err := v.Parse(s)
-//    ...  etc
-//
+//	v := new(Base)
+//	err := v.Parse(s)
+//	...  etc
 func (v *Base) Parse(in string) error {
 	if v.parseNumber(in) {
 		return nil

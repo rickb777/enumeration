@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v3 v3.1.2
+// github.com/rickb777/enumeration/v3 v3.1.4
 
 package example
 
@@ -91,10 +91,9 @@ func PetOf(v int) Pet {
 //
 // Usage Example
 //
-//    v := new(Pet)
-//    err := v.Parse(s)
-//    ...  etc
-//
+//	v := new(Pet)
+//	err := v.Parse(s)
+//	...  etc
 func (v *Pet) Parse(in string) error {
 	if v.parseNumber(in) {
 		return nil

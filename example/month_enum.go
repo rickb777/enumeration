@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v3 v3.1.2
+// github.com/rickb777/enumeration/v3 v3.1.4
 
 package example
 
@@ -107,10 +107,9 @@ func MonthOf(v int) Month {
 //
 // Usage Example
 //
-//    v := new(Month)
-//    err := v.Parse(s)
-//    ...  etc
-//
+//	v := new(Month)
+//	err := v.Parse(s)
+//	...  etc
 func (v *Month) Parse(in string) error {
 	if v.parseNumber(in) {
 		return nil

@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v3 v3.1.2
+// github.com/rickb777/enumeration/v3 v3.1.4
 
 package example
 
@@ -97,10 +97,9 @@ func MethodOf(v int) Method {
 //
 // Usage Example
 //
-//    v := new(Method)
-//    err := v.Parse(s)
-//    ...  etc
-//
+//	v := new(Method)
+//	err := v.Parse(s)
+//	...  etc
 func (v *Method) Parse(in string) error {
 	if v.parseNumber(in) {
 		return nil
