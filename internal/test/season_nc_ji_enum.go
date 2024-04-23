@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v3 v3.1.4
+// github.com/rickb777/enumeration/v3 v3.1.5
 
 package test
 
@@ -85,9 +85,10 @@ func Season_Nc_JiOf(v int) Season_Nc_Ji {
 //
 // Usage Example
 //
-//	v := new(Season_Nc_Ji)
-//	err := v.Parse(s)
-//	...  etc
+//    v := new(Season_Nc_Ji)
+//    err := v.Parse(s)
+//    ...  etc
+//
 func (v *Season_Nc_Ji) Parse(in string) error {
 	if v.parseNumber(in) {
 		return nil

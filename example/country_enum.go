@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v3 v3.1.4
+// github.com/rickb777/enumeration/v3 v3.1.5
 
 package example
 
@@ -681,9 +681,10 @@ func CountryOf(v int) Country {
 //
 // Usage Example
 //
-//	v := new(Country)
-//	err := v.Parse(s)
-//	...  etc
+//    v := new(Country)
+//    err := v.Parse(s)
+//    ...  etc
+//
 func (v *Country) Parse(in string) error {
 	if v.parseNumber(in) {
 		return nil

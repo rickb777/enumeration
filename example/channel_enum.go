@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v3 v3.1.4
+// github.com/rickb777/enumeration/v3 v3.1.5
 
 package example
 
@@ -88,9 +88,10 @@ func SalesChannelOf(v int) SalesChannel {
 //
 // Usage Example
 //
-//	v := new(SalesChannel)
-//	err := v.Parse(s)
-//	...  etc
+//    v := new(SalesChannel)
+//    err := v.Parse(s)
+//    ...  etc
+//
 func (v *SalesChannel) Parse(in string) error {
 	if v.parseNumber(in) {
 		return nil

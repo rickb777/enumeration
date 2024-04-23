@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v3 v3.1.4
+// github.com/rickb777/enumeration/v3 v3.1.5
 
 package example
 
@@ -137,9 +137,10 @@ func GreekAlphabetOf(v int) GreekAlphabet {
 //
 // Usage Example
 //
-//	v := new(GreekAlphabet)
-//	err := v.Parse(s)
-//	...  etc
+//    v := new(GreekAlphabet)
+//    err := v.Parse(s)
+//    ...  etc
+//
 func (v *GreekAlphabet) Parse(in string) error {
 	if v.parseNumber(in) {
 		return nil

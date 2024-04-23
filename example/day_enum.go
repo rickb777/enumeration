@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v3 v3.1.4
+// github.com/rickb777/enumeration/v3 v3.1.5
 
 package example
 
@@ -92,9 +92,10 @@ func DayOf(v int) Day {
 //
 // Usage Example
 //
-//	v := new(Day)
-//	err := v.Parse(s)
-//	...  etc
+//    v := new(Day)
+//    err := v.Parse(s)
+//    ...  etc
+//
 func (v *Day) Parse(in string) error {
 	if v.parseNumber(in) {
 		return nil
