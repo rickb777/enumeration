@@ -37,7 +37,7 @@ func parseConst(s *scanner, items []constItem) []constItem {
 	for s.Tok != token.EOF {
 		switch s.Scan() {
 		case token.IDENT:
-			items = parseConstSpec(s, items)
+			return parseConstSpec(s, items)
 
 		case token.LPAREN:
 			return parseConstBlock(s, items)

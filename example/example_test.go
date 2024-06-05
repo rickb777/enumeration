@@ -89,7 +89,7 @@ func TestMarshal(t *testing.T) {
 	x, err := xml.Marshal(v)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 	g.Expect(string(s)).Should(gomega.Equal(`{"B":347.2,"D":3,"G":"theta","X":"PO","M":"November","P":"Phascolarctos Cinereus","C":"webshop"}`))
-	g.Expect(string(x)).Should(gomega.Equal(`<Group><B>347.2</B><D>3</D><G>theta</G><X>3</X><M>November</M><P>Phascolarctos Cinereus</P><C>1</C></Group>`), string(x))
+	g.Expect(string(x)).Should(gomega.Equal(`<Group><B>347.2</B><D>3</D><G>theta</G><X>3</X><M>November</M><P>Phascolarctos Cinereus</P><C>3</C></Group>`), string(x))
 }
 
 func TestMethodScan(t *testing.T) {
@@ -153,9 +153,9 @@ func TestSalesChannelScan(t *testing.T) {
 		in       interface{}
 		expected SalesChannel
 	}{
-		{in: int64(3), expected: TelephoneSales},
-		{in: float64(3), expected: TelephoneSales},
-		{in: "2", expected: InstoreSales},
+		{in: int64(7), expected: TelephoneSales},
+		{in: float64(7), expected: TelephoneSales},
+		{in: "5", expected: InstoreSales},
 		{in: "s", expected: InstoreSales},
 		{in: []byte("o"), expected: OnlineSales},
 		{in: nil, expected: 0},
