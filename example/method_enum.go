@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v3 v3.1.5
+// github.com/rickb777/enumeration/v3 v3.2.0
 
 package example
 
@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/rickb777/enumeration/v3/enum"
+	"slices"
 	"strconv"
 	"strings"
 )
@@ -81,14 +82,23 @@ func (v Method) Int() int {
 	return int(v)
 }
 
+var invalidMethodValue = func() Method {
+	var v Method
+	for {
+		if !slices.Contains(AllMethods, v) {
+			return v
+		}
+		v++
+	} // AllMethods is a finite set so loop will terminate eventually
+}()
+
 // MethodOf returns a Method based on an ordinal number. This is the inverse of Ordinal.
 // If the ordinal is out of range, an invalid Method is returned.
 func MethodOf(v int) Method {
 	if 0 <= v && v < len(AllMethods) {
 		return AllMethods[v]
 	}
-	// an invalid result
-	return HEAD + GET + PUT + POST + PATCH + DELETE + 1
+	return invalidMethodValue
 }
 
 // Parse parses a string to find the corresponding Method, accepting one of the string values or
@@ -97,10 +107,9 @@ func MethodOf(v int) Method {
 //
 // Usage Example
 //
-//    v := new(Method)
-//    err := v.Parse(s)
-//    ...  etc
-//
+//	v := new(Method)
+//	err := v.Parse(s)
+//	...  etc
 func (v *Method) Parse(in string) error {
 	if v.parseNumber(in) {
 		return nil

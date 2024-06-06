@@ -134,15 +134,25 @@ func buildNumberMethod(units *codegen.Units, m Model) {
 
 var mainTypeOfUnit = codegen.Unit{
 	Declares: "OfFunction",
+	Imports:  collection.NewStringSet("slices"),
 	Template: `
+var invalid<<.MainType>>Value = func() <<.MainType>> {
+	var v <<.MainType>>
+	for {
+		if !slices.Contains(All<<.Plural>>, v) {
+			return v
+		}
+		v++
+	} // All<<.Plural>> is a finite set so loop will terminate eventually
+}()
+
 // <<.MainType>>Of returns a <<.MainType>> based on an ordinal number. This is the inverse of Ordinal.
 // If the ordinal is out of range, an invalid <<.MainType>> is returned.
 func <<.MainType>>Of(v int) <<.MainType>> {
 	if 0 <= v && v < len(All<<.Plural>>) {
 		return All<<.Plural>>[v]
 	}
-	// an invalid result
-	return <<.ValuesJoined 0 " + ">> + 1
+	return invalid<<.MainType>>Value
 }
 `,
 }

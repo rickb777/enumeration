@@ -25,7 +25,14 @@ func TestOrdinal(t *testing.T) {
 	g.Expect(int(Monday)).Should(gomega.Equal(2))
 	g.Expect(Monday.Ordinal()).Should(gomega.Equal(1))
 	g.Expect(Friday.Ordinal()).Should(gomega.Equal(5))
+	g.Expect(DayOf(0)).Should(gomega.Equal(Sunday))
 	g.Expect(DayOf(3)).Should(gomega.Equal(Wednesday))
+	g.Expect(DayOf(6)).Should(gomega.Equal(Saturday))
+	g.Expect(DayOf(7)).Should(gomega.BeEquivalentTo(0))
+	g.Expect(DayOf(13)).Should(gomega.BeEquivalentTo(0))
+	g.Expect(Wednesday.IsValid()).Should(gomega.BeTrue())
+	g.Expect(Day(10).IsValid()).Should(gomega.BeFalse())
+	g.Expect(DayOf(10).IsValid()).Should(gomega.BeFalse())
 	g.Expect(numberOfDays).Should(gomega.Equal(7))
 }
 

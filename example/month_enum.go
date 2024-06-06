@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v3 v3.1.5
+// github.com/rickb777/enumeration/v3 v3.2.0
 
 package example
 
@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/rickb777/enumeration/v3/enum"
+	"slices"
 	"strconv"
 	"strings"
 )
@@ -91,14 +92,23 @@ func (v Month) Int() int {
 	return int(v)
 }
 
+var invalidMonthValue = func() Month {
+	var v Month
+	for {
+		if !slices.Contains(AllMonths, v) {
+			return v
+		}
+		v++
+	} // AllMonths is a finite set so loop will terminate eventually
+}()
+
 // MonthOf returns a Month based on an ordinal number. This is the inverse of Ordinal.
 // If the ordinal is out of range, an invalid Month is returned.
 func MonthOf(v int) Month {
 	if 0 <= v && v < len(AllMonths) {
 		return AllMonths[v]
 	}
-	// an invalid result
-	return January + February + March + April + May + June + July + August + September + October + November + December + 1
+	return invalidMonthValue
 }
 
 // Parse parses a string to find the corresponding Month, accepting one of the string values or
@@ -107,10 +117,9 @@ func MonthOf(v int) Month {
 //
 // Usage Example
 //
-//    v := new(Month)
-//    err := v.Parse(s)
-//    ...  etc
-//
+//	v := new(Month)
+//	err := v.Parse(s)
+//	...  etc
 func (v *Month) Parse(in string) error {
 	if v.parseNumber(in) {
 		return nil

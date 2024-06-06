@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v3 v3.1.5
+// github.com/rickb777/enumeration/v3 v3.2.0
 
 package test
 
@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/rickb777/enumeration/v3/enum"
+	"slices"
 	"strconv"
 	"strings"
 )
@@ -70,14 +71,23 @@ func (v Season_Uc_Tn) Int() int {
 	return int(v)
 }
 
+var invalidSeason_Uc_TnValue = func() Season_Uc_Tn {
+	var v Season_Uc_Tn
+	for {
+		if !slices.Contains(AllSeason_Uc_Tns, v) {
+			return v
+		}
+		v++
+	} // AllSeason_Uc_Tns is a finite set so loop will terminate eventually
+}()
+
 // Season_Uc_TnOf returns a Season_Uc_Tn based on an ordinal number. This is the inverse of Ordinal.
 // If the ordinal is out of range, an invalid Season_Uc_Tn is returned.
 func Season_Uc_TnOf(v int) Season_Uc_Tn {
 	if 0 <= v && v < len(AllSeason_Uc_Tns) {
 		return AllSeason_Uc_Tns[v]
 	}
-	// an invalid result
-	return Spring_Uc_Tn + Summer_Uc_Tn + Autumn_Uc_Tn + Winter_Uc_Tn + 1
+	return invalidSeason_Uc_TnValue
 }
 
 // Parse parses a string to find the corresponding Season_Uc_Tn, accepting one of the string values or
@@ -85,10 +95,9 @@ func Season_Uc_TnOf(v int) Season_Uc_Tn {
 //
 // Usage Example
 //
-//    v := new(Season_Uc_Tn)
-//    err := v.Parse(s)
-//    ...  etc
-//
+//	v := new(Season_Uc_Tn)
+//	err := v.Parse(s)
+//	...  etc
 func (v *Season_Uc_Tn) Parse(in string) error {
 	if v.parseNumber(in) {
 		return nil

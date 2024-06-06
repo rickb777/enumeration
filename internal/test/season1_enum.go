@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v3 v3.1.5
+// github.com/rickb777/enumeration/v3 v3.2.0
 
 package test
 
@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/rickb777/enumeration/v3/enum"
+	"slices"
 	"strconv"
 )
 
@@ -69,14 +70,23 @@ func (v Season1) Int() int {
 	return int(v)
 }
 
+var invalidSeason1Value = func() Season1 {
+	var v Season1
+	for {
+		if !slices.Contains(AllSeason1s, v) {
+			return v
+		}
+		v++
+	} // AllSeason1s is a finite set so loop will terminate eventually
+}()
+
 // Season1Of returns a Season1 based on an ordinal number. This is the inverse of Ordinal.
 // If the ordinal is out of range, an invalid Season1 is returned.
 func Season1Of(v int) Season1 {
 	if 0 <= v && v < len(AllSeason1s) {
 		return AllSeason1s[v]
 	}
-	// an invalid result
-	return Spring1 + Summer1 + Autumn1 + Winter1 + 1
+	return invalidSeason1Value
 }
 
 // Parse parses a string to find the corresponding Season1, accepting one of the string values or
@@ -84,10 +94,9 @@ func Season1Of(v int) Season1 {
 //
 // Usage Example
 //
-//    v := new(Season1)
-//    err := v.Parse(s)
-//    ...  etc
-//
+//	v := new(Season1)
+//	err := v.Parse(s)
+//	...  etc
 func (v *Season1) Parse(in string) error {
 	if v.parseNumber(in) {
 		return nil

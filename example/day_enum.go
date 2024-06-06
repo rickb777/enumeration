@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v3 v3.1.5
+// github.com/rickb777/enumeration/v3 v3.2.0
 
 package example
 
@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/rickb777/enumeration/v3/enum"
+	"slices"
 	"strconv"
 )
 
@@ -77,14 +78,23 @@ func (v Day) Int() int {
 	return int(v)
 }
 
+var invalidDayValue = func() Day {
+	var v Day
+	for {
+		if !slices.Contains(AllDays, v) {
+			return v
+		}
+		v++
+	} // AllDays is a finite set so loop will terminate eventually
+}()
+
 // DayOf returns a Day based on an ordinal number. This is the inverse of Ordinal.
 // If the ordinal is out of range, an invalid Day is returned.
 func DayOf(v int) Day {
 	if 0 <= v && v < len(AllDays) {
 		return AllDays[v]
 	}
-	// an invalid result
-	return Sunday + Monday + Tuesday + Wednesday + Thursday + Friday + Saturday + 1
+	return invalidDayValue
 }
 
 // Parse parses a string to find the corresponding Day, accepting one of the string values or
@@ -92,10 +102,9 @@ func DayOf(v int) Day {
 //
 // Usage Example
 //
-//    v := new(Day)
-//    err := v.Parse(s)
-//    ...  etc
-//
+//	v := new(Day)
+//	err := v.Parse(s)
+//	...  etc
 func (v *Day) Parse(in string) error {
 	if v.parseNumber(in) {
 		return nil

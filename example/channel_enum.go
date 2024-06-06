@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v3 v3.1.5
+// github.com/rickb777/enumeration/v3 v3.2.0
 
 package example
 
@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/rickb777/enumeration/v3/enum"
+	"slices"
 	"strconv"
 	"strings"
 )
@@ -73,14 +74,23 @@ func (v SalesChannel) Int() int {
 	return int(v)
 }
 
+var invalidSalesChannelValue = func() SalesChannel {
+	var v SalesChannel
+	for {
+		if !slices.Contains(AllSalesChannels, v) {
+			return v
+		}
+		v++
+	} // AllSalesChannels is a finite set so loop will terminate eventually
+}()
+
 // SalesChannelOf returns a SalesChannel based on an ordinal number. This is the inverse of Ordinal.
 // If the ordinal is out of range, an invalid SalesChannel is returned.
 func SalesChannelOf(v int) SalesChannel {
 	if 0 <= v && v < len(AllSalesChannels) {
 		return AllSalesChannels[v]
 	}
-	// an invalid result
-	return OnlineSales + InstoreSales + TelephoneSales + 1
+	return invalidSalesChannelValue
 }
 
 // Parse parses a string to find the corresponding SalesChannel, accepting one of the string values or
@@ -88,10 +98,9 @@ func SalesChannelOf(v int) SalesChannel {
 //
 // Usage Example
 //
-//    v := new(SalesChannel)
-//    err := v.Parse(s)
-//    ...  etc
-//
+//	v := new(SalesChannel)
+//	err := v.Parse(s)
+//	...  etc
 func (v *SalesChannel) Parse(in string) error {
 	if v.parseNumber(in) {
 		return nil

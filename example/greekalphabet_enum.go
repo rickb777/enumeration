@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v3 v3.1.5
+// github.com/rickb777/enumeration/v3 v3.2.0
 
 package example
 
@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/rickb777/enumeration/v3/enum"
+	"slices"
 	"strconv"
 )
 
@@ -122,14 +123,23 @@ func (v GreekAlphabet) Int() int {
 	return int(v)
 }
 
+var invalidGreekAlphabetValue = func() GreekAlphabet {
+	var v GreekAlphabet
+	for {
+		if !slices.Contains(AllGreekAlphabets, v) {
+			return v
+		}
+		v++
+	} // AllGreekAlphabets is a finite set so loop will terminate eventually
+}()
+
 // GreekAlphabetOf returns a GreekAlphabet based on an ordinal number. This is the inverse of Ordinal.
 // If the ordinal is out of range, an invalid GreekAlphabet is returned.
 func GreekAlphabetOf(v int) GreekAlphabet {
 	if 0 <= v && v < len(AllGreekAlphabets) {
 		return AllGreekAlphabets[v]
 	}
-	// an invalid result
-	return Αλφα + Βήτα + Γάμμα + Δέλτα + Εψιλον + Ζήτα + Ητα + Θήτα + Ιώτα + Κάππα + Λάμβδα + Μυ + Νυ + Ξι + Ομικρον + Πι + Ρώ + Σίγμα + Ταυ + Υψιλον + Φι + Χι + Ψι + Ωμέγα + 1
+	return invalidGreekAlphabetValue
 }
 
 // Parse parses a string to find the corresponding GreekAlphabet, accepting one of the string values or
@@ -137,10 +147,9 @@ func GreekAlphabetOf(v int) GreekAlphabet {
 //
 // Usage Example
 //
-//    v := new(GreekAlphabet)
-//    err := v.Parse(s)
-//    ...  etc
-//
+//	v := new(GreekAlphabet)
+//	err := v.Parse(s)
+//	...  etc
 func (v *GreekAlphabet) Parse(in string) error {
 	if v.parseNumber(in) {
 		return nil

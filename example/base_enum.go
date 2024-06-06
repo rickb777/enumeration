@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v3 v3.1.5
+// github.com/rickb777/enumeration/v3 v3.2.0
 
 package example
 
@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/rickb777/enumeration/v3/enum"
+	"slices"
 	"strconv"
 	"strings"
 )
@@ -69,14 +70,23 @@ func (v Base) Float() float64 {
 	return float64(v)
 }
 
+var invalidBaseValue = func() Base {
+	var v Base
+	for {
+		if !slices.Contains(AllBases, v) {
+			return v
+		}
+		v++
+	} // AllBases is a finite set so loop will terminate eventually
+}()
+
 // BaseOf returns a Base based on an ordinal number. This is the inverse of Ordinal.
 // If the ordinal is out of range, an invalid Base is returned.
 func BaseOf(v int) Base {
 	if 0 <= v && v < len(AllBases) {
 		return AllBases[v]
 	}
-	// an invalid result
-	return A + C + G + T + 1
+	return invalidBaseValue
 }
 
 // Parse parses a string to find the corresponding Base, accepting one of the string values or
@@ -84,10 +94,9 @@ func BaseOf(v int) Base {
 //
 // Usage Example
 //
-//    v := new(Base)
-//    err := v.Parse(s)
-//    ...  etc
-//
+//	v := new(Base)
+//	err := v.Parse(s)
+//	...  etc
 func (v *Base) Parse(in string) error {
 	if v.parseNumber(in) {
 		return nil

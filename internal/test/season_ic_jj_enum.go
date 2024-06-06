@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v3 v3.1.5
+// github.com/rickb777/enumeration/v3 v3.2.0
 
 package test
 
@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/rickb777/enumeration/v3/enum"
+	"slices"
 	"strconv"
 	"strings"
 )
@@ -74,14 +75,23 @@ func (v Season_Ic_Jj) Int() int {
 	return int(v)
 }
 
+var invalidSeason_Ic_JjValue = func() Season_Ic_Jj {
+	var v Season_Ic_Jj
+	for {
+		if !slices.Contains(AllSeason_Ic_Jjs, v) {
+			return v
+		}
+		v++
+	} // AllSeason_Ic_Jjs is a finite set so loop will terminate eventually
+}()
+
 // Season_Ic_JjOf returns a Season_Ic_Jj based on an ordinal number. This is the inverse of Ordinal.
 // If the ordinal is out of range, an invalid Season_Ic_Jj is returned.
 func Season_Ic_JjOf(v int) Season_Ic_Jj {
 	if 0 <= v && v < len(AllSeason_Ic_Jjs) {
 		return AllSeason_Ic_Jjs[v]
 	}
-	// an invalid result
-	return Spring_Ic_Jj + Summer_Ic_Jj + Autumn_Ic_Jj + Winter_Ic_Jj + 1
+	return invalidSeason_Ic_JjValue
 }
 
 // Parse parses a string to find the corresponding Season_Ic_Jj, accepting one of the string values or
@@ -90,10 +100,9 @@ func Season_Ic_JjOf(v int) Season_Ic_Jj {
 //
 // Usage Example
 //
-//    v := new(Season_Ic_Jj)
-//    err := v.Parse(s)
-//    ...  etc
-//
+//	v := new(Season_Ic_Jj)
+//	err := v.Parse(s)
+//	...  etc
 func (v *Season_Ic_Jj) Parse(in string) error {
 	if v.parseNumber(in) {
 		return nil

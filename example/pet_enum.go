@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v3 v3.1.5
+// github.com/rickb777/enumeration/v3 v3.2.0
 
 package example
 
@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/rickb777/enumeration/v3/enum"
+	"slices"
 	"strconv"
 	"strings"
 )
@@ -76,14 +77,23 @@ func (v Pet) Int() int {
 	return int(v)
 }
 
+var invalidPetValue = func() Pet {
+	var v Pet
+	for {
+		if !slices.Contains(AllPets, v) {
+			return v
+		}
+		v++
+	} // AllPets is a finite set so loop will terminate eventually
+}()
+
 // PetOf returns a Pet based on an ordinal number. This is the inverse of Ordinal.
 // If the ordinal is out of range, an invalid Pet is returned.
 func PetOf(v int) Pet {
 	if 0 <= v && v < len(AllPets) {
 		return AllPets[v]
 	}
-	// an invalid result
-	return MyCat + MyDog + MyMouse + MyElephant + MyKoala_Bear + 1
+	return invalidPetValue
 }
 
 // Parse parses a string to find the corresponding Pet, accepting one of the string values or
@@ -91,10 +101,9 @@ func PetOf(v int) Pet {
 //
 // Usage Example
 //
-//    v := new(Pet)
-//    err := v.Parse(s)
-//    ...  etc
-//
+//	v := new(Pet)
+//	err := v.Parse(s)
+//	...  etc
 func (v *Pet) Parse(in string) error {
 	if v.parseNumber(in) {
 		return nil
