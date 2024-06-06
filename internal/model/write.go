@@ -191,10 +191,9 @@ const parse_body = `
 //
 // Usage Example
 //
-//    v := new(<<.MainType>>)
-//    err := v.Parse(s)
-//    ...  etc
-//
+//	v := new(<<.MainType>>)
+//	err := v.Parse(s)
+//	...  etc
 << end ->>
 func (v *<<.MainType>>) <<.Extra.Method>>(in string) error {
 	if v.parseNumber(in) {
