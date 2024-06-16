@@ -143,7 +143,7 @@ func GreekAlphabetOf(v int) GreekAlphabet {
 }
 
 // Parse parses a string to find the corresponding GreekAlphabet, accepting one of the string values or
-// a number. The input representation is determined by None. It is used by AsGreekAlphabet.
+// a number. It is used by AsGreekAlphabet.
 //
 // Usage Example
 //
@@ -202,7 +202,7 @@ var greekalphabetTransformInput = func(in string) string {
 }
 
 // AsGreekAlphabet parses a string to find the corresponding GreekAlphabet, accepting either one of the string values or
-// a number. The input representation is determined by greekalphabetMarshalTextRep. It wraps Parse.
+// a number. It wraps Parse.
 func AsGreekAlphabet(s string) (GreekAlphabet, error) {
 	var v = new(GreekAlphabet)
 	err := v.Parse(s)

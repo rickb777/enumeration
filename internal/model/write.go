@@ -184,7 +184,7 @@ func buildIsValidMethod(units *codegen.Units) {
 const parse_body = `
 << if .Extra.Doc ->>
 // Parse parses a string to find the corresponding <<.MainType>>, accepting one of the string values or
-// a number. The input representation is determined by <<.MarshalTextRep>>. It is used by As<<.MainType>>.
+// a number. << if gt .MarshalTextRep 0 >>The input representation is determined by <<.MarshalTextRep>>. <<end>>It is used by As<<.MainType>>.
 <<- if .IgnoreCase>>
 // The input case does not matter.
 <<- end>>
@@ -315,7 +315,7 @@ var asFunctionUnit = codegen.Unit{
 	Requires: []string{"v.Parse"},
 	Template: `
 // As<<.MainType>> parses a string to find the corresponding <<.MainType>>, accepting either one of the string values or
-// a number. The input representation is determined by <<.LcType>>MarshalTextRep. It wraps Parse.
+// a number. << if gt .MarshalTextRep 0 >>The input representation is determined by <<.LcType>>MarshalTextRep. <<end>>It wraps Parse.
 <<- if .IgnoreCase>>
 // The input case does not matter.
 <<- end>>

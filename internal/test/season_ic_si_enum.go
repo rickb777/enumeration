@@ -93,7 +93,7 @@ func Season_Ic_SiOf(v int) Season_Ic_Si {
 }
 
 // Parse parses a string to find the corresponding Season_Ic_Si, accepting one of the string values or
-// a number. The input representation is determined by None. It is used by AsSeason_Ic_Si.
+// a number. It is used by AsSeason_Ic_Si.
 // The input case does not matter.
 //
 // Usage Example
@@ -153,7 +153,7 @@ var season_ic_siTransformInput = func(in string) string {
 }
 
 // AsSeason_Ic_Si parses a string to find the corresponding Season_Ic_Si, accepting either one of the string values or
-// a number. The input representation is determined by season_ic_siMarshalTextRep. It wraps Parse.
+// a number. It wraps Parse.
 // The input case does not matter.
 func AsSeason_Ic_Si(s string) (Season_Ic_Si, error) {
 	var v = new(Season_Ic_Si)

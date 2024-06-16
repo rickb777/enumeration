@@ -98,7 +98,7 @@ func DayOf(v int) Day {
 }
 
 // Parse parses a string to find the corresponding Day, accepting one of the string values or
-// a number. The input representation is determined by None. It is used by AsDay.
+// a number. It is used by AsDay.
 //
 // Usage Example
 //
@@ -157,7 +157,7 @@ var dayTransformInput = func(in string) string {
 }
 
 // AsDay parses a string to find the corresponding Day, accepting either one of the string values or
-// a number. The input representation is determined by dayMarshalTextRep. It wraps Parse.
+// a number. It wraps Parse.
 func AsDay(s string) (Day, error) {
 	var v = new(Day)
 	err := v.Parse(s)

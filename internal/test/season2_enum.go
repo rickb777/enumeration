@@ -90,7 +90,7 @@ func Season2Of(v int) Season2 {
 }
 
 // Parse parses a string to find the corresponding Season2, accepting one of the string values or
-// a number. The input representation is determined by None. It is used by AsSeason2.
+// a number. It is used by AsSeason2.
 //
 // Usage Example
 //
@@ -156,7 +156,7 @@ var season2TransformInput = func(in string) string {
 }
 
 // AsSeason2 parses a string to find the corresponding Season2, accepting either one of the string values or
-// a number. The input representation is determined by season2MarshalTextRep. It wraps Parse.
+// a number. It wraps Parse.
 func AsSeason2(s string) (Season2, error) {
 	var v = new(Season2)
 	err := v.Parse(s)

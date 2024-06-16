@@ -98,7 +98,7 @@ func Season_Nc_TaOf(v int) Season_Nc_Ta {
 }
 
 // Parse parses a string to find the corresponding Season_Nc_Ta, accepting one of the string values or
-// a number. The input representation is determined by None. It is used by AsSeason_Nc_Ta.
+// a number. It is used by AsSeason_Nc_Ta.
 //
 // Usage Example
 //
@@ -157,7 +157,7 @@ var season_nc_taTransformInput = func(in string) string {
 }
 
 // AsSeason_Nc_Ta parses a string to find the corresponding Season_Nc_Ta, accepting either one of the string values or
-// a number. The input representation is determined by season_nc_taMarshalTextRep. It wraps Parse.
+// a number. It wraps Parse.
 func AsSeason_Nc_Ta(s string) (Season_Nc_Ta, error) {
 	var v = new(Season_Nc_Ta)
 	err := v.Parse(s)

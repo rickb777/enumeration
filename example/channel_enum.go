@@ -94,7 +94,7 @@ func SalesChannelOf(v int) SalesChannel {
 }
 
 // Parse parses a string to find the corresponding SalesChannel, accepting one of the string values or
-// a number. The input representation is determined by None. It is used by AsSalesChannel.
+// a number. It is used by AsSalesChannel.
 //
 // Usage Example
 //
@@ -153,7 +153,7 @@ var saleschannelTransformInput = func(in string) string {
 }
 
 // AsSalesChannel parses a string to find the corresponding SalesChannel, accepting either one of the string values or
-// a number. The input representation is determined by saleschannelMarshalTextRep. It wraps Parse.
+// a number. It wraps Parse.
 func AsSalesChannel(s string) (SalesChannel, error) {
 	var v = new(SalesChannel)
 	err := v.Parse(s)

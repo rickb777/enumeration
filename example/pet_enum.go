@@ -97,7 +97,7 @@ func PetOf(v int) Pet {
 }
 
 // Parse parses a string to find the corresponding Pet, accepting one of the string values or
-// a number. The input representation is determined by None. It is used by AsPet.
+// a number. It is used by AsPet.
 //
 // Usage Example
 //
@@ -163,7 +163,7 @@ var petTransformInput = func(in string) string {
 }
 
 // AsPet parses a string to find the corresponding Pet, accepting either one of the string values or
-// a number. The input representation is determined by petMarshalTextRep. It wraps Parse.
+// a number. It wraps Parse.
 func AsPet(s string) (Pet, error) {
 	var v = new(Pet)
 	err := v.Parse(s)

@@ -90,7 +90,7 @@ func BaseOf(v int) Base {
 }
 
 // Parse parses a string to find the corresponding Base, accepting one of the string values or
-// a number. The input representation is determined by None. It is used by AsBase.
+// a number. It is used by AsBase.
 //
 // Usage Example
 //
@@ -149,7 +149,7 @@ var baseTransformInput = func(in string) string {
 }
 
 // AsBase parses a string to find the corresponding Base, accepting either one of the string values or
-// a number. The input representation is determined by baseMarshalTextRep. It wraps Parse.
+// a number. It wraps Parse.
 func AsBase(s string) (Base, error) {
 	var v = new(Base)
 	err := v.Parse(s)

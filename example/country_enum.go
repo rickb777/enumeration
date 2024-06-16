@@ -686,7 +686,7 @@ func CountryOf(v int) Country {
 }
 
 // Parse parses a string to find the corresponding Country, accepting one of the string values or
-// a number. The input representation is determined by None. It is used by AsCountry.
+// a number. It is used by AsCountry.
 // The input case does not matter.
 //
 // Usage Example
@@ -753,7 +753,7 @@ var countryTransformInput = func(in string) string {
 }
 
 // AsCountry parses a string to find the corresponding Country, accepting either one of the string values or
-// a number. The input representation is determined by countryMarshalTextRep. It wraps Parse.
+// a number. It wraps Parse.
 // The input case does not matter.
 func AsCountry(s string) (Country, error) {
 	var v = new(Country)

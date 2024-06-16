@@ -91,7 +91,7 @@ func Season_Uc_JnOf(v int) Season_Uc_Jn {
 }
 
 // Parse parses a string to find the corresponding Season_Uc_Jn, accepting one of the string values or
-// a number. The input representation is determined by None. It is used by AsSeason_Uc_Jn.
+// a number. It is used by AsSeason_Uc_Jn.
 //
 // Usage Example
 //
@@ -150,7 +150,7 @@ var season_uc_jnTransformInput = func(in string) string {
 }
 
 // AsSeason_Uc_Jn parses a string to find the corresponding Season_Uc_Jn, accepting either one of the string values or
-// a number. The input representation is determined by season_uc_jnMarshalTextRep. It wraps Parse.
+// a number. It wraps Parse.
 func AsSeason_Uc_Jn(s string) (Season_Uc_Jn, error) {
 	var v = new(Season_Uc_Jn)
 	err := v.Parse(s)

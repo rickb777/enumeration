@@ -91,7 +91,7 @@ func Season_Nc_SiOf(v int) Season_Nc_Si {
 }
 
 // Parse parses a string to find the corresponding Season_Nc_Si, accepting one of the string values or
-// a number. The input representation is determined by None. It is used by AsSeason_Nc_Si.
+// a number. It is used by AsSeason_Nc_Si.
 //
 // Usage Example
 //
@@ -150,7 +150,7 @@ var season_nc_siTransformInput = func(in string) string {
 }
 
 // AsSeason_Nc_Si parses a string to find the corresponding Season_Nc_Si, accepting either one of the string values or
-// a number. The input representation is determined by season_nc_siMarshalTextRep. It wraps Parse.
+// a number. It wraps Parse.
 func AsSeason_Nc_Si(s string) (Season_Nc_Si, error) {
 	var v = new(Season_Nc_Si)
 	err := v.Parse(s)

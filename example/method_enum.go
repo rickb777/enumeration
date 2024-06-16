@@ -102,7 +102,7 @@ func MethodOf(v int) Method {
 }
 
 // Parse parses a string to find the corresponding Method, accepting one of the string values or
-// a number. The input representation is determined by None. It is used by AsMethod.
+// a number. It is used by AsMethod.
 // The input case does not matter.
 //
 // Usage Example
@@ -162,7 +162,7 @@ var methodTransformInput = func(in string) string {
 }
 
 // AsMethod parses a string to find the corresponding Method, accepting either one of the string values or
-// a number. The input representation is determined by methodMarshalTextRep. It wraps Parse.
+// a number. It wraps Parse.
 // The input case does not matter.
 func AsMethod(s string) (Method, error) {
 	var v = new(Method)

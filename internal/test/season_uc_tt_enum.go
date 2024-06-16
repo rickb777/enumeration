@@ -93,7 +93,7 @@ func Season_Uc_TtOf(v int) Season_Uc_Tt {
 }
 
 // Parse parses a string to find the corresponding Season_Uc_Tt, accepting one of the string values or
-// a number. The input representation is determined by None. It is used by AsSeason_Uc_Tt.
+// a number. It is used by AsSeason_Uc_Tt.
 //
 // Usage Example
 //
@@ -152,7 +152,7 @@ var season_uc_ttTransformInput = func(in string) string {
 }
 
 // AsSeason_Uc_Tt parses a string to find the corresponding Season_Uc_Tt, accepting either one of the string values or
-// a number. The input representation is determined by season_uc_ttMarshalTextRep. It wraps Parse.
+// a number. It wraps Parse.
 func AsSeason_Uc_Tt(s string) (Season_Uc_Tt, error) {
 	var v = new(Season_Uc_Tt)
 	err := v.Parse(s)

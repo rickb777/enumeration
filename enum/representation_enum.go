@@ -79,7 +79,7 @@ func (v *Representation) parseNumber(s string) (ok bool) {
 }
 
 // Parse parses a string to find the corresponding Representation, accepting one of the string values or
-// a number. The input representation is determined by None. It is used by AsRepresentation.
+// a number. It is used by AsRepresentation.
 // The input case does not matter.
 //
 // Usage Example
@@ -128,7 +128,7 @@ func (v *Representation) parseString(s string, concats string, indexes []uint16)
 }
 
 // AsRepresentation parses a string to find the corresponding Representation, accepting either one of the string values or
-// a number. The input representation is determined by representationMarshalTextRep. It wraps Parse.
+// a number. It wraps Parse.
 // The input case does not matter.
 func AsRepresentation(s string) (Representation, error) {
 	var v = new(Representation)
