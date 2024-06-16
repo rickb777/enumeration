@@ -57,19 +57,18 @@ func Convert(in io.Reader, input string, xCase transform.Case, config model.Conf
 
 	var foundMainType = false
 	var constItems []constItem
+	var baseType string
 
 	for s.Scan() != token.EOF {
 		switch s.Tok {
 		case token.TYPE:
-			s.Scan()
-			if s.Tok == token.IDENT && s.Lit == MainType {
+			baseType, err = parseType(s, MainType)
+			if err != nil {
+				return m, err
+			}
+			if baseType != "" {
 				foundMainType = true
-
-				s.Scan()
-				if s.Tok == token.IDENT {
-					m.BaseType = s.Lit
-					util.Debug("type %s %s\n", MainType, m.BaseType)
-				}
+				m.BaseType = baseType
 			}
 
 		case token.CONST:

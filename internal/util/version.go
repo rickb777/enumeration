@@ -1,4 +1,4 @@
 package util
 
 // edited manually
-const Version = "v3.2.0"
+const Version = "v3.2.1"
