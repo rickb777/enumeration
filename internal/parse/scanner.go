@@ -38,6 +38,10 @@ func (s *scanner) debug() {
 	}
 }
 
+func (s *scanner) Position() token.Position {
+	return fset.Position(s.Pos)
+}
+
 func (s *scanner) Scan() token.Token {
 	switch s.Tok {
 	case token.EOF:

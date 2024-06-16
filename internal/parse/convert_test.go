@@ -3,6 +3,7 @@ package parse
 import (
 	"bytes"
 	"flag"
+	"go/types"
 	"os"
 	"testing"
 
@@ -45,6 +46,7 @@ func TestConvertBlock1(t *testing.T) {
 		},
 		LcType:   "sweet",
 		BaseType: "int",
+		BaseKind: types.Int,
 		Version:  util.Version,
 		Values:   model.ValuesOf("Mars", "Bounty", "Snickers", "Kitkat"),
 		Case:     transform.Upper,
@@ -54,7 +56,9 @@ func TestConvertBlock1(t *testing.T) {
 }
 
 const enumBlock2 = `
-/* inline comments are allowed */
+/* inline comments are allowed, also var declarations are ignored */
+var x = 100 *
+		100
 type Sweet int // <-- buried here
 const (
 	_ Sweet = iota
@@ -91,6 +95,7 @@ func TestConvertBlock2(t *testing.T) {
 		},
 		LcType:   "sweet",
 		BaseType: "int",
+		BaseKind: types.Int,
 		Version:  util.Version,
 		Values:   model.ValuesOf("Mars", "Bounty", "Snickers", "Kitkat"),
 		Extra:    make(map[string]interface{}),
@@ -129,6 +134,7 @@ func TestConvertBlock3(t *testing.T) {
 		},
 		LcType:   "sweet",
 		BaseType: "int",
+		BaseKind: types.Int,
 		Version:  util.Version,
 		Values:   model.ValuesOf("Mars", "Bounty", "Snickers", "Kitkat"),
 		Case:     transform.Upper,
@@ -206,6 +212,7 @@ func TestConvertBlock4(t *testing.T) {
 		},
 		LcType:     "sweet",
 		BaseType:   "int",
+		BaseKind:   types.Int,
 		Version:    util.Version,
 		Values:     values,
 		AliasTable: "sweetAliases",
@@ -217,7 +224,9 @@ func TestConvertBlock4(t *testing.T) {
 //-------------------------------------------------------------------------------------------------
 
 const enumBlockMultiple = `
-type Sweet int
+type (
+	Sweet int
+)
 const (
 	Mars, Bounty, Snickers, Kitkat Sweet = 1, 2, 3, 4
 )
@@ -244,6 +253,7 @@ func TestConvertBlockMultiple(t *testing.T) {
 		},
 		LcType:   "sweet",
 		BaseType: "int",
+		BaseKind: types.Int,
 		Version:  util.Version,
 		Values:   model.ValuesOf("Mars", "Bounty", "Snickers", "Kitkat"),
 		Case:     transform.Upper,
@@ -283,6 +293,7 @@ func TestConvertSeparate1(t *testing.T) {
 		},
 		LcType:   "sweet",
 		BaseType: "int",
+		BaseKind: types.Int,
 		Version:  util.Version,
 		Values:   model.ValuesOf("Mars", "Bounty", "Snickers", "Kitkat"),
 		Case:     transform.Upper,
@@ -328,6 +339,7 @@ func TestConvertSeparate2(t *testing.T) {
 		},
 		LcType:   "sweet",
 		BaseType: "int",
+		BaseKind: types.Int,
 		Version:  util.Version,
 		Values:   expected,
 		Case:     transform.Upper,
@@ -337,7 +349,7 @@ func TestConvertSeparate2(t *testing.T) {
 }
 
 const enumSeparateMultiple = `
-type Sweet int
+type Sweet float64
 const Mars, Bounty, Snickers, Kitkat Sweet = 1, 2, 3, 4
 `
 
@@ -359,7 +371,8 @@ func TestConvertSeparateMultiple(t *testing.T) {
 			Pkg:      "confectionary",
 		},
 		LcType:   "sweet",
-		BaseType: "int",
+		BaseType: "float64",
+		BaseKind: types.Float64,
 		Version:  util.Version,
 		Values:   model.ValuesOf("Mars", "Bounty", "Snickers", "Kitkat"),
 		Case:     transform.Upper,
@@ -370,32 +383,79 @@ func TestConvertSeparateMultiple(t *testing.T) {
 
 //-------------------------------------------------------------------------------------------------
 
-const enumError1 = `
-type IgnoreMe int
-// type Sweet is missing
-const (
-	Mars Sweet = iota
-	Bounty
-	Snickers
-	Kitkat
-)
-const (
-	Jam IgnoreMe = iota
-	Toast
-	Butter
-)
-`
+var enumErrors = map[string]string{
+	// type Sweet is missing
+	`type Sweet uint
+	type Sweet int
+	const (
+		Mars Sweet = iota
+	)
+	`: "filename.go:2:7: found multiple type Sweet declarations",
 
-func TestConvertError1(t *testing.T) {
+	// type Sweet is missing
+	`type IgnoreMe int
+	const (
+		Mars Sweet = iota
+	)
+	const (
+		Jam IgnoreMe = iota
+	)
+	`: "filename.go: failed to find type Sweet",
+
+	// type Sweet is not numeric - simple
+	`type Sweet string
+	const (
+		Mars Sweet = iota
+	)
+	const (
+		Jam IgnoreMe = iota
+	)
+	`: "filename.go:1:12: enumeration type Sweet must be an integer or float type",
+
+	// type Sweet is not numeric - block
+	`type (
+		Sweet string
+	)
+	const (
+		Mars Sweet = iota
+	)
+	`: "filename.go:2:9: enumeration type Sweet must be an integer or float type",
+
+	// type Sweet is a type alias
+	`type Sweet = Alias
+	const (
+		Mars Sweet = iota
+	)
+	`: "filename.go:1:12: type Sweet is a type alias (not supported)",
+
+	// type Sweet is a type alias - block
+	`type (
+		Sweet = Alias
+	)
+	const (
+		Mars Sweet = iota
+	)
+	`: "filename.go:2:9: type Sweet is a type alias (not supported)",
+
+	// type Sweet is a type alias - block
+	`type (
+		Sweet
+	)
+	`: "filename.go:2:8: syntax error in type Sweet declaration",
+}
+
+func TestConvertErrors(t *testing.T) {
 	RegisterTestingT(t)
-	s := bytes.NewBufferString(enumError1)
-	_, err := Convert(s, "filename.go", transform.Stet,
-		model.Config{
-			MainType: "Sweet",
-			Plural:   "Sweets",
-			Pkg:      "confectionary",
-		})
-	Ω(err.Error()).Should(Equal("Failed to find Sweet in filename.go"))
+	for src, msg := range enumErrors {
+		s := bytes.NewBufferString(src)
+		_, err := Convert(s, "filename.go", transform.Stet,
+			model.Config{
+				MainType: "Sweet",
+				Plural:   "Sweets",
+				Pkg:      "confectionary",
+			})
+		Ω(err.Error()).Should(Equal(msg), msg)
+	}
 }
 
 func TestMain(m *testing.M) {

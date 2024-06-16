@@ -110,6 +110,7 @@ type Imports struct {
 type Model struct {
 	Config
 	LcType, BaseType string
+	BaseKind         types.BasicKind
 	Version          string
 	Values           Values
 	Case             transform.Case
@@ -261,26 +262,11 @@ func (m Model) FnMap() template.FuncMap {
 }
 
 func (m Model) IsFloat() bool {
-	return m.BaseKind() == types.Float64
-}
-
-func (m Model) BaseKind() types.BasicKind {
-	var kind types.BasicKind
-	switch m.BaseType {
-	case "int", "uint",
-		"int8", "uint8",
-		"int16", "uint16",
-		"int32", "uint32",
-		"int64", "uint64":
-		kind = types.Int
-	case "float32", "float64":
-		kind = types.Float64
-	}
-	return kind
+	return m.BaseKind == types.Float64
 }
 
 func (m Model) Placeholder() string {
-	switch m.BaseKind() {
+	switch m.BaseKind {
 	case types.Int:
 		return "%d"
 	case types.Float64:

@@ -49,7 +49,7 @@ var All<<.MainType>>Enums = <<.AllItemsSlice>>{
 `
 
 func (m Model) AllItemsSlice() string {
-	switch m.BaseKind() {
+	switch m.BaseKind {
 	case types.Int:
 		return "enum.IntEnums"
 	case types.Float64:

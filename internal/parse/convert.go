@@ -3,6 +3,7 @@ package parse
 import (
 	"fmt"
 	"go/token"
+	"go/types"
 	"io"
 	"regexp"
 	"strings"
@@ -55,20 +56,22 @@ func Convert(in io.Reader, input string, xCase transform.Case, config model.Conf
 
 	s := newFileScanner(input, src)
 
-	var foundMainType = false
+	var numFound = 0
 	var constItems []constItem
 	var baseType string
+	var baseKind types.BasicKind
 
 	for s.Scan() != token.EOF {
 		switch s.Tok {
 		case token.TYPE:
-			baseType, err = parseType(s, MainType)
+			baseType, baseKind, err = parseType(s, MainType, numFound)
 			if err != nil {
-				return m, err
+				return m, fmt.Errorf("%s: %w", s.Position(), err)
 			}
-			if baseType != "" {
-				foundMainType = true
+			if baseKind != types.Invalid {
+				numFound++
 				m.BaseType = baseType
+				m.BaseKind = baseKind
 			}
 
 		case token.CONST:
@@ -83,15 +86,15 @@ func Convert(in io.Reader, input string, xCase transform.Case, config model.Conf
 	debugValues(m.Values)
 
 	if s.gs.ErrorCount > 0 {
-		return model.Model{}, fmt.Errorf("Syntax error in %s\n%s", input, strings.Join(s.errs, "\n"))
+		return model.Model{}, fmt.Errorf("%s: syntax error\n%s", input, strings.Join(s.errs, "\n"))
 	}
 
-	if !foundMainType {
-		return model.Model{}, fmt.Errorf("Failed to find %s in %s", config.MainType, input)
+	if numFound == 0 {
+		return model.Model{}, fmt.Errorf("%s: failed to find type %s", input, config.MainType)
 	}
 
 	if len(m.Values) == 0 {
-		return model.Model{}, fmt.Errorf("Failed to find any values for %s in %s", config.MainType, input)
+		return model.Model{}, fmt.Errorf("%s: failed to find any values for %s", input, config.MainType)
 	}
 
 	if e2 := m.CheckBadPrefixSuffix(); e2 != nil {
