@@ -1,6 +1,6 @@
 # Enumerations for Go
 
-[![GoDoc](https://img.shields.io/badge/api-Godoc-blue.svg)](https://pkg.go.dev/github.com/rickb777/enumeration/enum)
+[![GoDoc](https://img.shields.io/badge/api-Godoc-blue.svg)](https://pkg.go.dev/github.com/rickb777/enumeration/v3/enum)
 [![Issues](https://img.shields.io/github/issues/rickb777/enumeration.svg)](https://github.com/rickb777/enumeration/issues)
 
 * Make simple Go enumerations work well for you using this easy-to-use code generator.
@@ -22,7 +22,9 @@ It will not handle C-style comments though, so these must not be present. The no
 
 ```
 go get github.com/rickb777/enumeration/v3
+go install github.com/rickb777/enumeration/v3
 ```
+
 You should see that the `enumeration` binary is now in the bin folder on your GOPATH. Make sure this is
 on your PATH so it can be run.
 
@@ -124,19 +126,34 @@ const (
 If you want more control of the strings used for JSON and for SQL marshaling, structured comments can be used. In this example, the `String()` method, the JSON string and the SQL value will all be different values.
 
 ```Go
-//go:generate enumeration -lc -type SalesChannel
+//go:generate enumeration -ic -type SalesChannel
 
 type SalesChannel int
 
 const (
-    _              SalesChannel = iota
+    _          SalesChannel = iota
     Online                  // json:"webshop" sql:"o" -- String() is "online"
     Instore                 // json:"store"   sql:"s" -- String() is "instore"
     Telephone               // json:"phone"   sql:"t" -- String() is "telephone"
 )
 ```
 
-Structured comments are deliberately similar to Go `struct` tags. The supported tags are `text` (for MarshalText/UnmarshalText), `json` (for MarshalJSON/UnmarshalJSON) and `sql` (for Value/Scan); these can be used in any combination; also `all` sets a value for all of them. When present, these tags override the `-marshaltext`, `-marshaljson` and/or `-store` options described below. They also override the `-uc`, `-ic` and `-lc` case modifiers on the corresponding marshal methods.
+Structured comments are deliberately similar to Go `struct` tags. The supported tags are `text` (for MarshalText/UnmarshalText), `json` (for MarshalJSON/UnmarshalJSON) and `sql` (for Value/Scan); these can be used in any combination; also `all` sets a value for all of them.
+
+```Go
+//go:generate enumeration -ic -type SalesChannel
+
+type SalesChannel int
+
+const (
+    _          SalesChannel = iota
+    Online                  // all:"webshop"
+    Instore                 // all:"store"
+    Telephone               // all:"phone"
+)
+```
+
+When present, these tags override the `-marshaltext`, `-marshaljson` and/or `-store` options described below. They also override the `-uc`, `-ic` and `-lc` case modifiers on the corresponding marshal methods.
 
 ## Next, Run The Tool
 
@@ -242,7 +259,9 @@ the `Day` type above. You will get these simple methods and fields:
  * `var AllDayEnums = enum.IntEnums{ ... }`
     - Provides all the `Day` values in a single slice, held using an interface for polymorphism. The slice type would instead be `enum.FloatEnums` if the base type is `float32` or `float64`.
 
-You will also get these methods unless you specify 'simple mode' (-s):
+### Parsing and serializing methods
+
+Unless you specify 'simple mode' (-s), you will also get these methods:
 
  * `func DayOf(o int) Day`
     - Converts an ordinal to a Day value, if it can. The name of this function depends on the name of your type (`DayOf` in this example). The related type conversion `Day(i)` should be used when converting a *value* instead of an *ordinal*.
