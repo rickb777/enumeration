@@ -13,5 +13,5 @@ function v
   "$@"
 }
 
-v rm -f *_enum.go
-v go generate .
+v rm -f *_enum.go simple/*_enum.go
+v go generate . ./simple

@@ -250,6 +250,7 @@ func buildParseHelperMethod(units *codegen.Units, method, table string) {
 var vparseFallbackUnit = codegen.Unit{
 	Declares: "v.parseFallback",
 	Requires: []string{"v.parseString"},
+	Imports:  collection.NewStringSet("errors"),
 	Template: `
 func (v *<<.MainType>>) parseFallback(in, s string) error {
 	<<- if .Asymmetric>>
@@ -327,8 +328,10 @@ func As<<.MainType>>(s string) (<<.MainType>>, error) {
 `,
 }
 
-func buildAsMethod(units *codegen.Units) {
-	units.Add(asFunctionUnit)
+func buildAsMethod(units *codegen.Units, m Model) {
+	if !m.Simple {
+		units.Add(asFunctionUnit)
+	}
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -351,9 +354,11 @@ func MustParse<<.MainType>>(s string) <<.MainType>> {
 `,
 }
 
-func buildMustParseMethod(units *codegen.Units) {
-	units.Add(mustParseFunctionUnit)
-	units.Add(asFunctionUnit)
+func buildMustParseMethod(units *codegen.Units, m Model) {
+	if !m.Simple {
+		units.Add(mustParseFunctionUnit)
+		units.Add(asFunctionUnit)
+	}
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -694,7 +699,7 @@ func (v *<<.MainType>>) UnmarshalText(bs []byte) error {
 }
 
 func buildUnmarshalText(units *codegen.Units, m Model) {
-	if m.MarshalTextRep > 0 || m.HasTextTags() {
+	if !m.Simple && (m.MarshalTextRep > 0 || m.HasTextTags()) {
 		units.Add(vUnmarshalTextUnit)
 		if m.HasTextTags() {
 			buildParseHelperMethod(units, "unmarshalText", "Text")
@@ -717,10 +722,6 @@ var <<.LcType>>TransformInput = func(in string) string {
 }
 `,
 }
-
-//func buildTransformInputFunction(codegen *codegen.Units) {
-//	codegen.Add(lctypeTransformInputUnit)
-//}
 
 //-------------------------------------------------------------------------------------------------
 
@@ -788,7 +789,7 @@ var vunmarshalJSON_plain_Unit = codegen.Unit{
 }
 
 func buildUnmarshalJSON(units *codegen.Units, m Model) {
-	if m.MarshalJSONRep > 0 || m.HasJSONTags() {
+	if !m.Simple && (m.MarshalJSONRep > 0 || m.HasJSONTags()) {
 		units.Add(vunmarshalJSON_plain_Unit)
 		units.Add(vparseNumberUnit)
 		units.Add(vparseStringUnit)
@@ -869,7 +870,7 @@ var vScanUnit = codegen.Unit{
 }
 
 func buildScanMethod(units *codegen.Units, m Model) {
-	if m.StoreRep > 0 || m.HasSQLTags() {
+	if !m.Simple && (m.StoreRep > 0 || m.HasSQLTags()) {
 		units.Add(vScanUnit)
 		if m.HasSQLTags() {
 			buildParseHelperMethod(units, "scanParse", "SQL")

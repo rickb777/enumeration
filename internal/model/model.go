@@ -22,6 +22,7 @@ type Config struct {
 	MarshalTextRep enum.Representation
 	MarshalJSONRep enum.Representation
 	StoreRep       enum.Representation
+	Simple         bool
 	IgnoreCase     bool
 	Unsnake        bool
 	Lenient        bool
@@ -280,7 +281,7 @@ func (m Model) ValuesJoined(from int, separator string) string {
 }
 
 func (m Model) SelectImports() Model {
-	if strings.Contains(m.expression(""), "strings.") {
+	if !m.Simple && strings.Contains(m.expression(""), "strings.") {
 		m.Imports.Add("strings")
 	}
 	return m

@@ -1,6 +1,5 @@
 package test
 
-//=================================================================================================
 //go:generate enumeration -v -f -i season_json.go -type Season_Nc_Ji -suffix _Nc_Ji -marshaljson identifier
 //go:generate enumeration -v -f -i season_json.go -type Season_Nc_Jn -suffix _Nc_Jn -marshaljson number
 //go:generate enumeration -v -f -i season_json.go -type Season_Nc_Jj -suffix _Nc_Jj

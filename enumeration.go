@@ -38,6 +38,7 @@ func defineFlags() {
 	flag.BoolVar(&uppercase, "uc", false, "Convert strings to uppercase and ignore case when parsing.")
 	flag.BoolVar(&config.IgnoreCase, "ic", false, "Ignore case when parsing but keep the mixed case when outputting.")
 	flag.BoolVar(&config.Unsnake, "unsnake", false, "Convert underscores in identifiers to spaces.")
+	flag.BoolVar(&config.Simple, "s", false, "Generate simple enumerations without serialising or parsing functions")
 	flag.BoolVar(&util.Verbose, "v", false, "Verbose progress messages.")
 	flag.BoolVar(&util.Dbg, "z", false, "Debug messages.")
 	flag.BoolVar(&showVersion, "version", false, "Print version number.")
@@ -149,6 +150,11 @@ func doMain() {
 
 	if outputJSON == "" {
 		outputJSON = strings.ToLower(config.MainType) + "_enum.json"
+	}
+
+	if config.Simple {
+		config.IgnoreCase = false
+		config.Lenient = false
 	}
 
 	util.Debug("type=%s\n", config.MainType)

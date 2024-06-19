@@ -23,7 +23,7 @@ var fset *token.FileSet
 
 var tagRE = regexp.MustCompile(`[a-z]:"`)
 
-var basicImports = []string{"errors", "fmt", "strconv", "github.com/rickb777/enumeration/v3/enum"}
+var basicImports = []string{"fmt", "github.com/rickb777/enumeration/v3/enum"}
 
 // https://go.dev/doc/go1.17_spec#Type_declarations (without type parameters)
 // TypeDecl = "type" ( TypeSpec | "(" { TypeSpec ";" } ")" ) .

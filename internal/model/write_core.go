@@ -249,10 +249,12 @@ func (m Model) BuildUnits() *codegen.Units {
 	buildOrdinalMethod(units)
 	buildIsValidMethod(units)
 	buildNumberMethod(units, m)
-	buildOfMethod(units)
-	buildParseHelperMethod(units, "Parse", "Enum")
-	buildAsMethod(units)
-	buildMustParseMethod(units)
+	if !m.Simple {
+		buildOfMethod(units)
+		buildParseHelperMethod(units, "Parse", "Enum")
+	}
+	buildAsMethod(units, m)
+	buildMustParseMethod(units, m)
 	buildMarshalText(units, m)
 	buildMarshalJSON(units, m)
 	buildUnmarshalText(units, m)
@@ -277,10 +279,12 @@ func WriteGo(units *codegen.Units, m Model, w DualWriter) {
 	writeUnit(w, units, done, m, "v.String", "root")
 	writeUnit(w, units, done, m, "v.IsValid", "root")
 	writeUnit(w, units, done, m, "v.Number", "root")
-	writeUnit(w, units, done, m, "OfFunction", "root")
-	writeUnit(w, units, done, m, "v.Parse", "root")
-	writeUnit(w, units, done, m, "AsFunction", "root")
-	writeUnit(w, units, done, m, "MustParseFunction", "root")
+	if !m.Simple {
+		writeUnit(w, units, done, m, "OfFunction", "root")
+		writeUnit(w, units, done, m, "v.Parse", "root")
+		writeUnit(w, units, done, m, "AsFunction", "root")
+		writeUnit(w, units, done, m, "MustParseFunction", "root")
+	}
 
 	for _, u := range units.Slice() {
 		writeUnit(w, units, done, m, u.Declares, "root")

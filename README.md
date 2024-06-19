@@ -169,6 +169,9 @@ Options are:
  * `-package <name>`
     - the name of the Go package. If omitted, the directory of the output file will be used if specified, or the current directory name otherwise.
 
+ * `-s`
+    - generate a simple enumeration without parsing methods.
+
  * `-lc`
     - convert to lower case the string representations of the enumeration values.
 
@@ -216,19 +219,16 @@ when this matches your needs. This example would try to read from `base.go` and 
 ## Generated Go
 
 The generated code complements your `type` and `const` definitions as follows. Let's assume that you wrote
-the `Day` type above. You will get:
+the `Day` type above. You will get these simple methods and fields:
 
  * `func (d Day) String() string`
-    - Converts Day values to strings and satisfies the well-known `Stringer` interface. The strings are the human-readable names, as written in the list of constants.
+    - Converts Day values to strings and satisfies the well-known `Stringer` interface. The strings are the human-readable names as written in the list of constants.
 
  * `func (d Day) Ordinal() int`
     - Converts Day values into their ordinal numbers, i.e. the indexes indicating the order in which you declared the constants, starting from zero. These may happen to be the same as the values you chose, but need not be. For invalid Day values, `Ordinal()` returns -1.
 
- * `func DayOf(o int) Day`
-    - Converts an ordinal to a Day value, if it can. The name of this function depends on the name of your type (`DayOf` in this example). The related type conversion `Day(i)` should be used when converting a *value* instead of an *ordinal*.
-
  * `func (d Day) IsValid() bool`
-    - Tests whether a given value is one of the defined `Day` constants. Type conversion allows possibly out-of range values to be created; these can be tested with this method. `IsValid()` is related to `Ordinal()` because all valid values have an ordinal >= 0. 
+    - Tests whether a given value is one of the defined `Day` constants. Type conversion allows possibly out-of range values to be created; these can be tested with this method. `IsValid()` is related to `Ordinal()` because all valid values have an ordinal >= 0.
 
  * `func (d Day) Int() int`
     - Converts Day values into their int values, i.e. just the value of the constant int. This is merely a type conversion to `int`, but conveniently matches the `enum.IntEnum` interface, allowing polymorphism. This method is only present when the base type is any integer type.
@@ -236,17 +236,22 @@ the `Day` type above. You will get:
  * `func (d Day) Float() float64`
     - Converts Day values into their float values, i.e. just the value of the constant float. This is merely a type conversion to `float64`, but conveniently matches the `enum.FloatEnum` interface, allowing polymorphism. This method is only present when the base type is `float32` or `float64`.
 
- * `func (d *Day) Parse(s string) error`
-    - Converts a string representation to a Day value, if it can, then assigns it to `d`. If `s` holds an integer, it is treated as a number (or possibly as an ordinal) and will result in the corresponding value. Numbers must be within the valid Day range unless `-lenient` was specified. Ordinals are not normally used but will be expected when the `-marshaltext ordinal` or `-store ordinal` options are specified.
-
- * `func AsDay(s string) (Day, error)`, `func MustParseDay(s string) Day`
-    - Converts a string representation to a Day value, if it can. The function name depends on the name of your type (`AsDay` and `MustParseDay` in this example). These functions are a convenient wrapper for the `Parse` method.
-
  * `var AllDays = []Day{ ... }`
     - Provides all the `Day` values in a single slice. This is particularly useful if you need to iterate over them. Usually, the identifier name depends on the name of your type, but it can be overridden using `-plural`.
 
  * `var AllDayEnums = enum.IntEnums{ ... }`
     - Provides all the `Day` values in a single slice, held using an interface for polymorphism. The slice type would instead be `enum.FloatEnums` if the base type is `float32` or `float64`.
+
+You will also get these methods unless you specify 'simple mode' (-s):
+
+ * `func DayOf(o int) Day`
+    - Converts an ordinal to a Day value, if it can. The name of this function depends on the name of your type (`DayOf` in this example). The related type conversion `Day(i)` should be used when converting a *value* instead of an *ordinal*.
+
+ * `func (d *Day) Parse(s string) error`
+    - Converts a string representation to a Day value, if it can, then assigns it to `d`. If `s` holds an integer, it is treated as a number (or possibly as an ordinal) and will result in the corresponding value. Numbers must be within the valid Day range unless `-lenient` was specified. Ordinals are not normally used but will be expected when the `-marshaltext ordinal` or `-store ordinal` options are specified.
+
+ * `func AsDay(s string) (Day, error)`, `func MustParseDay(s string) Day`
+    - Converts a string representation to a Day value, if it can. The function name depends on the name of your type (`AsDay` and `MustParseDay` in this example). These functions are a convenient wrapper for the `Parse` method.
 
 If you used the `-marshaltext` option or `text` struct tags, you will also get:
 
