@@ -1,4 +1,6 @@
-// package enum provides an API for manipulating enumerations.
+// Package enum provides an API for manipulating enumerations.
+// This is support code for the auto-generated enumerations:
+// see https://github.com/rickb777/enumeration for further instructions.
 package enum
 
 // Enum is a generic contract for all generated enums.
