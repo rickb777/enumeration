@@ -9,7 +9,7 @@ type Unit struct {
 	Declares string
 	Requires []string
 	Extra    map[string]any
-	Imports  collection.StringSet
+	Imports  collection.Set[string]
 	Template string
 }
 
@@ -36,6 +36,7 @@ func (units *Units) Take(identifier string) (u Unit, found bool) {
 		return id == identifier
 	})
 	u, found = units.m[identifier]
+	//delete(units.m, identifier)
 	return u, found
 }
 

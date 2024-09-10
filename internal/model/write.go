@@ -134,7 +134,7 @@ func buildNumberMethod(units *codegen.Units, m Model) {
 
 var mainTypeOfUnit = codegen.Unit{
 	Declares: "OfFunction",
-	Imports:  collection.NewStringSet("slices"),
+	Imports:  collection.NewSet[string]("slices"),
 	Template: `
 var invalid<<.MainType>>Value = func() <<.MainType>> {
 	var v <<.MainType>>
@@ -250,7 +250,7 @@ func buildParseHelperMethod(units *codegen.Units, method, table string) {
 var vparseFallbackUnit = codegen.Unit{
 	Declares: "v.parseFallback",
 	Requires: []string{"v.parseString"},
-	Imports:  collection.NewStringSet("errors"),
+	Imports:  collection.NewSet[string]("errors"),
 	Template: `
 func (v *<<.MainType>>) parseFallback(in, s string) error {
 	<<- if .Asymmetric>>
@@ -285,7 +285,7 @@ func buildParseFallback(units *codegen.Units) {
 
 var vparseNumberUnit = codegen.Unit{
 	Declares: "v.parseNumber",
-	Imports:  collection.NewStringSet("strconv"),
+	Imports:  collection.NewSet[string]("strconv"),
 	Template: `
 // parseNumber attempts to convert a decimal value.
 // << if .Lenient >>Any number is allowed, even if the result is invalid.<< else ->>
@@ -485,7 +485,7 @@ const enumImportPath = "github.com/rickb777/enumeration/v3/enum"
 var vMarshalJSON_struct_tags_Unit = codegen.Unit{
 	Declares: "v.MarshalJSON",
 	Requires: []string{"v.Ordinal", "v.marshalNumberOrError", "v.toString"},
-	Imports:  collection.NewStringSet(enumImportPath),
+	Imports:  collection.NewSet[string](enumImportPath),
 	Template: `
 // MarshalJSON converts values to bytes suitable for transmission via JSON.
 // The representation is chosen according to 'json' struct tags.
@@ -522,7 +522,7 @@ func (v <<.MainType>>) JSON() string {
 var vMarshalJSON_identifier_Unit = codegen.Unit{
 	Declares: "v.MarshalJSON",
 	Requires: []string{"v.Ordinal", "v.marshalNumberOrError", "v.toString"},
-	Imports:  collection.NewStringSet(enumImportPath),
+	Imports:  collection.NewSet[string](enumImportPath),
 	Template: `
 // MarshalJSON converts values to bytes suitable for transmission via JSON.
 // The identifier representation is chosen according to -marshaljson.
@@ -581,7 +581,7 @@ func buildMarshalJSON(units *codegen.Units, m Model) {
 
 var lctypeMarshalNumberUnit = codegen.Unit{
 	Declares: "lctypeMarshalNumber",
-	Imports:  collection.NewStringSet("strconv"),
+	Imports:  collection.NewSet[string]("strconv"),
 	Template: `
 // <<.LcType>>MarshalNumber handles marshaling where a number is required or where
 // the value is out of range.
@@ -785,7 +785,7 @@ var vunmarshalJSON_plain_Unit = codegen.Unit{
 	Declares: "v.UnmarshalJSON",
 	Requires: []string{"v.parseNumber", "v.parseString", "lctypeTransformInput"},
 	Template: unmarshalJSON_plain,
-	Imports:  collection.NewStringSet("strings", "errors"),
+	Imports:  collection.NewSet[string]("strings", "errors"),
 }
 
 func buildUnmarshalJSON(units *codegen.Units, m Model) {
@@ -806,7 +806,7 @@ const awsDynamoDBImportPath = "github.com/aws/aws-sdk-go-v2/service/dynamodb/typ
 var vMarshalDynamoDBAttributeValueUnit = codegen.Unit{
 	Declares: "v.JSON",
 	Requires: []string{"v.toString"},
-	Imports:  collection.NewStringSet(awsDynamoDBImportPath),
+	Imports:  collection.NewSet[string](awsDynamoDBImportPath),
 	Template: `
 // MarshalDynamoDBAttributeValue handles writing dates as DynamoDB attributes.
 func (v <<.MainType>>) MarshalDynamoDBAttributeValue() (types.AttributeValue, error) {
@@ -819,7 +819,7 @@ func (v <<.MainType>>) MarshalDynamoDBAttributeValue() (types.AttributeValue, er
 var vUnmarshalDynamoDBAttributeValueUnit = codegen.Unit{
 	Declares: "v.JSON",
 	Requires: []string{"v.Parse"},
-	Imports:  collection.NewStringSet(awsDynamoDBImportPath),
+	Imports:  collection.NewSet[string](awsDynamoDBImportPath),
 	Template: `
 // UnmarshalDynamoDBAttributeValue handles reading dates from DynamoDB attributes.
 func (v <<.MainType>>) UnmarshalDynamoDBAttributeValue(av types.AttributeValue) (err error) {
@@ -899,7 +899,7 @@ var vValue_identifier_Unit = codegen.Unit{
 	Declares: "v.Value",
 	Requires: []string{"v.IsValid", "v.String"},
 	Template: value_identifier,
-	Imports:  collection.NewStringSet("database/sql/driver"),
+	Imports:  collection.NewSet[string]("database/sql/driver"),
 }
 
 const value_number = `
@@ -918,7 +918,7 @@ var vValue_number_Unit = codegen.Unit{
 	Declares: "v.Value",
 	Requires: []string{"v.IsValid", "v.String"},
 	Template: value_number,
-	Imports:  collection.NewStringSet("database/sql/driver"),
+	Imports:  collection.NewSet[string]("database/sql/driver"),
 }
 
 const value_struct_tags = `
@@ -939,7 +939,7 @@ var vValue_struct_tags_Unit = codegen.Unit{
 	Declares: "v.Value",
 	Requires: []string{"v.Ordinal", "v.toString"},
 	Template: value_struct_tags,
-	Imports:  collection.NewStringSet("database/sql/driver"),
+	Imports:  collection.NewSet[string]("database/sql/driver"),
 }
 
 func buildValueMethod(units *codegen.Units, m Model) {
@@ -958,7 +958,7 @@ func buildValueMethod(units *codegen.Units, m Model) {
 
 //-------------------------------------------------------------------------------------------------
 
-func writeUnit(w DualWriter, units *codegen.Units, done collection.StringSet, m Model, identifier, parent string) {
+func writeUnit(w DualWriter, units *codegen.Units, done collection.Set[string], m Model, identifier, parent string) {
 	if !done.Contains(identifier) {
 		unit, ok := units.Take(identifier)
 		if !ok {

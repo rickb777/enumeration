@@ -14,7 +14,7 @@ type DualWriter interface {
 	io.StringWriter
 }
 
-var done = collection.NewStringSet()
+var done = collection.NewSet[string]()
 
 //-------------------------------------------------------------------------------------------------
 
@@ -269,7 +269,7 @@ func WriteGo(units *codegen.Units, m Model, w DualWriter) {
 		m.Imports = m.Imports.Union(u.Imports)
 	}
 
-	done := collection.NewStringSet()
+	done := collection.NewSet[string]()
 
 	m.writeHead(w)
 	m.writeAllItems(w)

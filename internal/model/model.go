@@ -116,7 +116,7 @@ type Model struct {
 	Values           Values
 	Case             transform.Case
 	AliasTable       string
-	Imports          collection.StringSet
+	Imports          collection.Set[string]
 	Extra            map[string]interface{}
 }
 

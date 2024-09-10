@@ -71,3 +71,42 @@ func TestFloatEnums_Floats(t *testing.T) {
 
 	Ω(es).Should(Equal([]float64{float64(example.A), float64(example.C), float64(example.G), float64(example.T)}))
 }
+
+func TestQuotedString(t *testing.T) {
+	RegisterTestingT(t)
+
+	qs1 := enum.QuotedString("")
+	Ω(qs1).Should(Equal([]byte{'"', '"'}))
+
+	qs2 := enum.QuotedString("XYZ")
+	Ω(qs2).Should(Equal([]byte{'"', 'X', 'Y', 'Z', '"'}))
+}
+
+func TestRepresentation(t *testing.T) {
+	RegisterTestingT(t)
+
+	r1 := enum.MustParseRepresentation("number")
+	Ω(r1).Should(Equal(enum.Number))
+
+	r2 := enum.MustParseRepresentation("2")
+	Ω(r2).Should(Equal(enum.Number))
+
+	_, err := enum.AsRepresentation("foobar")
+	Ω(err).Should(HaveOccurred())
+
+	num := enum.Number.String()
+	Ω(num).Should(Equal("Number"))
+
+	o1 := enum.RepresentationOf(1)
+	Ω(o1).Should(Equal(enum.Identifier))
+	Ω(o1.Int()).Should(Equal(1))
+	Ω(o1.IsValid()).Should(BeTrue())
+
+	o3 := enum.RepresentationOf(3)
+	Ω(o1.Int()).Should(Equal(1))
+	Ω(o3.IsValid()).Should(BeFalse())
+
+	Ω(enum.None.IsValid()).Should(BeTrue())
+	Ω(enum.Representation(4).IsValid()).Should(BeFalse())
+	Ω(enum.Representation(4).String()).Should(Equal("Representation(4)"))
+}

@@ -1,5 +1,6 @@
 #!/bin/bash -e
-cd "$(dirname $0)"
+cd "$(dirname $0)"/..
+PATH=$PWD/bin:$PATH
 
 function v
 {
@@ -9,5 +10,6 @@ function v
 
 type enumeration
 
-v rm -f *_enum.go
-v go generate .
+v rm -f example/*_enum.go
+v go generate ./example
+v go test ./example
