@@ -3,29 +3,11 @@ package util
 import (
 	"fmt"
 	"os"
-	"runtime/debug"
 	"strings"
 )
 
 var Verbose, Dbg bool
 var Stdout = os.Stdout
-
-func Version() string {
-	version, dirty := "unknown", ""
-
-	bi, _ := debug.ReadBuildInfo()
-	for _, s := range bi.Settings {
-		switch s.Key {
-		case "vcs.revision":
-			version = s.Value
-		case "vcs.modified":
-			if strings.EqualFold(s.Value, "true") {
-				dirty = "-dirty"
-			}
-		}
-	}
-	return version + dirty
-}
 
 func Must(err error, args ...interface{}) {
 	if err != nil {

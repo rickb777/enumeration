@@ -25,6 +25,8 @@ const (
 )
 `
 
+var version = "foo"
+
 func TestConvertBlock1(t *testing.T) {
 	RegisterTestingT(t)
 	util.Dbg = testing.Verbose()
@@ -47,7 +49,6 @@ func TestConvertBlock1(t *testing.T) {
 		LcType:   "sweet",
 		BaseType: "int",
 		BaseKind: types.Int,
-		Version:  util.Version(),
 		Values:   model.ValuesOf("Mars", "Bounty", "Snickers", "Kitkat"),
 		Case:     transform.Upper,
 		Extra:    make(map[string]interface{}),
@@ -96,7 +97,6 @@ func TestConvertBlock2(t *testing.T) {
 		LcType:   "sweet",
 		BaseType: "int",
 		BaseKind: types.Int,
-		Version:  util.Version(),
 		Values:   model.ValuesOf("Mars", "Bounty", "Snickers", "Kitkat"),
 		Extra:    make(map[string]interface{}),
 		Imports:  collection.NewSet[string](basicImports...),
@@ -135,7 +135,6 @@ func TestConvertBlock3(t *testing.T) {
 		LcType:   "sweet",
 		BaseType: "int",
 		BaseKind: types.Int,
-		Version:  util.Version(),
 		Values:   model.ValuesOf("Mars", "Bounty", "Snickers", "Kitkat"),
 		Case:     transform.Upper,
 		Extra:    make(map[string]interface{}),
@@ -213,7 +212,6 @@ func TestConvertBlock4(t *testing.T) {
 		LcType:     "sweet",
 		BaseType:   "int",
 		BaseKind:   types.Int,
-		Version:    util.Version(),
 		Values:     values,
 		AliasTable: "sweetAliases",
 		Extra:      make(map[string]interface{}),
@@ -254,7 +252,6 @@ func TestConvertBlockMultiple(t *testing.T) {
 		LcType:   "sweet",
 		BaseType: "int",
 		BaseKind: types.Int,
-		Version:  util.Version(),
 		Values:   model.ValuesOf("Mars", "Bounty", "Snickers", "Kitkat"),
 		Case:     transform.Upper,
 		Extra:    make(map[string]interface{}),
@@ -294,7 +291,6 @@ func TestConvertSeparate1(t *testing.T) {
 		LcType:   "sweet",
 		BaseType: "int",
 		BaseKind: types.Int,
-		Version:  util.Version(),
 		Values:   model.ValuesOf("Mars", "Bounty", "Snickers", "Kitkat"),
 		Case:     transform.Upper,
 		Extra:    make(map[string]interface{}),
@@ -340,7 +336,6 @@ func TestConvertSeparate2(t *testing.T) {
 		LcType:   "sweet",
 		BaseType: "int",
 		BaseKind: types.Int,
-		Version:  util.Version(),
 		Values:   expected,
 		Case:     transform.Upper,
 		Extra:    make(map[string]interface{}),
@@ -373,7 +368,6 @@ func TestConvertSeparateMultiple(t *testing.T) {
 		LcType:   "sweet",
 		BaseType: "float64",
 		BaseKind: types.Float64,
-		Version:  util.Version(),
 		Values:   model.ValuesOf("Mars", "Bounty", "Snickers", "Kitkat"),
 		Case:     transform.Upper,
 		Extra:    make(map[string]interface{}),
@@ -453,6 +447,7 @@ func TestConvertErrors(t *testing.T) {
 				MainType: "Sweet",
 				Plural:   "Sweets",
 				Pkg:      "confectionary",
+				Version:  version,
 			})
 		Ω(err.Error()).Should(Equal(msg), msg)
 	}

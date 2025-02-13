@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v4 unknown
+// github.com/rickb777/enumeration/v4 v4.0.0-dirty
 
 package example
 

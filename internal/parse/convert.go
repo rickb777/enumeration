@@ -47,7 +47,6 @@ func Convert(in io.Reader, input string, xCase transform.Case, config model.Conf
 		Config:     config,
 		LcType:     strings.ToLower(config.MainType),
 		BaseType:   "int",
-		Version:    util.Version(),
 		Case:       xCase,
 		AliasTable: AliasTable,
 		Extra:      make(map[string]interface{}),

@@ -5,6 +5,14 @@ unset GOPATH
 mkdir -p bin
 export PATH=$PWD/bin:$PATH
 
+DATE=$(date '+%F')
+
+if [ -d .git ]; then
+  VERSION=$(git describe --tags --always --dirty 2>/dev/null)
+else
+  VERSION=dev
+fi
+
 function v
 {
   echo "$@"
@@ -13,7 +21,7 @@ function v
 
 v go mod download
 #v go test .
-v go build -o bin/enumeration .
+v go build -o bin/enumeration -ldflags "-s -X main.version=$VERSION -X main.date=$DATE" .
 #type enumeration
 
 v go clean -testcache

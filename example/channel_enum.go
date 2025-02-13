@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v4 unknown
+// github.com/rickb777/enumeration/v4 v4.0.0-dirty
 
 package example
 
@@ -24,7 +24,7 @@ var AllSalesChannelEnums = enum.IntEnums{
 }
 
 const (
-	saleschannelEnumStrings = "OnlineInstoreTelephone"
+	saleschannelEnumStrings = "onlineinstoretelephone"
 	saleschannelJSONStrings = "webshopstorephone"
 	saleschannelSQLStrings  = "ost"
 )
@@ -149,7 +149,7 @@ func (v *SalesChannel) parseString(s string, concats string, indexes []uint16) (
 // This function is pluggable and is initialised using command-line flags
 // -ic -lc -uc -unsnake.
 var saleschannelTransformInput = func(in string) string {
-	return in
+	return strings.ToLower(in)
 }
 
 // AsSalesChannel parses a string to find the corresponding SalesChannel, accepting either one of the string values or

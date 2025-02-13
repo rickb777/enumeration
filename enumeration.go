@@ -126,8 +126,10 @@ func main() {
 }
 
 func doMain() {
+	config.Version = version
+
 	if showVersion {
-		fmt.Fprintln(os.Stderr, util.Version())
+		fmt.Fprintln(os.Stderr, version, "built", date)
 		os.Exit(1)
 	}
 
@@ -168,3 +170,9 @@ func doMain() {
 		generate()
 	}
 }
+
+// build metadata
+var (
+	version = "dev"
+	date    = ""
+)

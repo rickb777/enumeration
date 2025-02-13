@@ -27,6 +27,7 @@ type Config struct {
 	IgnoreCase     bool
 	Unsnake        bool
 	Lenient        bool
+	Version        string
 }
 
 type Value struct {
@@ -113,7 +114,6 @@ type Model struct {
 	Config
 	LcType, BaseType string
 	BaseKind         types.BasicKind
-	Version          string
 	Values           Values
 	Case             transform.Case
 	AliasTable       string
