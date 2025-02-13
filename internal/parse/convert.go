@@ -8,10 +8,10 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/rickb777/enumeration/v3/internal/collection"
-	"github.com/rickb777/enumeration/v3/internal/model"
-	"github.com/rickb777/enumeration/v3/internal/transform"
-	"github.com/rickb777/enumeration/v3/internal/util"
+	"github.com/rickb777/enumeration/v4/internal/collection"
+	"github.com/rickb777/enumeration/v4/internal/model"
+	"github.com/rickb777/enumeration/v4/internal/transform"
+	"github.com/rickb777/enumeration/v4/internal/util"
 )
 
 var (
@@ -23,7 +23,7 @@ var fset *token.FileSet
 
 var tagRE = regexp.MustCompile(`[a-z]:"`)
 
-var basicImports = []string{"fmt", "github.com/rickb777/enumeration/v3/enum"}
+var basicImports = []string{"fmt", "github.com/rickb777/enumeration/v4/enum"}
 
 // https://go.dev/doc/go1.17_spec#Type_declarations (without type parameters)
 // TypeDecl = "type" ( TypeSpec | "(" { TypeSpec ";" } ")" ) .
@@ -47,7 +47,7 @@ func Convert(in io.Reader, input string, xCase transform.Case, config model.Conf
 		Config:     config,
 		LcType:     strings.ToLower(config.MainType),
 		BaseType:   "int",
-		Version:    util.Version,
+		Version:    util.Version(),
 		Case:       xCase,
 		AliasTable: AliasTable,
 		Extra:      make(map[string]interface{}),

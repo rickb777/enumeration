@@ -7,9 +7,9 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/rickb777/enumeration/v3/enum"
-	"github.com/rickb777/enumeration/v3/internal/collection"
-	"github.com/rickb777/enumeration/v3/internal/transform"
+	"github.com/rickb777/enumeration/v4/enum"
+	"github.com/rickb777/enumeration/v4/internal/collection"
+	"github.com/rickb777/enumeration/v4/internal/transform"
 )
 
 var Prefix, Suffix string
@@ -23,6 +23,7 @@ type Config struct {
 	MarshalJSONRep enum.Representation
 	StoreRep       enum.Representation
 	Simple         bool
+	Polymorphic    bool
 	IgnoreCase     bool
 	Unsnake        bool
 	Lenient        bool

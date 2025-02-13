@@ -1,4 +1,4 @@
-module github.com/rickb777/enumeration/v3
+module github.com/rickb777/enumeration/v4
 
 require (
 	github.com/benmoss/matchers v0.0.0-20181101202349-c279145bd967
@@ -19,6 +19,4 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-go 1.22.0
-
-toolchain go1.23.4
+go 1.24.0

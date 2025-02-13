@@ -8,11 +8,11 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/rickb777/enumeration/v3/enum"
-	"github.com/rickb777/enumeration/v3/internal/model"
-	"github.com/rickb777/enumeration/v3/internal/parse"
-	"github.com/rickb777/enumeration/v3/internal/transform"
-	"github.com/rickb777/enumeration/v3/internal/util"
+	"github.com/rickb777/enumeration/v4/enum"
+	"github.com/rickb777/enumeration/v4/internal/model"
+	"github.com/rickb777/enumeration/v4/internal/parse"
+	"github.com/rickb777/enumeration/v4/internal/transform"
+	"github.com/rickb777/enumeration/v4/internal/util"
 )
 
 var config model.Config
@@ -39,6 +39,7 @@ func defineFlags() {
 	flag.BoolVar(&config.IgnoreCase, "ic", false, "Ignore case when parsing but keep the mixed case when outputting.")
 	flag.BoolVar(&config.Unsnake, "unsnake", false, "Convert underscores in identifiers to spaces.")
 	flag.BoolVar(&config.Simple, "s", false, "Generate simple enumerations without serialising or parsing functions")
+	flag.BoolVar(&config.Polymorphic, "poly", false, "Generate polymorphic representation code")
 	flag.BoolVar(&util.Verbose, "v", false, "Verbose progress messages.")
 	flag.BoolVar(&util.Dbg, "z", false, "Debug messages.")
 	flag.BoolVar(&showVersion, "version", false, "Print version number.")
@@ -126,7 +127,7 @@ func main() {
 
 func doMain() {
 	if showVersion {
-		fmt.Fprintln(os.Stderr, util.Version)
+		fmt.Fprintln(os.Stderr, util.Version())
 		os.Exit(1)
 	}
 

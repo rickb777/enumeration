@@ -1,7 +1,7 @@
 # Enumerations for Go
 
-[![GoDoc](https://img.shields.io/badge/api-Godoc-blue.svg)](https://pkg.go.dev/github.com/rickb777/enumeration/v3/enum)
-[![Go Report Card](https://goreportcard.com/badge/github.com/rickb777/enumeration)](https://goreportcard.com/report/github.com/rickb777/enumeration/v3)
+[![GoDoc](https://img.shields.io/badge/api-Godoc-blue.svg)](https://pkg.go.dev/github.com/rickb777/enumeration/v4/enum)
+[![Go Report Card](https://goreportcard.com/badge/github.com/rickb777/enumeration)](https://goreportcard.com/report/github.com/rickb777/enumeration/v4)
 [![Issues](https://img.shields.io/github/issues/rickb777/enumeration.svg)](https://github.com/rickb777/enumeration/issues)
 
 * Make simple Go enumerations work well for you using this easy-to-use code generator.
@@ -22,8 +22,8 @@ It will not handle C-style comments though, so these must not be present. The no
 ## First, Install
 
 ```
-go get github.com/rickb777/enumeration/v3
-go install github.com/rickb777/enumeration/v3
+go get github.com/rickb777/enumeration/v4
+go install github.com/rickb777/enumeration/v4
 ```
 
 You should see that the `enumeration` binary is now in the bin folder on your GOPATH. Make sure this is
@@ -83,31 +83,7 @@ const (
 
 There is one other restriction: the type declaration must be *before* the constants, as it does in all the examples above. White-space should be canonically formatted using `gofmt` before using the tool (the results are unpredictable otherwise). (This is because of the limited parser used, for the reasons given earlier.)
 
-Although the default behaviour is to generate strings for each enumeration value which match the constants you declared, you can take full control and override this with your own lookup table. The `-using` argument needed:
-
-```Go
-//go:generate enumeration -type Day -using shortDayNames
-
-type Day int
-
-const (
-	Sunday Day = iota
-	Monday
-	Tuesday
-	Wednesday
-	Thursday
-	Friday
-)
-
-var shortDayNames = map[Day]string{
-    Sunday:    "Su",
-    Monday:    "Mo",
-    Tuesday:   "Tu",
-    Wednesday: "We",
-    Thursday:  "Th",
-    Friday:    "Fr",
-}
-```
+Although the default behaviour is to generate strings for each enumeration value which match the constants you declared, you can take full control and override this however you need.
 
 Just occasionally, you might have several enumerations in the same package and you need to avoid their identifiers clashing. This is easy to control using the `-prefix` and `-suffix` options. Here's an example using a suffix; prefixes are similar and you can have both if you want.
 
@@ -189,6 +165,9 @@ Options are:
 
  * `-s`
     - generate a simple enumeration without parsing methods.
+
+ * `-nopoly`
+    - do not generate code that would make the enumeration polymorphic as.
 
  * `-lc`
     - convert to lower case the string representations of the enumeration values.

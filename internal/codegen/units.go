@@ -1,7 +1,7 @@
 package codegen
 
 import (
-	"github.com/rickb777/enumeration/v3/internal/collection"
+	"github.com/rickb777/enumeration/v4/internal/collection"
 	"slices"
 )
 

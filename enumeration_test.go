@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 	"github.com/onsi/gomega"
-	"github.com/rickb777/enumeration/v3/internal/model"
-	"github.com/rickb777/enumeration/v3/internal/parse"
+	"github.com/rickb777/enumeration/v4/internal/model"
+	"github.com/rickb777/enumeration/v4/internal/parse"
 	"go/scanner"
 	"go/token"
 	"io"

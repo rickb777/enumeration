@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	. "github.com/onsi/gomega"
-	"github.com/rickb777/enumeration/v3/enum"
-	"github.com/rickb777/enumeration/v3/example"
+	"github.com/rickb777/enumeration/v4/enum"
+	"github.com/rickb777/enumeration/v4/example"
 )
 
 func TestIntEnums_Strings(t *testing.T) {

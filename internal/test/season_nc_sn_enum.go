@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v3 v3.5.1
+// github.com/rickb777/enumeration/v4 6fbd6b0a14258861d58a8efc36602c830d2f5fce-dirty
 
 package test
 
@@ -7,7 +7,7 @@ import (
 	"database/sql/driver"
 	"errors"
 	"fmt"
-	"github.com/rickb777/enumeration/v3/enum"
+	"github.com/rickb777/enumeration/v4/enum"
 	"slices"
 	"strconv"
 )

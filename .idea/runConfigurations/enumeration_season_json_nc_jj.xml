@@ -4,7 +4,7 @@
     <working_directory value="$PROJECT_DIR$/internal/test" />
     <parameters value="-v -z -f -i season_json.go -type Season_Nc_Jj -suffix _Nc_Jj" />
     <kind value="PACKAGE" />
-    <package value="github.com/rickb777/enumeration/v3" />
+    <package value="github.com/rickb777/enumeration/v4" />
     <directory value="$PROJECT_DIR$" />
     <filePath value="$PROJECT_DIR$/enumeration.go" />
     <method v="2" />

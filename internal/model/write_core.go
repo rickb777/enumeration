@@ -2,8 +2,8 @@ package model
 
 import (
 	"fmt"
-	"github.com/rickb777/enumeration/v3/internal/codegen"
-	"github.com/rickb777/enumeration/v3/internal/collection"
+	"github.com/rickb777/enumeration/v4/internal/codegen"
+	"github.com/rickb777/enumeration/v4/internal/collection"
 	"go/types"
 	"io"
 	"strings"
@@ -19,7 +19,7 @@ var done = collection.NewSet[string]()
 //-------------------------------------------------------------------------------------------------
 
 const head = `// generated code - do not edit
-// github.com/rickb777/enumeration/v3 <<.Version>>
+// github.com/rickb777/enumeration/v4 <<.Version>>
 
 package <<.Pkg>>
 

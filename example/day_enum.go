@@ -1,12 +1,12 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v3 v3.5.1
+// github.com/rickb777/enumeration/v4 unknown
 
 package example
 
 import (
 	"errors"
 	"fmt"
-	"github.com/rickb777/enumeration/v3/enum"
+	"github.com/rickb777/enumeration/v4/enum"
 	"slices"
 	"strconv"
 )

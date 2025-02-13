@@ -5,13 +5,13 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/rickb777/enumeration/v3/enum"
-	"github.com/rickb777/enumeration/v3/internal/transform"
-	"github.com/rickb777/enumeration/v3/internal/util"
+	"github.com/rickb777/enumeration/v4/enum"
+	"github.com/rickb777/enumeration/v4/internal/transform"
+	"github.com/rickb777/enumeration/v4/internal/util"
 )
 
 const head0 = `// generated code - do not edit
-// github.com/rickb777/enumeration/v3 `
+// github.com/rickb777/enumeration/v4 `
 
 const head1 = `
 
@@ -21,7 +21,7 @@ import (
 	"database/sql/driver"
 	"errors"
 	"fmt"
-	"github.com/rickb777/enumeration/v3/enum"
+	"github.com/rickb777/enumeration/v4/enum"
 	"strconv"
 	"strings"
 )

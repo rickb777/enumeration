@@ -2,9 +2,9 @@ package model
 
 import (
 	"fmt"
-	"github.com/rickb777/enumeration/v3/enum"
-	"github.com/rickb777/enumeration/v3/internal/codegen"
-	"github.com/rickb777/enumeration/v3/internal/collection"
+	"github.com/rickb777/enumeration/v4/enum"
+	"github.com/rickb777/enumeration/v4/internal/codegen"
+	"github.com/rickb777/enumeration/v4/internal/collection"
 	"text/template"
 )
 
@@ -480,7 +480,7 @@ func (v <<.MainType>>) JSON() string {
 `,
 }
 
-const enumImportPath = "github.com/rickb777/enumeration/v3/enum"
+const enumImportPath = "github.com/rickb777/enumeration/v4/enum"
 
 var vMarshalJSON_struct_tags_Unit = codegen.Unit{
 	Declares: "v.MarshalJSON",

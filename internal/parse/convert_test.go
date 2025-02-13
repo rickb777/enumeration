@@ -9,10 +9,10 @@ import (
 
 	. "github.com/benmoss/matchers"
 	. "github.com/onsi/gomega"
-	"github.com/rickb777/enumeration/v3/internal/collection"
-	"github.com/rickb777/enumeration/v3/internal/model"
-	"github.com/rickb777/enumeration/v3/internal/transform"
-	"github.com/rickb777/enumeration/v3/internal/util"
+	"github.com/rickb777/enumeration/v4/internal/collection"
+	"github.com/rickb777/enumeration/v4/internal/model"
+	"github.com/rickb777/enumeration/v4/internal/transform"
+	"github.com/rickb777/enumeration/v4/internal/util"
 )
 
 const enumBlock1 = `
@@ -47,7 +47,7 @@ func TestConvertBlock1(t *testing.T) {
 		LcType:   "sweet",
 		BaseType: "int",
 		BaseKind: types.Int,
-		Version:  util.Version,
+		Version:  util.Version(),
 		Values:   model.ValuesOf("Mars", "Bounty", "Snickers", "Kitkat"),
 		Case:     transform.Upper,
 		Extra:    make(map[string]interface{}),
@@ -96,7 +96,7 @@ func TestConvertBlock2(t *testing.T) {
 		LcType:   "sweet",
 		BaseType: "int",
 		BaseKind: types.Int,
-		Version:  util.Version,
+		Version:  util.Version(),
 		Values:   model.ValuesOf("Mars", "Bounty", "Snickers", "Kitkat"),
 		Extra:    make(map[string]interface{}),
 		Imports:  collection.NewSet[string](basicImports...),
@@ -135,7 +135,7 @@ func TestConvertBlock3(t *testing.T) {
 		LcType:   "sweet",
 		BaseType: "int",
 		BaseKind: types.Int,
-		Version:  util.Version,
+		Version:  util.Version(),
 		Values:   model.ValuesOf("Mars", "Bounty", "Snickers", "Kitkat"),
 		Case:     transform.Upper,
 		Extra:    make(map[string]interface{}),
@@ -213,7 +213,7 @@ func TestConvertBlock4(t *testing.T) {
 		LcType:     "sweet",
 		BaseType:   "int",
 		BaseKind:   types.Int,
-		Version:    util.Version,
+		Version:    util.Version(),
 		Values:     values,
 		AliasTable: "sweetAliases",
 		Extra:      make(map[string]interface{}),
@@ -254,7 +254,7 @@ func TestConvertBlockMultiple(t *testing.T) {
 		LcType:   "sweet",
 		BaseType: "int",
 		BaseKind: types.Int,
-		Version:  util.Version,
+		Version:  util.Version(),
 		Values:   model.ValuesOf("Mars", "Bounty", "Snickers", "Kitkat"),
 		Case:     transform.Upper,
 		Extra:    make(map[string]interface{}),
@@ -294,7 +294,7 @@ func TestConvertSeparate1(t *testing.T) {
 		LcType:   "sweet",
 		BaseType: "int",
 		BaseKind: types.Int,
-		Version:  util.Version,
+		Version:  util.Version(),
 		Values:   model.ValuesOf("Mars", "Bounty", "Snickers", "Kitkat"),
 		Case:     transform.Upper,
 		Extra:    make(map[string]interface{}),
@@ -340,7 +340,7 @@ func TestConvertSeparate2(t *testing.T) {
 		LcType:   "sweet",
 		BaseType: "int",
 		BaseKind: types.Int,
-		Version:  util.Version,
+		Version:  util.Version(),
 		Values:   expected,
 		Case:     transform.Upper,
 		Extra:    make(map[string]interface{}),
@@ -373,7 +373,7 @@ func TestConvertSeparateMultiple(t *testing.T) {
 		LcType:   "sweet",
 		BaseType: "float64",
 		BaseKind: types.Float64,
-		Version:  util.Version,
+		Version:  util.Version(),
 		Values:   model.ValuesOf("Mars", "Bounty", "Snickers", "Kitkat"),
 		Case:     transform.Upper,
 		Extra:    make(map[string]interface{}),

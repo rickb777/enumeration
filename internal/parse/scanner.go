@@ -2,7 +2,7 @@ package parse
 
 import (
 	"fmt"
-	"github.com/rickb777/enumeration/v3/internal/util"
+	"github.com/rickb777/enumeration/v4/internal/util"
 	goscanner "go/scanner"
 	"go/token"
 )

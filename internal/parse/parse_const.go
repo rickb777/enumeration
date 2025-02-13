@@ -1,7 +1,7 @@
 package parse
 
 import (
-	"github.com/rickb777/enumeration/v3/internal/util"
+	"github.com/rickb777/enumeration/v4/internal/util"
 	"go/token"
 	"reflect"
 	"strings"
