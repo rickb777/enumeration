@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v4 v4.0.0-dirty
+// github.com/rickb777/enumeration/v4 v4.0.0-1-g132d3af-dirty
 
 package test
 
@@ -17,11 +17,6 @@ var AllSeason_Uc_Jjs = []Season_Uc_Jj{
 	Spring_Uc_Jj, Summer_Uc_Jj, Autumn_Uc_Jj, Winter_Uc_Jj,
 }
 
-// AllSeason_Uc_JjEnums lists all 4 values in order.
-var AllSeason_Uc_JjEnums = enum.IntEnums{
-	Spring_Uc_Jj, Summer_Uc_Jj, Autumn_Uc_Jj, Winter_Uc_Jj,
-}
-
 const (
 	season_uc_jjEnumStrings = "SPRINGSUMMERAUTUMNWINTER"
 	season_uc_jjJSONStrings = "SprgSumrAutmWint"
@@ -31,6 +26,13 @@ var (
 	season_uc_jjEnumIndex = [...]uint16{0, 6, 12, 18, 24}
 	season_uc_jjJSONIndex = [...]uint16{0, 4, 8, 12, 16}
 )
+
+// String returns the literal string representation of a Season_Uc_Jj, which is
+// the same as the const identifier but without prefix or suffix.
+func (v Season_Uc_Jj) String() string {
+	o := v.Ordinal()
+	return v.toString(o, season_uc_jjEnumStrings, season_uc_jjEnumIndex[:])
+}
 
 // Ordinal returns the ordinal number of a Season_Uc_Jj. This is an integer counting
 // from zero. It is *not* the same as the const number assigned to the value.
@@ -46,13 +48,6 @@ func (v Season_Uc_Jj) Ordinal() int {
 		return 3
 	}
 	return -1
-}
-
-// String returns the literal string representation of a Season_Uc_Jj, which is
-// the same as the const identifier but without prefix or suffix.
-func (v Season_Uc_Jj) String() string {
-	o := v.Ordinal()
-	return v.toString(o, season_uc_jjEnumStrings, season_uc_jjEnumIndex[:])
 }
 
 func (v Season_Uc_Jj) toString(o int, concats string, indexes []uint16) string {
@@ -234,11 +229,4 @@ func (v *Season_Uc_Jj) unmarshalJSON(in string) error {
 	}
 
 	return errors.New(in + ": unrecognised season_uc_jj")
-}
-
-// season_uc_jjMarshalNumber handles marshaling where a number is required or where
-// the value is out of range.
-// This function can be replaced with any bespoke function than matches signature.
-var season_uc_jjMarshalNumber = func(v Season_Uc_Jj) string {
-	return strconv.FormatInt(int64(v), 10)
 }

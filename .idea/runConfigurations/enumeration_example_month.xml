@@ -1,0 +1,12 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="enumeration example/month" type="GoApplicationRunConfiguration" factoryName="Go Application">
+    <module name="enumeration" />
+    <working_directory value="$PROJECT_DIR$/example" />
+    <parameters value="-f -v -type Month -ic -marshaltext identifier" />
+    <kind value="PACKAGE" />
+    <package value="github.com/rickb777/enumeration/v4" />
+    <directory value="$PROJECT_DIR$" />
+    <filePath value="$PROJECT_DIR$/enumeration.go" />
+    <method v="2" />
+  </configuration>
+</component>

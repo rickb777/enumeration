@@ -36,17 +36,14 @@ func (m Model) writeHead(w DualWriter) {
 
 //-------------------------------------------------------------------------------------------------
 
-const allItems = `
+const (
+	allItems = `
 // All<<.Plural>> lists all <<len .Values>> values in order.
 var All<<.Plural>> = []<<.MainType>>{
 	<<.ValuesWithWrapping 1>>,
 }
-
-// All<<.MainType>>Enums lists all <<len .Values>> values in order.
-var All<<.MainType>>Enums = <<.AllItemsSlice>>{
-	<<.ValuesWithWrapping 1>>,
-}
 `
+)
 
 func (m Model) AllItemsSlice() string {
 	switch m.BaseKind {
@@ -96,7 +93,7 @@ func (m Model) Indexes() string {
 func (m Model) InputTextValues() []string {
 	vs := make([]string, len(m.Values))
 	for i, v := range m.Values {
-		vs[i] = m.InputCase().Transform(v.Text)
+		vs[i] = m.InTrans.Transform(v.Text)
 	}
 	return vs
 }
@@ -125,7 +122,7 @@ func (m Model) TextIndexes() string {
 func (m Model) InputJSONValues() []string {
 	vs := make([]string, len(m.Values))
 	for i, v := range m.Values {
-		vs[i] = m.InputCase().Transform(v.JSON)
+		vs[i] = m.InTrans.Transform(v.JSON)
 	}
 	return vs
 }
@@ -154,7 +151,7 @@ func (m Model) JSONIndexes() string {
 func (m Model) InputSQLValues() []string {
 	vs := make([]string, len(m.Values))
 	for i, v := range m.Values {
-		vs[i] = m.InputCase().Transform(v.SQL)
+		vs[i] = m.InTrans.Transform(v.SQL)
 	}
 	return vs
 }
@@ -243,51 +240,58 @@ func (m Model) writeJoinedStringAndIndexes(w DualWriter) {
 
 //-------------------------------------------------------------------------------------------------
 
+// BuildUnits concatenates the units required to provide the expected methods,
+// omitting any units not needed for this configuration.
 func (m Model) BuildUnits() *codegen.Units {
 	units := codegen.New()
+	if m.Polymorphic {
+		buildAllTypeEnums(units)
+	}
 	buildStringMethod(units)
 	buildOrdinalMethod(units)
 	buildIsValidMethod(units)
 	buildNumberMethod(units, m)
-	if !m.Simple {
+	if !m.SimpleOnly {
 		buildOfMethod(units)
 		buildParseHelperMethod(units, "Parse", "Enum")
+		buildAsMethod(units, m)
+		buildMustParseMethod(units, m)
+		buildMarshalText(units, m)
+		buildMarshalJSON(units, m)
+		buildUnmarshalText(units, m)
+		buildUnmarshalJSON(units, m)
+		buildScanMethod(units, m)
+		buildValueMethod(units, m)
 	}
-	buildAsMethod(units, m)
-	buildMustParseMethod(units, m)
-	buildMarshalText(units, m)
-	buildMarshalJSON(units, m)
-	buildUnmarshalText(units, m)
-	buildUnmarshalJSON(units, m)
-	buildScanMethod(units, m)
-	buildValueMethod(units, m)
 	return units
 }
 
 func WriteGo(units *codegen.Units, m Model, w DualWriter) {
 	for _, u := range units.Slice() {
 		m.Imports = m.Imports.Union(u.Imports)
+
+		if u.Transforms {
+			if m.SimpleOnly {
+				m.Imports.AddAll(m.OutTrans.Imports()...)
+			} else {
+				m.Imports.AddAll(m.InTrans.Imports()...)
+			}
+		}
 	}
 
 	done := collection.NewSet[string]()
 
 	m.writeHead(w)
 	m.writeAllItems(w)
+	if m.Config.Polymorphic {
+		writeUnit(w, units, done, m, "allTypeEnums", "root")
+	}
 	m.writeJoinedStringAndIndexes(w)
 
-	writeUnit(w, units, done, m, "v.Ordinal", "root")
-	writeUnit(w, units, done, m, "v.String", "root")
-	writeUnit(w, units, done, m, "v.IsValid", "root")
-	writeUnit(w, units, done, m, "v.Number", "root")
-	if !m.Simple {
-		writeUnit(w, units, done, m, "OfFunction", "root")
-		writeUnit(w, units, done, m, "v.Parse", "root")
-		writeUnit(w, units, done, m, "AsFunction", "root")
-		writeUnit(w, units, done, m, "MustParseFunction", "root")
-	}
-
 	for _, u := range units.Slice() {
-		writeUnit(w, units, done, m, u.Declares, "root")
+		if u.Exported() {
+			writeUnit(w, units, done, m, u.Declares, "root")
+		}
 	}
 
 	if c, ok := w.(io.Closer); ok {

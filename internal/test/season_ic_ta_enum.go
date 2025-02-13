@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v4 v4.0.0-dirty
+// github.com/rickb777/enumeration/v4 v4.0.0-1-g132d3af-dirty
 
 package test
 
@@ -15,11 +15,6 @@ import (
 
 // AllSeason_Ic_Tas lists all 4 values in order.
 var AllSeason_Ic_Tas = []Season_Ic_Ta{
-	Spring_Ic_Ta, Summer_Ic_Ta, Autumn_Ic_Ta, Winter_Ic_Ta,
-}
-
-// AllSeason_Ic_TaEnums lists all 4 values in order.
-var AllSeason_Ic_TaEnums = enum.IntEnums{
 	Spring_Ic_Ta, Summer_Ic_Ta, Autumn_Ic_Ta, Winter_Ic_Ta,
 }
 
@@ -41,6 +36,13 @@ var (
 	season_ic_taSQLIndex  = [...]uint16{0, 4, 8, 12, 16}
 )
 
+// String returns the literal string representation of a Season_Ic_Ta, which is
+// the same as the const identifier but without prefix or suffix.
+func (v Season_Ic_Ta) String() string {
+	o := v.Ordinal()
+	return v.toString(o, season_ic_taEnumStrings, season_ic_taEnumIndex[:])
+}
+
 // Ordinal returns the ordinal number of a Season_Ic_Ta. This is an integer counting
 // from zero. It is *not* the same as the const number assigned to the value.
 func (v Season_Ic_Ta) Ordinal() int {
@@ -55,13 +57,6 @@ func (v Season_Ic_Ta) Ordinal() int {
 		return 3
 	}
 	return -1
-}
-
-// String returns the literal string representation of a Season_Ic_Ta, which is
-// the same as the const identifier but without prefix or suffix.
-func (v Season_Ic_Ta) String() string {
-	o := v.Ordinal()
-	return v.toString(o, season_ic_taEnumStrings, season_ic_taEnumIndex[:])
 }
 
 func (v Season_Ic_Ta) toString(o int, concats string, indexes []uint16) string {
@@ -288,13 +283,6 @@ func (v *Season_Ic_Ta) unmarshalJSON(in string) error {
 	}
 
 	return errors.New(in + ": unrecognised season_ic_ta")
-}
-
-// season_ic_taMarshalNumber handles marshaling where a number is required or where
-// the value is out of range.
-// This function can be replaced with any bespoke function than matches signature.
-var season_ic_taMarshalNumber = func(v Season_Ic_Ta) string {
-	return strconv.FormatInt(int64(v), 10)
 }
 
 // Scan parses some value, which can be a number, a string or []byte.

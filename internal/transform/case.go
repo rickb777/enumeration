@@ -24,6 +24,10 @@ func Of(lowercase, uppercase bool) Case {
 	return Stet
 }
 
+func (c Case) NoOp() bool {
+	return c == Stet
+}
+
 func (c Case) Transform(s string) string {
 	switch c {
 	case Upper:
@@ -44,4 +48,10 @@ func (c Case) Expression(s string) string {
 	return s
 }
 
-//x
+func (c Case) Imports() []string {
+	switch c {
+	case Upper, Lower:
+		return []string{"strings"}
+	}
+	return nil
+}

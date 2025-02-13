@@ -22,7 +22,7 @@ type Config struct {
 	MarshalTextRep enum.Representation
 	MarshalJSONRep enum.Representation
 	StoreRep       enum.Representation
-	Simple         bool
+	SimpleOnly     bool
 	Polymorphic    bool
 	IgnoreCase     bool
 	Unsnake        bool
@@ -115,7 +115,8 @@ type Model struct {
 	LcType, BaseType string
 	BaseKind         types.BasicKind
 	Values           Values
-	Case             transform.Case
+	InTrans          transform.Transforms
+	OutTrans         transform.Transforms
 	AliasTable       string
 	Imports          collection.Set[string]
 	Extra            map[string]interface{}
@@ -225,33 +226,16 @@ func (m Model) Asymmetric() bool {
 
 //-------------------------------------------------------------------------------------------------
 
-func (m Model) InputCase() transform.Case {
-	c := m.Case
-	if m.IgnoreCase && c == transform.Stet {
-		c = transform.Lower
-	}
-	return c
-}
-
 func (m Model) inputTransform(s string) string {
-	if m.Unsnake {
-		s = strings.ReplaceAll(s, "_", " ")
-	}
-	return m.InputCase().Transform(s)
+	return m.InTrans.Transform(s)
 }
 
 func (m Model) outputTransform(s string) string {
-	if m.Unsnake {
-		s = strings.ReplaceAll(s, "_", " ")
-	}
-	return m.Case.Transform(s)
+	return m.OutTrans.Transform(s)
 }
 
 func (m Model) expression(s string) string {
-	if m.Unsnake {
-		s = fmt.Sprintf(`strings.ReplaceAll(%s, "_", " ")`, s)
-	}
-	return m.InputCase().Expression(s)
+	return m.InTrans.Expression(s)
 }
 
 func (m Model) FnMap() template.FuncMap {
@@ -279,11 +263,4 @@ func (m Model) Placeholder() string {
 
 func (m Model) ValuesJoined(from int, separator string) string {
 	return strings.Join(m.Values[from:].Identifiers(), separator)
-}
-
-func (m Model) SelectImports() Model {
-	if !m.Simple && strings.Contains(m.expression(""), "strings.") {
-		m.Imports.Add("strings")
-	}
-	return m
 }

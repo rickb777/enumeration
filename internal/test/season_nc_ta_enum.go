@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v4 v4.0.0-dirty
+// github.com/rickb777/enumeration/v4 v4.0.0-1-g132d3af-dirty
 
 package test
 
@@ -18,11 +18,6 @@ var AllSeason_Nc_Tas = []Season_Nc_Ta{
 	Spring_Nc_Ta, Summer_Nc_Ta, Autumn_Nc_Ta, Winter_Nc_Ta,
 }
 
-// AllSeason_Nc_TaEnums lists all 4 values in order.
-var AllSeason_Nc_TaEnums = enum.IntEnums{
-	Spring_Nc_Ta, Summer_Nc_Ta, Autumn_Nc_Ta, Winter_Nc_Ta,
-}
-
 const (
 	season_nc_taEnumStrings = "SpringSummerAutumnWinter"
 	season_nc_taTextStrings = "SprgSumrAutmWint"
@@ -36,6 +31,13 @@ var (
 	season_nc_taJSONIndex = [...]uint16{0, 4, 8, 12, 16}
 	season_nc_taSQLIndex  = [...]uint16{0, 4, 8, 12, 16}
 )
+
+// String returns the literal string representation of a Season_Nc_Ta, which is
+// the same as the const identifier but without prefix or suffix.
+func (v Season_Nc_Ta) String() string {
+	o := v.Ordinal()
+	return v.toString(o, season_nc_taEnumStrings, season_nc_taEnumIndex[:])
+}
 
 // Ordinal returns the ordinal number of a Season_Nc_Ta. This is an integer counting
 // from zero. It is *not* the same as the const number assigned to the value.
@@ -51,13 +53,6 @@ func (v Season_Nc_Ta) Ordinal() int {
 		return 3
 	}
 	return -1
-}
-
-// String returns the literal string representation of a Season_Nc_Ta, which is
-// the same as the const identifier but without prefix or suffix.
-func (v Season_Nc_Ta) String() string {
-	o := v.Ordinal()
-	return v.toString(o, season_nc_taEnumStrings, season_nc_taEnumIndex[:])
 }
 
 func (v Season_Nc_Ta) toString(o int, concats string, indexes []uint16) string {
@@ -281,13 +276,6 @@ func (v *Season_Nc_Ta) unmarshalJSON(in string) error {
 	}
 
 	return errors.New(in + ": unrecognised season_nc_ta")
-}
-
-// season_nc_taMarshalNumber handles marshaling where a number is required or where
-// the value is out of range.
-// This function can be replaced with any bespoke function than matches signature.
-var season_nc_taMarshalNumber = func(v Season_Nc_Ta) string {
-	return strconv.FormatInt(int64(v), 10)
 }
 
 // Scan parses some value, which can be a number, a string or []byte.

@@ -12,13 +12,13 @@ import (
 func TestIntEnums_Strings(t *testing.T) {
 	RegisterTestingT(t)
 
-	days := example.AllDayEnums.Strings()
+	methods := example.AllMethodEnums.Strings()
 
-	Ω(strings.Join(days, "|")).Should(Equal("Sunday|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday"))
+	Ω(strings.Join(methods, "|")).Should(Equal("HEAD|GET|PUT|POST|PATCH|DELETE"))
 
-	days = enum.Enums{example.Wednesday, example.Friday, example.Sunday}.Strings()
+	methods = enum.Enums{example.HEAD, example.PUT, example.PATCH}.Strings()
 
-	Ω(strings.Join(days, "|")).Should(Equal("Wednesday|Friday|Sunday"))
+	Ω(strings.Join(methods, "|")).Should(Equal("HEAD|PUT|PATCH"))
 }
 
 func TestIntEnums_Ordinals(t *testing.T) {

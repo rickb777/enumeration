@@ -1,12 +1,11 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v4 v4.0.0-dirty
+// github.com/rickb777/enumeration/v4 v4.0.0-1-g132d3af-dirty
 
 package test
 
 import (
 	"errors"
 	"fmt"
-	"github.com/rickb777/enumeration/v4/enum"
 	"slices"
 	"strconv"
 	"strings"
@@ -17,11 +16,6 @@ var AllSeason_Nc_Jns = []Season_Nc_Jn{
 	Spring_Nc_Jn, Summer_Nc_Jn, Autumn_Nc_Jn, Winter_Nc_Jn,
 }
 
-// AllSeason_Nc_JnEnums lists all 4 values in order.
-var AllSeason_Nc_JnEnums = enum.IntEnums{
-	Spring_Nc_Jn, Summer_Nc_Jn, Autumn_Nc_Jn, Winter_Nc_Jn,
-}
-
 const (
 	season_nc_jnEnumStrings = "SpringSummerAutumnWinter"
 )
@@ -29,6 +23,13 @@ const (
 var (
 	season_nc_jnEnumIndex = [...]uint16{0, 6, 12, 18, 24}
 )
+
+// String returns the literal string representation of a Season_Nc_Jn, which is
+// the same as the const identifier but without prefix or suffix.
+func (v Season_Nc_Jn) String() string {
+	o := v.Ordinal()
+	return v.toString(o, season_nc_jnEnumStrings, season_nc_jnEnumIndex[:])
+}
 
 // Ordinal returns the ordinal number of a Season_Nc_Jn. This is an integer counting
 // from zero. It is *not* the same as the const number assigned to the value.
@@ -44,13 +45,6 @@ func (v Season_Nc_Jn) Ordinal() int {
 		return 3
 	}
 	return -1
-}
-
-// String returns the literal string representation of a Season_Nc_Jn, which is
-// the same as the const identifier but without prefix or suffix.
-func (v Season_Nc_Jn) String() string {
-	o := v.Ordinal()
-	return v.toString(o, season_nc_jnEnumStrings, season_nc_jnEnumIndex[:])
 }
 
 func (v Season_Nc_Jn) toString(o int, concats string, indexes []uint16) string {
@@ -191,11 +185,6 @@ func (v Season_Nc_Jn) invalidError() error {
 // This function can be replaced with any bespoke function than matches signature.
 var season_nc_jnMarshalNumber = func(v Season_Nc_Jn) string {
 	return strconv.FormatInt(int64(v), 10)
-}
-
-func (v Season_Nc_Jn) marshalNumberStringOrError() (string, error) {
-	bs, err := v.marshalNumberOrError()
-	return string(bs), err
 }
 
 // UnmarshalJSON converts transmitted JSON values to ordinary values. It allows both

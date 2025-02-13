@@ -17,7 +17,7 @@ import (
 
 var config model.Config
 var inputGo, outputGo, outputJSON, marshalTextRep, marshalJSONRep, storeRep string
-var force, lowercase, uppercase, showVersion bool
+var force, nocase, lowercase, uppercase, showVersion bool
 
 func defineFlags() {
 	flag.StringVar(&config.MainType, "type", "", "Name of the enumeration type (required).")
@@ -34,11 +34,12 @@ func defineFlags() {
 
 	flag.BoolVar(&config.Lenient, "lenient", false, "Allow parsing to yield invalid values.")
 	flag.BoolVar(&force, "f", false, "Force writing the output file even if up to date (not used when piping stdin or stdout).")
+	flag.BoolVar(&nocase, "nc", false, "Don't convert strings to upper or lowercase (this is the default)")
 	flag.BoolVar(&lowercase, "lc", false, "Convert strings to lowercase and ignore case when parsing")
 	flag.BoolVar(&uppercase, "uc", false, "Convert strings to uppercase and ignore case when parsing.")
 	flag.BoolVar(&config.IgnoreCase, "ic", false, "Ignore case when parsing but keep the mixed case when outputting.")
 	flag.BoolVar(&config.Unsnake, "unsnake", false, "Convert underscores in identifiers to spaces.")
-	flag.BoolVar(&config.Simple, "s", false, "Generate simple enumerations without serialising or parsing functions")
+	flag.BoolVar(&config.SimpleOnly, "s", false, "Generate simple enumerations without serialising or parsing functions")
 	flag.BoolVar(&config.Polymorphic, "poly", false, "Generate polymorphic representation code")
 	flag.BoolVar(&util.Verbose, "v", false, "Verbose progress messages.")
 	flag.BoolVar(&util.Dbg, "z", false, "Debug messages.")
@@ -115,7 +116,7 @@ func generate() {
 	util.Must(err)
 
 	units := m.BuildUnits()
-	model.WriteGo(units, m.SelectImports(), out)
+	model.WriteGo(units, m, out)
 	util.Info("Generated %s.\n", outputGo)
 }
 
@@ -155,7 +156,7 @@ func doMain() {
 		outputJSON = strings.ToLower(config.MainType) + "_enum.json"
 	}
 
-	if config.Simple {
+	if config.SimpleOnly {
 		config.IgnoreCase = false
 		config.Lenient = false
 	}

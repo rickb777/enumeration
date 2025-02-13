@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v4 v3.4.0
+// github.com/rickb777/enumeration/v4
 
 package enum
 
@@ -118,6 +118,12 @@ func (v *Representation) parseFallback(in, s string) error {
 		return nil
 	}
 
+	var ok bool
+	*v, ok = altReps[s]
+	if ok {
+		return nil
+	}
+
 	return errors.New(in + ": unrecognised representation")
 }
 
@@ -133,7 +139,8 @@ func (v *Representation) parseString(s string, concats string, indexes []uint16)
 		}
 		i0 = i1
 	}
-	return false
+	*v, ok = altReps[s]
+	return ok
 }
 
 // representationTransformInput may alter input strings before they are parsed.

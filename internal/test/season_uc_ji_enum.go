@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v4 v4.0.0-dirty
+// github.com/rickb777/enumeration/v4 v4.0.0-1-g132d3af-dirty
 
 package test
 
@@ -17,11 +17,6 @@ var AllSeason_Uc_Jis = []Season_Uc_Ji{
 	Spring_Uc_Ji, Summer_Uc_Ji, Autumn_Uc_Ji, Winter_Uc_Ji,
 }
 
-// AllSeason_Uc_JiEnums lists all 4 values in order.
-var AllSeason_Uc_JiEnums = enum.IntEnums{
-	Spring_Uc_Ji, Summer_Uc_Ji, Autumn_Uc_Ji, Winter_Uc_Ji,
-}
-
 const (
 	season_uc_jiEnumStrings = "SPRINGSUMMERAUTUMNWINTER"
 )
@@ -29,6 +24,13 @@ const (
 var (
 	season_uc_jiEnumIndex = [...]uint16{0, 6, 12, 18, 24}
 )
+
+// String returns the literal string representation of a Season_Uc_Ji, which is
+// the same as the const identifier but without prefix or suffix.
+func (v Season_Uc_Ji) String() string {
+	o := v.Ordinal()
+	return v.toString(o, season_uc_jiEnumStrings, season_uc_jiEnumIndex[:])
+}
 
 // Ordinal returns the ordinal number of a Season_Uc_Ji. This is an integer counting
 // from zero. It is *not* the same as the const number assigned to the value.
@@ -44,13 +46,6 @@ func (v Season_Uc_Ji) Ordinal() int {
 		return 3
 	}
 	return -1
-}
-
-// String returns the literal string representation of a Season_Uc_Ji, which is
-// the same as the const identifier but without prefix or suffix.
-func (v Season_Uc_Ji) String() string {
-	o := v.Ordinal()
-	return v.toString(o, season_uc_jiEnumStrings, season_uc_jiEnumIndex[:])
 }
 
 func (v Season_Uc_Ji) toString(o int, concats string, indexes []uint16) string {
@@ -228,11 +223,4 @@ func (v *Season_Uc_Ji) unmarshalJSON(in string) error {
 	}
 
 	return errors.New(in + ": unrecognised season_uc_ji")
-}
-
-// season_uc_jiMarshalNumber handles marshaling where a number is required or where
-// the value is out of range.
-// This function can be replaced with any bespoke function than matches signature.
-var season_uc_jiMarshalNumber = func(v Season_Uc_Ji) string {
-	return strconv.FormatInt(int64(v), 10)
 }

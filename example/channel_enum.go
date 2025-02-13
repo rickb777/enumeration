@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v4 v4.0.0-dirty
+// github.com/rickb777/enumeration/v4 v4.0.0-1-g132d3af-dirty
 
 package example
 
@@ -35,6 +35,13 @@ var (
 	saleschannelSQLIndex  = [...]uint16{0, 1, 2, 3}
 )
 
+// String returns the literal string representation of a SalesChannel, which is
+// the same as the const identifier but without prefix or suffix.
+func (v SalesChannel) String() string {
+	o := v.Ordinal()
+	return v.toString(o, saleschannelEnumStrings, saleschannelEnumIndex[:])
+}
+
 // Ordinal returns the ordinal number of a SalesChannel. This is an integer counting
 // from zero. It is *not* the same as the const number assigned to the value.
 func (v SalesChannel) Ordinal() int {
@@ -47,13 +54,6 @@ func (v SalesChannel) Ordinal() int {
 		return 2
 	}
 	return -1
-}
-
-// String returns the literal string representation of a SalesChannel, which is
-// the same as the const identifier but without prefix or suffix.
-func (v SalesChannel) String() string {
-	o := v.Ordinal()
-	return v.toString(o, saleschannelEnumStrings, saleschannelEnumIndex[:])
 }
 
 func (v SalesChannel) toString(o int, concats string, indexes []uint16) string {
@@ -235,13 +235,6 @@ func (v *SalesChannel) unmarshalJSON(in string) error {
 	}
 
 	return errors.New(in + ": unrecognised saleschannel")
-}
-
-// saleschannelMarshalNumber handles marshaling where a number is required or where
-// the value is out of range.
-// This function can be replaced with any bespoke function than matches signature.
-var saleschannelMarshalNumber = func(v SalesChannel) string {
-	return strconv.FormatInt(int64(v), 10)
 }
 
 // Scan parses some value, which can be a number, a string or []byte.

@@ -109,9 +109,9 @@ type SalesChannel int
 
 const (
     _          SalesChannel = iota
-    Online                  // json:"webshop" sql:"o" -- String() is "online"
-    Instore                 // json:"store"   sql:"s" -- String() is "instore"
-    Telephone               // json:"phone"   sql:"t" -- String() is "telephone"
+    Online                  // json:"webshop" sql:"o"
+    Instore                 // json:"store"   sql:"s"
+    Telephone               // json:"phone"   sql:"t"
 )
 ```
 
@@ -166,8 +166,8 @@ Options are:
  * `-s`
     - generate a simple enumeration without parsing methods.
 
- * `-nopoly`
-    - do not generate code that would make the enumeration polymorphic as.
+ * `-poly`
+    - generate code that makes the enumeration polymorphic via [github.com/rickb777/enumeration/v4/enum](https://pkg.go.dev/github.com/rickb777/enumeration/v4/enum) types.
 
  * `-lc`
     - convert to lower case the string representations of the enumeration values.

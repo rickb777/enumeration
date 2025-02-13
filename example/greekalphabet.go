@@ -2,7 +2,7 @@ package example
 
 //go:generate enumeration -v -type GreekAlphabet
 
-// GreekAlphabet: This example shows non-ASCII characters in use. There is also a cross-mapping
+// GreekAlphabet example shows non-ASCII characters in use. There is also a cross-mapping
 // table specified via the '-using' option. So the parser recognises inputs from both
 // sets of strings.
 //

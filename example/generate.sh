@@ -11,5 +11,5 @@ function v
 type enumeration
 
 v rm -f example/*_enum.go
-v go generate ./example
+v go generate -x ./example
 v go test ./example

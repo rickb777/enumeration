@@ -1,21 +1,14 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v4 v4.0.0-dirty
+// github.com/rickb777/enumeration/v4 v4.0.0-1-g132d3af-dirty
 
 package simple
 
 import (
-	"database/sql/driver"
 	"fmt"
-	"github.com/rickb777/enumeration/v4/enum"
 )
 
 // AllSeason_Nc_Sis lists all 4 values in order.
 var AllSeason_Nc_Sis = []Season_Nc_Si{
-	Spring_Nc_Si, Summer_Nc_Si, Autumn_Nc_Si, Winter_Nc_Si,
-}
-
-// AllSeason_Nc_SiEnums lists all 4 values in order.
-var AllSeason_Nc_SiEnums = enum.IntEnums{
 	Spring_Nc_Si, Summer_Nc_Si, Autumn_Nc_Si, Winter_Nc_Si,
 }
 
@@ -26,6 +19,13 @@ const (
 var (
 	season_nc_siEnumIndex = [...]uint16{0, 6, 12, 18, 24}
 )
+
+// String returns the literal string representation of a Season_Nc_Si, which is
+// the same as the const identifier but without prefix or suffix.
+func (v Season_Nc_Si) String() string {
+	o := v.Ordinal()
+	return v.toString(o, season_nc_siEnumStrings, season_nc_siEnumIndex[:])
+}
 
 // Ordinal returns the ordinal number of a Season_Nc_Si. This is an integer counting
 // from zero. It is *not* the same as the const number assigned to the value.
@@ -41,13 +41,6 @@ func (v Season_Nc_Si) Ordinal() int {
 		return 3
 	}
 	return -1
-}
-
-// String returns the literal string representation of a Season_Nc_Si, which is
-// the same as the const identifier but without prefix or suffix.
-func (v Season_Nc_Si) String() string {
-	o := v.Ordinal()
-	return v.toString(o, season_nc_siEnumStrings, season_nc_siEnumIndex[:])
 }
 
 func (v Season_Nc_Si) toString(o int, concats string, indexes []uint16) string {
@@ -66,14 +59,4 @@ func (v Season_Nc_Si) IsValid() bool {
 // This facilitates polymorphism (see enum.IntEnum).
 func (v Season_Nc_Si) Int() int {
 	return int(v)
-}
-
-// Value converts the Season_Nc_Si to a string  (based on '-store identifier').
-// It implements driver.Valuer, https://golang.org/pkg/database/sql/driver/#Valuer
-func (v Season_Nc_Si) Value() (driver.Value, error) {
-	if !v.IsValid() {
-		return nil, fmt.Errorf("%v: cannot be stored", v)
-	}
-
-	return v.String(), nil
 }

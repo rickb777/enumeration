@@ -2,7 +2,7 @@ package example
 
 //go:generate enumeration -v -type Month -ic -marshaltext identifier
 
-// Month: This example shows that several comma-separated enumeration constants can
+// Month example shows that several comma-separated enumeration constants can
 // be on each line, and they can have explicit values. The '-ic' option means
 // the parser ignores the case of its inputs.
 type Month uint

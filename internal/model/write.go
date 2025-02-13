@@ -8,6 +8,25 @@ import (
 	"text/template"
 )
 
+const enumImportPath = "github.com/rickb777/enumeration/v4/enum"
+
+var vPolyEnumUnit = codegen.Unit{
+	Declares: "allTypeEnums",
+	Imports:  collection.NewSet[string](enumImportPath),
+	Template: `
+// All<<.MainType>>Enums lists all <<len .Values>> values in order.
+var All<<.MainType>>Enums = <<.AllItemsSlice>>{
+	<<.ValuesWithWrapping 1>>,
+}
+`,
+}
+
+func buildAllTypeEnums(units *codegen.Units) {
+	units.Add(vPolyEnumUnit)
+}
+
+//-------------------------------------------------------------------------------------------------
+
 var vtoStringUnit = codegen.Unit{
 	Declares: "v.toString",
 	Template: `
@@ -329,7 +348,7 @@ func As<<.MainType>>(s string) (<<.MainType>>, error) {
 }
 
 func buildAsMethod(units *codegen.Units, m Model) {
-	if !m.Simple {
+	if !m.SimpleOnly {
 		units.Add(asFunctionUnit)
 	}
 }
@@ -355,7 +374,7 @@ func MustParse<<.MainType>>(s string) <<.MainType>> {
 }
 
 func buildMustParseMethod(units *codegen.Units, m Model) {
-	if !m.Simple {
+	if !m.SimpleOnly {
 		units.Add(mustParseFunctionUnit)
 		units.Add(asFunctionUnit)
 	}
@@ -423,7 +442,7 @@ func (v <<.MainType>>) marshalText() (string, error) {
 
 var vmarshalText_number_Unit = codegen.Unit{
 	Declares: "v.marshalText",
-	Requires: []string{"v.IsValid", "v.marshalNumberStringOrError", "v.toString"},
+	Requires: []string{"v.IsValid", "v.marshalNumberStringOrError", "v.toString", "lctypeMarshalNumber"},
 	Template: `
 // marshalText converts values to a form suitable for transmission via XML, JSON etc.
 // The number representation is chosen according to -marshaltext.
@@ -479,8 +498,6 @@ func (v <<.MainType>>) JSON() string {
 }
 `,
 }
-
-const enumImportPath = "github.com/rickb777/enumeration/v4/enum"
 
 var vMarshalJSON_struct_tags_Unit = codegen.Unit{
 	Declares: "v.MarshalJSON",
@@ -699,7 +716,7 @@ func (v *<<.MainType>>) UnmarshalText(bs []byte) error {
 }
 
 func buildUnmarshalText(units *codegen.Units, m Model) {
-	if !m.Simple && (m.MarshalTextRep > 0 || m.HasTextTags()) {
+	if !m.SimpleOnly && (m.MarshalTextRep > 0 || m.HasTextTags()) {
 		units.Add(vUnmarshalTextUnit)
 		if m.HasTextTags() {
 			buildParseHelperMethod(units, "unmarshalText", "Text")
@@ -712,7 +729,8 @@ func buildUnmarshalText(units *codegen.Units, m Model) {
 //-------------------------------------------------------------------------------------------------
 
 var lctypeTransformInputUnit = codegen.Unit{
-	Declares: "lctypeTransformInput",
+	Declares:   "lctypeTransformInput",
+	Transforms: true,
 	Template: `
 // <<.LcType>>TransformInput may alter input strings before they are parsed.
 // This function is pluggable and is initialised using command-line flags
@@ -789,7 +807,7 @@ var vunmarshalJSON_plain_Unit = codegen.Unit{
 }
 
 func buildUnmarshalJSON(units *codegen.Units, m Model) {
-	if !m.Simple && (m.MarshalJSONRep > 0 || m.HasJSONTags()) {
+	if !m.SimpleOnly && (m.MarshalJSONRep > 0 || m.HasJSONTags()) {
 		units.Add(vunmarshalJSON_plain_Unit)
 		units.Add(vparseNumberUnit)
 		units.Add(vparseStringUnit)
@@ -870,7 +888,7 @@ var vScanUnit = codegen.Unit{
 }
 
 func buildScanMethod(units *codegen.Units, m Model) {
-	if !m.Simple && (m.StoreRep > 0 || m.HasSQLTags()) {
+	if !m.SimpleOnly && (m.StoreRep > 0 || m.HasSQLTags()) {
 		units.Add(vScanUnit)
 		if m.HasSQLTags() {
 			buildParseHelperMethod(units, "scanParse", "SQL")

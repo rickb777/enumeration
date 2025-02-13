@@ -2,7 +2,7 @@ package example
 
 //go:generate enumeration -v -type Country -plural Countries -ic -unsnake -alias iso3166_3LetterCodes
 
-// Country: This example shows use of the '-plural' option to set the name of plural
+// Country example shows use of the '-plural' option to set the name of plural
 // collections. Because of '-ic', the parser ignores case. Because of '-unsnake', the parser
 // treats underscores and spaces alike.
 //

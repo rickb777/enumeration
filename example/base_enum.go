@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v4 v4.0.0-dirty
+// github.com/rickb777/enumeration/v4 v4.0.0-1-g132d3af-dirty
 
 package example
 
@@ -30,6 +30,13 @@ var (
 	baseEnumIndex = [...]uint16{0, 1, 2, 3, 4}
 )
 
+// String returns the literal string representation of a Base, which is
+// the same as the const identifier but without prefix or suffix.
+func (v Base) String() string {
+	o := v.Ordinal()
+	return v.toString(o, baseEnumStrings, baseEnumIndex[:])
+}
+
 // Ordinal returns the ordinal number of a Base. This is an integer counting
 // from zero. It is *not* the same as the const number assigned to the value.
 func (v Base) Ordinal() int {
@@ -44,13 +51,6 @@ func (v Base) Ordinal() int {
 		return 3
 	}
 	return -1
-}
-
-// String returns the literal string representation of a Base, which is
-// the same as the const identifier but without prefix or suffix.
-func (v Base) String() string {
-	o := v.Ordinal()
-	return v.toString(o, baseEnumStrings, baseEnumIndex[:])
 }
 
 func (v Base) toString(o int, concats string, indexes []uint16) string {

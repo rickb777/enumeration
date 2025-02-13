@@ -1,20 +1,14 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v4 v4.0.0-dirty
+// github.com/rickb777/enumeration/v4 v4.0.0-1-g132d3af-dirty
 
 package simple
 
 import (
 	"fmt"
-	"github.com/rickb777/enumeration/v4/enum"
 )
 
 // AllSeason_Nc_Tss lists all 4 values in order.
 var AllSeason_Nc_Tss = []Season_Nc_Ts{
-	Spring_Nc_Tt, Summer_Nc_Tt, Autumn_Nc_Tt, Winter_Nc_Tt,
-}
-
-// AllSeason_Nc_TsEnums lists all 4 values in order.
-var AllSeason_Nc_TsEnums = enum.IntEnums{
 	Spring_Nc_Tt, Summer_Nc_Tt, Autumn_Nc_Tt, Winter_Nc_Tt,
 }
 
@@ -27,6 +21,13 @@ var (
 	season_nc_tsEnumIndex = [...]uint16{0, 12, 24, 36, 48}
 	season_nc_tsTextIndex = [...]uint16{0, 4, 8, 12, 16}
 )
+
+// String returns the literal string representation of a Season_Nc_Ts, which is
+// the same as the const identifier but without prefix or suffix.
+func (v Season_Nc_Ts) String() string {
+	o := v.Ordinal()
+	return v.toString(o, season_nc_tsEnumStrings, season_nc_tsEnumIndex[:])
+}
 
 // Ordinal returns the ordinal number of a Season_Nc_Ts. This is an integer counting
 // from zero. It is *not* the same as the const number assigned to the value.
@@ -42,13 +43,6 @@ func (v Season_Nc_Ts) Ordinal() int {
 		return 3
 	}
 	return -1
-}
-
-// String returns the literal string representation of a Season_Nc_Ts, which is
-// the same as the const identifier but without prefix or suffix.
-func (v Season_Nc_Ts) String() string {
-	o := v.Ordinal()
-	return v.toString(o, season_nc_tsEnumStrings, season_nc_tsEnumIndex[:])
 }
 
 func (v Season_Nc_Ts) toString(o int, concats string, indexes []uint16) string {
@@ -67,41 +61,4 @@ func (v Season_Nc_Ts) IsValid() bool {
 // This facilitates polymorphism (see enum.IntEnum).
 func (v Season_Nc_Ts) Int() int {
 	return int(v)
-}
-
-// MarshalText converts values to bytes suitable for transmission via XML, JSON etc.
-func (v Season_Nc_Ts) MarshalText() ([]byte, error) {
-	s, err := v.marshalText()
-	return []byte(s), err
-}
-
-// Text returns the representation used for transmission via XML, JSON etc.
-func (v Season_Nc_Ts) Text() string {
-	s, _ := v.marshalText()
-	return s
-}
-
-// marshalText converts values to bytes suitable for transmission via XML, JSON etc.
-// The representation is chosen according to 'text' struct tags.
-func (v Season_Nc_Ts) marshalText() (string, error) {
-	o := v.Ordinal()
-	if o < 0 {
-		return v.marshalNumberStringOrError()
-	}
-
-	return v.toString(o, season_nc_tsTextStrings, season_nc_tsTextIndex[:]), nil
-}
-
-func (v Season_Nc_Ts) marshalNumberStringOrError() (string, error) {
-	bs, err := v.marshalNumberOrError()
-	return string(bs), err
-}
-
-func (v Season_Nc_Ts) marshalNumberOrError() ([]byte, error) {
-	// disallow lenient marshaling
-	return nil, v.invalidError()
-}
-
-func (v Season_Nc_Ts) invalidError() error {
-	return fmt.Errorf("%d is not a valid season_nc_ts", v)
 }

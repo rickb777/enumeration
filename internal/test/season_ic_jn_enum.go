@@ -1,12 +1,11 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v4 v4.0.0-dirty
+// github.com/rickb777/enumeration/v4 v4.0.0-1-g132d3af-dirty
 
 package test
 
 import (
 	"errors"
 	"fmt"
-	"github.com/rickb777/enumeration/v4/enum"
 	"slices"
 	"strconv"
 	"strings"
@@ -14,11 +13,6 @@ import (
 
 // AllSeason_Ic_Jns lists all 4 values in order.
 var AllSeason_Ic_Jns = []Season_Ic_Jn{
-	Spring_Ic_Jn, Summer_Ic_Jn, Autumn_Ic_Jn, Winter_Ic_Jn,
-}
-
-// AllSeason_Ic_JnEnums lists all 4 values in order.
-var AllSeason_Ic_JnEnums = enum.IntEnums{
 	Spring_Ic_Jn, Summer_Ic_Jn, Autumn_Ic_Jn, Winter_Ic_Jn,
 }
 
@@ -30,6 +24,13 @@ const (
 var (
 	season_ic_jnEnumIndex = [...]uint16{0, 6, 12, 18, 24}
 )
+
+// String returns the literal string representation of a Season_Ic_Jn, which is
+// the same as the const identifier but without prefix or suffix.
+func (v Season_Ic_Jn) String() string {
+	o := v.Ordinal()
+	return v.toString(o, season_ic_jnEnumStrings, season_ic_jnEnumIndex[:])
+}
 
 // Ordinal returns the ordinal number of a Season_Ic_Jn. This is an integer counting
 // from zero. It is *not* the same as the const number assigned to the value.
@@ -45,13 +46,6 @@ func (v Season_Ic_Jn) Ordinal() int {
 		return 3
 	}
 	return -1
-}
-
-// String returns the literal string representation of a Season_Ic_Jn, which is
-// the same as the const identifier but without prefix or suffix.
-func (v Season_Ic_Jn) String() string {
-	o := v.Ordinal()
-	return v.toString(o, season_ic_jnEnumStrings, season_ic_jnEnumIndex[:])
 }
 
 func (v Season_Ic_Jn) toString(o int, concats string, indexes []uint16) string {
@@ -195,11 +189,6 @@ func (v Season_Ic_Jn) invalidError() error {
 // This function can be replaced with any bespoke function than matches signature.
 var season_ic_jnMarshalNumber = func(v Season_Ic_Jn) string {
 	return strconv.FormatInt(int64(v), 10)
-}
-
-func (v Season_Ic_Jn) marshalNumberStringOrError() (string, error) {
-	bs, err := v.marshalNumberOrError()
-	return string(bs), err
 }
 
 // UnmarshalJSON converts transmitted JSON values to ordinary values. It allows both

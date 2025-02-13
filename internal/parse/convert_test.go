@@ -50,9 +50,10 @@ func TestConvertBlock1(t *testing.T) {
 		BaseType: "int",
 		BaseKind: types.Int,
 		Values:   model.ValuesOf("Mars", "Bounty", "Snickers", "Kitkat"),
-		Case:     transform.Upper,
+		InTrans:  transform.ListOf(transform.Upper),
+		OutTrans: transform.ListOf(transform.Upper),
 		Extra:    make(map[string]interface{}),
-		Imports:  collection.NewSet[string](basicImports...),
+		Imports:  collection.NewSet[string]("fmt"),
 	}))
 }
 
@@ -98,8 +99,10 @@ func TestConvertBlock2(t *testing.T) {
 		BaseType: "int",
 		BaseKind: types.Int,
 		Values:   model.ValuesOf("Mars", "Bounty", "Snickers", "Kitkat"),
+		InTrans:  transform.ListOf(transform.Lower, transform.Unsnake(true)),
+		OutTrans: transform.ListOf(transform.Stet, transform.Unsnake(true)),
 		Extra:    make(map[string]interface{}),
-		Imports:  collection.NewSet[string](basicImports...),
+		Imports:  collection.NewSet[string]("fmt"),
 	}))
 }
 
@@ -136,9 +139,10 @@ func TestConvertBlock3(t *testing.T) {
 		BaseType: "int",
 		BaseKind: types.Int,
 		Values:   model.ValuesOf("Mars", "Bounty", "Snickers", "Kitkat"),
-		Case:     transform.Upper,
+		InTrans:  transform.ListOf(transform.Upper),
+		OutTrans: transform.ListOf(transform.Upper),
 		Extra:    make(map[string]interface{}),
-		Imports:  collection.NewSet[string](basicImports...),
+		Imports:  collection.NewSet[string]("fmt"),
 	}))
 }
 
@@ -213,9 +217,11 @@ func TestConvertBlock4(t *testing.T) {
 		BaseType:   "int",
 		BaseKind:   types.Int,
 		Values:     values,
+		InTrans:    transform.ListOf(transform.Lower, transform.Unsnake(true)),
+		OutTrans:   transform.ListOf(transform.Stet, transform.Unsnake(true)),
 		AliasTable: "sweetAliases",
 		Extra:      make(map[string]interface{}),
-		Imports:    collection.NewSet[string](basicImports...),
+		Imports:    collection.NewSet[string]("fmt"),
 	}))
 }
 
@@ -253,9 +259,10 @@ func TestConvertBlockMultiple(t *testing.T) {
 		BaseType: "int",
 		BaseKind: types.Int,
 		Values:   model.ValuesOf("Mars", "Bounty", "Snickers", "Kitkat"),
-		Case:     transform.Upper,
+		InTrans:  transform.ListOf(transform.Upper),
+		OutTrans: transform.ListOf(transform.Upper),
 		Extra:    make(map[string]interface{}),
-		Imports:  collection.NewSet[string](basicImports...),
+		Imports:  collection.NewSet[string]("fmt"),
 	}))
 }
 
@@ -292,9 +299,10 @@ func TestConvertSeparate1(t *testing.T) {
 		BaseType: "int",
 		BaseKind: types.Int,
 		Values:   model.ValuesOf("Mars", "Bounty", "Snickers", "Kitkat"),
-		Case:     transform.Upper,
+		InTrans:  transform.ListOf(transform.Upper),
+		OutTrans: transform.ListOf(transform.Upper),
 		Extra:    make(map[string]interface{}),
-		Imports:  collection.NewSet[string](basicImports...),
+		Imports:  collection.NewSet[string]("fmt"),
 	}))
 }
 
@@ -337,9 +345,10 @@ func TestConvertSeparate2(t *testing.T) {
 		BaseType: "int",
 		BaseKind: types.Int,
 		Values:   expected,
-		Case:     transform.Upper,
+		InTrans:  transform.ListOf(transform.Upper),
+		OutTrans: transform.ListOf(transform.Upper),
 		Extra:    make(map[string]interface{}),
-		Imports:  collection.NewSet[string](basicImports...),
+		Imports:  collection.NewSet[string]("fmt"),
 	}))
 }
 
@@ -369,9 +378,10 @@ func TestConvertSeparateMultiple(t *testing.T) {
 		BaseType: "float64",
 		BaseKind: types.Float64,
 		Values:   model.ValuesOf("Mars", "Bounty", "Snickers", "Kitkat"),
-		Case:     transform.Upper,
+		InTrans:  transform.ListOf(transform.Upper),
+		OutTrans: transform.ListOf(transform.Upper),
 		Extra:    make(map[string]interface{}),
-		Imports:  collection.NewSet[string](basicImports...),
+		Imports:  collection.NewSet[string]("fmt"),
 	}))
 }
 

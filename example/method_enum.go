@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v4 v4.0.0-dirty
+// github.com/rickb777/enumeration/v4 v4.0.0-1-g132d3af-dirty
 
 package example
 
@@ -37,6 +37,13 @@ var (
 	methodJSONIndex = [...]uint16{0, 2, 4, 6, 8, 10, 12}
 )
 
+// String returns the literal string representation of a Method, which is
+// the same as the const identifier but without prefix or suffix.
+func (v Method) String() string {
+	o := v.Ordinal()
+	return v.toString(o, methodEnumStrings, methodEnumIndex[:])
+}
+
 // Ordinal returns the ordinal number of a Method. This is an integer counting
 // from zero. It is *not* the same as the const number assigned to the value.
 func (v Method) Ordinal() int {
@@ -55,13 +62,6 @@ func (v Method) Ordinal() int {
 		return 5
 	}
 	return -1
-}
-
-// String returns the literal string representation of a Method, which is
-// the same as the const identifier but without prefix or suffix.
-func (v Method) String() string {
-	o := v.Ordinal()
-	return v.toString(o, methodEnumStrings, methodEnumIndex[:])
 }
 
 func (v Method) toString(o int, concats string, indexes []uint16) string {
@@ -246,13 +246,6 @@ func (v *Method) unmarshalJSON(in string) error {
 	}
 
 	return errors.New(in + ": unrecognised method")
-}
-
-// methodMarshalNumber handles marshaling where a number is required or where
-// the value is out of range.
-// This function can be replaced with any bespoke function than matches signature.
-var methodMarshalNumber = func(v Method) string {
-	return strconv.FormatInt(int64(v), 10)
 }
 
 // Scan parses some value, which can be a number, a string or []byte.

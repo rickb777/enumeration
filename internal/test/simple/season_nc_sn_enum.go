@@ -1,21 +1,14 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v4 v4.0.0-dirty
+// github.com/rickb777/enumeration/v4 v4.0.0-1-g132d3af-dirty
 
 package simple
 
 import (
-	"database/sql/driver"
 	"fmt"
-	"github.com/rickb777/enumeration/v4/enum"
 )
 
 // AllSeason_Nc_Sns lists all 4 values in order.
 var AllSeason_Nc_Sns = []Season_Nc_Sn{
-	Spring_Nc_Sn, Summer_Nc_Sn, Autumn_Nc_Sn, Winter_Nc_Sn,
-}
-
-// AllSeason_Nc_SnEnums lists all 4 values in order.
-var AllSeason_Nc_SnEnums = enum.IntEnums{
 	Spring_Nc_Sn, Summer_Nc_Sn, Autumn_Nc_Sn, Winter_Nc_Sn,
 }
 
@@ -26,6 +19,13 @@ const (
 var (
 	season_nc_snEnumIndex = [...]uint16{0, 6, 12, 18, 24}
 )
+
+// String returns the literal string representation of a Season_Nc_Sn, which is
+// the same as the const identifier but without prefix or suffix.
+func (v Season_Nc_Sn) String() string {
+	o := v.Ordinal()
+	return v.toString(o, season_nc_snEnumStrings, season_nc_snEnumIndex[:])
+}
 
 // Ordinal returns the ordinal number of a Season_Nc_Sn. This is an integer counting
 // from zero. It is *not* the same as the const number assigned to the value.
@@ -41,13 +41,6 @@ func (v Season_Nc_Sn) Ordinal() int {
 		return 3
 	}
 	return -1
-}
-
-// String returns the literal string representation of a Season_Nc_Sn, which is
-// the same as the const identifier but without prefix or suffix.
-func (v Season_Nc_Sn) String() string {
-	o := v.Ordinal()
-	return v.toString(o, season_nc_snEnumStrings, season_nc_snEnumIndex[:])
 }
 
 func (v Season_Nc_Sn) toString(o int, concats string, indexes []uint16) string {
@@ -66,10 +59,4 @@ func (v Season_Nc_Sn) IsValid() bool {
 // This facilitates polymorphism (see enum.IntEnum).
 func (v Season_Nc_Sn) Int() int {
 	return int(v)
-}
-
-// Value converts the Season_Nc_Sn to a number (based on '-store number').
-// It implements driver.Valuer, https://golang.org/pkg/database/sql/driver/#Valuer
-func (v Season_Nc_Sn) Value() (driver.Value, error) {
-	return int64(v), nil
 }

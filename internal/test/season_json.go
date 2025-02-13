@@ -55,7 +55,7 @@ const (
 
 //=================================================================================================
 //go:generate enumeration -v -f -i season_json.go -type Season_Uc_Ji -suffix _Uc_Ji -uc -marshaljson identifier
-//go:generate enumeration -v -f -i season_json.go -type Season_Uc_Jn -suffix _Uc_Jn -uc -marshaljson number -z
+//go:generate enumeration -v -f -i season_json.go -type Season_Uc_Jn -suffix _Uc_Jn -uc -marshaljson number
 //go:generate enumeration -v -f -i season_json.go -type Season_Uc_Jj -suffix _Uc_Jj -uc
 
 type (

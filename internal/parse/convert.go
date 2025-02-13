@@ -23,8 +23,6 @@ var fset *token.FileSet
 
 var tagRE = regexp.MustCompile(`[a-z]:"`)
 
-var basicImports = []string{"fmt", "github.com/rickb777/enumeration/v4/enum"}
-
 // https://go.dev/doc/go1.17_spec#Type_declarations (without type parameters)
 // TypeDecl = "type" ( TypeSpec | "(" { TypeSpec ";" } ")" ) .
 // TypeSpec = AliasDecl | TypeDef .
@@ -43,14 +41,21 @@ func Convert(in io.Reader, input string, xCase transform.Case, config model.Conf
 
 	MainType = config.MainType
 
+	outTrans := transform.ListOf(xCase, transform.Unsnake(config.Unsnake))
+	inTrans := outTrans
+	if config.IgnoreCase && xCase == transform.Stet {
+		inTrans = transform.ListOf(transform.Lower, transform.Unsnake(config.Unsnake))
+	}
+
 	m := model.Model{
 		Config:     config,
 		LcType:     strings.ToLower(config.MainType),
 		BaseType:   "int",
-		Case:       xCase,
+		InTrans:    inTrans,
+		OutTrans:   outTrans,
 		AliasTable: AliasTable,
 		Extra:      make(map[string]interface{}),
-		Imports:    collection.NewSet[string](basicImports...),
+		Imports:    collection.NewSet[string]("fmt"),
 	}
 
 	s := newFileScanner(input, src)

@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v4 v4.0.0-dirty
+// github.com/rickb777/enumeration/v4 v4.0.0-1-g132d3af-dirty
 
 package test
 
@@ -17,11 +17,6 @@ var AllSeason_Ic_Jjs = []Season_Ic_Jj{
 	Spring_Ic_Jj, Summer_Ic_Jj, Autumn_Ic_Jj, Winter_Ic_Jj,
 }
 
-// AllSeason_Ic_JjEnums lists all 4 values in order.
-var AllSeason_Ic_JjEnums = enum.IntEnums{
-	Spring_Ic_Jj, Summer_Ic_Jj, Autumn_Ic_Jj, Winter_Ic_Jj,
-}
-
 const (
 	season_ic_jjEnumStrings = "SpringSummerAutumnWinter"
 	season_ic_jjEnumInputs  = "springsummerautumnwinter"
@@ -33,6 +28,13 @@ var (
 	season_ic_jjEnumIndex = [...]uint16{0, 6, 12, 18, 24}
 	season_ic_jjJSONIndex = [...]uint16{0, 4, 8, 12, 16}
 )
+
+// String returns the literal string representation of a Season_Ic_Jj, which is
+// the same as the const identifier but without prefix or suffix.
+func (v Season_Ic_Jj) String() string {
+	o := v.Ordinal()
+	return v.toString(o, season_ic_jjEnumStrings, season_ic_jjEnumIndex[:])
+}
 
 // Ordinal returns the ordinal number of a Season_Ic_Jj. This is an integer counting
 // from zero. It is *not* the same as the const number assigned to the value.
@@ -48,13 +50,6 @@ func (v Season_Ic_Jj) Ordinal() int {
 		return 3
 	}
 	return -1
-}
-
-// String returns the literal string representation of a Season_Ic_Jj, which is
-// the same as the const identifier but without prefix or suffix.
-func (v Season_Ic_Jj) String() string {
-	o := v.Ordinal()
-	return v.toString(o, season_ic_jjEnumStrings, season_ic_jjEnumIndex[:])
 }
 
 func (v Season_Ic_Jj) toString(o int, concats string, indexes []uint16) string {
@@ -239,11 +234,4 @@ func (v *Season_Ic_Jj) unmarshalJSON(in string) error {
 	}
 
 	return errors.New(in + ": unrecognised season_ic_jj")
-}
-
-// season_ic_jjMarshalNumber handles marshaling where a number is required or where
-// the value is out of range.
-// This function can be replaced with any bespoke function than matches signature.
-var season_ic_jjMarshalNumber = func(v Season_Ic_Jj) string {
-	return strconv.FormatInt(int64(v), 10)
 }

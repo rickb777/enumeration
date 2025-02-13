@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v4 v4.0.0-dirty
+// github.com/rickb777/enumeration/v4 v4.0.0-1-g132d3af-dirty
 
 package test
 
@@ -7,7 +7,6 @@ import (
 	"database/sql/driver"
 	"errors"
 	"fmt"
-	"github.com/rickb777/enumeration/v4/enum"
 	"slices"
 	"strconv"
 	"strings"
@@ -15,11 +14,6 @@ import (
 
 // AllSeason_Ic_Sss lists all 4 values in order.
 var AllSeason_Ic_Sss = []Season_Ic_Ss{
-	Spring_Ic_Ss, Summer_Ic_Ss, Autumn_Ic_Ss, Winter_Ic_Ss,
-}
-
-// AllSeason_Ic_SsEnums lists all 4 values in order.
-var AllSeason_Ic_SsEnums = enum.IntEnums{
 	Spring_Ic_Ss, Summer_Ic_Ss, Autumn_Ic_Ss, Winter_Ic_Ss,
 }
 
@@ -35,6 +29,13 @@ var (
 	season_ic_ssSQLIndex  = [...]uint16{0, 4, 8, 12, 16}
 )
 
+// String returns the literal string representation of a Season_Ic_Ss, which is
+// the same as the const identifier but without prefix or suffix.
+func (v Season_Ic_Ss) String() string {
+	o := v.Ordinal()
+	return v.toString(o, season_ic_ssEnumStrings, season_ic_ssEnumIndex[:])
+}
+
 // Ordinal returns the ordinal number of a Season_Ic_Ss. This is an integer counting
 // from zero. It is *not* the same as the const number assigned to the value.
 func (v Season_Ic_Ss) Ordinal() int {
@@ -49,13 +50,6 @@ func (v Season_Ic_Ss) Ordinal() int {
 		return 3
 	}
 	return -1
-}
-
-// String returns the literal string representation of a Season_Ic_Ss, which is
-// the same as the const identifier but without prefix or suffix.
-func (v Season_Ic_Ss) String() string {
-	o := v.Ordinal()
-	return v.toString(o, season_ic_ssEnumStrings, season_ic_ssEnumIndex[:])
 }
 
 func (v Season_Ic_Ss) toString(o int, concats string, indexes []uint16) string {

@@ -1,12 +1,11 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v4 v4.0.0-dirty
+// github.com/rickb777/enumeration/v4 v4.0.0-1-g132d3af-dirty
 
 package example
 
 import (
 	"errors"
 	"fmt"
-	"github.com/rickb777/enumeration/v4/enum"
 	"slices"
 	"strconv"
 	"strings"
@@ -14,12 +13,6 @@ import (
 
 // AllPets lists all 5 values in order.
 var AllPets = []Pet{
-	MyCat, MyDog, MyMouse, MyElephant,
-	MyKoala_Bear,
-}
-
-// AllPetEnums lists all 5 values in order.
-var AllPetEnums = enum.IntEnums{
 	MyCat, MyDog, MyMouse, MyElephant,
 	MyKoala_Bear,
 }
@@ -33,6 +26,13 @@ var (
 	petEnumIndex = [...]uint16{0, 3, 6, 11, 19, 29}
 	petTextIndex = [...]uint16{0, 11, 22, 34, 52, 74}
 )
+
+// String returns the literal string representation of a Pet, which is
+// the same as the const identifier but without prefix or suffix.
+func (v Pet) String() string {
+	o := v.Ordinal()
+	return v.toString(o, petEnumStrings, petEnumIndex[:])
+}
 
 // Ordinal returns the ordinal number of a Pet. This is an integer counting
 // from zero. It is *not* the same as the const number assigned to the value.
@@ -50,13 +50,6 @@ func (v Pet) Ordinal() int {
 		return 4
 	}
 	return -1
-}
-
-// String returns the literal string representation of a Pet, which is
-// the same as the const identifier but without prefix or suffix.
-func (v Pet) String() string {
-	o := v.Ordinal()
-	return v.toString(o, petEnumStrings, petEnumIndex[:])
 }
 
 func (v Pet) toString(o int, concats string, indexes []uint16) string {
@@ -159,7 +152,7 @@ func (v *Pet) parseString(s string, concats string, indexes []uint16) (ok bool) 
 // This function is pluggable and is initialised using command-line flags
 // -ic -lc -uc -unsnake.
 var petTransformInput = func(in string) string {
-	return strings.ToLower(strings.ReplaceAll(in, "_", " "))
+	return strings.ReplaceAll(strings.ToLower(in), "_", " ")
 }
 
 // AsPet parses a string to find the corresponding Pet, accepting either one of the string values or

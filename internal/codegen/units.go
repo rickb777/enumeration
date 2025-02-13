@@ -3,14 +3,24 @@ package codegen
 import (
 	"github.com/rickb777/enumeration/v4/internal/collection"
 	"slices"
+	"unicode"
 )
 
 type Unit struct {
-	Declares string
-	Requires []string
-	Extra    map[string]any
-	Imports  collection.Set[string]
-	Template string
+	Declares   string
+	Requires   []string
+	Extra      map[string]any
+	Imports    collection.Set[string]
+	Transforms bool
+	Template   string
+}
+
+func (u Unit) Exported() bool {
+	d := u.Declares
+	if d[:2] == "v." {
+		d = d[2:]
+	}
+	return unicode.IsUpper(rune(d[0]))
 }
 
 type Units struct {

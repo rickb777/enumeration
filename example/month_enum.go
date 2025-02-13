@@ -1,12 +1,11 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v4 v4.0.0-dirty
+// github.com/rickb777/enumeration/v4 v4.0.0-1-g132d3af-dirty
 
 package example
 
 import (
 	"errors"
 	"fmt"
-	"github.com/rickb777/enumeration/v4/enum"
 	"slices"
 	"strconv"
 	"strings"
@@ -14,13 +13,6 @@ import (
 
 // AllMonths lists all 12 values in order.
 var AllMonths = []Month{
-	January, February, March, April,
-	May, June, July, August, September,
-	October, November, December,
-}
-
-// AllMonthEnums lists all 12 values in order.
-var AllMonthEnums = enum.IntEnums{
 	January, February, March, April,
 	May, June, July, August, September,
 	October, November, December,
@@ -34,6 +26,13 @@ const (
 var (
 	monthEnumIndex = [...]uint16{0, 7, 15, 20, 25, 28, 32, 36, 42, 51, 58, 66, 74}
 )
+
+// String returns the literal string representation of a Month, which is
+// the same as the const identifier but without prefix or suffix.
+func (v Month) String() string {
+	o := v.Ordinal()
+	return v.toString(o, monthEnumStrings, monthEnumIndex[:])
+}
 
 // Ordinal returns the ordinal number of a Month. This is an integer counting
 // from zero. It is *not* the same as the const number assigned to the value.
@@ -65,13 +64,6 @@ func (v Month) Ordinal() int {
 		return 11
 	}
 	return -1
-}
-
-// String returns the literal string representation of a Month, which is
-// the same as the const identifier but without prefix or suffix.
-func (v Month) String() string {
-	o := v.Ordinal()
-	return v.toString(o, monthEnumStrings, monthEnumIndex[:])
 }
 
 func (v Month) toString(o int, concats string, indexes []uint16) string {

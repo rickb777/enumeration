@@ -2,7 +2,7 @@ package example
 
 //go:generate enumeration -v -type Pet -prefix My -unsnake -lc -alias petAliases -lenient
 
-// Pet: This example has a cross-mapping table specified via the 'text' tags. So the parser
+// Pet example has a cross-mapping table specified via the 'text' tags. So the parser
 // recognises inputs from both sets of strings. Also:
 //
 //   - The '-lc' option means the parser expects lowercase inputs and the String method

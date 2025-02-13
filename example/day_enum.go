@@ -1,24 +1,17 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v4 v4.0.0-dirty
+// github.com/rickb777/enumeration/v4 v4.0.0-1-g132d3af-dirty
 
 package example
 
 import (
 	"errors"
 	"fmt"
-	"github.com/rickb777/enumeration/v4/enum"
 	"slices"
 	"strconv"
 )
 
 // AllDays lists all 7 values in order.
 var AllDays = []Day{
-	Sunday, Monday, Tuesday, Wednesday,
-	Thursday, Friday, Saturday,
-}
-
-// AllDayEnums lists all 7 values in order.
-var AllDayEnums = enum.IntEnums{
 	Sunday, Monday, Tuesday, Wednesday,
 	Thursday, Friday, Saturday,
 }
@@ -30,6 +23,13 @@ const (
 var (
 	dayEnumIndex = [...]uint16{0, 6, 12, 19, 28, 36, 42, 50}
 )
+
+// String returns the literal string representation of a Day, which is
+// the same as the const identifier but without prefix or suffix.
+func (v Day) String() string {
+	o := v.Ordinal()
+	return v.toString(o, dayEnumStrings, dayEnumIndex[:])
+}
 
 // Ordinal returns the ordinal number of a Day. This is an integer counting
 // from zero. It is *not* the same as the const number assigned to the value.
@@ -51,13 +51,6 @@ func (v Day) Ordinal() int {
 		return 6
 	}
 	return -1
-}
-
-// String returns the literal string representation of a Day, which is
-// the same as the const identifier but without prefix or suffix.
-func (v Day) String() string {
-	o := v.Ordinal()
-	return v.toString(o, dayEnumStrings, dayEnumIndex[:])
 }
 
 func (v Day) toString(o int, concats string, indexes []uint16) string {

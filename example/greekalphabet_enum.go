@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v4 v4.0.0-dirty
+// github.com/rickb777/enumeration/v4 v4.0.0-1-g132d3af-dirty
 
 package example
 
@@ -7,22 +7,12 @@ import (
 	"database/sql/driver"
 	"errors"
 	"fmt"
-	"github.com/rickb777/enumeration/v4/enum"
 	"slices"
 	"strconv"
 )
 
 // AllGreekAlphabets lists all 24 values in order.
 var AllGreekAlphabets = []GreekAlphabet{
-	Αλφα, Βήτα, Γάμμα, Δέλτα,
-	Εψιλον, Ζήτα, Ητα, Θήτα, Ιώτα,
-	Κάππα, Λάμβδα, Μυ, Νυ, Ξι,
-	Ομικρον, Πι, Ρώ, Σίγμα, Ταυ,
-	Υψιλον, Φι, Χι, Ψι, Ωμέγα,
-}
-
-// AllGreekAlphabetEnums lists all 24 values in order.
-var AllGreekAlphabetEnums = enum.IntEnums{
 	Αλφα, Βήτα, Γάμμα, Δέλτα,
 	Εψιλον, Ζήτα, Ητα, Θήτα, Ιώτα,
 	Κάππα, Λάμβδα, Μυ, Νυ, Ξι,
@@ -41,6 +31,13 @@ var (
 	greekalphabetTextIndex = [...]uint16{0, 5, 9, 14, 19, 26, 30, 33, 38, 42, 47, 53, 55, 57, 59, 66, 68, 71, 76, 79, 86, 89, 92, 95, 100}
 	greekalphabetSQLIndex  = [...]uint16{0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 44, 46, 48}
 )
+
+// String returns the literal string representation of a GreekAlphabet, which is
+// the same as the const identifier but without prefix or suffix.
+func (v GreekAlphabet) String() string {
+	o := v.Ordinal()
+	return v.toString(o, greekalphabetEnumStrings, greekalphabetEnumIndex[:])
+}
 
 // Ordinal returns the ordinal number of a GreekAlphabet. This is an integer counting
 // from zero. It is *not* the same as the const number assigned to the value.
@@ -96,13 +93,6 @@ func (v GreekAlphabet) Ordinal() int {
 		return 23
 	}
 	return -1
-}
-
-// String returns the literal string representation of a GreekAlphabet, which is
-// the same as the const identifier but without prefix or suffix.
-func (v GreekAlphabet) String() string {
-	o := v.Ordinal()
-	return v.toString(o, greekalphabetEnumStrings, greekalphabetEnumIndex[:])
 }
 
 func (v GreekAlphabet) toString(o int, concats string, indexes []uint16) string {

@@ -1,9 +1,9 @@
 package example
 
-//go:generate enumeration -v -f -type Base -lc
+//go:generate enumeration -v -f -type Base -lc -poly
 
-// Base: This example demonstrates using floating point values instead of integers.
-// These are float32 but could be float64; the only ither restriction is that
+// Base example demonstrates using floating point values instead of integers.
+// These are float32 but could be float64; the only other restriction is that
 // no two values can be the same number.
 type Base float32
 

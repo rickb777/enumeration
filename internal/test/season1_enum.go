@@ -1,23 +1,17 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v4 v4.0.0-dirty
+// github.com/rickb777/enumeration/v4 v4.0.0-1-g132d3af-dirty
 
 package test
 
 import (
 	"errors"
 	"fmt"
-	"github.com/rickb777/enumeration/v4/enum"
 	"slices"
 	"strconv"
 )
 
 // AllSeason1s lists all 4 values in order.
 var AllSeason1s = []Season1{
-	Spring1, Summer1, Autumn1, Winter1,
-}
-
-// AllSeason1Enums lists all 4 values in order.
-var AllSeason1Enums = enum.IntEnums{
 	Spring1, Summer1, Autumn1, Winter1,
 }
 
@@ -28,6 +22,13 @@ const (
 var (
 	season1EnumIndex = [...]uint16{0, 6, 12, 18, 24}
 )
+
+// String returns the literal string representation of a Season1, which is
+// the same as the const identifier but without prefix or suffix.
+func (v Season1) String() string {
+	o := v.Ordinal()
+	return v.toString(o, season1EnumStrings, season1EnumIndex[:])
+}
 
 // Ordinal returns the ordinal number of a Season1. This is an integer counting
 // from zero. It is *not* the same as the const number assigned to the value.
@@ -43,13 +44,6 @@ func (v Season1) Ordinal() int {
 		return 3
 	}
 	return -1
-}
-
-// String returns the literal string representation of a Season1, which is
-// the same as the const identifier but without prefix or suffix.
-func (v Season1) String() string {
-	o := v.Ordinal()
-	return v.toString(o, season1EnumStrings, season1EnumIndex[:])
 }
 
 func (v Season1) toString(o int, concats string, indexes []uint16) string {

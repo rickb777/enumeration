@@ -1,16 +1,16 @@
 package example
 
-//go:generate enumeration -v -i channel.go -o channel_enum.go -lc -type SalesChannel -suffix Sales
+//go:generate enumeration -v -i channel.go -o channel_enum.go -lc -type SalesChannel -suffix Sales -poly
 
-// preamble const declarations are ignored
+// preamble const declarations are ignored by the enumeration tool
 const IgnoreThisItem, AndThis = 741, "quack"
 
-// this is ignored too
 const (
+	// One is ignored by the enumeration tool too
 	One = 1
 )
 
-// SalesChannel: The example demonstrates the removing of a suffix string from the identifiers
+// SalesChannel example demonstrates the removing of a suffix string from the identifiers
 // when their string equivalent is accessed.
 //
 // The `json` tags in comments control values used for JSON marshalling.

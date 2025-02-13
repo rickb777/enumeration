@@ -15,14 +15,14 @@ import (
 
 func TestMainApp_Day(t *testing.T) {
 	g := gomega.NewWithT(t)
-	outputFile := "example/day_enum.go"
+	outputFile := "temp/example/day_enum.go"
 	err := os.Remove(outputFile)
 	if err != nil {
 		t.Logf("rm %s: %s", outputFile, err.Error())
 		// continue anyway
 	}
 
-	os.Args = []string{"", "-f", "-type", "Day", "-i", "example/day.go", "-o", outputFile}
+	os.Args = []string{"", "-f", "-type", "Day", "-i", "temp/example/day.go", "-o", outputFile}
 
 	main()
 
@@ -32,12 +32,12 @@ func TestMainApp_Day(t *testing.T) {
 func TestMainApp_Channel(t *testing.T) {
 	g := gomega.NewWithT(t)
 
-	inputGo = "example/channel.go"
-	outputGo = "example/channel_enum.go"
+	inputGo = "temp/example/channel.go"
+	outputGo = "temp/example/channel_enum.go"
 
 	err := os.Remove(outputGo)
 	if err != nil {
-		t.Logf("rm %s: %s", "example/channel_enum.go", err.Error())
+		t.Logf("rm %s: %s", "temp/example/channel_enum.go", err.Error())
 		// continue anyway
 	}
 
@@ -61,8 +61,8 @@ func TestMainApp_Channel(t *testing.T) {
 func TestMainApp_Country(t *testing.T) {
 	g := gomega.NewWithT(t)
 
-	inputGo = "example/country.go"
-	outputGo = "example/country_enum.go"
+	inputGo = "temp/example/country.go"
+	outputGo = "temp/example/country_enum.go"
 
 	err := os.Remove(outputGo)
 	if err != nil {
@@ -93,12 +93,12 @@ func TestMainApp_Country(t *testing.T) {
 func TestMainApp_Method(t *testing.T) {
 	g := gomega.NewWithT(t)
 
-	inputGo = "example/method.go"
-	outputGo = "example/method_enum.go"
+	inputGo = "temp/example/method.go"
+	outputGo = "temp/example/method_enum.go"
 
 	err := os.Remove(outputGo)
 	if err != nil {
-		t.Logf("rm %s: %s", "example/method_enum.go", err.Error())
+		t.Logf("rm %s: %s", "temp/example/method_enum.go", err.Error())
 		// continue anyway
 	}
 
