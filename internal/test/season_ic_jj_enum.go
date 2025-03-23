@@ -1,5 +1,5 @@
 // generated code - do not edit
-// github.com/rickb777/enumeration/v4 v4.0.2-dirty
+// github.com/rickb777/enumeration/v4 v4.0.2-1-ga50534c
 
 package test
 
