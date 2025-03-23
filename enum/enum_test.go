@@ -1,112 +1,95 @@
 package enum_test
 
 import (
+	"github.com/rickb777/expect"
 	"strings"
 	"testing"
 
-	. "github.com/onsi/gomega"
 	"github.com/rickb777/enumeration/v4/enum"
 	"github.com/rickb777/enumeration/v4/example"
 )
 
 func TestIntEnums_Strings(t *testing.T) {
-	RegisterTestingT(t)
-
 	methods := example.AllMethodEnums.Strings()
 
-	Ω(strings.Join(methods, "|")).Should(Equal("HEAD|GET|PUT|POST|PATCH|DELETE"))
+	expect.String(strings.Join(methods, "|")).ToBe(t, "HEAD|GET|PUT|POST|PATCH|DELETE")
 
 	methods = enum.Enums{example.HEAD, example.PUT, example.PATCH}.Strings()
 
-	Ω(strings.Join(methods, "|")).Should(Equal("HEAD|PUT|PATCH"))
+	expect.String(strings.Join(methods, "|")).ToBe(t, "HEAD|PUT|PATCH")
 }
 
 func TestIntEnums_Ordinals(t *testing.T) {
-	RegisterTestingT(t)
-
 	days := enum.Enums{example.Wednesday, example.Friday, example.Sunday}.Ordinals()
 
-	Ω(days).Should(Equal([]int{3, 5, 0}))
+	expect.Slice(days).ToBe(t, 3, 5, 0)
 
 	days = enum.IntEnums{example.Wednesday, example.Friday, example.Sunday}.Ordinals()
 
-	Ω(days).Should(Equal([]int{3, 5, 0}))
+	expect.Slice(days).ToBe(t, 3, 5, 0)
 }
 
 func TestIntEnums_Ints(t *testing.T) {
-	RegisterTestingT(t)
-
 	days := enum.IntEnums{example.Wednesday, example.Friday, example.Sunday}.Ints()
 
-	Ω(days).Should(Equal([]int{4, 6, 1}))
+	expect.Slice(days).ToBe(t, 4, 6, 1)
 }
 
 //-------------------------------------------------------------------------------------------------
 
 func TestFloatEnums_Strings(t *testing.T) {
-	RegisterTestingT(t)
-
 	es := example.AllBaseEnums.Strings()
 
-	Ω(es).Should(HaveLen(4))
-	Ω(strings.Join(es, "|")).Should(Equal("a|c|g|t"))
+	expect.Slice(es).ToBe(t, "a", "c", "g", "t")
 }
 
 func TestFloatEnums_Ordinals(t *testing.T) {
-	RegisterTestingT(t)
-
 	es := enum.Enums{example.C, example.T}.Ordinals()
 
-	Ω(es).Should(Equal([]int{1, 3}))
+	expect.Slice(es).ToBe(t, 1, 3)
 
 	es = enum.FloatEnums{example.C, example.T}.Ordinals()
 
-	Ω(es).Should(Equal([]int{1, 3}))
+	expect.Slice(es).ToBe(t, 1, 3)
 }
 
 func TestFloatEnums_Floats(t *testing.T) {
-	RegisterTestingT(t)
-
 	es := example.AllBaseEnums.Floats()
 
-	Ω(es).Should(Equal([]float64{float64(example.A), float64(example.C), float64(example.G), float64(example.T)}))
+	expect.Slice(es).ToBe(t, float64(example.A), float64(example.C), float64(example.G), float64(example.T))
 }
 
 func TestQuotedString(t *testing.T) {
-	RegisterTestingT(t)
-
 	qs1 := enum.QuotedString("")
-	Ω(qs1).Should(Equal([]byte{'"', '"'}))
+	expect.String(qs1).ToBe(t, []byte{'"', '"'})
 
 	qs2 := enum.QuotedString("XYZ")
-	Ω(qs2).Should(Equal([]byte{'"', 'X', 'Y', 'Z', '"'}))
+	expect.String(qs2).ToBe(t, []byte{'"', 'X', 'Y', 'Z', '"'})
 }
 
 func TestRepresentation(t *testing.T) {
-	RegisterTestingT(t)
-
 	r1 := enum.MustParseRepresentation("number")
-	Ω(r1).Should(Equal(enum.Number))
+	expect.Number(r1).ToBe(t, enum.Number)
 
 	r2 := enum.MustParseRepresentation("2")
-	Ω(r2).Should(Equal(enum.Number))
+	expect.Number(r2).ToBe(t, enum.Number)
 
 	_, err := enum.AsRepresentation("foobar")
-	Ω(err).Should(HaveOccurred())
+	expect.Error(err).ToHaveOccurred(t)
 
 	num := enum.Number.String()
-	Ω(num).Should(Equal("Number"))
+	expect.String(num).ToBe(t, "Number")
 
 	o1 := enum.RepresentationOf(1)
-	Ω(o1).Should(Equal(enum.Identifier))
-	Ω(o1.Int()).Should(Equal(1))
-	Ω(o1.IsValid()).Should(BeTrue())
+	expect.Number(o1).ToBe(t, enum.Identifier)
+	expect.Number(o1.Int()).ToBe(t, 1)
+	expect.Bool(o1.IsValid()).ToBeTrue(t)
 
 	o3 := enum.RepresentationOf(3)
-	Ω(o1.Int()).Should(Equal(1))
-	Ω(o3.IsValid()).Should(BeFalse())
+	expect.Number(o1.Int()).ToBe(t, 1)
+	expect.Bool(o3.IsValid()).ToBeFalse(t)
 
-	Ω(enum.None.IsValid()).Should(BeTrue())
-	Ω(enum.Representation(4).IsValid()).Should(BeFalse())
-	Ω(enum.Representation(4).String()).Should(Equal("Representation(4)"))
+	expect.Bool(enum.None.IsValid()).ToBeTrue(t)
+	expect.Bool(enum.Representation(4).IsValid()).ToBeFalse(t)
+	expect.String(enum.Representation(4).String()).ToBe(t, "Representation(4)")
 }

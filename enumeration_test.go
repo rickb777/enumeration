@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
-	"github.com/onsi/gomega"
 	"github.com/rickb777/enumeration/v4/internal/model"
 	"github.com/rickb777/enumeration/v4/internal/parse"
+	"github.com/rickb777/expect"
 	"go/scanner"
 	"go/token"
 	"io"
@@ -14,7 +14,6 @@ import (
 )
 
 func TestMainApp_Day(t *testing.T) {
-	g := gomega.NewWithT(t)
 	outputFile := "temp/example/day_enum.go"
 	err := os.Remove(outputFile)
 	if err != nil {
@@ -26,12 +25,10 @@ func TestMainApp_Day(t *testing.T) {
 
 	main()
 
-	compareGeneratedFile(g, outputFile)
+	compareGeneratedFile(t, outputFile)
 }
 
 func TestMainApp_Channel(t *testing.T) {
-	g := gomega.NewWithT(t)
-
 	inputGo = "temp/example/channel.go"
 	outputGo = "temp/example/channel_enum.go"
 
@@ -55,12 +52,10 @@ func TestMainApp_Channel(t *testing.T) {
 
 	doMain()
 
-	compareGeneratedFile(g, outputGo)
+	compareGeneratedFile(t, outputGo)
 }
 
 func TestMainApp_Country(t *testing.T) {
-	g := gomega.NewWithT(t)
-
 	inputGo = "temp/example/country.go"
 	outputGo = "temp/example/country_enum.go"
 
@@ -87,12 +82,10 @@ func TestMainApp_Country(t *testing.T) {
 
 	doMain()
 
-	compareGeneratedFile(g, outputGo)
+	compareGeneratedFile(t, outputGo)
 }
 
 func TestMainApp_Method(t *testing.T) {
-	g := gomega.NewWithT(t)
-
 	inputGo = "temp/example/method.go"
 	outputGo = "temp/example/method_enum.go"
 
@@ -117,16 +110,16 @@ func TestMainApp_Method(t *testing.T) {
 
 	doMain()
 
-	compareGeneratedFile(g, outputGo)
+	compareGeneratedFile(t, outputGo)
 }
 
-func compareGeneratedFile(g *gomega.WithT, fileName string) {
+func compareGeneratedFile(t *testing.T, fileName string) {
 	f, err := os.Open(fileName)
-	g.Expect(err).NotTo(gomega.HaveOccurred())
+	expect.Error(err).Not().ToHaveOccurred(t)
 	defer f.Close()
 
 	src, err := io.ReadAll(f)
-	g.Expect(err).NotTo(gomega.HaveOccurred())
+	expect.Error(err).Not().ToHaveOccurred(t)
 
 	var s scanner.Scanner
 	fset := token.NewFileSet()                      // positions are relative to fset
@@ -136,17 +129,17 @@ func compareGeneratedFile(g *gomega.WithT, fileName string) {
 	// check just the first few lines of the generated Go source code
 
 	pos, tok, lit := s.Scan()
-	g.Expect(tok).To(gomega.Equal(token.COMMENT))
+	expect.Number(tok).ToBe(t, token.COMMENT)
 
 	_, tok, lit = s.Scan()
-	g.Expect(tok).To(gomega.Equal(token.COMMENT))
+	expect.Number(tok).ToBe(t, token.COMMENT)
 
 	_, tok, lit = s.Scan()
-	g.Expect(tok).To(gomega.Equal(token.PACKAGE))
+	expect.Number(tok).ToBe(t, token.PACKAGE)
 
 	_, tok, lit = s.Scan()
-	g.Expect(tok).To(gomega.Equal(token.IDENT))
-	g.Expect(lit).To(gomega.Equal("example"))
+	expect.Number(tok).ToBe(t, token.IDENT)
+	expect.String(lit).ToBe(t, "example")
 
 	if testing.Verbose() {
 		for {
@@ -160,17 +153,15 @@ func compareGeneratedFile(g *gomega.WithT, fileName string) {
 }
 
 func TestScannerTryOut(t *testing.T) {
-	g := gomega.NewWithT(t)
-
 	if testing.Verbose() {
 		for _, n := range []string{"example/base.go", "example/day.go", "example/country.go", "example/month.go"} {
 			f, err := os.Open(n)
-			g.Expect(err).NotTo(gomega.HaveOccurred())
+			expect.Error(err).Not().ToHaveOccurred(t)
 			defer f.Close()
 
 			fmt.Printf("-- %s\n", n)
 			src, err := io.ReadAll(f)
-			g.Expect(err).NotTo(gomega.HaveOccurred())
+			expect.Error(err).Not().ToHaveOccurred(t)
 
 			var s scanner.Scanner
 			fset := token.NewFileSet()                      // positions are relative to fset

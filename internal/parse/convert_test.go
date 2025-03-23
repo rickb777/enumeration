@@ -3,12 +3,11 @@ package parse
 import (
 	"bytes"
 	"flag"
+	"github.com/rickb777/expect"
 	"go/types"
 	"os"
 	"testing"
 
-	. "github.com/benmoss/matchers"
-	. "github.com/onsi/gomega"
 	"github.com/rickb777/enumeration/v4/internal/collection"
 	"github.com/rickb777/enumeration/v4/internal/model"
 	"github.com/rickb777/enumeration/v4/internal/transform"
@@ -28,7 +27,6 @@ const (
 var version = "foo"
 
 func TestConvertBlock1(t *testing.T) {
-	RegisterTestingT(t)
 	util.Dbg = testing.Verbose()
 	s := bytes.NewBufferString(enumBlock1)
 	m, err := Convert(s, "filename.go", transform.Upper,
@@ -39,8 +37,8 @@ func TestConvertBlock1(t *testing.T) {
 			IgnoreCase: false,
 			Unsnake:    false,
 		})
-	Ω(err).Should(BeNil())
-	Ω(m).Should(DeepEqual(model.Model{
+	expect.Error(err).ToBeNil(t)
+	expect.Any(m).ToEqual(t, model.Model{
 		Config: model.Config{
 			MainType: "Sweet",
 			Plural:   "Sweets",
@@ -54,7 +52,7 @@ func TestConvertBlock1(t *testing.T) {
 		OutTrans: transform.ListOf(transform.Upper),
 		Extra:    make(map[string]interface{}),
 		Imports:  collection.NewSet[string]("fmt"),
-	}))
+	})
 }
 
 const enumBlock2 = `
@@ -75,7 +73,6 @@ const (
 `
 
 func TestConvertBlock2(t *testing.T) {
-	RegisterTestingT(t)
 	util.Dbg = testing.Verbose()
 	s := bytes.NewBufferString(enumBlock2)
 	m, err := Convert(s, "filename.go", transform.Stet,
@@ -86,8 +83,8 @@ func TestConvertBlock2(t *testing.T) {
 			IgnoreCase: true,
 			Unsnake:    true,
 		})
-	Ω(err).Should(BeNil())
-	Ω(m).Should(DeepEqual(model.Model{
+	expect.Error(err).ToBeNil(t)
+	expect.Any(m).ToEqual(t, model.Model{
 		Config: model.Config{
 			MainType:   "Sweet",
 			Plural:     "Sweets",
@@ -103,7 +100,7 @@ func TestConvertBlock2(t *testing.T) {
 		OutTrans: transform.ListOf(transform.Stet, transform.Unsnake(true)),
 		Extra:    make(map[string]interface{}),
 		Imports:  collection.NewSet[string]("fmt"),
-	}))
+	})
 }
 
 const enumBlock3 = `
@@ -119,7 +116,6 @@ const (
 `
 
 func TestConvertBlock3(t *testing.T) {
-	RegisterTestingT(t)
 	util.Dbg = testing.Verbose()
 	s := bytes.NewBufferString(enumBlock3)
 	m, err := Convert(s, "filename.go", transform.Upper,
@@ -128,8 +124,8 @@ func TestConvertBlock3(t *testing.T) {
 			Plural:   "Sweets",
 			Pkg:      "confectionary",
 		})
-	Ω(err).Should(BeNil())
-	Ω(m).Should(DeepEqual(model.Model{
+	expect.Error(err).ToBeNil(t)
+	expect.Any(m).ToEqual(t, model.Model{
 		Config: model.Config{
 			MainType: "Sweet",
 			Plural:   "Sweets",
@@ -143,7 +139,7 @@ func TestConvertBlock3(t *testing.T) {
 		OutTrans: transform.ListOf(transform.Upper),
 		Extra:    make(map[string]interface{}),
 		Imports:  collection.NewSet[string]("fmt"),
-	}))
+	})
 }
 
 const enumBlock4 = `
@@ -183,7 +179,6 @@ var sweetStrings = map[Sweet]string{
 `
 
 func TestConvertBlock4(t *testing.T) {
-	RegisterTestingT(t)
 	AliasTable = "sweetAliases"
 	defer func() { AliasTable = "" }()
 
@@ -197,7 +192,7 @@ func TestConvertBlock4(t *testing.T) {
 			IgnoreCase: true,
 			Unsnake:    true,
 		})
-	Ω(err).Should(BeNil())
+	expect.Error(err).ToBeNil(t)
 
 	values := model.ValuesOf("Mars", "Bounty", "Snickers", "Kitkat")
 	values[0].JSON = "mmm"
@@ -205,7 +200,7 @@ func TestConvertBlock4(t *testing.T) {
 	values[2].JSON = "sss"
 	values[3].JSON = "kkk"
 
-	Ω(m).Should(DeepEqual(model.Model{
+	expect.Any(m).ToEqual(t, model.Model{
 		Config: model.Config{
 			MainType:   "Sweet",
 			Plural:     "Sweets",
@@ -222,7 +217,7 @@ func TestConvertBlock4(t *testing.T) {
 		AliasTable: "sweetAliases",
 		Extra:      make(map[string]interface{}),
 		Imports:    collection.NewSet[string]("fmt"),
-	}))
+	})
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -237,7 +232,6 @@ const (
 `
 
 func TestConvertBlockMultiple(t *testing.T) {
-	RegisterTestingT(t)
 	util.Dbg = testing.Verbose()
 	s := bytes.NewBufferString(enumBlockMultiple)
 	m, err := Convert(s, "filename.go", transform.Upper,
@@ -248,8 +242,8 @@ func TestConvertBlockMultiple(t *testing.T) {
 			IgnoreCase: false,
 			Unsnake:    false,
 		})
-	Ω(err).Should(BeNil())
-	Ω(m).Should(DeepEqual(model.Model{
+	expect.Error(err).ToBeNil(t)
+	expect.Any(m).ToEqual(t, model.Model{
 		Config: model.Config{
 			MainType: "Sweet",
 			Plural:   "Sweets",
@@ -263,7 +257,7 @@ func TestConvertBlockMultiple(t *testing.T) {
 		OutTrans: transform.ListOf(transform.Upper),
 		Extra:    make(map[string]interface{}),
 		Imports:  collection.NewSet[string]("fmt"),
-	}))
+	})
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -279,7 +273,6 @@ const Kitkat   Sweet = 5
 `
 
 func TestConvertSeparate1(t *testing.T) {
-	RegisterTestingT(t)
 	util.Dbg = testing.Verbose()
 	s := bytes.NewBufferString(enumSeparate1)
 	m, err := Convert(s, "filename.go", transform.Upper,
@@ -288,8 +281,8 @@ func TestConvertSeparate1(t *testing.T) {
 			Plural:   "Sweets",
 			Pkg:      "confectionary",
 		})
-	Ω(err).Should(BeNil())
-	Ω(m).Should(DeepEqual(model.Model{
+	expect.Error(err).ToBeNil(t)
+	expect.Any(m).ToEqual(t, model.Model{
 		Config: model.Config{
 			MainType: "Sweet",
 			Plural:   "Sweets",
@@ -303,7 +296,7 @@ func TestConvertSeparate1(t *testing.T) {
 		OutTrans: transform.ListOf(transform.Upper),
 		Extra:    make(map[string]interface{}),
 		Imports:  collection.NewSet[string]("fmt"),
-	}))
+	})
 }
 
 const enumSeparate2 = `
@@ -318,7 +311,6 @@ const Ignore         = 6 // json:"orange"
 `
 
 func TestConvertSeparate2(t *testing.T) {
-	RegisterTestingT(t)
 	util.Dbg = testing.Verbose()
 	s := bytes.NewBufferString(enumSeparate2)
 	m, err := Convert(s, "filename.go", transform.Upper,
@@ -327,7 +319,7 @@ func TestConvertSeparate2(t *testing.T) {
 			Plural:   "Sweets",
 			Pkg:      "confectionary",
 		})
-	Ω(err).Should(BeNil())
+	expect.Error(err).ToBeNil(t)
 
 	var expected model.Values
 	expected = expected.Append("Mars", `json:"toffee"`)
@@ -335,7 +327,7 @@ func TestConvertSeparate2(t *testing.T) {
 	expected = expected.Append("Snickers", `json:"peanut"`)
 	expected = expected.Append("Kitkat", `json:"biscuit"`)
 
-	Ω(m).Should(DeepEqual(model.Model{
+	expect.Any(m).ToEqual(t, model.Model{
 		Config: model.Config{
 			MainType: "Sweet",
 			Plural:   "Sweets",
@@ -349,7 +341,7 @@ func TestConvertSeparate2(t *testing.T) {
 		OutTrans: transform.ListOf(transform.Upper),
 		Extra:    make(map[string]interface{}),
 		Imports:  collection.NewSet[string]("fmt"),
-	}))
+	})
 }
 
 const enumSeparateMultiple = `
@@ -358,7 +350,6 @@ const Mars, Bounty, Snickers, Kitkat Sweet = 1, 2, 3, 4
 `
 
 func TestConvertSeparateMultiple(t *testing.T) {
-	RegisterTestingT(t)
 	util.Dbg = testing.Verbose()
 	s := bytes.NewBufferString(enumSeparateMultiple)
 	m, err := Convert(s, "filename.go", transform.Upper,
@@ -367,8 +358,8 @@ func TestConvertSeparateMultiple(t *testing.T) {
 			Plural:   "Sweets",
 			Pkg:      "confectionary",
 		})
-	Ω(err).Should(BeNil())
-	Ω(m).Should(DeepEqual(model.Model{
+	expect.Error(err).ToBeNil(t)
+	expect.Any(m).ToEqual(t, model.Model{
 		Config: model.Config{
 			MainType: "Sweet",
 			Plural:   "Sweets",
@@ -382,7 +373,7 @@ func TestConvertSeparateMultiple(t *testing.T) {
 		OutTrans: transform.ListOf(transform.Upper),
 		Extra:    make(map[string]interface{}),
 		Imports:  collection.NewSet[string]("fmt"),
-	}))
+	})
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -449,7 +440,6 @@ var enumErrors = map[string]string{
 }
 
 func TestConvertErrors(t *testing.T) {
-	RegisterTestingT(t)
 	for src, msg := range enumErrors {
 		s := bytes.NewBufferString(src)
 		_, err := Convert(s, "filename.go", transform.Stet,
@@ -459,7 +449,7 @@ func TestConvertErrors(t *testing.T) {
 				Pkg:      "confectionary",
 				Version:  version,
 			})
-		Ω(err.Error()).Should(Equal(msg), msg)
+		expect.Error(err).ToContain(t, msg)
 	}
 }
 
