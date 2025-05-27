@@ -4,3 +4,5 @@ github.com/rickb777/expect v0.21.0 h1:d06fVjsz2zGVfbEVRWetStwv/YKaxM4A0t39IzzST8
 github.com/rickb777/expect v0.21.0/go.mod h1:NQTOf7atJ/89U2FLV1ghRp5XJDdZ8dV+8iW47kJ9q7c=
 github.com/rickb777/plural v1.4.3 h1:YrWiz/jrbcRzjPOIWQZZRQFOBj2e/2CwZpD7BxLu65U=
 github.com/rickb777/plural v1.4.3/go.mod h1:dzZdD8cHnKMz8jud+XKajn8Hz8voyCNgbuozC8pv1N8=
+github.com/rickb777/plural v1.4.4 h1:OpZU8uRr9P2NkYAbkLMwlKNVJyJ5HvRcRBFyXGJtKGI=
+github.com/rickb777/plural v1.4.4/go.mod h1:DB19dtrplGS5s6VJVHn7tvmFYPoE83p1xqio3oVnNRM=
