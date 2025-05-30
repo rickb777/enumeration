@@ -21,7 +21,7 @@ function v
 
 v go mod download
 
-v go build -o bin/enumeration -ldflags "-s -X main.version=$VERSION -X main.date=$DATE" .
+v go build -o bin/enumeration .
 
 v go clean -testcache
 

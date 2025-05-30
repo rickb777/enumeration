@@ -127,11 +127,11 @@ func main() {
 }
 
 func doMain() {
-	config.Version = version
+	config.Version = appVersion
 
 	if showVersion {
-		fmt.Fprintln(os.Stderr, version, "built", date)
-		os.Exit(1)
+		fmt.Fprintln(os.Stdout, appVersion)
+		os.Exit(0)
 	}
 
 	if config.MainType == "" {
@@ -171,9 +171,3 @@ func doMain() {
 		generate()
 	}
 }
-
-// build metadata
-var (
-	version = "dev"
-	date    = ""
-)
