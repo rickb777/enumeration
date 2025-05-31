@@ -6,6 +6,8 @@
 package main
 
 import (
+	"fmt"
+	"github.com/magefile/mage/mg"
 	"github.com/magefile/mage/sh"
 	"os"
 	"path/filepath"
@@ -20,14 +22,16 @@ func Build() error {
 		return err
 	}
 
+	x := ternary(mg.Verbose(), "-x ", "")
+
 	if err := run(
 		"go build -o bin/enumeration .",
 		"go clean -testcache",
 		"rm -f internal/test/*_enum.go internal/test/simple/*_enum.go",
 		"go test ./internal/parse",
-		"go generate ./internal/test",
+		"go generate "+x+"./internal/test",
 		"rm -f example/*_enum.go",
-		"go generate -x ./example",
+		"go generate "+x+"./example",
 		"gofmt -l -w -s .",
 	); err != nil {
 		return err
@@ -42,10 +46,11 @@ func Build() error {
 	}
 
 	if err := run(
-		"rm -f temp/example/*_enum.go temp/example/*_test.go",
-		"cp example/*.go temp/example",
+		"cp -r example temp",
+		"rm -f temp/example/*_*.go",
 		"go test ./...",
 		"go vet ./...",
+		"rm -rf temp/",
 	); err != nil {
 		return err
 	}
@@ -61,6 +66,7 @@ func run(cmds ...string) error {
 			if err != nil {
 				return err
 			}
+			fmt.Println(strings.Join(parts, " "))
 			err = sh.RunWith(env, parts[0], expanded...)
 			if err != nil {
 				return err
@@ -106,4 +112,11 @@ func setupPathWithBinDir() map[string]string {
 	bindir := filepath.Join(dir, "bin")
 	path := bindir + ":" + os.Getenv("PATH")
 	return map[string]string{"PATH": path}
+}
+
+func ternary(pred bool, a, b string) string {
+	if pred {
+		return a
+	}
+	return b
 }

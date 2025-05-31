@@ -15,11 +15,8 @@ import (
 
 func TestMainApp_Day(t *testing.T) {
 	outputFile := "temp/example/day_enum.go"
-	err := os.Remove(outputFile)
-	if err != nil {
-		t.Logf("rm %s: %s", outputFile, err.Error())
-		// continue anyway
-	}
+
+	remove(t, outputGo)
 
 	os.Args = []string{"", "-f", "-type", "Day", "-i", "temp/example/day.go", "-o", outputFile}
 
@@ -32,11 +29,7 @@ func TestMainApp_Channel(t *testing.T) {
 	inputGo = "temp/example/channel.go"
 	outputGo = "temp/example/channel_enum.go"
 
-	err := os.Remove(outputGo)
-	if err != nil {
-		t.Logf("rm %s: %s", "temp/example/channel_enum.go", err.Error())
-		// continue anyway
-	}
+	remove(t, outputGo)
 
 	force = true
 	lowercase, uppercase, showVersion = false, false, false
@@ -59,11 +52,7 @@ func TestMainApp_Country(t *testing.T) {
 	inputGo = "temp/example/country.go"
 	outputGo = "temp/example/country_enum.go"
 
-	err := os.Remove(outputGo)
-	if err != nil {
-		t.Logf("rm %s: %s", outputGo, err.Error())
-		// continue anyway
-	}
+	remove(t, outputGo)
 
 	force = true
 	lowercase, uppercase, showVersion = false, false, false
@@ -89,11 +78,7 @@ func TestMainApp_Method(t *testing.T) {
 	inputGo = "temp/example/method.go"
 	outputGo = "temp/example/method_enum.go"
 
-	err := os.Remove(outputGo)
-	if err != nil {
-		t.Logf("rm %s: %s", "temp/example/method_enum.go", err.Error())
-		// continue anyway
-	}
+	remove(t, outputGo)
 
 	force = true
 	lowercase, uppercase, showVersion = false, false, false
@@ -113,12 +98,16 @@ func TestMainApp_Method(t *testing.T) {
 	compareGeneratedFile(t, outputGo)
 }
 
-func compareGeneratedFile(t *testing.T, fileName string) {
-	f, err := os.Open(fileName)
-	expect.Error(err).Not().ToHaveOccurred(t)
-	defer f.Close()
+func remove(t *testing.T, file string) {
+	err := os.Remove(file)
+	if err != nil {
+		t.Logf("rm %s: %s", file, err.Error())
+		// continue anyway
+	}
+}
 
-	src, err := io.ReadAll(f)
+func compareGeneratedFile(t *testing.T, fileName string) {
+	src, err := os.ReadFile(fileName)
 	expect.Error(err).Not().ToHaveOccurred(t)
 
 	var s scanner.Scanner
@@ -140,6 +129,15 @@ func compareGeneratedFile(t *testing.T, fileName string) {
 	_, tok, lit = s.Scan()
 	expect.Number(tok).ToBe(t, token.IDENT)
 	expect.String(lit).ToBe(t, "example")
+
+	_, tok, lit = s.Scan()
+	expect.Number(tok).ToBe(t, token.SEMICOLON)
+
+	_, tok, lit = s.Scan()
+	expect.Number(tok).ToBe(t, token.IMPORT)
+
+	_, tok, lit = s.Scan()
+	expect.Number(tok).ToBe(t, token.LPAREN)
 
 	if testing.Verbose() {
 		for {
