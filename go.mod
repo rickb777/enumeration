@@ -1,6 +1,9 @@
 module github.com/rickb777/enumeration/v4
 
-require github.com/rickb777/expect v0.21.0
+require (
+	github.com/magefile/mage v1.15.0
+	github.com/rickb777/expect v0.24.0
+)
 
 require (
 	github.com/google/go-cmp v0.7.0 // indirect
@@ -8,3 +11,5 @@ require (
 )
 
 go 1.24.1
+
+tool github.com/magefile/mage
