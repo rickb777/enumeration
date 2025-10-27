@@ -2,7 +2,7 @@ module github.com/rickb777/enumeration/v4
 
 require (
 	github.com/magefile/mage v1.15.0
-	github.com/rickb777/expect v0.24.0
+	github.com/rickb777/expect v1.0.0
 )
 
 require (
