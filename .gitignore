@@ -4,3 +4,4 @@
 /temp/
 /go.work
 /go.work.sum
+*.out
