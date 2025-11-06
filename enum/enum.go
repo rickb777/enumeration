@@ -109,6 +109,10 @@ func (es FloatEnums) Floats() []float64 {
 	return vs
 }
 
+// QuotedString wraps a string in double-quotes then returns this as []byte.
+// This is the same behaviour as
+//
+//	[]byte(fmt.Sprintf("%q", s)).
 func QuotedString(s string) []byte {
 	b := make([]byte, len(s)+2)
 	b[0] = '"'

@@ -61,10 +61,10 @@ func TestFloatEnums_Floats(t *testing.T) {
 
 func TestQuotedString(t *testing.T) {
 	qs1 := enum.QuotedString("")
-	expect.String(qs1).ToBe(t, []byte{'"', '"'})
+	expect.Slice(qs1).ToBe(t, '"', '"')
 
 	qs2 := enum.QuotedString("XYZ")
-	expect.String(qs2).ToBe(t, []byte{'"', 'X', 'Y', 'Z', '"'})
+	expect.Slice(qs2).ToBe(t, '"', 'X', 'Y', 'Z', '"')
 }
 
 func TestRepresentation(t *testing.T) {
