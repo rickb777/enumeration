@@ -1,10 +1,11 @@
 package parse
 
 import (
-	"github.com/rickb777/enumeration/v4/internal/util"
 	"go/token"
 	"reflect"
 	"strings"
+
+	"github.com/rickb777/enumeration/v4/internal/util"
 )
 
 type constItem struct {

@@ -1,12 +1,12 @@
 package enum_test
 
 import (
-	"github.com/rickb777/expect"
 	"strings"
 	"testing"
 
 	"github.com/rickb777/enumeration/v4/enum"
 	"github.com/rickb777/enumeration/v4/example"
+	"github.com/rickb777/expect"
 )
 
 func TestIntEnums_Strings(t *testing.T) {

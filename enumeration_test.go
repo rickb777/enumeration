@@ -2,15 +2,16 @@ package main
 
 import (
 	"fmt"
-	"github.com/rickb777/enumeration/v4/internal/model"
-	"github.com/rickb777/enumeration/v4/internal/parse"
-	"github.com/rickb777/expect"
 	"go/scanner"
 	"go/token"
 	"io"
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/rickb777/enumeration/v4/internal/model"
+	"github.com/rickb777/enumeration/v4/internal/parse"
+	"github.com/rickb777/expect"
 )
 
 func TestMainApp_Day(t *testing.T) {

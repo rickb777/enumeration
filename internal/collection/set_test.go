@@ -1,8 +1,9 @@
 package collection
 
 import (
-	"github.com/rickb777/expect"
 	"testing"
+
+	"github.com/rickb777/expect"
 )
 
 func TestSetUnits(t *testing.T) {

@@ -5,8 +5,9 @@ import (
 	"encoding/gob"
 	"encoding/json"
 	"encoding/xml"
-	"github.com/rickb777/expect"
 	"testing"
+
+	"github.com/rickb777/expect"
 )
 
 func TestString(t *testing.T) {

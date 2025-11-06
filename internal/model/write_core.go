@@ -2,11 +2,12 @@ package model
 
 import (
 	"fmt"
-	"github.com/rickb777/enumeration/v4/internal/codegen"
-	"github.com/rickb777/enumeration/v4/internal/collection"
 	"go/types"
 	"io"
 	"strings"
+
+	"github.com/rickb777/enumeration/v4/internal/codegen"
+	"github.com/rickb777/enumeration/v4/internal/collection"
 )
 
 type DualWriter interface {

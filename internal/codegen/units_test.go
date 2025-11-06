@@ -1,9 +1,10 @@
 package codegen
 
 import (
+	"testing"
+
 	"github.com/rickb777/enumeration/v4/internal/collection"
 	"github.com/rickb777/expect"
-	"testing"
 )
 
 func TestUnits(t *testing.T) {

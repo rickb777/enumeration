@@ -3,7 +3,6 @@ package parse
 import (
 	"bytes"
 	"flag"
-	"github.com/rickb777/expect"
 	"go/types"
 	"os"
 	"testing"
@@ -12,6 +11,7 @@ import (
 	"github.com/rickb777/enumeration/v4/internal/model"
 	"github.com/rickb777/enumeration/v4/internal/transform"
 	"github.com/rickb777/enumeration/v4/internal/util"
+	"github.com/rickb777/expect"
 )
 
 const enumBlock1 = `

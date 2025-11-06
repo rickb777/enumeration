@@ -1,9 +1,10 @@
 package codegen
 
 import (
-	"github.com/rickb777/enumeration/v4/internal/collection"
 	"slices"
 	"unicode"
+
+	"github.com/rickb777/enumeration/v4/internal/collection"
 )
 
 type Unit struct {

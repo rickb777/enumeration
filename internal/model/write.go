@@ -2,10 +2,11 @@ package model
 
 import (
 	"fmt"
+	"text/template"
+
 	"github.com/rickb777/enumeration/v4/enum"
 	"github.com/rickb777/enumeration/v4/internal/codegen"
 	"github.com/rickb777/enumeration/v4/internal/collection"
-	"text/template"
 )
 
 const enumImportPath = "github.com/rickb777/enumeration/v4/enum"
