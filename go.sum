@@ -1,8 +1,8 @@
 github.com/google/go-cmp v0.7.0 h1:wk8382ETsv4JYUZwIsn6YpYiWiBsYLSJiTsyBybVuN8=
 github.com/google/go-cmp v0.7.0/go.mod h1:pXiqmnSA92OHEEa9HXL2W4E7lf9JzCmGVUdgjX3N/iU=
-github.com/magefile/mage v1.16.0 h1:2naaPmNwrMicCdLBCRDw288hcyClO9lmnm6FMpXyJ5I=
-github.com/magefile/mage v1.16.0/go.mod h1:z5UZb/iS3GoOSn0JgWuiw7dxlurVYTu+/jHXqQg881A=
-github.com/rickb777/expect v1.0.9 h1:yLzCr5XsJ2baFnkWMOKLfJU512UuaMnqlC9c0nUY9d8=
-github.com/rickb777/expect v1.0.9/go.mod h1:Q83Ilhy307rbyGWcKfZwQI0nYtmSyRuNu3RP+Rb/0mc=
-github.com/rickb777/plural v1.4.9 h1:oRs12FkLlhcadn1S4/b5wv5rSShzliG2lYqoCd9xYCU=
-github.com/rickb777/plural v1.4.9/go.mod h1:Bhp03WcY53+Blm5zzzNqolQUH0PI8s8mI4XOYPfTrJM=
+github.com/magefile/mage v1.17.1 h1:F1d2lnLSlbQDM0Plq6Ac4NtaHxkxTK8t5nrMY9SkoNA=
+github.com/magefile/mage v1.17.1/go.mod h1:Yj51kqllmsgFpvvSzgrZPK9WtluG3kUhFaBUVLo4feA=
+github.com/rickb777/expect v1.2.1 h1:7Sorr+a2GMr/iTrLbNJkrRFJ93s0b4yHkiy0qo8/Eww=
+github.com/rickb777/expect v1.2.1/go.mod h1:oH4sLnpnBxjL5TtXGipDuS43LaENQAhGAcMUp37SuOc=
+github.com/rickb777/plural v1.4.10 h1:qaHV20qA9F2o3F/aiGxvRP/idS6mrkz64YhoNSP7aSI=
+github.com/rickb777/plural v1.4.10/go.mod h1:NaRKc+CBxKgvrUu2aNX2+Ahbbv4J2YN9t8mVvS+mEF0=
